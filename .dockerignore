@@ -1,10 +1,35 @@
-.git
-.bin
+.git/
+.github/
+.idea/
+.vscode/
+.bin/
+
+# Environment files
 .env
-*.log
-node_modules
-vendor
-storage
-bootstrap/cache
+.env.*
+!.env.prod.example
+
+# Build and Dependency directories
+node_modules/
+vendor/
+public/build/
+public/hot/
+bun.lock
+bun.lockb
+composer.lock
+package-lock.json
+
+# Laravel specific exclusions
+storage/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*.php
+storage/app/public/*
+bootstrap/cache/*.php
 database/database.sqlite
+
+# System files
+.DS_Store
+Thumbs.db
 
