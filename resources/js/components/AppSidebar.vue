@@ -1,0 +1,87 @@
+<script setup lang="ts">
+import { Link } from "@inertiajs/vue3";
+import { Command, LifeBuoy, Send, Settings2 } from "lucide-vue-next";
+import AppLogo from "@/components/AppLogo.vue";
+import NavMain from "@/components/NavMain.vue";
+import NavSidebarFooter from "@/components/NavSidebarFooter.vue";
+import NavUser from "@/components/NavUser.vue";
+import type { SidebarProps } from "@/components/ui/sidebar";
+
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import type { TFooterNavigationItems, TSidebarNavigationItems } from "@/types";
+
+const props = withDefaults(defineProps<SidebarProps>(), {
+    variant: "inset",
+});
+
+const navigation: TSidebarNavigationItems = [
+    {
+        title: "Platform",
+        items: [
+            {
+                title: "Dashboard",
+                href: route("dashboard", {}, false),
+                icon: Command,
+            },
+            {
+                title: "Settings",
+                icon: Settings2,
+                items: [
+                    {
+                        title: "General",
+                        href: "#",
+                    },
+                ],
+            },
+        ],
+    },
+];
+
+const footerNavigation: TFooterNavigationItems = {
+    title: "Links",
+    items: [
+        {
+            title: "Support",
+            href: "#",
+            icon: LifeBuoy,
+        },
+        {
+            title: "Feedback",
+            href: "#",
+            icon: Send,
+        },
+    ],
+};
+</script>
+
+<template>
+    <Sidebar v-bind="props">
+        <SidebarHeader>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton size="lg" as-child>
+                        <Link :href="route('dashboard', {}, false)">
+                            <AppLogo />
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarHeader>
+
+        <SidebarContent class="pb-3">
+            <NavMain :items="navigation" />
+            <NavSidebarFooter :items="footerNavigation" class="mt-auto" />
+        </SidebarContent>
+        <SidebarFooter>
+            <NavUser />
+        </SidebarFooter>
+    </Sidebar>
+</template>

@@ -1,0 +1,10 @@
+.git
+.bin
+.env
+*.log
+node_modules
+vendor
+storage
+bootstrap/cache
+database/database.sqlite
+

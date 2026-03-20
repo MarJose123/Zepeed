@@ -1,0 +1,4 @@
+*
+!.gitignore
+!run-mailpit.php
+!updater.php
