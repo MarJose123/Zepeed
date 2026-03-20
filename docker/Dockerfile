@@ -7,6 +7,7 @@ ARG NODE_VERSION=24
 ARG MYSQL_CLIENT="mysql-client"
 ARG POSTGRES_VERSION=18
 ARG TIMEZOME
+ARG LIBRESPEED_VERSION=1.0.12
 
 WORKDIR /var/www/html
 
@@ -35,9 +36,8 @@ RUN apt-get update && apt-get upgrade -y \
        php8.4-imap php8.4-mysql php8.4-mbstring \
        php8.4-xml php8.4-zip php8.4-bcmath php8.4-soap \
        php8.4-intl php8.4-readline \
-       php8.4-ldap \
-       php8.4-msgpack php8.4-igbinary php8.4-redis php8.4-swoole \
-       php8.4-memcached php8.4-pcov php8.4-imagick php8.4-xdebug \
+       php8.4-msgpack php8.4-igbinary php8.4-redis \
+       php8.4-memcached php8.4-pcov php8.4-imagick \
     && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
@@ -49,7 +49,19 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get update \
     && apt-get install -y $MYSQL_CLIENT \
     && apt-get install -y postgresql-client-$POSTGRES_VERSION \
-    && apt-get -y autoremove \
+
+# Installation of the Speedtest cli
+RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash \
+    && apt-get install speedtest \
+    && npm install --global fast-cli \
+    && curl -o /tmp/librespeed-cli.tar.gz -L \
+                "https://github.com/librespeed/speedtest-cli/releases/download/v$LIBRESPEED_VERSION/librespeed-cli_${LIBRESPEED_VERSION}_linux_amd64.tar.gz" \
+           && tar -xzf /tmp/librespeed-cli.tar.gz -C /usr/bin \
+
+
+# Clean up
+
+RUN apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
