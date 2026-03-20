@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Grid2x2Plus } from "lucide-vue-next";
+import { Gauge } from "lucide-vue-next";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 
 import DisplayModeToggle from "@/components/DisplayModeToggle.vue";
@@ -33,7 +33,7 @@ withDefaults(
             </template>
             <div class="flex ml-auto">
                 <Button variant="ghost" class="rounded-full">
-                    <component :is="Grid2x2Plus" />
+                    <component :is="Gauge" />
                 </Button>
                 <Notification />
                 <DisplayModeToggle />

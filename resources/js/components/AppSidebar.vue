@@ -2,8 +2,9 @@
 import { Link } from "@inertiajs/vue3";
 import {
     Cable,
-    Command,
+    ChartGantt,
     Github,
+    LayoutDashboard,
     LifeBuoy,
     Settings2,
     Webhook,
@@ -36,7 +37,25 @@ const navigation: TSidebarNavigationItems = [
             {
                 title: "Dashboard",
                 href: route("dashboard", {}, false),
-                icon: Command,
+                icon: LayoutDashboard,
+            },
+            {
+                title: "Results",
+                icon: ChartGantt,
+                items: [
+                    {
+                        title: "Download",
+                        href: "#",
+                    },
+                    {
+                        title: "Upload",
+                        href: "#",
+                    },
+                    {
+                        title: "Pings",
+                        href: "#",
+                    },
+                ],
             },
             {
                 title: "Settings",
@@ -44,6 +63,14 @@ const navigation: TSidebarNavigationItems = [
                 items: [
                     {
                         title: "General",
+                        href: "#",
+                    },
+                    {
+                        title: "Users",
+                        href: "#",
+                    },
+                    {
+                        title: "Notifications",
                         href: "#",
                     },
                 ],
