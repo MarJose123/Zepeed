@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
-import { Command, LifeBuoy, Send, Settings2 } from "lucide-vue-next";
+import {
+    Cable,
+    Command,
+    Github,
+    LifeBuoy,
+    Settings2,
+    Webhook,
+} from "lucide-vue-next";
 import AppLogo from "@/components/AppLogo.vue";
 import NavMain from "@/components/NavMain.vue";
 import NavSidebarFooter from "@/components/NavSidebarFooter.vue";
@@ -41,6 +48,17 @@ const navigation: TSidebarNavigationItems = [
                     },
                 ],
             },
+            {
+                title: "Integrations",
+                icon: Cable,
+                items: [
+                    {
+                        title: "Webhooks",
+                        href: "#",
+                        icon: Webhook,
+                    },
+                ],
+            },
         ],
     },
 ];
@@ -50,13 +68,13 @@ const footerNavigation: TFooterNavigationItems = {
     items: [
         {
             title: "Support",
-            href: "#",
+            href: "https://github.com/MarJose123/Zepeed/issues",
             icon: LifeBuoy,
         },
         {
-            title: "Feedback",
-            href: "#",
-            icon: Send,
+            title: "GitHub",
+            href: "https://github.com/MarJose123/Zepeed",
+            icon: Github,
         },
     ],
 };

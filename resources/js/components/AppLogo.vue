@@ -9,8 +9,8 @@ import AppLogoIcon from "@/components/AppLogoIcon.vue";
         <AppLogoIcon />
     </div>
     <div class="grid flex-1 text-left text-sm leading-tight">
-        <span class="truncate font-medium">Acme Inc</span>
-        <span class="truncate text-xs">Enterprise</span>
+        <span class="truncate font-medium">Zepeed</span>
+        <span class="truncate text-xs">Bandwidth Tracker</span>
     </div>
 </template>
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Command } from "lucide-vue-next";
+import { Rocket } from "lucide-vue-next";
 </script>
 
 <template>
-    <Command class="size-4" />
+    <Rocket class="size-5" />
 </template>
 
 <style scoped></style>
