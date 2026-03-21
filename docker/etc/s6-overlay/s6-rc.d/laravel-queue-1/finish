@@ -1,0 +1,4 @@
+#!/command/with-contenv sh
+# $1 = exit code of run script, $2 = signal that killed it
+# Give queue:work a moment to finish the current job on SIGTERM
+sleep 1

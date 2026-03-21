@@ -8,6 +8,7 @@ ARG LIBRESPEED_VERSION=1.0.12
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=$TIMEZONE
 
+#use the root user for installing dependencies
 USER root
 
 RUN apt update -y && apt install -y curl nodejs supervisor unzip tar
@@ -29,5 +30,10 @@ RUN bun add --global fast-cli
 RUN apt autoremove -y
 RUN rm -rf /tmp/* /var/tmp/*
 
+# ─── S6 Overlay service definitions ─────────────────────────────────────────
+# Drop all service directories into s6-rc.d. S6 auto-discovers them.
+# No changes to ENTRYPOINT or CMD are needed — s6 is already PID 1.
+COPY --chmod=755 etc/s6-overlay/s6-rc.d /etc/s6-overlay/s6-rc.d
 
+# use the www-data user to serve the application
 USER www-data

@@ -30,7 +30,10 @@ services:
         networks:
             - zepeed
         depends_on:
-            - mariadb
+            mariadb:
+                condition: service_healthy
+            mailpit:
+                condition: service_started
     mariadb:
         container_name: Mariadb
         image: 'mariadb:11'
@@ -44,10 +47,8 @@ services:
             MARIADB_PASSWORD: '${DB_PASSWORD}'
             MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
             MARIADB_EXTRA_FLAGS: '--innodb-use-native-aio=0'
-        command:
-            -   '--plugin-load-add=simple_password_check'
         healthcheck:
-            test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+            test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
             start_period: 10s
             interval: 10s
             timeout: 5s
@@ -60,8 +61,14 @@ services:
         container_name: Mailpit
         image: 'axllent/mailpit:latest'
         ports:
-            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
-            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+            - "8025:8025" # Web UI
+            - "1025:1025" # SMTP
+        healthcheck:
+            test: [ "CMD", "wget", "--spider", "--quiet", "http://localhost:8025/api/v1/info" ]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 5s
         networks:
             - zepeed
 networks:
