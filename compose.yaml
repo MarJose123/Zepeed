@@ -6,7 +6,7 @@ services:
             context: ./docker
             dockerfile: Dockerfile
             args:
-                TIMEZONE: '${TIMEZONE:-UTC}'
+                TIMEZONE: '${APP_TIMEZONE:-UTC}'
         environment:
             HEALTHCHECK_PATH: '/up'
             PHP_UPLOAD_MAX_FILE_SIZE: '100M'
