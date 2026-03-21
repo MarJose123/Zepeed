@@ -1,5 +1,6 @@
 #!/command/with-contenv sh
 exec php /var/www/html/artisan queue:work \
+    --queue=speedtest,default \
     --tries=3 \
     --timeout=90 \
     --sleep=3 \
