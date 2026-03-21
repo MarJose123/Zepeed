@@ -2,7 +2,11 @@
 
 use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Jobs\RunSpeedtestJob;
+use App\Models\Provider;
+use App\Models\ProviderSchedule;
 use App\Services\InertiaNotification;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,6 +32,33 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ])
             ->appendToPriorityList(StartSession::class, HandleInertiaRequests::class);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Load enabled providers that are fully configured
+        // withoutOverlapping() is handled at the Job level via uniqueId()
+        // so we don't need it here — avoids a cache dependency in bootstrap
+
+        Provider::query()
+            ->enabled()
+            ->get()
+            ->each(function (Provider $provider) use ($schedule) {
+                // Fetch the Schedule record for this provider
+                // Falls back to a safe default if no schedule row exists yet
+                $providerSchedule = ProviderSchedule::forProvider(
+                    $provider->slug
+                );
+
+                if (! $providerSchedule?->cron_expression) {
+                    return; // no cron configured — skip silently
+                }
+
+                $schedule
+                    ->job(new RunSpeedtestJob($provider), queue: 'speedtest')
+                    ->cron($providerSchedule->cron_expression)
+                    ->name("speedtest:{$provider->slug->value}")
+                    ->withoutOverlapping(expiresAt: 10)
+                    ->runInBackground();
+            });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

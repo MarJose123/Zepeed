@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Settings\AppearanceController;
-use App\Http\Controllers\Settings\PasswordController;
-use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\Settings\SessionController;
-use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
+use App\Http\Controllers\Account\Settings\AppearanceController;
+use App\Http\Controllers\Account\Settings\PasswordController;
+use App\Http\Controllers\Account\Settings\ProfileController;
+use App\Http\Controllers\Account\Settings\SessionController;
+use App\Http\Controllers\Account\Settings\TwoFactorAuthenticationController;
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');

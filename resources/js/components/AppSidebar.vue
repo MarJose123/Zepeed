@@ -70,8 +70,20 @@ const navigation: TSidebarNavigationItems = [
                         href: "#",
                     },
                     {
-                        title: "Notifications",
+                        title: "Alerts",
                         href: "#",
+                    },
+                    {
+                        title: "Schedules",
+                        href: route("speedtest.schedules.index", {}, false),
+                    },
+                    {
+                        title: "Speedtest Providers",
+                        href: route(
+                            "speedtest.server.providers.index",
+                            {},
+                            false,
+                        ),
                     },
                 ],
             },
@@ -81,6 +93,11 @@ const navigation: TSidebarNavigationItems = [
                 items: [
                     {
                         title: "Webhooks",
+                        href: "#",
+                        icon: Webhook,
+                    },
+                    {
+                        title: "SMTP",
                         href: "#",
                         icon: Webhook,
                     },
