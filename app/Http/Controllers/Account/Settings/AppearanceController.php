@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Settings;
+namespace App\Http\Controllers\Account\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\Appearance\AppearanceUpdateRequest;
+use App\Http\Requests\Account\Settings\Appearance\AppearanceUpdateRequest;
 
 class AppearanceController extends Controller
 {

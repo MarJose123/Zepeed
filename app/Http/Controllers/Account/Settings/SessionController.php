@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Settings;
+namespace App\Http\Controllers\Account\Settings;
 
 use App\Actions\Session\DeleteUserSession;
 use App\Actions\Session\RetrieveWebUserSession;
@@ -37,7 +37,7 @@ class SessionController extends Controller implements HasMiddleware
 
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/Sessions', [
+        return Inertia::render('account/settings/Sessions', [
             'userWebSession' => resolve(RetrieveWebUserSession::class)->handle($request),
         ]);
     }

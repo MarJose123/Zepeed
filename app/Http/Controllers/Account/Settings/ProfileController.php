@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Settings;
+namespace App\Http\Controllers\Account\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\Profile\ProfileDeleteRequest;
-use App\Http\Requests\Settings\Profile\ProfileUpdateRequest;
+use App\Http\Requests\Account\Settings\Profile\ProfileDeleteRequest;
+use App\Http\Requests\Account\Settings\Profile\ProfileUpdateRequest;
 use App\Services\InertiaNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +20,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/Profile', [
+        return Inertia::render('account/settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
         ]);
     }
