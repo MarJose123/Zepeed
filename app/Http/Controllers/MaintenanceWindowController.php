@@ -7,6 +7,7 @@ use App\Http\Requests\StoreMaintenanceWindowRequest;
 use App\Http\Requests\UpdateMaintenanceWindowRequest;
 use App\Http\Resources\MaintenanceWindowResource;
 use App\Models\MaintenanceWindow;
+use App\Services\InertiaNotification;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,8 +34,13 @@ class MaintenanceWindowController extends Controller
     {
         MaintenanceWindow::query()->create($request->validated());
 
-        return back()
-            ->with('success', 'Maintenance window created.');
+        InertiaNotification::make()
+            ->success()
+            ->title('Window created')
+            ->message('Maintenance window has been scheduled.')
+            ->send();
+
+        return redirect()->back();
     }
 
     public function update(
@@ -43,16 +49,27 @@ class MaintenanceWindowController extends Controller
     ): RedirectResponse {
         $maintenanceWindow->update($request->validated());
 
-        return back()
-            ->with('success', 'Maintenance window updated.');
+        InertiaNotification::make()
+            ->success()
+            ->title('Window updated')
+            ->message("Maintenance window \"{$maintenanceWindow->label}\" has been updated.")
+            ->send();
+
+        return redirect()->back();
     }
 
     public function destroy(MaintenanceWindow $maintenanceWindow): RedirectResponse
     {
+        $label = $maintenanceWindow->label;
         $maintenanceWindow->delete();
 
-        return back()
-            ->with('success', 'Maintenance window deleted.');
+        InertiaNotification::make()
+            ->success()
+            ->title('Window deleted')
+            ->message("Maintenance window \"{$label}\" has been removed.")
+            ->send();
+
+        return redirect()->back();
     }
 
     /**
@@ -69,7 +86,16 @@ class MaintenanceWindowController extends Controller
 
         MaintenanceWindow::toggleGlobalPause(! $isCurrentlyActive);
 
-        return back()
-            ->with('success', $isCurrentlyActive ? 'Global pause deactivated.' : 'Global pause activated.');
+        InertiaNotification::make()
+            ->warning()
+            ->title($isCurrentlyActive ? 'Global pause deactivated' : 'Global pause activated')
+            ->message(
+                $isCurrentlyActive
+                    ? 'All providers will resume their scheduled runs.'
+                    : 'All speedtest runs are now suppressed.'
+            )
+            ->send();
+
+        return redirect()->back();
     }
 }

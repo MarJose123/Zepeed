@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProviderScheduleRequest;
 use App\Models\ProviderSchedule;
+use App\Services\InertiaNotification;
 use Illuminate\Http\RedirectResponse;
 
 class ProviderScheduleController extends Controller
@@ -14,7 +15,12 @@ class ProviderScheduleController extends Controller
     ): RedirectResponse {
         $providerSchedule->update($request->validated());
 
-        return back()
-            ->with('success', 'Schedule updated.');
+        InertiaNotification::make()
+            ->success()
+            ->title('Schedule updated')
+            ->message("{$providerSchedule->provider_slug->label()} schedule has been saved.")
+            ->send();
+
+        return redirect()->back();
     }
 }
