@@ -29,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useNotification } from "@/composables/useNotification";
+import { useSpeedtestTestChannel } from "@/composables/useSpeedtestTestChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type { Provider } from "@/types/provider";
@@ -46,6 +48,7 @@ const breadcrumbs: TBreadcrumbItem[] = [
 ];
 
 const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
+const { notify } = useNotification();
 
 const runNow = (provider: Provider) => {
     router.post(
@@ -105,6 +108,54 @@ watch(
     },
     { immediate: true },
 );
+
+watch(
+    () => props.providers,
+    (updatedProviders) => {
+        const provider = updatedProviders.find(
+            (p) => p.slug === activeTab.value,
+        );
+        if (provider) {
+            form.defaults({
+                is_enabled: provider.is_enabled,
+                server_url: provider.server_url ?? "",
+                server_id: (provider.server_id as string) ?? "",
+                alert_on_failure: provider.alert_on_failure,
+            });
+            form.reset();
+        }
+    },
+    { immediate: true },
+);
+
+// register realtime notification for the speedtest test
+props.providers.forEach((provider) => {
+    useSpeedtestTestChannel(provider.slug, {
+        onCompleted: (e) => {
+            notify({
+                type: "success",
+                title: `${e.provider_name} completed`,
+                message: `↓ ${e.download_mbps} Mbps  ↑ ${e.upload_mbps} Mbps`,
+            });
+            router.reload({ only: ["results", "stats"] });
+        },
+        onFailed: (e) => {
+            notify({
+                type: "error",
+                title: `${e.provider_name} failed`,
+                message: "The speedtest run failed.",
+            });
+            router.reload({ only: ["providers"] });
+        },
+        onException: (e) => {
+            notify({
+                type: "error",
+                title: `${e.provider_name} exception`,
+                message: e.message,
+            });
+        },
+    });
+});
 
 const submitForm = () => {
     form.patch(

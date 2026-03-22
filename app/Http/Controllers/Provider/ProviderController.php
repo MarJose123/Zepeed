@@ -57,7 +57,7 @@ class ProviderController extends Controller
         InertiaNotification::make()
             ->success()
             ->title('Run queued')
-            ->message("Manual run dispatched for {$provider->slug->label()}.")
+            ->message("Manual run dispatched for {$provider->slug->label()}. Please stay on this page until the test completes.")
             ->send();
 
         return to_route('speedtest.server.providers.index');

@@ -13,6 +13,8 @@ use Override;
  */
 class UserResource extends JsonResource
 {
+    public static $wrap = null;
+
     /**
      * @param Request $request
      *
