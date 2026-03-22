@@ -18,13 +18,16 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useCurrentUrl } from "@/composables/useCurrentUrl";
-import type { INavGroup } from "@/types";
+import type { INavGroup, INavItem } from "@/types";
 
 const props = defineProps<{
     items: INavGroup[];
 }>();
 
 const { isCurrentUrl } = useCurrentUrl();
+const hasActiveChild = (items: INavItem[] = []): boolean => {
+    return items.some((item) => isCurrentUrl(item.href!));
+};
 </script>
 
 <template>
@@ -40,6 +43,7 @@ const { isCurrentUrl } = useCurrentUrl();
                     v-if="item.items && item.items.length > 0"
                     as-child
                     class="group/collapsible"
+                    :default-open="hasActiveChild(item.items)"
                 >
                     <SidebarMenuItem>
                         <CollapsibleTrigger as-child>
