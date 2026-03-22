@@ -23,6 +23,7 @@
         "laravel/fortify": "^1.33",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
+        "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-data": "^4.20.1",
         "stevebauman/location": "^7.6",
         "tightenco/ziggy": "^2.6"

@@ -34,7 +34,9 @@ services:
             mariadb:
                 condition: service_healthy
             mailpit:
-                condition: service_started
+                condition: service_healthy
+            soketi:
+                condition: service_healthy
     mariadb:
         container_name: Mariadb
         image: 'mariadb:11'
@@ -56,6 +58,33 @@ services:
             retries: 3
         volumes:
             - 'zepeed-mariadb:/var/lib/mysql'
+        networks:
+            - zepeed
+    soketi:
+        container_name: Soketi
+        image: 'quay.io/soketi/soketi:latest-16-alpine'
+        restart: unless-stopped
+        environment:
+            SOKETI_DEFAULT_APP_ID: "${PUSHER_APP_ID:-zepeed}"
+            SOKETI_DEFAULT_APP_KEY: "${PUSHER_APP_KEY:-zepeed}"
+            SOKETI_DEFAULT_APP_SECRET: "${PUSHER_APP_SECRET:-zepeed}"
+            # Bind to all interfaces so healthcheck and other containers can reach it
+            SOKETI_HOST: "0.0.0.0"
+            SOKETI_PORT: '6001'
+            SOKETI_DEBUG: "${SOKETI_DEBUG:-0}"
+            SOKETI_METRICS_ENABLED: "true"
+            SOKETI_METRICS_SERVER_PORT: '9601'
+        volumes:
+            - ./storage:/var/www/html/storage
+        ports:
+            - '${VITE_PUSHER_PORT:-6001}:6001'
+            - '${SOKETI_PORT_METRICS:-9601}:9601'
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9601/usage"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
         networks:
             - zepeed
     mailpit:
