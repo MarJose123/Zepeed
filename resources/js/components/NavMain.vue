@@ -17,11 +17,14 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useCurrentUrl } from "@/composables/useCurrentUrl";
 import type { INavGroup } from "@/types";
 
 const props = defineProps<{
     items: INavGroup[];
 }>();
+
+const { isCurrentUrl } = useCurrentUrl();
 </script>
 
 <template>
@@ -54,7 +57,7 @@ const props = defineProps<{
                                     v-for="subItem in item.items"
                                     :key="subItem.title"
                                 >
-                                    <SidebarMenuSubButton as-child>
+                                    <SidebarMenuSubButton as-child :is-active="isCurrentUrl(subItem.href)">
                                         <Link :href="subItem.href">
                                             <span>{{ subItem.title }}</span>
                                         </Link>
@@ -67,7 +70,7 @@ const props = defineProps<{
 
                 <!-- Item without sub-items: simple link -->
                 <SidebarMenuItem v-else>
-                    <SidebarMenuButton as-child :tooltip="item.title">
+                    <SidebarMenuButton as-child :tooltip="item.title" :is-active="isCurrentUrl(item.href!)">
                         <Link :href="item.href">
                             <component v-if="item.icon" :is="item.icon" />
                             <span>{{ item.title }}</span>
