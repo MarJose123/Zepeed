@@ -33,7 +33,10 @@ RUN rm -rf /tmp/* /var/tmp/*
 # ─── S6 Overlay service definitions ─────────────────────────────────────────
 # Drop all service directories into s6-rc.d. S6 auto-discovers them.
 # No changes to ENTRYPOINT or CMD are needed — s6 is already PID 1.
-COPY --chmod=755 etc/s6-overlay/s6-rc.d /etc/s6-overlay/s6-rc.d
+# Copy the entire s6-overlay directory structure
+COPY etc/s6-overlay /etc/s6-overlay
+# Only run scripts need execute permission
+RUN find /etc/s6-overlay/s6-rc.d -name 'run' -o -name 'finish' | xargs chmod 755
 
 # use the www-data user to serve the application
 USER www-data

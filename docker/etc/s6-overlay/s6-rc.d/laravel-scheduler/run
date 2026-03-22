@@ -1,2 +1,3 @@
 #!/command/with-contenv sh
+# Drop privileges to www-data before exec — s6 starts as root
 exec php /var/www/html/artisan schedule:work
