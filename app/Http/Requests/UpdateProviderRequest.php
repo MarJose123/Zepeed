@@ -21,7 +21,6 @@ class UpdateProviderRequest extends FormRequest
         return [
             'is_enabled'       => ['required', 'boolean'],
             'alert_on_failure' => ['required', 'boolean'],
-            'extra_flags'      => ['nullable', 'string', 'max:255'],
             'server_url'       => [
                 $needsUrl ? 'required' : 'nullable',
                 'url',
