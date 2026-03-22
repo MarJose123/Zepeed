@@ -21,6 +21,6 @@ class ProviderScheduleController extends Controller
             ->message("{$providerSchedule->provider_slug->label()} schedule has been saved.")
             ->send();
 
-        return redirect()->back();
+        return back();
     }
 }

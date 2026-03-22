@@ -39,6 +39,12 @@ class Provider extends Model
 {
     use HasUuids;
 
+    #[Override]
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $fillable = [
         'slug',
         'name',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\QueueWorkerName;
 use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Jobs\RunSpeedtestJob;
@@ -53,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 $schedule
-                    ->job(new RunSpeedtestJob($provider), queue: 'speedtest')
+                    ->job(new RunSpeedtestJob($provider), queue: QueueWorkerName::Speedtest->value)
                     ->cron($providerSchedule->cron_expression)
                     ->name("speedtest:{$provider->slug->value}")
                     ->withoutOverlapping(expiresAt: 10)

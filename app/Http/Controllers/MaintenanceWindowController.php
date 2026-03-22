@@ -40,7 +40,7 @@ class MaintenanceWindowController extends Controller
             ->message('Maintenance window has been scheduled.')
             ->send();
 
-        return redirect()->back();
+        return back();
     }
 
     public function update(
@@ -55,7 +55,7 @@ class MaintenanceWindowController extends Controller
             ->message("Maintenance window \"{$maintenanceWindow->label}\" has been updated.")
             ->send();
 
-        return redirect()->back();
+        return back();
     }
 
     public function destroy(MaintenanceWindow $maintenanceWindow): RedirectResponse
@@ -69,7 +69,7 @@ class MaintenanceWindowController extends Controller
             ->message("Maintenance window \"{$label}\" has been removed.")
             ->send();
 
-        return redirect()->back();
+        return back();
     }
 
     /**
@@ -96,6 +96,6 @@ class MaintenanceWindowController extends Controller
             )
             ->send();
 
-        return redirect()->back();
+        return back();
     }
 }

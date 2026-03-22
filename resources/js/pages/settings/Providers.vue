@@ -1,11 +1,32 @@
 <script setup lang="ts">
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { ExternalLink, Loader2, AlertTriangle } from "lucide-vue-next";
-import { ref, computed } from "vue";
+import { Head, router, useForm } from "@inertiajs/vue3";
+import {
+    ExternalLink,
+    Loader2,
+    AlertTriangle,
+    Radio,
+    Server,
+    Bell,
+} from "lucide-vue-next";
+import { ref, watch } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardFooter,
+} from "@/components/ui/card";
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -26,53 +47,31 @@ const breadcrumbs: TBreadcrumbItem[] = [
 
 const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
 
-// One form per provider keyed by slug
-const forms = Object.fromEntries(
-    props.providers.map((provider) => [
-        provider.slug,
-        useForm({
-            is_enabled: provider.is_enabled,
-            alert_on_failure: provider.alert_on_failure,
-            server_url: provider.server_url ?? "",
-            server_id: provider.server_id ?? "",
-            extra_flags: provider.extra_flags ?? "",
-        }),
-    ]),
-);
-
-const activeProvider = computed<Provider>(
-    () =>
-        props.providers.find((p) => p.slug === activeTab.value) ??
-        props.providers[0],
-);
-
-const activeForm = computed(() => forms[activeTab.value]);
-
-function save(provider: Provider) {
-    forms[provider.slug].patch(
-        route("settings.providers.update", { provider: provider.slug }, false),
-        { preserveScroll: true },
-    );
-}
-
-function runNow(provider: Provider) {
+const runNow = (provider: Provider) => {
     router.post(
-        route("settings.providers.run-now", { provider: provider.slug }, false),
+        route("speedtest.server.providers.run-now", {
+            provider: provider.slug,
+        }),
         {},
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload();
+            },
+        },
     );
-}
+};
 
-function statusBadgeVariant(badge: Provider["status_badge"]) {
+const statusBadgeVariant = (badge: Provider["status_badge"]) => {
     return {
         success: "default",
         danger: "destructive",
         warning: "secondary",
         neutral: "outline",
     }[badge] as "default" | "destructive" | "secondary" | "outline";
-}
+};
 
-function statusLabel(status: Provider["last_run_status"]) {
+const statusLabel = (status: Provider["last_run_status"]) => {
     return (
         {
             success: "Healthy",
@@ -81,7 +80,46 @@ function statusLabel(status: Provider["last_run_status"]) {
             null: "Never run",
         }[status ?? "null"] ?? "Never run"
     );
-}
+};
+
+const form = useForm({
+    is_enabled: false,
+    server_url: "",
+    server_id: "",
+    alert_on_failure: false,
+});
+
+watch(
+    () => activeTab.value,
+    (newTab) => {
+        const provider = props.providers.find((p) => p.slug === newTab);
+        if (provider) {
+            form.defaults({
+                is_enabled: provider.is_enabled,
+                server_url: provider.server_url ?? "",
+                server_id: (provider.server_id as string) ?? "",
+                alert_on_failure: provider.alert_on_failure,
+            });
+            form.reset();
+        }
+    },
+    { immediate: true },
+);
+
+const submitForm = () => {
+    form.patch(
+        route("speedtest.server.providers.update", {
+            provider: activeTab.value,
+        }),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload();
+                form.reset();
+            },
+        },
+    );
+};
 </script>
 
 <template>
@@ -95,7 +133,19 @@ function statusLabel(status: Provider["last_run_status"]) {
                 </p>
             </div>
 
-            <Tabs v-model="activeTab">
+            <div
+                v-if="!providers.length"
+                class="border-border rounded-lg border border-dashed py-16 text-center"
+            >
+                <p class="text-muted-foreground text-sm">
+                    No providers found. Run
+                    <code class="font-mono text-xs"
+                        >php artisan db:seed --class=ProviderSeeder</code
+                    >
+                </p>
+            </div>
+
+            <Tabs v-else v-model="activeTab">
                 <TabsList>
                     <TabsTrigger
                         v-for="provider in providers"
@@ -103,10 +153,6 @@ function statusLabel(status: Provider["last_run_status"]) {
                         :value="provider.slug"
                     >
                         {{ provider.name }}
-                        <span
-                            v-if="provider.is_enabled"
-                            class="bg-primary ml-1.5 inline-block h-1.5 w-1.5 rounded-full"
-                        />
                     </TabsTrigger>
                 </TabsList>
 
@@ -114,12 +160,12 @@ function statusLabel(status: Provider["last_run_status"]) {
                     v-for="provider in providers"
                     :key="provider.slug"
                     :value="provider.slug"
-                    class="mt-0 space-y-3"
+                    class="mt-4"
                 >
-                    <!-- Chromium warning for Fast.com -->
+                    <!-- Chromium warning -->
                     <div
                         v-if="provider.requires_chromium"
-                        class="bg-warning/10 border-warning/30 flex items-start gap-2 rounded-lg border p-3"
+                        class="bg-warning/10 border-warning/30 mb-4 flex items-start gap-2 rounded-lg border p-3"
                     >
                         <AlertTriangle
                             class="text-warning mt-0.5 h-4 w-4 shrink-0"
@@ -133,159 +179,238 @@ function statusLabel(status: Provider["last_run_status"]) {
                             is set correctly.
                         </p>
                     </div>
-
-                    <!-- Status row -->
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <Badge
-                                :variant="
-                                    statusBadgeVariant(provider.status_badge)
-                                "
-                            >
-                                {{ statusLabel(provider.last_run_status) }}
-                            </Badge>
-                            <span
-                                v-if="provider.last_run_at"
-                                class="text-muted-foreground text-xs"
-                            >
-                                Last run {{ provider.last_run_at }}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                :disabled="!provider.is_runnable"
-                                @click="runNow(provider)"
-                            >
-                                Run now
-                            </Button>
-
-                            <Link
-                                :href="provider.website_link"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-muted-foreground hover:text-foreground"
-                            >
-                                <ExternalLink class="h-4 w-4" />
-                            </Link>
-                        </div>
-                    </div>
-
-                    <!-- Provider status -->
                     <Card>
-                        <CardContent
-                            class="flex items-center justify-between p-4"
-                        >
-                            <div class="space-y-0.5">
-                                <p class="font-semibold">Provider status</p>
-                                <p class="text-muted-foreground text-sm">
-                                    Enable or disable this provider globally
-                                </p>
+                        <CardHeader class="pb-1">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="space-y-1">
+                                    <CardTitle class="text-base">
+                                        {{ provider.name }}
+                                    </CardTitle>
+                                    <CardDescription
+                                        class="flex items-center gap-2"
+                                    >
+                                        <Badge
+                                            :variant="
+                                                statusBadgeVariant(
+                                                    provider.status_badge,
+                                                )
+                                            "
+                                        >
+                                            {{
+                                                statusLabel(
+                                                    provider.last_run_status,
+                                                )
+                                            }}
+                                        </Badge>
+                                        <span
+                                            v-if="provider.last_run_at"
+                                            class="text-xs"
+                                        >
+                                            Last run: {{ provider.last_run_at }}
+                                        </span>
+                                        <span v-else class="text-xs"
+                                            >Never run</span
+                                        >
+                                    </CardDescription>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        :disabled="!provider.is_runnable"
+                                        @click="runNow(provider)"
+                                    >
+                                        Run now
+                                    </Button>
+                                    <a
+                                        :href="provider.website_link"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-muted-foreground hover:text-foreground"
+                                    >
+                                        <ExternalLink class="h-4 w-4" />
+                                    </a>
+                                </div>
                             </div>
-                            <Switch
-                                :checked="forms[provider.slug].is_enabled"
-                                @update:checked="
-                                    forms[provider.slug].is_enabled = $event
-                                "
-                            />
-                        </CardContent>
-                    </Card>
+                        </CardHeader>
+                        <Separator />
+                        <CardContent>
+                            <!-- Provider status -->
+                            <Field class="py-4">
+                                <div
+                                    class="grid grid-cols-2 items-center gap-4"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                        >
+                                            <Radio
+                                                class="text-muted-foreground h-4 w-4"
+                                            />
+                                        </div>
+                                        <div>
+                                            <FieldLabel
+                                                >Provider status</FieldLabel
+                                            >
+                                            <FieldDescription>
+                                                Enable or disable this provider
+                                                globally
+                                            </FieldDescription>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <Switch
+                                            id="is_enabled"
+                                            name="is_enabled"
+                                            v-model="form.is_enabled"
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
 
-                    <!-- Server URL — LibreSpeed only -->
-                    <Card v-if="provider.requires_server_url">
-                        <CardContent
-                            class="flex items-center justify-between gap-8 p-4"
-                        >
-                            <div class="space-y-0.5">
-                                <p class="font-semibold">Server URL</p>
-                                <p class="text-muted-foreground text-sm">
-                                    Your self-hosted LibreSpeed instance URL
-                                </p>
+                            <!-- Server URL — LibreSpeed only -->
+                            <Field
+                                v-if="provider.requires_server_url"
+                                class="py-4"
+                            >
+                                <div
+                                    class="grid grid-cols-2 items-center gap-4"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                        >
+                                            <Server
+                                                class="text-muted-foreground h-4 w-4"
+                                            />
+                                        </div>
+                                        <div>
+                                            <FieldLabel>Server URL</FieldLabel>
+                                            <FieldDescription>
+                                                Your self-hosted LibreSpeed
+                                                instance URL
+                                            </FieldDescription>
+                                            <FieldError
+                                                v-if="form.errors.server_url"
+                                            >
+                                                {{ form.errors.server_url }}
+                                            </FieldError>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <Input
+                                            name="server_url"
+                                            v-model="form.server_url"
+                                            type="url"
+                                            id="server_url"
+                                            placeholder="https://speed.example.com"
+                                            class="max-w-xs"
+                                            :class="{
+                                                'border-destructive':
+                                                    form.errors.server_url,
+                                            }"
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
+
+                            <!-- Server ID — Speedtest · Ookla only -->
+                            <Field
+                                v-if="provider.slug === 'speedtest'"
+                                class="py-4"
+                            >
+                                <div
+                                    class="grid grid-cols-2 items-center gap-4"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                        >
+                                            <Server
+                                                class="text-muted-foreground h-4 w-4"
+                                            />
+                                        </div>
+                                        <div>
+                                            <FieldLabel>Server ID</FieldLabel>
+                                            <FieldDescription>
+                                                Leave blank to auto-select
+                                                nearest server
+                                            </FieldDescription>
+                                            <FieldError
+                                                v-if="form.errors.server_id"
+                                            >
+                                                {{ form.errors.server_id }}
+                                            </FieldError>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <Input
+                                            name="server_id"
+                                            type="text"
+                                            id="server_id"
+                                            v-model="form.server_id"
+                                            placeholder="e.g. 12345"
+                                            class="max-w-xs"
+                                            :class="{
+                                                'border-destructive':
+                                                    form.errors.server_id,
+                                            }"
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
+
+                            <!-- Failure alert -->
+                            <Field class="py-4">
+                                <div
+                                    class="grid grid-cols-2 items-center gap-4"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                        >
+                                            <Bell
+                                                class="text-muted-foreground h-4 w-4"
+                                            />
+                                        </div>
+                                        <div>
+                                            <FieldLabel
+                                                >Failure alert</FieldLabel
+                                            >
+                                            <FieldDescription>
+                                                Notify when this provider run
+                                                fails
+                                            </FieldDescription>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <Switch
+                                            id="alert_on_failure"
+                                            name="alert_on_failure"
+                                            v-model="form.alert_on_failure"
+                                        />
+                                    </div>
+                                </div>
+                            </Field>
+                        </CardContent>
+                        <CardFooter>
+                            <div class="flex items-center ml-auto">
+                                <Button
+                                    type="button"
+                                    @click.prevent="submitForm"
+                                    size="sm"
+                                    :disabled="form.processing || !form.isDirty"
+                                >
+                                    <Loader2
+                                        v-if="form.processing"
+                                        class="mr-2 h-4 w-4 animate-spin"
+                                    />
+                                    Save changes
+                                </Button>
                             </div>
-                            <Input
-                                v-model="forms[provider.slug].server_url"
-                                type="url"
-                                placeholder="https://speed.example.com"
-                                class="max-w-xs"
-                            />
-                        </CardContent>
+                        </CardFooter>
                     </Card>
-
-                    <!-- Server ID — Speedtest only -->
-                    <Card v-if="provider.slug === 'speedtest'">
-                        <CardContent
-                            class="flex items-center justify-between gap-8 p-4"
-                        >
-                            <div class="space-y-0.5">
-                                <p class="font-semibold">Server ID</p>
-                                <p class="text-muted-foreground text-sm">
-                                    Leave blank to auto-select nearest server
-                                </p>
-                            </div>
-                            <Input
-                                v-model="forms[provider.slug].server_id"
-                                type="text"
-                                placeholder="e.g. 12345"
-                                class="max-w-xs"
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <!-- Extra CLI flags -->
-                    <Card>
-                        <CardContent
-                            class="flex items-center justify-between gap-8 p-4"
-                        >
-                            <div class="space-y-0.5">
-                                <p class="font-semibold">Extra CLI flags</p>
-                                <p class="text-muted-foreground text-sm">
-                                    Appended verbatim to the speedtest command
-                                </p>
-                            </div>
-                            <Input
-                                v-model="forms[provider.slug].extra_flags"
-                                type="text"
-                                placeholder="--secure --format=json"
-                                class="max-w-xs"
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <!-- Failure alert -->
-                    <Card>
-                        <CardContent
-                            class="flex items-center justify-between p-4"
-                        >
-                            <div class="space-y-0.5">
-                                <p class="font-semibold">Failure alert</p>
-                                <p class="text-muted-foreground text-sm">
-                                    Notify when this provider run fails
-                                </p>
-                            </div>
-                            <Switch
-                                :checked="forms[provider.slug].alert_on_failure"
-                                @update:checked="
-                                    forms[provider.slug].alert_on_failure =
-                                        $event
-                                "
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <!-- Save button -->
-                    <div class="flex justify-end pt-2">
-                        <Button
-                            :disabled="forms[provider.slug].processing"
-                            @click="save(provider)"
-                        >
-                            <Loader2
-                                v-if="forms[provider.slug].processing"
-                                class="mr-2 h-4 w-4 animate-spin"
-                            />
-                            Save changes
-                        </Button>
-                    </div>
                 </TabsContent>
             </Tabs>
         </div>

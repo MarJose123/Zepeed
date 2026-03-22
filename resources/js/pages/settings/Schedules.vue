@@ -149,14 +149,8 @@ const commonCrons = [
 
             <Tabs v-model="activeTab">
                 <TabsList>
-                    <TabsTrigger
-                        value="schedules"
-                    >
-                        Schedules
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="maintenance"
-                    >
+                    <TabsTrigger value="schedules"> Schedules </TabsTrigger>
+                    <TabsTrigger value="maintenance">
                         Maintenance
                         <span
                             v-if="globalPause"

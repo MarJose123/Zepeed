@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Provider;
 
+use App\Enums\QueueWorkerName;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
+use App\Services\InertiaNotification;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,8 +35,13 @@ class ProviderController extends Controller
     {
         $provider->update($request->validated());
 
-        return back()
-            ->with('success', "{$provider->name} settings saved.");
+        InertiaNotification::make()
+            ->success()
+            ->title('Provider updated')
+            ->message("{$provider->slug->label()} settings have been saved.")
+            ->send();
+
+        return to_route('speedtest.server.providers.index');
     }
 
     /**
@@ -43,11 +50,16 @@ class ProviderController extends Controller
      */
     public function runNow(Provider $provider): RedirectResponse
     {
-        abort_unless($provider->is_enabled, 422, 'Provider is disabled.');
+        abort_unless($provider->is_runnable, 422, 'Provider is disabled or not fully configured.');
 
-        dispatch(new RunSpeedtestJob($provider));
+        dispatch(new RunSpeedtestJob($provider))->onQueue(QueueWorkerName::Speedtest->value);
 
-        return back()
-            ->with('success', "Manual run queued for {$provider->name}.");
+        InertiaNotification::make()
+            ->success()
+            ->title('Run queued')
+            ->message("Manual run dispatched for {$provider->slug->label()}.")
+            ->send();
+
+        return to_route('speedtest.server.providers.index');
     }
 }
