@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\MaintenanceWindowType;
+use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
 use App\Models\MaintenanceWindow;
 use App\Models\Provider;
@@ -45,6 +46,7 @@ class RunSpeedtestJob implements ShouldQueue
 
     public function __construct(
         public readonly Provider $provider,
+        public bool $testOnly = false,
     ) {}
 
     public function uniqueId(): string
@@ -83,7 +85,6 @@ class RunSpeedtestJob implements ShouldQueue
         if ($this->isUnderMaintenance($slug)) {
             SpeedResult::recordSkipped(
                 provider: $this->provider,
-                reason  : 'Maintenance window active.',
             );
 
             $this->provider->markSkipped();
@@ -168,7 +169,7 @@ class RunSpeedtestJob implements ShouldQueue
     private function dispatchFailureAlert(SpeedtestException $e): void
     {
         User::all()->each(function (User $user) use ($e): void {
-            $user->notify(new SpeedtestExceptionNotification($this->provider, $e));
+            $user->notify(new SpeedtestExceptionNotification($this->provider, $e)->onQueue(QueueWorkerName::Mail->value));
         });
     }
 
