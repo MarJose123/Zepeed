@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use App\Enums\SpeedtestServer;
+use App\Events\Speedtest\SpeedtestExceptionEvent;
+use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
 use App\Services\Speedtest\Contracts\SpeedtestServiceInterface;
 use App\Services\Speedtest\FastcomService;
 use App\Services\Speedtest\LibrespeedService;
 use App\Services\Speedtest\OklaSpeedtestService;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Override;
@@ -41,5 +44,8 @@ class SpeedtestServiceProvider extends ServiceProvider
         );
     }
 
-    public function boot(): void {}
+    public function boot(): void
+    {
+        Event::listen(SpeedtestExceptionEvent::class, SendSpeedtestExceptionAlertListener::class);
+    }
 }

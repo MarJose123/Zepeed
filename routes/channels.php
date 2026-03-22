@@ -2,4 +2,11 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
-Broadcast::channel('App.Models.User.{id}', fn ($user, $id) => (int) $user->id === (int) $id);
+// Authenticated users can listen on any provider's channel
+Broadcast::channel('speedtest.{providerSlug}',
+    // Any authenticated user can subscribe
+    fn ($user, string $providerSlug) => auth()->check());
+// for on-demand speedtest testing of the provider
+Broadcast::channel('speedtest.test.{providerSlug}',
+    // Any authenticated user can subscribe
+    fn ($user, string $providerSlug) => auth()->check());

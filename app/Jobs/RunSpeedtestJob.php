@@ -3,13 +3,18 @@
 namespace App\Jobs;
 
 use App\Enums\MaintenanceWindowType;
-use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
+use App\Events\Speedtest\SpeedtestCompletedEvent;
+use App\Events\Speedtest\SpeedtestExceptionEvent;
+use App\Events\Speedtest\SpeedtestSkippedEvent;
+use App\Events\Speedtest\SpeedtestStartedEvent;
+use App\Events\Speedtest\Test\SpeedtestTestCompletedEvent;
+use App\Events\Speedtest\Test\SpeedtestTestExceptionEvent;
+use App\Events\Speedtest\Test\SpeedtestTestSkippedEvent;
+use App\Events\Speedtest\Test\SpeedtestTestStartedEvent;
 use App\Models\MaintenanceWindow;
 use App\Models\Provider;
 use App\Models\SpeedResult;
-use App\Models\User;
-use App\Notifications\Speedtest\SpeedtestExceptionNotification;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
@@ -47,6 +52,7 @@ class RunSpeedtestJob implements ShouldQueue
     public function __construct(
         public readonly Provider $provider,
         public bool $testOnly = false,
+        public bool $runFromConsole = false,
     ) {}
 
     public function uniqueId(): string
@@ -89,11 +95,26 @@ class RunSpeedtestJob implements ShouldQueue
 
             $this->provider->markSkipped();
 
+            if (! $this->runFromConsole && $this->testOnly) {
+                event(new SpeedtestTestSkippedEvent($this->provider, 'Maintenance window active.'));
+            }
+            if (! $this->runFromConsole && ! $this->testOnly) {
+                event(new SpeedtestSkippedEvent($this->provider, 'Maintenance window active.'));
+            }
+
             Log::info('Speedtest job skipped — maintenance window active.', [
                 'provider' => $slug->value,
             ]);
 
             return;
+        }
+
+        // Broadcast started
+        if (! $this->runFromConsole && $this->testOnly) {
+            event(new SpeedtestTestStartedEvent($this->provider));
+        }
+        if (! $this->runFromConsole && ! $this->testOnly) {
+            event(new SpeedtestStartedEvent($this->provider));
         }
 
         try {
@@ -102,6 +123,14 @@ class RunSpeedtestJob implements ShouldQueue
             SpeedResult::query()->create($result->toStorageArray());
 
             $this->provider->markSuccessful();
+
+            // Broadcast completed with metrics
+            if (! $this->runFromConsole && $this->testOnly) {
+                event(new SpeedtestTestCompletedEvent($this->provider, $result));
+            }
+            if (! $this->runFromConsole && ! $this->testOnly) {
+                event(new SpeedtestCompletedEvent($this->provider, $result));
+            }
 
             Log::info('Speedtest completed successfully.', [
                 'provider'      => $slug->value,
@@ -119,15 +148,20 @@ class RunSpeedtestJob implements ShouldQueue
 
             $this->provider->markFailed();
 
+            // Broadcast both failed + exception events
+            if (! $this->runFromConsole && $this->testOnly) {
+                event(new SpeedtestTestExceptionEvent($this->provider, $e));
+            }
+            if (! $this->runFromConsole && ! $this->testOnly) {
+                event(new SpeedtestExceptionEvent($this->provider, $e));
+            }
+
             Log::error('Speedtest job failed.', [
                 'provider' => $slug->value,
                 'reason'   => $e->reason->value,
                 'message'  => $e->getMessage(),
             ]);
 
-            if ($this->provider->alert_on_failure) {
-                $this->dispatchFailureAlert($e);
-            }
         }
     }
 
@@ -164,13 +198,6 @@ class RunSpeedtestJob implements ShouldQueue
         $windowEnd = $lastRun->addMinutes($window->duration_minutes ?? 60);
 
         return $now->lessThanOrEqualTo($windowEnd);
-    }
-
-    private function dispatchFailureAlert(SpeedtestException $e): void
-    {
-        User::all()->each(function (User $user) use ($e): void {
-            $user->notify(new SpeedtestExceptionNotification($this->provider, $e)->onQueue(QueueWorkerName::Mail->value));
-        });
     }
 
     public function failed(Throwable $exception): void

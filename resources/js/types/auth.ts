@@ -7,7 +7,8 @@ export type User = {
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
-    updated_at: string;
+    unread_count: number;
+    notifications: DbNotification[];
     [key: string]: unknown;
 };
 
@@ -19,6 +20,14 @@ export type UserAppearance = {
 export type Auth = {
     user: User;
 };
+
+export interface DbNotification {
+    id: string;
+    type: string;
+    data: Record<string, unknown>;
+    read_at: string | null;
+    created_at: string;
+}
 
 export type TwoFactorConfigContent = {
     title: string;

@@ -18,12 +18,18 @@ class SpeedtestExceptionNotification extends Notification implements ShouldQueue
         public readonly SpeedtestException $exception,
     ) {}
 
+    /**
+     * Email channel for users with a verified email.
+     * Database channel for all users.
+     *
+     * @return array<int, string>
+     */
     public function via(object $notifiable): array
     {
-        $channels = ['mail'];
+        $channels = ['database'];
 
-        if (config('speedtest.webhook_url')) {
-            // TODO: Implement webhook notifications
+        if (filled($notifiable->email) && filled($notifiable->email_verified_at)) {
+            $channels[] = 'mail';
         }
 
         return $channels;
@@ -33,22 +39,36 @@ class SpeedtestExceptionNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->error()
-            ->subject("[Zepeed] {$this->provider->slug->label()} test failed")
-            ->greeting('Speed test failed')
-            ->line("{$this->provider->slug->label()} could not complete its scheduled run.")
-            ->line("**Reason:** {$this->exception->reason->describe($this->provider->slug)}")
-            ->line("**Detail:** {$this->exception->getMessage()}")
-            ->action('View Results', url('/results'))
-            ->line('This alert was triggered because failure notifications are enabled for this provider.');
+            ->subject("[Zepeed] {$this->provider->slug->label()} speedtest failed")
+            ->greeting("Speedtest Exception — {$this->provider->slug->label()}")
+            ->line('A speedtest run encountered an exception and could not complete.')
+            ->line('**Reason:** '.$this->exception->reason->value)
+            ->line('**Message:** '.$this->exception->getMessage())
+            ->line('**Provider:** '.$this->provider->slug->label())
+            ->line('**Time:** '.now()->toDateTimeString())
+            ->action('View Results', url(route('dashboard')))
+            ->line('You are receiving this because alert on failure is enabled for this provider.');
     }
 
-    public function toArray(object $notifiable): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
     {
         return [
-            'provider'  => $this->provider->slug->value,
-            'reason'    => $this->exception->reason->value,
-            'message'   => $this->exception->getMessage(),
-            'failed_at' => now()->toIso8601String(),
+            'provider_slug'  => $this->provider->slug->value,
+            'provider_name'  => $this->provider->slug->label(),
+            'reason'         => $this->exception->reason->value,
+            'message'        => $this->exception->getMessage(),
+            'occurred_at'    => now()->toIso8601String(),
         ];
+    }
+
+    /**
+     * Prevent duplicate notifications — one per provider per minute.
+     */
+    public function uniqueId(): string
+    {
+        return $this->provider->slug->value.':'.now()->format('Y-m-d-H-i');
     }
 }

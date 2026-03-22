@@ -52,7 +52,7 @@ class ProviderController extends Controller
     {
         abort_unless($provider->is_runnable, 422, 'Provider is disabled or not fully configured.');
 
-        dispatch(new RunSpeedtestJob($provider))->onQueue(QueueWorkerName::Speedtest->value);
+        dispatch(new RunSpeedtestJob(provider: $provider, testOnly: true))->onQueue(QueueWorkerName::Speedtest->value);
 
         InertiaNotification::make()
             ->success()

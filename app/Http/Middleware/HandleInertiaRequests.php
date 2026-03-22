@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\UiAvatars;
+use App\Http\Resources\Account\User\UserResource;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Override;
@@ -43,14 +43,9 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => function () use ($request) {
-                    if (auth()->check()) {
-                        return [
-                            ...$request->user()->toArray(),
-                            'avatar' => UiAvatars::make($request->user()->name)->rounded()->get(),
-                        ];
-                    }
-                },
+                'user' => fn () => $request->user()
+                    ? new UserResource($request->user())
+                    : null,
             ],
         ];
     }

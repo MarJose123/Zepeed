@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
@@ -86,7 +87,7 @@ class SpeedtestRunCommand extends Command
             return;
         }
 
-        dispatch(new RunSpeedtestJob($provider));
+        dispatch(new RunSpeedtestJob(provider: $provider, runFromConsole: true)->onQueue(QueueWorkerName::Speedtest->value));
 
         $this->components->info("Dispatched {$provider->slug->label()} to the queue.");
     }
