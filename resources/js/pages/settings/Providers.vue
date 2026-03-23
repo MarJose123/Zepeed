@@ -47,6 +47,11 @@ const breadcrumbs: TBreadcrumbItem[] = [
 
 const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
 const testing = ref(false);
+const faviconError = ref(false);
+
+function onFaviconError() {
+    faviconError.value = true;
+}
 
 const runNow = (provider: Provider) => {
     router.post(
@@ -218,8 +223,24 @@ const submitForm = () => {
                         <CardHeader class="pb-1">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="space-y-1">
-                                    <CardTitle class="text-base">
-                                        {{ provider.name }}
+                                    <CardTitle class="text-base pb-1">
+                                        <div
+                                            v-if="!faviconError"
+                                            class="flex flex-row items-center gap-1"
+                                        >
+                                            <img
+                                                :src="`https://www.google.com/s2/favicons?domain=${provider.website_link}&sz=32`"
+                                                :alt="provider.name"
+                                                class="h-4 w-4 object-contain"
+                                                @error="onFaviconError"
+                                            />
+                                            <div>
+                                                {{ provider.name }}
+                                            </div>
+                                        </div>
+                                        <div v-else class="flex flex-row">
+                                            {{ provider.name }}
+                                        </div>
                                     </CardTitle>
                                     <CardDescription
                                         class="flex items-center gap-2"
