@@ -140,7 +140,10 @@ class MaintenanceWindow extends Model
         return self::query()
             ->active()
             ->ofType(MaintenanceWindowType::OneTime)
-            ->where('id', '!=', $this->id ?? 0)
+            ->when(
+                filled($this->id),
+                fn (Builder $q) => $q->where('id', '!=', $this->id)
+            )
             ->where(function (Builder $query) {
                 $query->where('starts_at', '<', $this->ends_at)
                     ->where('ends_at', '>', $this->starts_at);

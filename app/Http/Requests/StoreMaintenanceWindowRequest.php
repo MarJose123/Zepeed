@@ -11,6 +11,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
+use Override;
 
 class StoreMaintenanceWindowRequest extends FormRequest
 {
@@ -40,19 +41,22 @@ class StoreMaintenanceWindowRequest extends FormRequest
             'starts_at' => [
                 $type?->requiresDateRange() ? 'required' : 'nullable',
                 'date',
+                // Must be a future date/time — no backdating
+                'after:now',
                 'before:ends_at',
             ],
             'ends_at' => [
                 $type?->requiresDateRange() ? 'required' : 'nullable',
                 'date',
+                // Must be after both now and starts_at
                 'after:starts_at',
+                'after:now',
             ],
 
             // Recurring fields — required only when type = recurring
             'cron_expression' => [
                 $type?->requiresCronExpression() ? 'required' : 'nullable',
                 'string',
-                // Validate cron syntax via a closure
                 function (string $attribute, mixed $value, Closure $fail) {
                     if (! $value) {
                         return;
@@ -69,10 +73,19 @@ class StoreMaintenanceWindowRequest extends FormRequest
                 $type?->requiresCronExpression() ? 'required' : 'nullable',
                 'integer',
                 'min:1',
-                'max:1440', // max 24 hours
+                'max:1440',
             ],
 
             'notes' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    #[Override]
+    public function messages(): array
+    {
+        return [
+            'starts_at.after' => 'The start date must be a future date and time.',
+            'ends_at.after'   => 'The end date must be after the start date and in the future.',
         ];
     }
 

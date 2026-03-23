@@ -16,16 +16,40 @@ class ScheduleController extends Controller
 {
     public function index(): Response
     {
+        $windows = MaintenanceWindow::query()
+            ->orderByDesc('is_active')
+            ->latest()
+            ->get();
+
+        // Exclude the global pause window from the list —
+        // it is controlled separately via the toggle
+        $windowList = $windows->reject(
+            fn (MaintenanceWindow $w): bool => $w->type === MaintenanceWindowType::Indefinite
+            && $w->coversAllProviders()
+            && $w->label === 'Global pause'
+        );
+
         return Inertia::render('settings/Schedules', [
-            'providers'  => ProviderResource::collection(Provider::all())->resolve(),
-            'schedules'  => ProviderScheduleResource::collection(
-                ProviderSchedule::query()->orderBy('provider_slug')->get()
+            'providers' => ProviderResource::collection(
+                Provider::all()
             )->resolve(),
+
+            'schedules' => ProviderScheduleResource::collection(
+                ProviderSchedule::query()->oldest()->get()
+            )->resolve(),
+
             'windows' => MaintenanceWindowResource::collection(
-                MaintenanceWindow::query()
-                    ->orderByDesc('is_active')->latest()
-                    ->get()
+                $windowList
             )->resolve(),
+
+            // Stats for the maintenance tab dashboard bar
+            'stats' => [
+                'total'            => $windowList->count(),
+                'currently_active' => $windowList
+                    ->filter(fn (MaintenanceWindow $w) => $w->isCurrentlyActive())
+                    ->count(),
+            ],
+
             'globalPause' => MaintenanceWindow::query()
                 ->active()
                 ->ofType(MaintenanceWindowType::Indefinite)

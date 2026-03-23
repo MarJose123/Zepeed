@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import cronstrue from "cronstrue";
 import { ChevronRight, Loader2, Clock } from "lucide-vue-next";
 import { computed, ref } from "vue";
@@ -40,24 +40,24 @@ const form = useForm({
     is_enabled: props.schedule.is_enabled,
 });
 
-function parseCron(expr: string): string[] {
+const parseCron = (expr: string): string[] => {
     const parts = (expr || "* * * * *").split(" ");
     while (parts.length < 5) parts.push("*");
     return parts.slice(0, 5);
-}
+};
 
 const cronParts = ref<string[]>(parseCron(form.cron_expression));
 
-function onSegmentInput() {
+const onSegmentInput = () => {
     form.cron_expression = cronParts.value
         .map((p) => p.trim() || "*")
         .join(" ");
-}
+};
 
-function selectPreset(value: string) {
+const selectPreset = (value: string) => {
     form.cron_expression = value;
     cronParts.value = parseCron(value);
-}
+};
 
 const previewLabel = computed(() => {
     if (!form.cron_expression) return null;
@@ -79,28 +79,28 @@ const previewLabel = computed(() => {
 
 const faviconError = ref(false);
 
-function onFaviconError() {
+const onFaviconError = () => {
     faviconError.value = true;
-}
+};
 
 const isOpen = ref(props.defaultOpen ?? false);
 
-function toggleRow() {
+const toggleRow = () => {
     isOpen.value = !isOpen.value;
-}
+};
 
-function cancel() {
+const cancel = () => {
     isOpen.value = false;
     form.cron_expression = props.schedule.cron_expression ?? "";
     form.is_enabled = props.schedule.is_enabled;
     cronParts.value = parseCron(form.cron_expression);
     form.clearErrors();
-}
+};
 
-function save() {
+const save = () => {
     form.patch(
         route(
-            "settings.schedules.update",
+            "speedtest.schedules.update",
             { providerSchedule: props.schedule.id },
             false,
         ),
@@ -108,10 +108,11 @@ function save() {
             preserveScroll: true,
             onSuccess: () => {
                 isOpen.value = false;
+                router.reload();
             },
         },
     );
-}
+};
 </script>
 
 <template>

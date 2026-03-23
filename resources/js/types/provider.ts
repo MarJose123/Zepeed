@@ -46,6 +46,11 @@ export interface MaintenanceWindow {
     created_at: string;
 }
 
+export interface MaintenanceWindowStats {
+    total: number;
+    currently_active: number;
+}
+
 // Speedtest broadcast event payloads
 
 export interface SpeedtestEventPayload {
