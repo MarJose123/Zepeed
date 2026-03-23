@@ -58,8 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->job(new RunSpeedtestJob($provider), queue: QueueWorkerName::Speedtest->value)
                     ->cron($providerSchedule->cron_expression)
                     ->name("speedtest:{$provider->slug->value}")
-                    ->withoutOverlapping(expiresAt: 10)
-                    ->runInBackground();
+                    ->withoutOverlapping(expiresAt: 10);
             });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
