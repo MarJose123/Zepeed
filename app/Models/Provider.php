@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Override;
 
 /**
@@ -31,9 +32,11 @@ use Override;
  * @property-read string               $status_badge
  * @property-read bool                 $is_healthy
  * @property-read bool                 $is_runnable
+ * @property-read SpeedResult|null $latestResult
  *
  * @method static Builder<Provider> enabled()
  * @method static Builder<Provider> forServer(SpeedtestServer $server)
+ *
  */
 class Provider extends Model
 {
@@ -212,5 +215,14 @@ class Provider extends Model
     public function speedResults(): HasMany
     {
         return $this->hasMany(SpeedResult::class, 'provider_slug', 'slug');
+    }
+
+    /**
+     * @return HasOne<SpeedResult, $this>
+     */
+    public function latestResult(): HasOne
+    {
+        return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
+            ->latestOfMany();
     }
 }

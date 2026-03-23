@@ -16,6 +16,9 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         Route::post('providers/{provider}/run-now', [ProviderController::class, 'runNow'])
             ->name('providers.run-now');
+
+        Route::post('providers/{provider}/test', [ProviderController::class, 'test'])
+            ->name('providers.test');
     });
 
     Route::prefix('schedules/')->name('schedules.')->group(function () {

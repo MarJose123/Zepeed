@@ -9,6 +9,7 @@ use App\Http\Resources\ProviderResource;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
 use App\Services\InertiaNotification;
+use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,14 +53,42 @@ class ProviderController extends Controller
     {
         abort_unless($provider->is_runnable, 422, 'Provider is disabled or not fully configured.');
 
-        dispatch(new RunSpeedtestJob(provider: $provider, testOnly: true))->onQueue(QueueWorkerName::Speedtest->value);
+        dispatch(new RunSpeedtestJob(provider: $provider))->onQueue(QueueWorkerName::Speedtest->value);
 
         InertiaNotification::make()
             ->success()
             ->title('Run queued')
-            ->message("Manual run dispatched for {$provider->slug->label()}. Please stay on this page until the test completes.")
+            ->message("Manual run dispatched for {$provider->slug->label()}.")
             ->send();
 
         return to_route('speedtest.server.providers.index');
+    }
+
+    /**
+     * @param Provider $provider
+     * @return void
+     * @throws \Exception
+     */
+    public function test(Provider $provider): RedirectResponse
+    {
+        try {
+            $result = $provider->service()->run();
+
+            InertiaNotification::make()
+                ->success()
+                ->title("{$provider->slug->label()} test completed")
+                ->message("↓ {$result->downloadMbps} Mbps  ↑ {$result->uploadMbps} Mbps ↔ ping {$result->pingMs} ms")
+                ->send();
+
+            return to_route('speedtest.server.providers.index');
+
+        } catch (SpeedtestException $e) {
+            InertiaNotification::make()
+                ->error()
+                ->title("{$provider->slug->label()} test failed")
+                ->message($e->getMessage())
+                ->send();
+            return to_route('speedtest.server.providers.index');
+        }
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\Account\User\UserResource;
+use App\Http\Resources\ProviderResource;
+use App\Models\Provider;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Override;
@@ -47,6 +49,12 @@ class HandleInertiaRequests extends Middleware
                     ? new UserResource($request->user())
                     : null,
             ],
+            'speedtest' => fn() => $request->user() ? ProviderResource::collection(
+                Provider::query()
+                    ->with('latestResult')
+                    ->orderBy('id')
+                    ->get()
+            ) : [],
         ];
     }
 }

@@ -4,7 +4,7 @@ import type {
     SpeedtestCompletedPayload,
     SpeedtestExceptionPayload,
     SpeedtestSkippedPayload,
-} from "@/types/speedtest";
+} from "@/types/provider";
 
 interface UseSpeedtestChannelOptions {
     onStarted?: (payload: SpeedtestEventPayload) => void;

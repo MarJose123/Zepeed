@@ -1,5 +1,6 @@
 import type { Auth, UserAppearance } from "@/types/auth";
 import type { INotification } from "@/types/notification";
+import { Provider } from "@/types/provider";
 
 // Extend ImportMeta interface for Vite...
 declare module "vite/client" {
@@ -20,6 +21,7 @@ declare module "@inertiajs/core" {
             name: string;
             auth: Auth;
             appearance: UserAppearance;
+            speedtest: Provider[]
             [key: string]: unknown;
         };
         flashDataType: {

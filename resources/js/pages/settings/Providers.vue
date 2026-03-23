@@ -47,8 +47,9 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
-const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
 const { notify } = useNotification();
+const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
+const testing = ref(false)
 
 const runNow = (provider: Provider) => {
     router.post(
@@ -64,6 +65,19 @@ const runNow = (provider: Provider) => {
         },
     );
 };
+
+const testRun = (provider: Provider) => {
+    testing.value = true
+    router.post(
+        route('speedtest.server.providers.test', { provider: provider.slug }, false),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => { testing.value = false },
+        },
+    )
+}
+
 
 const statusBadgeVariant = (badge: Provider["status_badge"]) => {
     return {
@@ -127,35 +141,6 @@ watch(
     },
     { immediate: true },
 );
-
-// register realtime notification for the speedtest test
-props.providers.forEach((provider) => {
-    useSpeedtestTestChannel(provider.slug, {
-        onCompleted: (e) => {
-            notify({
-                type: "success",
-                title: `${e.provider_name} completed`,
-                message: `↓ ${e.download_mbps} Mbps  ↑ ${e.upload_mbps} Mbps`,
-            });
-            router.reload({ only: ["results", "stats"] });
-        },
-        onFailed: (e) => {
-            notify({
-                type: "error",
-                title: `${e.provider_name} failed`,
-                message: "The speedtest run failed.",
-            });
-            router.reload({ only: ["providers"] });
-        },
-        onException: (e) => {
-            notify({
-                type: "error",
-                title: `${e.provider_name} exception`,
-                message: e.message,
-            });
-        },
-    });
-});
 
 const submitForm = () => {
     form.patch(
@@ -265,6 +250,19 @@ const submitForm = () => {
                                     </CardDescription>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    <!-- Test — always available regardless of is_enabled -->
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        :disabled="testing"
+                                        @click="testRun(provider)"
+                                    >
+                                        <Loader2 v-if="testing" class="mr-2 h-4 w-4 animate-spin" />
+                                        Test
+                                    </Button>
+
+                                    <!-- Run Now — respects is_runnable (enabled + not in maintenance) -->
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -274,6 +272,7 @@ const submitForm = () => {
                                     >
                                         Run now
                                     </Button>
+
                                     <a
                                         :href="provider.website_link"
                                         target="_blank"
