@@ -1,42 +1,46 @@
-FROM serversideup/php:8.4-fpm-nginx AS base
+FROM serversideup/php:8.4-fpm-nginx-alpine AS base
 
 LABEL maintainer="MarJose Darang"
 
 ARG TIMEZONE
 ARG LIBRESPEED_VERSION=1.0.12
+ARG SPEEDTEST_VERSION=1.2.0
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=$TIMEZONE
 
-#use the root user for installing dependencies
 USER root
 
-RUN apt update -y && apt install -y curl nodejs supervisor unzip tar
-RUN curl -fsSL https://bun.com/install | bash
+# Alpine packages
+RUN apk add --no-cache curl nodejs npm unzip tar bash
 
-ENV PATH="/root/.bun/bin:${PATH}"
+# Ookla Speedtest CLI — download binary directly, no packagecloud script needed
+RUN curl -sSL "https://install.speedtest.net/app/cli/ookla-speedtest-${SPEEDTEST_VERSION}-linux-x86_64.tgz" \
+    | tar -xz -C /tmp \
+    && mv /tmp/speedtest /usr/local/bin/speedtest \
+    && chmod 755 /usr/local/bin/speedtest \
+    && rm -rf /tmp/speedtest*
 
-RUN exec /bin/sh
+# LibreSpeed CLI
+RUN curl -sSL -o /tmp/librespeed-cli.tar.gz \
+        "https://github.com/librespeed/speedtest-cli/releases/download/v${LIBRESPEED_VERSION}/librespeed-cli_${LIBRESPEED_VERSION}_linux_amd64.tar.gz" \
+    && tar -xzf /tmp/librespeed-cli.tar.gz -C /usr/local/bin \
+    && chmod 755 /usr/local/bin/librespeed-cli \
+    && rm /tmp/librespeed-cli.tar.gz
 
-# Installation of the Speedtest cli
-RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash \
-    && apt install speedtest \
-    && curl -o /tmp/librespeed-cli.tar.gz -L \
-                "https://github.com/librespeed/speedtest-cli/releases/download/v$LIBRESPEED_VERSION/librespeed-cli_${LIBRESPEED_VERSION}_linux_amd64.tar.gz" \
-           && tar -xzf /tmp/librespeed-cli.tar.gz -C /usr/bin
+# Fast.com CLI
+RUN npm install --global fast-cli
 
-RUN bun add --global fast-cli
+# Chromium for Puppeteer (fast-cli)
+RUN apk add --no-cache chromium
 
-RUN apt autoremove -y
+# Tell Puppeteer to use the system Chromium instead of downloading its own
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 RUN rm -rf /tmp/* /var/tmp/*
 
-# ─── S6 Overlay service definitions ─────────────────────────────────────────
-# Drop all service directories into s6-rc.d. S6 auto-discovers them.
-# No changes to ENTRYPOINT or CMD are needed — s6 is already PID 1.
-# Copy the entire s6-overlay directory structure
+# ─── S6 Overlay service definitions ──────────────────────────────────────────
 COPY etc/s6-overlay /etc/s6-overlay
-# Only run scripts need execute permission
 RUN find /etc/s6-overlay/s6-rc.d -name 'run' -o -name 'finish' | xargs chmod 755
 
-# use the www-data user to serve the application
 USER www-data
