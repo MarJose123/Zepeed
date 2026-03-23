@@ -17,7 +17,7 @@ enum SpeedtestServer: string
         return match ($this) {
             self::Speedtest  => 'Speedtest Ookla',
             self::Librespeed => 'LibreSpeed',
-            self::Fastcom    => 'Fast.com',
+            self::Fastcom    => 'Netflix Speedtest',
         };
     }
 
