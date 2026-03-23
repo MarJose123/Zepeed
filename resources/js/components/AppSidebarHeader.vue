@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { Gauge } from "lucide-vue-next";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 
-import DisplayModeToggle from "@/components/DisplayModeToggle.vue";
-import Notification from "@/components/Notification.vue";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -31,13 +27,6 @@ withDefaults(
             <template v-if="breadcrumbs && breadcrumbs.length > 0">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </template>
-            <div class="flex ml-auto">
-                <Button variant="ghost" class="rounded-full">
-                    <component :is="Gauge" />
-                </Button>
-                <Notification />
-                <DisplayModeToggle />
-            </div>
         </div>
     </header>
 </template>

@@ -2,14 +2,15 @@
 import { Link, router, usePage } from "@inertiajs/vue3";
 import {
     Bell,
-    Sparkles,
     ChevronsUpDown,
     CreditCard,
     LogOut,
     Settings,
+    Moon,
 } from "lucide-vue-next";
 
 import { computed } from "vue";
+import DisplayModeToggle from "@/components/DisplayModeToggle.vue";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -72,11 +73,18 @@ const handleLogout = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                            <Sparkles />
-                            Upgrade to Pro
+                        <DropdownMenuItem
+                            class="flex items-center justify-between"
+                            @select.prevent
+                        >
+                            <div class="flex items-center gap-2">
+                                <Moon class="size-4" />
+                                <span>Appearance</span>
+                            </div>
+                            <DisplayModeToggle />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
+
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         <DropdownMenuItem>
@@ -87,11 +95,12 @@ const handleLogout = () => {
                             <Bell />
                             Notifications
                         </DropdownMenuItem>
-                        <DropdownMenuItem :as-child="true">
+                        <DropdownMenuItem as-child>
                             <Link
-                                class="block w-full cursor-pointer"
+                                class="block w-full cursor-pointer flex-row"
                                 :href="route('profile.edit')"
-                                prefetch
+                                as="button"
+                                method="get"
                             >
                                 <Settings />
                                 Settings
