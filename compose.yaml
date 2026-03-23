@@ -7,15 +7,11 @@ services:
             dockerfile: Dockerfile
             args:
                 TIMEZONE: '${APP_TIMEZONE:-UTC}'
+                HEALTHCHECK_PATH: '/up'
         environment:
-            HEALTHCHECK_PATH: '/up'
-            PHP_UPLOAD_MAX_FILE_SIZE: '100M'
-            PHP_POST_MAX_SIZE: '100M'
-            NGINX_FASTCGI_BUFFERS: '128 4k'
-            NGINX_FASTCGI_BUFFER_SIZE: '32k'
-            PHP_OPCACHE_ENABLE: '1'
+            # Autorun
             AUTORUN_ENABLED: 'true'
-            AUTORUN_DEBUG: '${APP_ENV:-true}'
+            AUTORUN_DEBUG: '${APP_DEBUG:-false}'
             AUTORUN_LARAVEL_MIGRATION_DATABASE: '${AUTORUN_LARAVEL_MIGRATION_DATABASE:-mariadb}'
             AUTORUN_LARAVEL_CONFIG_CACHE: '${AUTORUN_LARAVEL_CONFIG_CACHE:-false}'
             AUTORUN_LARAVEL_EVENT_CACHE: '${AUTORUN_LARAVEL_EVENT_CACHE:-false}'
