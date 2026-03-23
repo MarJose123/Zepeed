@@ -10,7 +10,7 @@ class ProviderSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (SpeedtestServer::cases() as $server) {
+        collect(SpeedtestServer::cases())->reverse()->each(function(SpeedtestServer $server){
             $exists = Provider::where('slug', $server->value)->exists();
 
             if (! $exists) {
@@ -34,6 +34,6 @@ class ProviderSeeder extends Seeder
 
                 $this->command->line("Provider already exists, label synced: {$server->label()}");
             }
-        }
+        });
     }
 }
