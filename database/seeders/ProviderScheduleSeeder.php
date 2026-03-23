@@ -10,21 +10,21 @@ class ProviderScheduleSeeder extends Seeder
 {
     public function run(): void
     {
-        collect(SpeedtestServer::cases())->each(function(SpeedtestServer $server){
+        collect(SpeedtestServer::cases())->each(function (SpeedtestServer $server) {
             $exists = ProviderSchedule::where('provider_slug', $server->value)->exists();
 
-        if (! $exists) {
-            // First-time insert only
-            ProviderSchedule::create([
-                'provider_slug'    => $server->value,
-                'cron_expression'  => null,
-                'is_enabled'       => false,
-            ]);
+            if (! $exists) {
+                // First-time insert only
+                ProviderSchedule::create([
+                    'provider_slug'    => $server->value,
+                    'cron_expression'  => null,
+                    'is_enabled'       => false,
+                ]);
 
-            $this->command->info("Schedule created: {$server->label()}");
-        } else {
-            $this->command->line("Schedule already exists, skipping: {$server->label()}");
-        }
+                $this->command->info("Schedule created: {$server->label()}");
+            } else {
+                $this->command->line("Schedule already exists, skipping: {$server->label()}");
+            }
         });
     }
 }

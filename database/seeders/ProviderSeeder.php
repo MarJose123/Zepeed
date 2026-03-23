@@ -10,7 +10,7 @@ class ProviderSeeder extends Seeder
 {
     public function run(): void
     {
-        collect(SpeedtestServer::cases())->each(function(SpeedtestServer $server){
+        collect(SpeedtestServer::cases())->each(function (SpeedtestServer $server) {
             $exists = Provider::where('slug', $server->value)->exists();
 
             if (! $exists) {
