@@ -50,7 +50,7 @@ return [
             'driver'  => 'pusher',
             'key'     => env('PUSHER_APP_KEY', 'zepeed'),
             'secret'  => env('PUSHER_APP_SECRET', 'zepeed'),
-            'app_id'  => env('PUSHER_APP_ID' , 'zepeed'),
+            'app_id'  => env('PUSHER_APP_ID', 'zepeed'),
             'options' => [
                 'cluster'   => env('PUSHER_APP_CLUSTER'),
                 'host'      => env('PUSHER_HOST') ?: 'soketi',

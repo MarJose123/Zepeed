@@ -43,6 +43,7 @@ class OklaSpeedtestService extends AbstractSpeedtestService
             'server_name'     => $parsed['server']['name'] ?? null,
             'server_location' => $parsed['server']['location'] ?? null,
             'isp'             => $parsed['isp'] ?? null,
+            'share_url'       => $parsed['result']['url'] ?? null,
             'client_ip'       => $parsed['interface']['externalIp'] ?? null,
         ];
     }

@@ -17,6 +17,8 @@ class ProviderResource extends JsonResource
             'name'                => $this->slug->label(),
             'website_link'        => $this->slug->websiteLink(),
             'requires_server_url' => $this->slug->requiresServerUrl(),
+            'support_server_url'  => $this->slug->supportServerUrl(),
+            'requires_chromium'   => $this->slug->requiresChromium(),
             'is_enabled'          => $this->is_enabled,
             'is_runnable'         => $this->is_runnable,   // ← new
             'is_healthy'          => $this->is_healthy,    // ← new

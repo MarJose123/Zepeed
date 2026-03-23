@@ -49,7 +49,7 @@ class HandleInertiaRequests extends Middleware
                     ? new UserResource($request->user())
                     : null,
             ],
-            'speedtest' => fn() => $request->user() ? ProviderResource::collection(
+            'speedtest' => fn () => $request->user() ? ProviderResource::collection(
                 Provider::query()
                     ->with('latestResult')
                     ->orderBy('id')

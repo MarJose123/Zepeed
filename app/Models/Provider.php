@@ -36,7 +36,6 @@ use Override;
  *
  * @method static Builder<Provider> enabled()
  * @method static Builder<Provider> forServer(SpeedtestServer $server)
- *
  */
 class Provider extends Model
 {

@@ -19,7 +19,7 @@ class ProviderSeeder extends Seeder
                     'slug'             => $server->value,
                     'name'             => $server->label(),
                     'is_enabled'       => false,
-                    'alert_on_failure' => true,
+                    'alert_on_failure' => false,
                     'server_url'       => null,
                     'server_id'        => null,
                     'extra_flags'      => null,

@@ -40,11 +40,12 @@ class LibrespeedService extends AbstractSpeedtestService
             'ping_ms'         => (float) $result['ping'],
             'jitter_ms'       => isset($result['jitter']) ? (float) $result['jitter'] : null,
             'packet_loss'     => null, // librespeed-cli does not report packet loss
-            'download_bytes'  => null,
-            'upload_bytes'    => null,
+            'download_bytes'  => $result['bytes_received'] ?? null,
+            'upload_bytes'    => $result['bytes_sent'] ?? null,
             'server_name'     => $result['server']['name'] ?? null,
             'server_location' => $result['server']['host'] ?? null,
-            'isp'             => $result['client']['isp'] ?? null,
+            'isp'             => $result['client']['org'] ?? null,
+            'share_url'       => filled($result['share'] ?? null) ? $result['share'] : null,
             'client_ip'       => $result['client']['ip'] ?? null,
         ];
     }

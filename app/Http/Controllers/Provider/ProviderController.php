@@ -10,6 +10,7 @@ use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
 use App\Services\InertiaNotification;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -65,9 +66,13 @@ class ProviderController extends Controller
     }
 
     /**
+     * Test run under the provider
+     *
      * @param Provider $provider
-     * @return void
-     * @throws \Exception
+     *
+     * @throws Exception
+     *
+     * @return RedirectResponse
      */
     public function test(Provider $provider): RedirectResponse
     {
@@ -88,6 +93,7 @@ class ProviderController extends Controller
                 ->title("{$provider->slug->label()} test failed")
                 ->message($e->getMessage())
                 ->send();
+
             return to_route('speedtest.server.providers.index');
         }
     }

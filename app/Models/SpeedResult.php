@@ -28,6 +28,7 @@ class SpeedResult extends Model
         'server_name',
         'server_location',
         'isp',
+        'share_url',
         'client_ip',
         'failure_reason',
         'failure_message',

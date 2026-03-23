@@ -42,6 +42,9 @@ class SpeedtestResult extends Data
         // Raw CLI output — stored verbatim for debugging
         public readonly string $rawJson,
 
+        // share result url
+        public readonly ?string $shareUrl,
+
         // Timestamp
         public readonly CarbonImmutable $measuredAt,
     ) {
@@ -60,20 +63,21 @@ class SpeedtestResult extends Data
         string $rawJson,
     ): self {
         return new self(
-            server         : $server,
-            downloadMbps   : (float) $data['download_mbps'],
-            uploadMbps     : (float) $data['upload_mbps'],
-            pingMs         : (float) $data['ping_ms'],
-            jitterMs       : isset($data['jitter_ms']) ? (float) $data['jitter_ms'] : null,
-            packetLoss     : isset($data['packet_loss']) ? (float) $data['packet_loss'] : null,
-            downloadBytes  : isset($data['download_bytes']) ? (int) $data['download_bytes'] : null,
-            uploadBytes    : isset($data['upload_bytes']) ? (int) $data['upload_bytes'] : null,
-            serverName     : $data['server_name'] ?? null,
-            serverLocation : $data['server_location'] ?? null,
-            isp            : $data['isp'] ?? null,
-            clientIp       : $data['client_ip'] ?? null,
-            rawJson        : $rawJson,
-            measuredAt     : CarbonImmutable::now(),
+            server: $server,
+            downloadMbps: (float) $data['download_mbps'],
+            uploadMbps: (float) $data['upload_mbps'],
+            pingMs: (float) $data['ping_ms'],
+            jitterMs: isset($data['jitter_ms']) ? (float) $data['jitter_ms'] : null,
+            packetLoss: isset($data['packet_loss']) ? (float) $data['packet_loss'] : null,
+            downloadBytes: isset($data['download_bytes']) ? (int) $data['download_bytes'] : null,
+            uploadBytes: isset($data['upload_bytes']) ? (int) $data['upload_bytes'] : null,
+            serverName: $data['server_name'] ?? null,
+            serverLocation: $data['server_location'] ?? null,
+            isp: $data['isp'] ?? null,
+            clientIp: $data['client_ip'] ?? null,
+            rawJson: $rawJson,
+            shareUrl: $data['share_url'] ?? null,
+            measuredAt: CarbonImmutable::now(),
         );
     }
 
@@ -97,6 +101,7 @@ class SpeedtestResult extends Data
             'server_name'     => $this->serverName,
             'server_location' => $this->serverLocation,
             'isp'             => $this->isp,
+            'share_url'       => $this->shareUrl,
             'client_ip'       => $this->clientIp,
             'raw_json'        => $this->rawJson,
             'measured_at'     => $this->measuredAt,

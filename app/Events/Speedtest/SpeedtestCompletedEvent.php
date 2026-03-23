@@ -31,6 +31,7 @@ class SpeedtestCompletedEvent extends Speedtest
             'server_name'     => $this->result->serverName,
             'server_location' => $this->result->serverLocation,
             'isp'             => $this->result->isp,
+            'share_url'       => $this->result->shareUrl,
             'measured_at'     => $this->result->measuredAt->toIso8601String(),
         ]);
     }

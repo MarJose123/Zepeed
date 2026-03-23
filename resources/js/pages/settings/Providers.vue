@@ -3,7 +3,7 @@ import { Head, router, useForm } from "@inertiajs/vue3";
 import {
     ExternalLink,
     Loader2,
-    AlertTriangle,
+    Info,
     Radio,
     Server,
     Bell,
@@ -29,8 +29,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useNotification } from "@/composables/useNotification";
-import { useSpeedtestTestChannel } from "@/composables/useSpeedtestTestChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type { Provider } from "@/types/provider";
@@ -47,9 +45,8 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
-const { notify } = useNotification();
 const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
-const testing = ref(false)
+const testing = ref(false);
 
 const runNow = (provider: Provider) => {
     router.post(
@@ -67,17 +64,22 @@ const runNow = (provider: Provider) => {
 };
 
 const testRun = (provider: Provider) => {
-    testing.value = true
+    testing.value = true;
     router.post(
-        route('speedtest.server.providers.test', { provider: provider.slug }, false),
+        route(
+            "speedtest.server.providers.test",
+            { provider: provider.slug },
+            false,
+        ),
         {},
         {
             preserveScroll: true,
-            onFinish: () => { testing.value = false },
+            onFinish: () => {
+                testing.value = false;
+            },
         },
-    )
-}
-
+    );
+};
 
 const statusBadgeVariant = (badge: Provider["status_badge"]) => {
     return {
@@ -201,18 +203,15 @@ const submitForm = () => {
                     <!-- Chromium warning -->
                     <div
                         v-if="provider.requires_chromium"
-                        class="bg-warning/10 border-warning/30 mb-4 flex items-start gap-2 rounded-lg border p-3"
+                        class="bg-muted border-border mb-4 flex items-start gap-2 rounded-lg border p-3"
                     >
-                        <AlertTriangle
-                            class="text-warning mt-0.5 h-4 w-4 shrink-0"
+                        <Info
+                            class="text-muted-foreground mt-0.5 h-4 w-4 shrink-0"
                         />
-                        <p class="text-warning text-sm">
-                            Fast.com requires Chromium (Puppeteer) installed in
-                            your Docker container. Ensure
-                            <code class="font-mono text-xs"
-                                >PUPPETEER_EXECUTABLE_PATH</code
-                            >
-                            is set correctly.
+                        <p class="text-muted-foreground text-sm">
+                            This provider requires Chromium to run. Chromium is
+                            pre-installed in the Docker image and no additional
+                            setup is required.
                         </p>
                     </div>
                     <Card>
@@ -258,7 +257,10 @@ const submitForm = () => {
                                         :disabled="testing"
                                         @click="testRun(provider)"
                                     >
-                                        <Loader2 v-if="testing" class="mr-2 h-4 w-4 animate-spin" />
+                                        <Loader2
+                                            v-if="testing"
+                                            class="mr-2 h-4 w-4 animate-spin"
+                                        />
                                         Test
                                     </Button>
 
@@ -321,7 +323,7 @@ const submitForm = () => {
 
                             <!-- Server URL — LibreSpeed only -->
                             <Field
-                                v-if="provider.requires_server_url"
+                                v-if="provider.support_server_url"
                                 class="py-4"
                             >
                                 <div
@@ -338,8 +340,10 @@ const submitForm = () => {
                                         <div>
                                             <FieldLabel>Server URL</FieldLabel>
                                             <FieldDescription>
-                                                Your self-hosted LibreSpeed
-                                                instance URL
+                                                Optional — leave blank to use a
+                                                public LibreSpeed server or you
+                                                can use your self-hosted
+                                                LibreSpeed server.
                                             </FieldDescription>
                                             <FieldError
                                                 v-if="form.errors.server_url"
