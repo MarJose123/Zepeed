@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
 class SpeedtestRunCommand extends Command
 {
     protected $signature = 'speedtest:run
-                            {provider? : Provider slug (speedtest, librespeed, fastcom). Omit to run all.}
+                            {provider? : Provider slug (speedtest, librespeed, netflix-speedtest). Omit to run all.}
                             {--sync : Run synchronously and output results inline}
                             {--queue : Dispatch to the queue (default behaviour)}';
 
