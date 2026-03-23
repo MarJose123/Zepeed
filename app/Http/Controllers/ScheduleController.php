@@ -18,7 +18,7 @@ class ScheduleController extends Controller
     {
         return Inertia::render('settings/Schedules', [
             'providers'  => ProviderResource::collection(Provider::all())->resolve(),
-            'schedules' => ProviderScheduleResource::collection(
+            'schedules'  => ProviderScheduleResource::collection(
                 ProviderSchedule::query()->orderBy('provider_slug')->get()
             )->resolve(),
             'windows' => MaintenanceWindowResource::collection(

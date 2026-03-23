@@ -1,10 +1,22 @@
 <script setup lang="ts">
 import { Head, useForm, router } from "@inertiajs/vue3";
-import { Plus, Trash2, Loader2, AlertTriangle } from "lucide-vue-next";
+import {
+    Plus,
+    Trash2,
+    Loader2,
+    AlertTriangle,
+} from "lucide-vue-next";
 import { ref } from "vue";
+import ProviderScheduleRow from "@/components/speedtest/ProviderScheduleRow.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
@@ -27,9 +39,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
-import type { ProviderSchedule, MaintenanceWindow } from "@/types/provider";
+import type {
+    ProviderSchedule,
+    MaintenanceWindow,
+    Provider,
+} from "@/types/provider";
 
-const props = defineProps<{
+defineProps<{
+    providers: Provider[];
     schedules: ProviderSchedule[];
     windows: MaintenanceWindow[];
     globalPause: boolean;
@@ -41,28 +58,6 @@ const breadcrumbs: TBreadcrumbItem[] = [
 ];
 
 const activeTab = ref<"schedules" | "maintenance">("schedules");
-
-// Schedule forms — one per provider
-const scheduleForms = Object.fromEntries(
-    props.schedules.map((s) => [
-        s.provider_slug,
-        useForm({
-            cron_expression: s.cron_expression ?? "",
-            is_enabled: s.is_enabled,
-        }),
-    ]),
-);
-
-function saveSchedule(schedule: ProviderSchedule) {
-    scheduleForms[schedule.provider_slug].patch(
-        route(
-            "settings.schedules.update",
-            { providerSchedule: schedule.id },
-            false,
-        ),
-        { preserveScroll: true },
-    );
-}
 
 // Global pause
 const globalPauseProcessing = ref(false);
@@ -124,15 +119,6 @@ function windowTypeBadge(type: MaintenanceWindow["type"]) {
         recurring: "outline",
     }[type] as "secondary" | "default" | "outline";
 }
-
-const commonCrons = [
-    { label: "Every 15 minutes", value: "*/15 * * * *" },
-    { label: "Every 30 minutes", value: "*/30 * * * *" },
-    { label: "Every hour", value: "0 * * * *" },
-    { label: "Every 2 hours", value: "0 */2 * * *" },
-    { label: "Every 6 hours", value: "0 */6 * * *" },
-    { label: "Daily at midnight", value: "0 0 * * *" },
-];
 </script>
 
 <template>
@@ -149,130 +135,40 @@ const commonCrons = [
 
             <Tabs v-model="activeTab">
                 <TabsList>
-                    <TabsTrigger value="schedules"> Schedules </TabsTrigger>
+                    <TabsTrigger value="schedules">Schedules</TabsTrigger>
                     <TabsTrigger value="maintenance">
                         Maintenance
                         <span
                             v-if="globalPause"
-                            class="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-destructive"
+                            class="bg-destructive ml-1.5 inline-block h-1.5 w-1.5 rounded-full"
                         />
                     </TabsTrigger>
                 </TabsList>
 
-                <!-- Schedules tab -->
-                <TabsContent value="schedules" class="mt-0 space-y-3">
-                    <Card
-                        v-for="schedule in schedules"
-                        :key="schedule.provider_slug"
-                    >
-                        <CardContent class="p-4">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="space-y-0.5">
-                                    <p class="font-semibold">
-                                        {{ schedule.provider_name }}
-                                    </p>
-                                    <p
-                                        v-if="schedule.next_run_at"
-                                        class="text-muted-foreground text-xs"
-                                    >
-                                        Next run: {{ schedule.next_run_at }}
-                                    </p>
-                                    <p
-                                        v-else
-                                        class="text-muted-foreground text-xs"
-                                    >
-                                        Not scheduled
-                                    </p>
-                                </div>
-                                <Switch
-                                    :checked="
-                                        scheduleForms[schedule.provider_slug]
-                                            .is_enabled
-                                    "
-                                    @update:checked="
-                                        scheduleForms[
-                                            schedule.provider_slug
-                                        ].is_enabled = $event
-                                    "
-                                />
-                            </div>
+                <!-- ── Schedules tab ── -->
+                <TabsContent value="schedules" class="mt-4">
+                    <Card class="overflow-hidden">
+                        <CardHeader>
+                            <CardTitle class="text-sm font-medium"
+                                >Provider schedules</CardTitle
+                            >
+                            <CardDescription class="text-xs">
+                                Click a provider row to edit its schedule
+                            </CardDescription>
+                        </CardHeader>
 
-                            <div class="mt-4 space-y-3">
-                                <!-- Quick cron presets -->
-                                <div class="flex flex-wrap gap-2">
-                                    <button
-                                        v-for="preset in commonCrons"
-                                        :key="preset.value"
-                                        type="button"
-                                        class="border-border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md border px-2.5 py-1 text-xs transition-colors"
-                                        :class="{
-                                            'border-primary bg-primary/10 text-primary':
-                                                scheduleForms[
-                                                    schedule.provider_slug
-                                                ].cron_expression ===
-                                                preset.value,
-                                        }"
-                                        @click="
-                                            scheduleForms[
-                                                schedule.provider_slug
-                                            ].cron_expression = preset.value
-                                        "
-                                    >
-                                        {{ preset.label }}
-                                    </button>
-                                </div>
-
-                                <!-- Cron input -->
-                                <div class="flex items-center gap-3">
-                                    <Input
-                                        v-model="
-                                            scheduleForms[
-                                                schedule.provider_slug
-                                            ].cron_expression
-                                        "
-                                        type="text"
-                                        placeholder="*/30 * * * *"
-                                        class="font-mono text-sm"
-                                    />
-                                    <Button
-                                        size="sm"
-                                        :disabled="
-                                            scheduleForms[
-                                                schedule.provider_slug
-                                            ].processing
-                                        "
-                                        @click="saveSchedule(schedule)"
-                                    >
-                                        <Loader2
-                                            v-if="
-                                                scheduleForms[
-                                                    schedule.provider_slug
-                                                ].processing
-                                            "
-                                            class="mr-2 h-4 w-4 animate-spin"
-                                        />
-                                        Save
-                                    </Button>
-                                </div>
-                                <p
-                                    v-if="
-                                        scheduleForms[schedule.provider_slug]
-                                            .errors.cron_expression
-                                    "
-                                    class="text-destructive text-xs"
-                                >
-                                    {{
-                                        scheduleForms[schedule.provider_slug]
-                                            .errors.cron_expression
-                                    }}
-                                </p>
-                            </div>
-                        </CardContent>
+                        <!-- One row per schedule — first expanded, rest collapsed -->
+                        <ProviderScheduleRow
+                            v-for="(schedule, index) in schedules"
+                            :key="schedule.provider_slug"
+                            :schedule="schedule"
+                            :default-open="index === 0"
+                        />
                     </Card>
                 </TabsContent>
 
-                <!-- Maintenance tab -->
-                <TabsContent value="maintenance" class="mt-0 space-y-3">
+                <!-- ── Maintenance tab ── -->
+                <TabsContent value="maintenance" class="mt-4 space-y-3">
                     <!-- Global pause -->
                     <Card
                         :class="{
@@ -312,7 +208,7 @@ const commonCrons = [
                         </p>
                     </div>
 
-                    <!-- Maintenance windows list header -->
+                    <!-- Windows list header -->
                     <div class="flex items-center justify-between">
                         <p class="text-sm font-medium">Scheduled windows</p>
                         <Dialog v-model:open="showAddWindow">
@@ -328,9 +224,7 @@ const commonCrons = [
                                         >New maintenance window</DialogTitle
                                     >
                                 </DialogHeader>
-
                                 <div class="space-y-4 py-2">
-                                    <!-- Label -->
                                     <div class="space-y-1.5">
                                         <Label>Label</Label>
                                         <Input
@@ -344,16 +238,13 @@ const commonCrons = [
                                             {{ windowForm.errors.label }}
                                         </p>
                                     </div>
-
-                                    <!-- Type -->
                                     <div class="space-y-1.5">
                                         <Label>Type</Label>
                                         <Select v-model="windowForm.type">
-                                            <SelectTrigger>
-                                                <SelectValue
+                                            <SelectTrigger
+                                                ><SelectValue
                                                     placeholder="Select type"
-                                                />
-                                            </SelectTrigger>
+                                            /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="one_time"
                                                     >One-time</SelectItem
@@ -367,8 +258,6 @@ const commonCrons = [
                                             </SelectContent>
                                         </Select>
                                     </div>
-
-                                    <!-- One-time fields -->
                                     <template
                                         v-if="windowForm.type === 'one_time'"
                                     >
@@ -415,8 +304,6 @@ const commonCrons = [
                                             </div>
                                         </div>
                                     </template>
-
-                                    <!-- Recurring fields -->
                                     <template
                                         v-if="windowForm.type === 'recurring'"
                                     >
@@ -476,8 +363,6 @@ const commonCrons = [
                                             </p>
                                         </div>
                                     </template>
-
-                                    <!-- Providers -->
                                     <div class="space-y-1.5">
                                         <Label>Applies to</Label>
                                         <Select
@@ -488,30 +373,24 @@ const commonCrons = [
                                                 windowForm.providers = [$event]
                                             "
                                         >
-                                            <SelectTrigger>
-                                                <SelectValue
+                                            <SelectTrigger
+                                                ><SelectValue
                                                     placeholder="Select providers"
-                                                />
-                                            </SelectTrigger>
+                                            /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="all"
                                                     >All providers</SelectItem
                                                 >
-                                                <SelectItem value="speedtest"
-                                                    >Speedtest ·
-                                                    Ookla</SelectItem
+                                                <SelectItem
+                                                    v-for="provider in providers"
+                                                    :key="provider.slug"
+                                                    :value="provider.slug"
                                                 >
-                                                <SelectItem value="librespeed"
-                                                    >LibreSpeed</SelectItem
-                                                >
-                                                <SelectItem value="fastcom"
-                                                    >Fast.com</SelectItem
-                                                >
+                                                    {{ provider.name }}
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
-
-                                    <!-- Notes -->
                                     <div class="space-y-1.5">
                                         <Label
                                             >Notes
@@ -522,18 +401,16 @@ const commonCrons = [
                                         <Textarea
                                             v-model="windowForm.notes"
                                             placeholder="e.g. ISP ticket #12345"
-                                            rows="2"
+                                            :rows="2"
                                         />
                                     </div>
                                 </div>
-
                                 <DialogFooter>
                                     <Button
                                         variant="outline"
                                         @click="showAddWindow = false"
+                                        >Cancel</Button
                                     >
-                                        Cancel
-                                    </Button>
                                     <Button
                                         :disabled="windowForm.processing"
                                         @click="submitWindow"
@@ -566,29 +443,26 @@ const commonCrons = [
                         >
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
-                                    <p class="font-medium text-sm">
+                                    <p class="text-sm font-medium">
                                         {{ window.label }}
                                     </p>
                                     <Badge
                                         :variant="windowTypeBadge(window.type)"
                                         class="text-xs"
+                                        >{{ window.type_label }}</Badge
                                     >
-                                        {{ window.type_label }}
-                                    </Badge>
                                     <Badge
                                         v-if="window.is_currently_active"
                                         variant="destructive"
                                         class="text-xs"
+                                        >Active</Badge
                                     >
-                                        Active
-                                    </Badge>
                                 </div>
-
                                 <p class="text-muted-foreground text-xs">
-                                    <template v-if="window.type === 'one_time'">
-                                        {{ window.starts_at }} →
-                                        {{ window.ends_at }}
-                                    </template>
+                                    <template v-if="window.type === 'one_time'"
+                                        >{{ window.starts_at }} →
+                                        {{ window.ends_at }}</template
+                                    >
                                     <template
                                         v-else-if="window.type === 'recurring'"
                                     >
@@ -597,11 +471,10 @@ const commonCrons = [
                                         }}</code>
                                         for {{ window.duration_minutes }} min
                                     </template>
-                                    <template v-else>
-                                        Until manually disabled
-                                    </template>
+                                    <template v-else
+                                        >Until manually disabled</template
+                                    >
                                 </p>
-
                                 <p class="text-muted-foreground text-xs">
                                     {{
                                         window.covers_all
@@ -609,7 +482,6 @@ const commonCrons = [
                                             : window.providers.join(", ")
                                     }}
                                 </p>
-
                                 <p
                                     v-if="window.notes"
                                     class="text-muted-foreground text-xs italic"
@@ -617,7 +489,6 @@ const commonCrons = [
                                     {{ window.notes }}
                                 </p>
                             </div>
-
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -629,8 +500,7 @@ const commonCrons = [
                         </CardContent>
                     </Card>
 
-                    <!-- Skipped log note -->
-                    <p class="text-muted-foreground text-xs text-center pt-2">
+                    <p class="text-muted-foreground pt-2 text-center text-xs">
                         Runs skipped during any active window are logged with a
                         <code class="font-mono">skipped</code> status in
                         Results.
