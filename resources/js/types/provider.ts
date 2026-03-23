@@ -25,6 +25,7 @@ export interface ProviderSchedule {
     website_link: string;
     cron_expression: string | null;
     is_enabled: boolean;
+    provider_is_enabled: boolean;
     next_run_at: string | null;
     last_scheduled_at: string | null;
 }

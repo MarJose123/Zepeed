@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+    Tooltip,
+    TooltipTrigger,
+    TooltipContent,
+} from "@/components/ui/tooltip";
 import type { ProviderSchedule } from "@/types/provider";
 
 const props = defineProps<{
@@ -98,6 +103,10 @@ const cancel = () => {
 };
 
 const save = () => {
+    form.cron_expression = cronParts.value
+        .map((p) => p.trim() || "*")
+        .join(" ");
+
     form.patch(
         route(
             "speedtest.schedules.update",
@@ -111,6 +120,20 @@ const save = () => {
                 router.reload();
             },
         },
+    );
+};
+
+const toggleEnabled = (val: boolean) => {
+    form.is_enabled = val;
+
+    router.patch(
+        route(
+            "speedtest.schedules.update",
+            { providerSchedule: props.schedule.id },
+            false,
+        ),
+        { is_enabled: val },
+        { preserveScroll: true },
     );
 };
 </script>
@@ -148,8 +171,13 @@ const save = () => {
                         {{ schedule.provider_name }}
                     </span>
                     <Badge
-                        :variant="form.is_enabled ? 'default' : 'secondary'"
                         class="text-[10px]"
+                        :class="
+                            form.is_enabled
+                                ? 'border-green-600/20 bg-green-50 text-green-700 dark:border-green-400/20 dark:bg-green-950 dark:text-green-400'
+                                : 'border-border bg-muted text-muted-foreground'
+                        "
+                        variant="outline"
                     >
                         {{ form.is_enabled ? "enabled" : "disabled" }}
                     </Badge>
@@ -164,7 +192,10 @@ const save = () => {
                         }}</code>
                     </template>
                     <template v-else>No schedule set</template>
-                    <span v-if="schedule.next_run_at" class="ml-1">
+                    <span
+                        v-if="schedule.next_run_at && form.is_enabled"
+                        class="ml-1"
+                    >
                         · Next run {{ schedule.next_run_at }}
                     </span>
                 </p>
@@ -172,9 +203,24 @@ const save = () => {
 
             <!-- Toggle -->
             <div @click.stop>
+                <Tooltip v-if="!schedule.provider_is_enabled">
+                    <TooltipTrigger as-child>
+                        <span class="cursor-not-allowed">
+                            <Switch
+                                :model-value="form.is_enabled"
+                                :disabled="true"
+                                class="pointer-events-none"
+                            />
+                        </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                        Enable this provider in Speedtest Providers first
+                    </TooltipContent>
+                </Tooltip>
                 <Switch
-                    :checked="form.is_enabled"
-                    @update:checked="form.is_enabled = $event"
+                    v-else
+                    :model-value="form.is_enabled"
+                    @update:model-value="toggleEnabled"
                 />
             </div>
 
