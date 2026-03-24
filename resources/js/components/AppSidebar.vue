@@ -66,10 +66,6 @@ const navigation: TSidebarNavigationItems = [
                         href: "#",
                     },
                     {
-                        title: "Users",
-                        href: "#",
-                    },
-                    {
                         title: "Alerts",
                         href: "#",
                     },
