@@ -37,9 +37,12 @@ export function componentToString<P>(
         const cachedContent = cache.get(serializedKey);
         if (cachedContent) return cachedContent;
 
-        const vnode = h<unknown>(component, {
+        const vnode = h<any>(component, {
             ...props,
-            payload: data,
+            payload:
+                typeof (props as any)?.payload === "function"
+                    ? (props as any).payload(data)
+                    : data,
             config,
             x,
         });
