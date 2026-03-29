@@ -25,7 +25,7 @@ const toggleAppearance = (val: boolean) => {
 </script>
 
 <template>
-    <Switch :checked="isDark" @update:model-value="toggleAppearance">
+    <Switch :model-value="isDark" @update:model-value="toggleAppearance">
         <template #thumb>
             <div class="flex items-center justify-center w-full h-full">
                 <Moon v-if="isDark" class="size-2.5 text-blue-300" />
