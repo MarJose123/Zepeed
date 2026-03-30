@@ -108,7 +108,7 @@ const footerNavigation: TFooterNavigationItems = {
     items: [
         {
             title: "Support",
-            href: 'https://github.com/MarJose123/Zepeed/issues?ref=zepeed-app',
+            href: "https://github.com/MarJose123/Zepeed/issues?ref=zepeed-app",
             icon: LifeBuoy,
         },
         {
