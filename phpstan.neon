@@ -4,7 +4,6 @@ includes:
 parameters:
     excludePaths:
         - tests
-        - .bin
 
     paths:
         - app
