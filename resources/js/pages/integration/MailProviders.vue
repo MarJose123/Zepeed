@@ -217,7 +217,8 @@ function discardOrder() {
 
             <!-- Info note -->
             <p class="text-muted-foreground text-center text-xs">
-               If provider 1 fails, provider 2 is tried automatically, and so on.
+                If provider 1 fails, provider 2 is tried automatically, and so
+                on.
             </p>
         </div>
     </AppLayout>

@@ -12,6 +12,7 @@ use App\Services\Speedtest\FastcomService;
 use App\Services\Speedtest\LibrespeedService;
 use App\Services\Speedtest\OklaSpeedtestService;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Override;
@@ -48,14 +49,23 @@ class SpeedtestServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Register dynamic failover mailer on every request
-        // Only runs if the mail_providers table exists (avoids errors on fresh installs)
-        try {
-            resolve(MailProviderService::class)->buildFailoverMailer();
-        } catch (Throwable) {
-            // Silently skip — table may not exist yet during migrations
-        }
+        $this->dynamicMailers();
 
         Event::listen(SpeedtestExceptionEvent::class, SendSpeedtestExceptionAlertListener::class);
+    }
+
+    protected function dynamicMailers(): void
+    {
+        /**
+         * Register dynamic failover mailer on every request
+         * Only runs if the mail_providers table exists (avoids errors on fresh installations)
+         */
+        try {
+            resolve(MailProviderService::class)->buildFailoverMailer();
+        } catch (Throwable $th) {
+            Log::error('Failed to build failover mailer.', [
+                'exception' => $th,
+            ]);
+        }
     }
 }
