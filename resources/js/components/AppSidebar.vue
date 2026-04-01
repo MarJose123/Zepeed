@@ -7,7 +7,6 @@ import {
     LayoutDashboard,
     LifeBuoy,
     Settings2,
-    Webhook,
 } from "lucide-vue-next";
 import AppLogo from "@/components/AppLogo.vue";
 import NavMain from "@/components/NavMain.vue";
@@ -90,12 +89,10 @@ const navigation: TSidebarNavigationItems = [
                     {
                         title: "Webhooks",
                         href: "#",
-                        icon: Webhook,
                     },
                     {
-                        title: "SMTP",
-                        href: "#",
-                        icon: Webhook,
+                        title: "Mailer",
+                        href: route("speedtest.integration.smtp.index"),
                     },
                 ],
             },

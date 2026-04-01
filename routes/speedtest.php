@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
 use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\ProviderScheduleController;
@@ -41,6 +42,20 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
             ->name('update');
         Route::delete('/{maintenanceWindow}', [MaintenanceWindowController::class, 'destroy'])
             ->name('destroy');
+
+    });
+
+    Route::prefix('integration/')->name('integration.')->group(function () {
+        Route::prefix('smtp/')
+            ->name('smtp.')
+            ->group(function () {
+                Route::get('/', [MailProviderController::class, 'index'])->name('index');
+                Route::post('/', [MailProviderController::class, 'store'])->name('store');
+                Route::patch('/{mailProvider}', [MailProviderController::class, 'update'])->name('update');
+                Route::delete('/{mailProvider}', [MailProviderController::class, 'destroy'])->name('destroy');
+                Route::post('/reorder', [MailProviderController::class, 'reorder'])->name('reorder');
+                Route::post('/{mailProvider}/test', [MailProviderController::class, 'test'])->name('test');
+            });
 
     });
 
