@@ -1,7 +1,7 @@
 #!/command/with-contenv sh
 # Drop privileges to www-data before exec — s6 starts as root
 exec php /var/www/html/artisan queue:work \
-    --queue=speedtest,realtime,mail,default \
+    --queue=speedtest \
     --tries=3 \
     --timeout=90 \
     --sleep=3 \
