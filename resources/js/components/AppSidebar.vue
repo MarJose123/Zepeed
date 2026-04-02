@@ -39,7 +39,7 @@ const navigation: TSidebarNavigationItems = [
                 icon: LayoutDashboard,
             },
             {
-                title: "Results",
+                title: "Speedtest Results",
                 icon: ChartGantt,
                 items: [
                     {
