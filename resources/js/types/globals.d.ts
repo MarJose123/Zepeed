@@ -26,6 +26,7 @@ declare module "@inertiajs/core" {
         };
         flashDataType: {
             notification?: INotification;
+            [key: string]: unknown;
         };
     }
 }
