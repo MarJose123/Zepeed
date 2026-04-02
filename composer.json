@@ -20,7 +20,7 @@
         "php": "^8.4",
         "aws/aws-sdk-php": "^3.374",
         "hexydec/agentzero": "^2.0",
-        "inertiajs/inertia-laravel": "^2.0",
+        "inertiajs/inertia-laravel": "^3.0",
         "laravel/fortify": "^1.33",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
