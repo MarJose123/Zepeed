@@ -29,9 +29,8 @@
             background-color: oklch(0.145 0 0);
         }
     </style>
-
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
+    <x-inertia::head>
+    <title data-inertia>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -41,9 +40,9 @@
 
     @routes
     @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
-    @inertiaHead
+    </x-inertia::head>
 </head>
 <body class="font-sans antialiased">
-@inertia
+<x-inertia::app />
 </body>
 </html>

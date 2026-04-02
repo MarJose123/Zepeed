@@ -1,4 +1,5 @@
 import { createInertiaApp, router } from "@inertiajs/vue3";
+import { http } from "@inertiajs/vue3";
 import { echo } from "@laravel/echo-vue";
 import { configureEcho } from "@laravel/echo-vue";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
@@ -6,7 +7,10 @@ import type { DefineComponent } from "vue";
 import { createApp, h } from "vue";
 import { ZiggyVue } from "ziggy-js";
 import "../css/app.css";
+import { useNotification } from "@/composables/useNotification";
 import { initializeTheme } from "./composables/useAppearance";
+
+const { notify } = useNotification();
 
 configureEcho({
     broadcaster: "pusher",
@@ -29,9 +33,21 @@ router.on("before", (event) => {
     }
 });
 
+http.onError((error) => {
+    if ([401, 419].includes(Number(error.code))) {
+        notify({
+            type: "error",
+            title: "Session Expired!",
+            message: "Your session has expired. Please login again.",
+        });
+        router.flushAll();
+        router.visit(route("login"));
+    }
+});
+
 const appName = import.meta.env.VITE_APP_NAME || "Zepeed";
 
-createInertiaApp({
+await createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
         resolvePageComponent(

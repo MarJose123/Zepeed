@@ -1,6 +1,6 @@
+import { useHttp } from "@inertiajs/vue3";
 import type { ComputedRef, Ref } from "vue";
 import { computed, ref } from "vue";
-import axiosClient from "@/lib/axios";
 
 export type UseTwoFactorAuthReturn = {
     qrCodeSvg: Ref<string | null>;
@@ -18,15 +18,14 @@ export type UseTwoFactorAuthReturn = {
 };
 
 const fetchJson = async <T>(url: string): Promise<T> => {
-    const response = await axiosClient(url, {
+    const http = useHttp<Record<string, never>, T>();
+
+    return await http.get(url, {
         headers: { Accept: "application/json" },
+        onError: (error) => {
+            throw new Error(`Failed to fetch: ${error.status}`);
+        },
     });
-
-    if (response.status !== 200) {
-        throw new Error(`Failed to fetch: ${response.status}`);
-    }
-
-    return response.data;
 };
 
 const errors = ref<string[]>([]);
