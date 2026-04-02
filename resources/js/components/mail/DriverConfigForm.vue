@@ -19,8 +19,14 @@ const emit = defineEmits<{
     "update:config": [config: Record<string, string>];
 }>();
 
-const update = (key: string, value: string) => {
-    emit("update:config", { ...props.config, [key]: value });
+const update = (key: string, value: string | number) => {
+    emit("update:config", { ...props.config, [key]: String(value) });
+};
+
+const updateSelect = (key: string, value: unknown) => {
+    if (typeof value === "string" || typeof value === "number") {
+        emit("update:config", { ...props.config, [key]: String(value) });
+    }
 };
 </script>
 
@@ -51,7 +57,9 @@ const update = (key: string, value: string) => {
                 <Label class="text-xs">Encryption</Label>
                 <Select
                     :model-value="config.encryption ?? 'tls'"
-                    @update:model-value="update('encryption', $event)"
+                    @update:model-value="
+                        (val) => updateSelect('encryption', val)
+                    "
                 >
                     <SelectTrigger class="text-xs">
                         <SelectValue />
@@ -194,7 +202,7 @@ const update = (key: string, value: string) => {
             <Label class="text-xs">Region</Label>
             <Select
                 :model-value="config.region ?? 'us-east-1'"
-                @update:model-value="update('region', $event)"
+                @update:model-value="(val) => updateSelect('region', val)"
             >
                 <SelectTrigger class="text-xs">
                     <SelectValue />

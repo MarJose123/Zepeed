@@ -42,22 +42,6 @@ enum MailDriver: string
     }
 
     /**
-     *  Website link for the driver.
-     *
-     * @return string
-     */
-    public function websiteLink(): string
-    {
-        return match ($this) {
-            self::Smtp, self::Sendmail     => null,
-            self::Resend   => 'https://resend.com/',
-            self::Mailgun  => 'https://www.mailgun.com/',
-            self::Postmark => 'https://postmarkapp.com/',
-            self::Ses      => 'https://aws.amazon.com/ses/',
-        };
-    }
-
-    /**
      * Config fields required for this driver.
      *
      * @return array<string>

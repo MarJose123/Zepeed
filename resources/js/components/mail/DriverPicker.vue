@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button } from "@/components/ui/button";
 import { MAIL_DRIVERS } from "@/types/mail";
 import type { MailDriver } from "@/types/mail";
 
@@ -22,14 +23,15 @@ const driverIcons: Record<MailDriver, string> = {
 
 <template>
     <div class="grid grid-cols-3 gap-2">
-        <button
+        <Button
             v-for="driver in MAIL_DRIVERS"
             :key="driver.value"
             type="button"
-            class="flex items-start gap-2.5 rounded-lg border p-3 text-left transition-colors"
+            variant="outline"
+            class="h-auto items-start justify-start gap-2.5 p-3 text-left transition-colors"
             :class="
                 modelValue === driver.value
-                    ? 'border-primary bg-primary/5 text-primary'
+                    ? 'border-primary bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary'
                     : 'border-border hover:border-primary/40 hover:bg-muted/50'
             "
             @click="emit('update:modelValue', driver.value)"
@@ -52,6 +54,6 @@ const driverIcons: Record<MailDriver, string> = {
                     {{ driver.description }}
                 </div>
             </div>
-        </button>
+        </Button>
     </div>
 </template>
