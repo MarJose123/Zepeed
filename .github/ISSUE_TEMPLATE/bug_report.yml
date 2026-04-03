@@ -1,0 +1,50 @@
+name: Bug Report (User)
+description: Report a bug you found while using Zepeed
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: What steps did you take?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What did you expect to see?
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / App Version
+      description: What browser or version of the app are you using? (e.g. Chrome, Firefox, Mobile App)
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Videos
+      description: If applicable, add screenshots or screen recordings to help explain your problem.
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Anything else?
+      description: Add any other context about the problem here.
