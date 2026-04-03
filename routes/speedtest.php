@@ -5,6 +5,7 @@ use App\Http\Controllers\MaintenanceWindowController;
 use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\ProviderScheduleController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\WebhookController;
 
 Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.')->group(function () {
 
@@ -55,6 +56,18 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::delete('/{mailProvider}', [MailProviderController::class, 'destroy'])->name('destroy');
                 Route::post('/reorder', [MailProviderController::class, 'reorder'])->name('reorder');
                 Route::post('/{mailProvider}/test', [MailProviderController::class, 'test'])->name('test');
+            });
+
+        Route::prefix('webhooks/')
+            ->name('webhooks.')
+            ->group(function () {
+                Route::get('/', [WebhookController::class, 'index'])->name('index');
+                Route::post('/', [WebhookController::class, 'store'])->name('store');
+                Route::patch('/{webhook}', [WebhookController::class, 'update'])->name('update');
+                Route::delete('/{webhook}', [WebhookController::class, 'destroy'])->name('destroy');
+                Route::post('/{webhook}/test', [WebhookController::class, 'test'])->name('test');
+                Route::get('/{webhook}/deliveries', [WebhookController::class, 'deliveries'])->name('deliveries');
+                Route::get('/{webhook}/deliveries/json', [WebhookController::class, 'deliveriesJson'])->name('deliveries.json');
             });
 
     });

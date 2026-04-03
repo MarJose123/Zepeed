@@ -10,7 +10,7 @@ import AppLogoIcon from "@/components/AppLogoIcon.vue";
     </div>
     <div class="grid flex-1 text-left text-sm leading-tight">
         <span class="truncate font-medium">Zepeed</span>
-        <span class="truncate text-xs">Bandwidth Tracker</span>
+        <span class="truncate text-xs">Internet Speed Tracker</span>
     </div>
 </template>
 

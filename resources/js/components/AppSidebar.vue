@@ -88,7 +88,7 @@ const navigation: TSidebarNavigationItems = [
                 items: [
                     {
                         title: "Webhooks",
-                        href: "#",
+                        href: route("speedtest.integration.webhooks.index"),
                     },
                     {
                         title: "Mailer",

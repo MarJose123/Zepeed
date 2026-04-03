@@ -9,6 +9,7 @@ export type UseCurrentUrlReturn = {
     isCurrentUrl: (
         urlToCheck: NonNullable<InertiaLinkProps["href"]>,
         currentUrl?: string,
+        exact?: boolean,
     ) => boolean;
     whenCurrentUrl: <T, F = null>(
         urlToCheck: NonNullable<InertiaLinkProps["href"]>,
@@ -26,21 +27,26 @@ export function useCurrentUrl(): UseCurrentUrlReturn {
     function isCurrentUrl(
         urlToCheck: NonNullable<InertiaLinkProps["href"]>,
         currentUrl?: string,
+        exact: boolean = true,
     ) {
         const urlToCompare = currentUrl ?? currentUrlReactive.value;
         const urlString = toUrl(urlToCheck);
 
-        if (!urlString.startsWith("http")) {
-            return urlString === urlToCompare;
+        let pathnameToCheck = urlString;
+
+        if (urlString.startsWith("http")) {
+            try {
+                pathnameToCheck = new URL(urlString).pathname;
+            } catch {
+                return false;
+            }
         }
 
-        try {
-            const absoluteUrl = new URL(urlString);
-
-            return absoluteUrl.pathname === urlToCompare;
-        } catch {
-            return false;
+        if (exact) {
+            return pathnameToCheck === urlToCompare;
         }
+
+        return urlToCompare.startsWith(pathnameToCheck);
     }
 
     function whenCurrentUrl(
