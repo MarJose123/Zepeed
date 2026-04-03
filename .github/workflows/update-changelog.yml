@@ -24,7 +24,7 @@ jobs:
 
 #     uncomment this if you want to commit the changes to the repository
       - name: Commit updated CHANGELOG
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: ${{ env.BRANCH_NAME }}
           commit_message: Update CHANGELOG
