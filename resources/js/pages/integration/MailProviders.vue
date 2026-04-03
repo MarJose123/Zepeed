@@ -23,7 +23,7 @@ const props = defineProps<{
 }>();
 
 const breadcrumbs: TBreadcrumbItem[] = [
-    { title: "Settings", href: "#" },
+    { title: "Integration", href: "#" },
     {
         title: "Mailer Integration",
         href: route("speedtest.integration.smtp.index", {}, false),
