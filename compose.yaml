@@ -39,11 +39,11 @@ services:
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
-            MARIADB_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MARIADB_ROOT_PASSWORD: '${DB_PASSWORD:-zepeed}'
             MARIADB_ROOT_HOST: '${DB_HOST:-%}'
-            MARIADB_DATABASE: '${DB_DATABASE}'
-            MARIADB_USER: '${DB_USERNAME}'
-            MARIADB_PASSWORD: '${DB_PASSWORD}'
+            MARIADB_DATABASE: '${DB_DATABASE:-zepeed}'
+            MARIADB_USER: '${DB_USERNAME:-zepeed}'
+            MARIADB_PASSWORD: '${DB_PASSWORD:-password}'
             MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
             MARIADB_EXTRA_FLAGS: '--innodb-use-native-aio=0'
         healthcheck:
