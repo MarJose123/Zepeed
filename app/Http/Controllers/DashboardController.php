@@ -96,7 +96,7 @@ class DashboardController extends Controller
     private function buildChartData(): array
     {
         return [
-            '24h' => $this->buildRangeData(hours: 24, groupFormat: 'Y-m-d H', labelFormat: 'H:i'),
+            '24h' => $this->buildRangeData(hours: 24, groupFormat: 'Y-m-d H:i', labelFormat: 'H:i'),
             '7d'  => $this->buildRangeData(hours: 168, groupFormat: 'Y-m-d', labelFormat: 'D d'),
             '30d' => $this->buildRangeData(hours: 720, groupFormat: 'Y-m-d', labelFormat: 'M d'),
         ];
