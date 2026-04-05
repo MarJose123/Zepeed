@@ -25,9 +25,8 @@ const props = defineProps<{
 }>();
 
 const { isCurrentUrl } = useCurrentUrl();
-const hasActiveChild = (items: INavItem[] = []): boolean => {
-    return items.some((item) => isCurrentUrl(item.href!, undefined, false));
-};
+const hasActiveChild = (items: INavItem[] = []): boolean =>
+    items.some((item) => isCurrentUrl(item.href!, undefined, false));
 </script>
 
 <template>

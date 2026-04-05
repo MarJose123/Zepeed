@@ -55,6 +55,7 @@ const description = computed(() => statusCopy.value.description);
 const page = usePage();
 const retryAfter = computed(() => {
     const value = page.props.retryAfter as number | string | null | undefined;
+
     if (statusCode.value !== 503) {
         return null;
     }

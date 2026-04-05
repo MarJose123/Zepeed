@@ -10,18 +10,21 @@ export function useNotification() {
                 duration: 5000,
             });
         }
+
         if (notification?.type === "success") {
             toast.success(notification.title ?? "", {
                 description: notification.message,
                 duration: 5000,
             });
         }
+
         if (notification?.type === "warning") {
             toast.warning(notification.title ?? "", {
                 description: notification.message,
                 duration: 5000,
             });
         }
+
         if (notification?.type === "info") {
             toast.info(notification.title ?? "", {
                 description: notification.message,
