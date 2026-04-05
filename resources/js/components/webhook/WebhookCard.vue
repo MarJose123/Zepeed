@@ -17,12 +17,23 @@ const emit = defineEmits<{
 }>();
 
 const lastFiredLabel = (wh: Webhook) => {
-    if (!wh.last_fired_at) return "Never";
+    if (!wh.last_fired_at) {
+        return "Never";
+    }
+
     const diff = Date.now() - new Date(wh.last_fired_at).getTime();
     const mins = Math.floor(diff / 60_000);
-    if (mins < 60) return `${mins} min ago`;
+
+    if (mins < 60) {
+        return `${mins} min ago`;
+    }
+
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+
+    if (hrs < 24) {
+        return `${hrs}h ago`;
+    }
+
     return `${Math.floor(hrs / 24)}d ago`;
 };
 

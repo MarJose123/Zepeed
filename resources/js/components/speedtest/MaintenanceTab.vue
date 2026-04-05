@@ -67,26 +67,27 @@ const toggleGlobalPause = () => {
 };
 
 // ── Type icon map ─────────────────────────────────────────────────────────────
-const typeIcon = (type: MaintenanceWindow["type"]) => {
-    return {
+const typeIcon = (type: MaintenanceWindow["type"]) =>
+    ({
         one_time: CalendarClock,
         recurring: RefreshCw,
         indefinite: Infinity,
-    }[type];
-};
+    })[type];
 
 // ── Type badge variant ────────────────────────────────────────────────────────
-const typeBadgeVariant = (type: MaintenanceWindow["type"]) => {
-    return {
+const typeBadgeVariant = (type: MaintenanceWindow["type"]) =>
+    ({
         one_time: "secondary",
         recurring: "outline",
         indefinite: "secondary",
-    }[type] as "secondary" | "outline";
-};
+    })[type] as "secondary" | "outline";
 
 // ── Left accent bar colour ────────────────────────────────────────────────────
 const typeAccent = (window: MaintenanceWindow) => {
-    if (window.is_currently_active) return "bg-destructive";
+    if (window.is_currently_active) {
+        return "bg-destructive";
+    }
+
     return {
         one_time: "bg-blue-400",
         recurring: "bg-green-500",
@@ -96,7 +97,10 @@ const typeAccent = (window: MaintenanceWindow) => {
 
 // ── Provider label ────────────────────────────────────────────────────────────
 const providerLabel = (window: MaintenanceWindow) => {
-    if (window.covers_all) return "All providers";
+    if (window.covers_all) {
+        return "All providers";
+    }
+
     return window.providers
         .map(
             (slug) =>
@@ -149,16 +153,20 @@ const submitWindow = () => {
 const nowLocalIso = computed(() => {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60_000;
+
     return new Date(now.getTime() - offset).toISOString().slice(0, 16);
 });
 
 const endsAtMin = computed(() => {
-    if (!windowForm.starts_at) return nowLocalIso.value;
+    if (!windowForm.starts_at) {
+        return nowLocalIso.value;
+    }
 
     // Add 1 minute to starts_at so ends_at must be strictly after
     const start = new Date(windowForm.starts_at);
     start.setMinutes(start.getMinutes() + 1);
     const offset = start.getTimezoneOffset() * 60_000;
+
     return new Date(start.getTime() - offset).toISOString().slice(0, 16);
 });
 
@@ -181,7 +189,9 @@ const onStartsAtChange = () => {
 };
 
 const onEndsAtChange = () => {
-    if (!windowForm.ends_at) return;
+    if (!windowForm.ends_at) {
+        return;
+    }
 
     const selected = new Date(windowForm.ends_at);
     const minAllowed = windowForm.starts_at

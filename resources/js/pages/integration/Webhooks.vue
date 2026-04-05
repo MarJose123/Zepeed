@@ -67,7 +67,10 @@ function confirmDelete(webhook: Webhook) {
 }
 
 function destroyWebhook() {
-    if (!deleteTarget.value) return;
+    if (!deleteTarget.value) {
+        return;
+    }
+
     router.delete(
         route(
             "speedtest.integration.webhooks.destroy",

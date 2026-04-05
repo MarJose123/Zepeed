@@ -41,7 +41,9 @@ const { qrCodeSvg, manualSetupKey, clearSetupData, fetchSetupData, errors } =
 const showVerificationStep = ref(false);
 const code = ref<string>("");
 
-const pinInputContainerRef = useTemplateRef<HTMLElement>("pinInputContainerRef");
+const pinInputContainerRef = useTemplateRef<HTMLElement>(
+    "pinInputContainerRef",
+);
 
 const modalConfig = computed<TwoFactorConfigContent>(() => {
     if (props.twoFactorEnabled) {

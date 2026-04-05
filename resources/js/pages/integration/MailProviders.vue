@@ -54,7 +54,10 @@ function onDragStart(id: string) {
 }
 
 function onDragOver(id: string) {
-    if (draggingId.value === null || draggingId.value === id) return;
+    if (draggingId.value === null || draggingId.value === id) {
+        return;
+    }
+
     dragOverId.value = id;
 
     // Reorder locally for live preview
@@ -62,7 +65,10 @@ function onDragOver(id: string) {
         (p) => p.id === draggingId.value,
     );
     const to = localProviders.value.findIndex((p) => p.id === id);
-    if (from === -1 || to === -1) return;
+
+    if (from === -1 || to === -1) {
+        return;
+    }
 
     const reordered = [...localProviders.value];
     const [moved] = reordered.splice(from, 1);

@@ -51,24 +51,47 @@ watch(
 );
 
 const dotColor = (d: WebhookDelivery) => {
-    if (d.success) return "bg-green-500";
-    if (!d.status_code) return "bg-muted-foreground";
+    if (d.success) {
+        return "bg-green-500";
+    }
+
+    if (!d.status_code) {
+        return "bg-muted-foreground";
+    }
+
     return "bg-destructive";
 };
 
 const statusColor = (d: WebhookDelivery) => {
-    if (d.success) return "text-green-700 dark:text-green-400";
-    if (!d.status_code) return "text-muted-foreground";
+    if (d.success) {
+        return "text-green-700 dark:text-green-400";
+    }
+
+    if (!d.status_code) {
+        return "text-muted-foreground";
+    }
+
     return "text-destructive";
 };
 
 const relativeTime = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
     const mins = Math.floor(diff / 60_000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins} min ago`;
+
+    if (mins < 1) {
+        return "just now";
+    }
+
+    if (mins < 60) {
+        return `${mins} min ago`;
+    }
+
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+
+    if (hrs < 24) {
+        return `${hrs}h ago`;
+    }
+
     return `${Math.floor(hrs / 24)}d ago`;
 };
 </script>

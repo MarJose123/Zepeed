@@ -36,12 +36,23 @@ const statusLabel = computed(
 );
 
 const lastRunLabel = computed(() => {
-    if (!props.provider.last_run_at) return "Never run";
+    if (!props.provider.last_run_at) {
+        return "Never run";
+    }
+
     const diff = Date.now() - new Date(props.provider.last_run_at).getTime();
     const mins = Math.floor(diff / 60_000);
-    if (mins < 60) return `${mins} min ago`;
+
+    if (mins < 60) {
+        return `${mins} min ago`;
+    }
+
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+
+    if (hrs < 24) {
+        return `${hrs}h ago`;
+    }
+
     return `${Math.floor(hrs / 24)}d ago`;
 });
 </script>
