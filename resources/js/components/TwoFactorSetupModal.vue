@@ -256,6 +256,7 @@ watch(
 
                 <template v-else>
                     <Form
+                        class="w-full space-y-4"
                         :action="route('two-factor.confirm')"
                         method="post"
                         reset-on-error
@@ -300,27 +301,25 @@ watch(
                                     </InputOTP>
                                     <FieldError
                                         v-if="
-                                            errors
-                                                ?.confirmTwoFactorAuthentication
-                                                ?.code
+                                            (
+                                                errors.confirmTwoFactorAuthentication as {
+                                                    code?: string;
+                                                }
+                                            )?.code
                                         "
                                         >{{
-                                            errors
-                                                ?.confirmTwoFactorAuthentication
-                                                ?.code
+                                            (
+                                                errors.confirmTwoFactorAuthentication as {
+                                                    code?: string;
+                                                }
+                                            )?.code
                                         }}</FieldError
                                     >
                                 </div>
 
-                                <div class="flex w-full items-center space-x-5">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        @click="showVerificationStep = false"
-                                        :disabled="processing"
-                                    >
-                                        Back
-                                    </Button>
+                                <div
+                                    class="flex w-full items-center flex-row-reverse gap-4"
+                                >
                                     <Button
                                         type="submit"
                                         :disabled="
@@ -328,6 +327,14 @@ watch(
                                         "
                                     >
                                         Confirm
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        @click="showVerificationStep = false"
+                                        :disabled="processing"
+                                    >
+                                        Back
                                     </Button>
                                 </div>
                             </Field>
