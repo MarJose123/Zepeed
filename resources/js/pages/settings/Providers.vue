@@ -86,25 +86,21 @@ const testRun = (provider: Provider) => {
     );
 };
 
-const statusBadgeVariant = (badge: Provider["status_badge"]) => {
-    return {
+const statusBadgeVariant = (badge: Provider["status_badge"]) =>
+    ({
         success: "default",
         danger: "destructive",
         warning: "secondary",
         neutral: "outline",
-    }[badge] as "default" | "destructive" | "secondary" | "outline";
-};
+    })[badge] as "default" | "destructive" | "secondary" | "outline";
 
-const statusLabel = (status: Provider["last_run_status"]) => {
-    return (
-        {
-            success: "Healthy",
-            failed: "Failed",
-            skipped: "Skipped",
-            null: "Never run",
-        }[status ?? "null"] ?? "Never run"
-    );
-};
+const statusLabel = (status: Provider["last_run_status"]) =>
+    ({
+        success: "Healthy",
+        failed: "Failed",
+        skipped: "Skipped",
+        null: "Never run",
+    })[status ?? "null"] ?? "Never run";
 
 const form = useForm({
     is_enabled: false,
@@ -117,6 +113,7 @@ watch(
     () => activeTab.value,
     (newTab) => {
         const provider = props.providers.find((p) => p.slug === newTab);
+
         if (provider) {
             form.defaults({
                 is_enabled: provider.is_enabled,
@@ -136,6 +133,7 @@ watch(
         const provider = updatedProviders.find(
             (p) => p.slug === activeTab.value,
         );
+
         if (provider) {
             form.defaults({
                 is_enabled: provider.is_enabled,

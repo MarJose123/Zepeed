@@ -41,7 +41,9 @@ const { qrCodeSvg, manualSetupKey, clearSetupData, fetchSetupData, errors } =
 const showVerificationStep = ref(false);
 const code = ref<string>("");
 
-const pinInputContainerRef = useTemplateRef("pinInputContainerRef");
+const pinInputContainerRef = useTemplateRef<HTMLElement>(
+    "pinInputContainerRef",
+);
 
 const modalConfig = computed<TwoFactorConfigContent>(() => {
     if (props.twoFactorEnabled) {
@@ -98,6 +100,7 @@ watch(
     async (isOpen) => {
         if (!isOpen) {
             resetModalState();
+
             return;
         }
 
@@ -270,7 +273,6 @@ watch(
                             </Field>
 
                             <Field
-                                ref="pinInputContainerRef"
                                 class="relative w-full space-y-3"
                                 :data-invalid="
                                     errors.hasOwnProperty(
@@ -279,6 +281,7 @@ watch(
                                 "
                             >
                                 <div
+                                    ref="pinInputContainerRef"
                                     class="flex w-full flex-col items-center justify-center space-y-3 py-2"
                                 >
                                     <InputOTP

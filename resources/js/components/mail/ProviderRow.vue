@@ -33,24 +33,47 @@ const emit = defineEmits<{
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 const statusVariant = (p: MailProvider) => {
-    if (p.failure_count > 3) return "destructive";
-    if (p.last_used_at) return "default";
+    if (p.failure_count > 3) {
+        return "destructive";
+    }
+
+    if (p.last_used_at) {
+        return "default";
+    }
+
     return "secondary";
 };
 
 const statusLabel = (p: MailProvider) => {
-    if (p.failure_count > 3) return "failed";
-    if (p.last_used_at) return "connected";
+    if (p.failure_count > 3) {
+        return "failed";
+    }
+
+    if (p.last_used_at) {
+        return "connected";
+    }
+
     return "not tested";
 };
 
 const lastUsedLabel = (p: MailProvider) => {
-    if (!p.last_used_at) return "Never";
+    if (!p.last_used_at) {
+        return "Never";
+    }
+
     const diff = Date.now() - new Date(p.last_used_at).getTime();
     const mins = Math.floor(diff / 60_000);
-    if (mins < 60) return `${mins} min ago`;
+
+    if (mins < 60) {
+        return `${mins} min ago`;
+    }
+
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+
+    if (hrs < 24) {
+        return `${hrs}h ago`;
+    }
+
     return `${Math.floor(hrs / 24)}d ago`;
 };
 

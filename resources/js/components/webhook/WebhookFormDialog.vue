@@ -54,7 +54,10 @@ const form = useForm({
 watch(
     () => props.webhook,
     (wh) => {
-        if (!wh) return;
+        if (!wh) {
+            return;
+        }
+
         form.name = wh.name;
         form.url = wh.url;
         form.method = wh.method;
@@ -105,7 +108,10 @@ function close() {
 }
 
 function testConnection() {
-    if (!props.webhook) return;
+    if (!props.webhook) {
+        return;
+    }
+
     testProcessing.value = true;
     testResult.value = null;
     testMessage.value = null;

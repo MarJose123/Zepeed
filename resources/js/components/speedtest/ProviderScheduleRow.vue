@@ -47,7 +47,11 @@ const form = useForm({
 
 const parseCron = (expr: string): string[] => {
     const parts = (expr || "* * * * *").split(" ");
-    while (parts.length < 5) parts.push("*");
+
+    while (parts.length < 5) {
+        parts.push("*");
+    }
+
     return parts.slice(0, 5);
 };
 
@@ -65,11 +69,16 @@ const selectPreset = (value: string) => {
 };
 
 const previewLabel = computed(() => {
-    if (!form.cron_expression) return null;
+    if (!form.cron_expression) {
+        return null;
+    }
 
     // Check preset descriptions first for clean labels
     const preset = descriptions[form.cron_expression];
-    if (preset) return preset;
+
+    if (preset) {
+        return preset;
+    }
 
     // Fall back to cronstrue for custom expressions
     try {

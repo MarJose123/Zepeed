@@ -62,6 +62,7 @@ const driverLabel = computed(() => {
         ses: "Amazon SES",
         sendmail: "Sendmail",
     };
+
     return form.driver ? map[form.driver] : "";
 });
 
@@ -75,6 +76,7 @@ const labelPlaceholder = computed(() => {
         ses: "e.g. AWS SES us-east-1",
         sendmail: "e.g. Server sendmail",
     };
+
     return form.driver ? map[form.driver] : "Provider label";
 });
 
@@ -88,6 +90,7 @@ const fromAddressPlaceholder = computed(() => {
         ses: "noreply@verified-domain.com",
         sendmail: "noreply@yourdomain.com",
     };
+
     return form.driver ? map[form.driver] : "noreply@yourdomain.com";
 });
 
@@ -96,12 +99,15 @@ const fromAddressHint = computed(() => {
     if (form.driver === "ses") {
         return "Must be a verified identity in your AWS SES account.";
     }
+
     if (form.driver === "mailgun") {
         return "Must match your Mailgun sending domain.";
     }
+
     if (form.driver === "postmark") {
         return "Must be a verified sender signature in Postmark.";
     }
+
     return null;
 });
 
@@ -118,11 +124,16 @@ const canProceedStep2 = computed(
 
 // ── Navigation ─────────────────────────────────────────────────────────────────
 function next() {
-    if (step.value < 3) step.value = (step.value + 1) as Step;
+    if (step.value < 3) {
+        step.value = (step.value + 1) as Step;
+    }
 }
 
 function back() {
-    if (step.value > 1) step.value = (step.value - 1) as Step;
+    if (step.value > 1) {
+        step.value = (step.value - 1) as Step;
+    }
+
     testResult.value = null;
     testErrorMsg.value = null;
 }
@@ -155,8 +166,9 @@ function saveAndProceedToTest() {
 
 // ── Real backend test ─────────────────────────────────────────────────────────
 function sendTest() {
-    if (!form.test_email.trim() || !savedId.value || testProcessing.value)
+    if (!form.test_email.trim() || !savedId.value || testProcessing.value) {
         return;
+    }
 
     testProcessing.value = true;
     testResult.value = null;

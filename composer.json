@@ -62,6 +62,7 @@
             "@php -r \"file_exists('.env') || copy('.env.dev.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
+            "@php artisan realtime:credentials --force",
             "bun install --ignore-scripts",
             "bun run build"
         ],
