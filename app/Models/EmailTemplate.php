@@ -94,7 +94,9 @@ class EmailTemplate extends Model
      */
     public function isUsedInRules(): bool
     {
-        return false;
+        return AlertRuleAction::query()
+            ->where('email_template_id', $this->id)
+            ->exists();
     }
 
     /**
@@ -102,7 +104,15 @@ class EmailTemplate extends Model
      */
     public function usedInRuleNames(): array
     {
-        return [];
+        return AlertRuleAction::query()
+            ->where('email_template_id', $this->id)
+            ->with('rule')
+            ->get()
+            ->pluck('rule.name')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

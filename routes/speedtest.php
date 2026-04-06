@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
@@ -64,6 +65,16 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
             Route::post('/preview-raw', [EmailTemplateController::class, 'previewRaw'])->name('preview-raw');
 
         });
+
+        Route::prefix('alert-rules')
+            ->name('alert-rules.')
+            ->group(function () {
+                Route::get('/', [AlertRuleController::class, 'index'])->name('index');
+                Route::post('/', [AlertRuleController::class, 'store'])->name('store');
+                Route::patch('/{alertRule}', [AlertRuleController::class, 'update'])->name('update');
+                Route::delete('/{alertRule}', [AlertRuleController::class, 'destroy'])->name('destroy');
+                Route::post('/{alertRule}/toggle', [AlertRuleController::class, 'toggle'])->name('toggle');
+            });
 
     });
 

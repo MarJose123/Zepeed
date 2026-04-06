@@ -69,9 +69,9 @@ class Webhook extends Model
      */
     public function isUsedInRules(): bool
     {
-        // Will be implemented when AlertRule model exists
-        // For now returns false — safe to delete
-        return false;
+        return AlertRuleAction::query()
+            ->where('webhook_id', $this->id)
+            ->exists();
     }
 
     /**
@@ -81,6 +81,14 @@ class Webhook extends Model
      */
     public function usedInRuleNames(): array
     {
-        return [];
+        return AlertRuleAction::query()
+            ->where('webhook_id', $this->id)
+            ->with('rule')
+            ->get()
+            ->pluck('rule.name')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }

@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Enums\SpeedtestServer;
 use App\Events\Speedtest\SpeedtestExceptionEvent;
+use App\Events\Speedtest\SpeedtestFailedEvent;
+use App\Events\Speedtest\SpeedtestSkippedEvent;
+use App\Listeners\EvaluateAlertRules;
 use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
 use App\Services\MailProviderService;
@@ -51,7 +54,14 @@ class SpeedtestServiceProvider extends ServiceProvider
     {
         $this->dynamicMailers();
 
+        $this->eventListeners();
+    }
+
+    protected function eventListeners(): void
+    {
         Event::listen(SpeedtestExceptionEvent::class, SendSpeedtestExceptionAlertListener::class);
+        Event::listen(SpeedtestFailedEvent::class, EvaluateAlertRules::class);
+        Event::listen(SpeedtestSkippedEvent::class, EvaluateAlertRules::class);
     }
 
     protected function dynamicMailers(): void
