@@ -25,7 +25,7 @@ class AlertRuleResource extends JsonResource
             'is_active'           => $rule->is_active,
             'cooldown_minutes'    => $rule->cooldown_minutes,
             'last_triggered_at'   => $rule->last_triggered_at?->toIso8601String(),
-            'conditions'          => $rule->conditions->map(fn ($c) => [
+            'conditions'          => $rule->conditions()->get()->map(fn ($c) => [
                 'id'             => $c->id,
                 'metric'         => $c->metric->value,
                 'metric_label'   => $c->metric->label(),
@@ -34,7 +34,7 @@ class AlertRuleResource extends JsonResource
                 'value'          => $c->value,
                 'sort_order'     => $c->sort_order,
             ])->values(),
-            'actions' => $rule->actions->map(fn ($a) => [
+            'actions' => $rule->actions()->get()->map(fn ($a) => [
                 'id'                   => $a->id,
                 'type'                 => $a->type,
                 'mail_provider_id'     => $a->mail_provider_id,

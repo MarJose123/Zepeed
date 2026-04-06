@@ -6,9 +6,9 @@ use App\Enums\AlertRuleEvent;
 use App\Models\AlertRule;
 use App\Models\AlertRuleAction;
 use App\Models\SpeedResult;
+use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Message;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -95,7 +95,7 @@ class AlertRuleService
     {
         $mergeData = $this->buildMergeData($result);
 
-        /** @var Collection $actions */
+        /** @var Collection<int, AlertRuleAction> $actions */
         $actions = $rule->actions;
         foreach ($actions as $action) {
             try {
@@ -135,15 +135,18 @@ class AlertRuleService
 
         $mailer
             ->html($body, function (Message $message) use ($subject, $action) {
+                /** @var string $fromAddress */
+                $fromAddress = $action->mailProvider->from_address
+                    ?? config('mail.from.address');
+
+                /** @var string $fromName */
+                $fromName = $action->mailProvider->from_name
+                    ?? config('mail.from.name');
+
                 $message
-                    ->to($action->recipient_email)
+                    ->to((string) $action->recipient_email)
                     ->subject($subject)
-                    ->from(
-                        $action->mailProvider->from_address
-                        ?? config('mail.from.address'),
-                        $action->mailProvider->from_name
-                        ?? config('mail.from.name'),
-                    );
+                    ->from($fromAddress, $fromName);
             });
     }
 
@@ -164,31 +167,42 @@ class AlertRuleService
                 'ping_ms'         => $result->ping_ms,
                 'jitter_ms'       => $result->jitter_ms,
                 'packet_loss'     => $result->packet_loss,
-                'measured_at'     => $result->measured_at instanceof Carbon ? $result->measured_at->toIso8601String() : $result->measured_at,
+                'measured_at'     => $result->measured_at->toIso8601String(),
                 'failure_reason'  => $result->failure_reason,
             ],
         );
     }
 
     /**
+     * @param SpeedResult $result
+     *
      * @return array<string, mixed>
      */
     private function buildMergeData(SpeedResult $result): array
     {
+        $providerName = $result->provider_slug->label();
+        $tz = config('app.timezone');
+
         return [
-            'provider_name'   => $result->provider_slug,
+            'provider_name'   => $providerName,
             'status'          => $result->status,
-            'download_mbps'   => number_format((float) $result->download_mbps, 2),
-            'upload_mbps'     => number_format((float) $result->upload_mbps, 2),
+            'download_mbps'   => $result->download_mbps !== null
+                ? number_format((float) $result->download_mbps, 2)
+                : '—',
+            'upload_mbps'     => $result->upload_mbps !== null
+                ? number_format((float) $result->upload_mbps, 2)
+                : '—',
             'ping_ms'         => $result->ping_ms ?? '—',
             'jitter_ms'       => $result->jitter_ms ?? '—',
             'packet_loss'     => $result->packet_loss ?? '0',
-            'measured_at'     => $result->measured_at instanceof Carbon ? $result->measured_at->format('d M Y H:i') : $result->measured_at,
-            'failure_reason'  => $result->failure_reason ?? '',
+            'measured_at'     => $result->measured_at ? "{$result->measured_at->format('d M Y H:i')} {$tz}" : '—',
+            'failure_reason'  => $result->failure_reason instanceof SpeedtestFailureReason
+                ? $result->failure_reason->value
+                : ($result->failure_reason ?? ''),
             'failure_message' => $result->failure_message ?? '',
             'isp'             => $result->isp ?? '',
             'client_ip'       => $result->client_ip ?? '',
-            'dashboard_url'   => url('/dashboard'),
+            'dashboard_url'   => url(route('dashboard')),
             'share_url'       => $result->share_url ?? '',
         ];
     }

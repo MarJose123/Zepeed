@@ -60,8 +60,8 @@ class AlertRuleCondition extends Model
         };
 
         return match ($this->operator) {
-            AlertRuleOperator::Is      => $actual == $this->value,
-            AlertRuleOperator::IsNot   => $actual != $this->value,
+            AlertRuleOperator::Is      => (string) $actual === (string) $this->value,
+            AlertRuleOperator::IsNot   => (string) $actual !== (string) $this->value,
             AlertRuleOperator::IsAbove => (float) $actual > (float) $this->value,
             AlertRuleOperator::IsBelow => (float) $actual < (float) $this->value,
         };

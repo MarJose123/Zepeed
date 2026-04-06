@@ -8,17 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
 /**
- * @property string      $id
- * @property string      $alert_rule_id
- * @property string      $type              email|webhook
- * @property string|null $mail_provider_id
- * @property string|null $email_template_id
- * @property string|null $recipient_email
- * @property string|null $webhook_id
- * @property int         $sort_order
- * @property-read MailProvider|null   $mailProvider
- * @property-read EmailTemplate|null  $emailTemplate
- * @property-read Webhook|null        $webhook
+ * @property string             $id
+ * @property string             $alert_rule_id
+ * @property string             $type              email|webhook
+ * @property string|null        $mail_provider_id
+ * @property string|null        $email_template_id
+ * @property string|null        $recipient_email
+ * @property string|null        $webhook_id
+ * @property int                $sort_order
+ * @property MailProvider|null  $mailProvider
+ * @property EmailTemplate|null $emailTemplate
+ * @property Webhook|null       $webhook
  */
 class AlertRuleAction extends Model
 {
