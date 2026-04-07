@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from "@inertiajs/vue3";
+import { Head, router, usePage } from "@inertiajs/vue3";
 import {
     Bell,
     Plus,
@@ -8,7 +8,7 @@ import {
     CheckCircle2,
     PauseCircle,
 } from "lucide-vue-next";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import RuleBuilder from "@/components/alert-rule/RuleBuilder.vue";
 import {
     AlertDialog,
@@ -45,16 +45,20 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
+const page = usePage();
+
 // ── Builder state ─────────────────────────────────────────────────────────────
-const selectedId = ref<string | undefined>(undefined);
+const selectedId = ref<string | undefined | null>(null);
 const isNew = ref(false);
 const showBuilder = ref(false);
+const pendingSaveName = ref<string | null>(null);
+const pendingSaveIsNew = ref(false);
 
 const selectedRule = () =>
     props.rules.find((r) => r.id === selectedId.value) ?? null;
 
 function openNew() {
-    selectedId.value = undefined;
+    selectedId.value = null;
     isNew.value = true;
     showBuilder.value = true;
 }
@@ -67,13 +71,62 @@ function openEdit(rule: AlertRule) {
 
 function closeBuilder() {
     showBuilder.value = false;
-    selectedId.value = undefined;
+    selectedId.value = null;
     isNew.value = false;
 }
 
 function onSaved() {
-    closeBuilder();
+    // Capture what we need before the Inertia reload resets things
+    pendingSaveIsNew.value = isNew.value;
+    pendingSaveName.value = null; // will use ID for edits, name for new
+
+    if (!isNew.value && selectedId.value) {
+        // For edits — keep selectedId, Inertia reload will refresh the rule data
+        pendingSaveName.value = null;
+    } else {
+        // For new rules — mark so the watcher picks the latest
+        pendingSaveName.value = "__new__";
+    }
 }
+
+// Watch for rules to reload after Inertia redirect, then re-select
+watch(
+    () => props.rules,
+    (newRules) => {
+        if (pendingSaveName.value === null && selectedId.value) {
+            // Edit case — rule already selected, just refresh it in place
+            // showBuilder stays true, selectedId stays the same
+            // The RuleBuilder :key stays as selectedId so it re-renders with fresh data
+            return;
+        }
+
+        if (pendingSaveName.value === "__new__") {
+            // New rule case — select the most recently created (first in list since ordered latest())
+            const newest = newRules[0];
+
+            if (newest) {
+                selectedId.value = newest.id;
+                isNew.value = false;
+                showBuilder.value = true;
+                pendingSaveName.value = null;
+            }
+        }
+    },
+    { deep: false },
+);
+
+watch(
+    () => page.flash?.alert_rule_id as string | null,
+    (id) => {
+        if (!id) return;
+
+        // Keep builder open, pointing at the saved rule (new or edited)
+        selectedId.value = id;
+        isNew.value = false;
+        showBuilder.value = true;
+    },
+    { immediate: true },
+);
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 const deleteTarget = ref<AlertRule | null>(null);
@@ -85,19 +138,23 @@ function confirmDelete(rule: AlertRule) {
 function doDelete() {
     if (!deleteTarget.value) return;
 
+    const target = deleteTarget.value;
+
     router.delete(
-        route(
-            "speedtest.alert-rules.destroy",
-            { alertRule: deleteTarget.value.id },
-            false,
-        ),
+        route("speedtest.alert-rules.destroy", { alertRule: target.id }, false),
         {
             preserveScroll: true,
+            preserveState: false, // force full reload so rules list refreshes
             onSuccess: () => {
-                deleteTarget.value = null;
+                // Close builder if we just deleted the selected rule
+                if (selectedId.value === target.id) {
+                    closeBuilder();
+                }
             },
         },
     );
+
+    deleteTarget.value = null; // close dialog immediately
 }
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
@@ -282,21 +339,23 @@ function actionsSummary(rule: AlertRule): string {
                                         class="h-3.5 w-3.5 text-green-500"
                                     />
                                 </Button>
+
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     class="h-7 w-7"
+                                    title="Edit rule"
                                     @click="openEdit(rule)"
                                 >
-                                    <Pencil
-                                        class="text-muted-foreground h-3.5 w-3.5"
-                                    />
+                                    <Pencil class="h-3.5 w-3.5" />
                                 </Button>
+
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    class="text-muted-foreground hover:text-destructive h-7 w-7"
-                                    @click="confirmDelete(rule)"
+                                    class="text-destructive hover:bg-destructive/10 h-7 w-7"
+                                    title="Delete rule"
+                                    @click.stop="confirmDelete(rule)"
                                 >
                                     <Trash2 class="h-3.5 w-3.5" />
                                 </Button>
@@ -320,7 +379,7 @@ function actionsSummary(rule: AlertRule): string {
                 class="flex flex-1 flex-col overflow-hidden"
             >
                 <RuleBuilder
-                    :key="isNew ? 'new' : selectedId"
+                    :key="isNew ? 'new' : (selectedId ?? 'none')"
                     :rule="isNew ? null : selectedRule()"
                     :is-new="isNew"
                     :providers="providers"
@@ -346,10 +405,7 @@ function actionsSummary(rule: AlertRule): string {
     </AppLayout>
 
     <!-- Delete confirm -->
-    <AlertDialog
-        :open="!!deleteTarget"
-        @update:open="(v) => !v && (deleteTarget = null)"
-    >
+    <AlertDialog :open="!!deleteTarget" @update:open="(v) => !v">
         <AlertDialogContent>
             <AlertDialogHeader>
                 <AlertDialogTitle>Delete alert rule?</AlertDialogTitle>
@@ -362,11 +418,10 @@ function actionsSummary(rule: AlertRule): string {
                 <AlertDialogCancel @click="deleteTarget = null"
                     >Cancel</AlertDialogCancel
                 >
-                <AlertDialogAction
-                    class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    @click="doDelete"
-                >
-                    Delete rule
+                <AlertDialogAction as-child>
+                    <Button variant="destructive" @click="doDelete">
+                        Delete rule
+                    </Button>
                 </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>

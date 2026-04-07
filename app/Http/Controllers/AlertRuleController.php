@@ -56,7 +56,7 @@ class AlertRuleController extends Controller
 
     public function store(StoreAlertRuleRequest $request): RedirectResponse
     {
-        DB::transaction(function () use ($request) {
+        $rule = DB::transaction(function () use ($request): AlertRule {
             $validated = $request->validated();
 
             $rule = AlertRule::query()->create([
@@ -89,6 +89,8 @@ class AlertRuleController extends Controller
                     'sort_order'        => $action['sort_order'] ?? $i,
                 ]);
             }
+
+            return $rule;
         });
 
         InertiaNotification::make()
@@ -96,6 +98,8 @@ class AlertRuleController extends Controller
             ->title('Alert rule created')
             ->message("Rule \"{$request->validated('name')}\" is now active.")
             ->send();
+
+        Inertia::flash('alert_rule_id', $rule->id);
 
         return back();
     }
@@ -162,6 +166,8 @@ class AlertRuleController extends Controller
             ->message("\"{$alertRule->name}\" has been updated.")
             ->send();
 
+        Inertia::flash('alert_rule_id', $alertRule->id);
+
         return back();
     }
 
@@ -176,7 +182,7 @@ class AlertRuleController extends Controller
             ->message("\"{$name}\" has been removed.")
             ->send();
 
-        return back();
+        return to_route('speedtest.alert-rules.index');
     }
 
     public function toggle(AlertRule $alertRule): RedirectResponse
