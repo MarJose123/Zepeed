@@ -45,8 +45,6 @@ const breadcrumbs: TBreadcrumbItem[] = [
 ];
 
 const page = usePage();
-
-// ── Builder state ─────────────────────────────────────────────────────────────
 const selectedId = ref<string | undefined | null>(null);
 const isNew = ref(false);
 const showBuilder = ref(false);
@@ -56,25 +54,25 @@ const pendingSaveIsNew = ref(false);
 const selectedRule = () =>
     props.rules.find((r) => r.id === selectedId.value) ?? null;
 
-function openNew() {
+const openNew = () => {
     selectedId.value = null;
     isNew.value = true;
     showBuilder.value = true;
 }
 
-function openEdit(rule: AlertRule) {
+const openEdit = (rule: AlertRule) => {
     selectedId.value = rule.id;
     isNew.value = false;
     showBuilder.value = true;
 }
 
-function closeBuilder() {
+const closeBuilder = () => {
     showBuilder.value = false;
     selectedId.value = null;
     isNew.value = false;
 }
 
-function onSaved() {
+const onSaved = () => {
     // Capture what we need before the Inertia reload resets things
     pendingSaveIsNew.value = isNew.value;
     pendingSaveName.value = null; // will use ID for edits, name for new
@@ -127,14 +125,13 @@ watch(
     { immediate: true },
 );
 
-// ── Delete ────────────────────────────────────────────────────────────────────
 const deleteTarget = ref<AlertRule | null>(null);
 
-function confirmDelete(rule: AlertRule) {
+const confirmDelete = (rule: AlertRule) => {
     deleteTarget.value = rule;
 }
 
-function doDelete() {
+const doDelete = () => {
     if (!deleteTarget.value) return;
 
     const target = deleteTarget.value;
@@ -156,8 +153,7 @@ function doDelete() {
     deleteTarget.value = null; // close dialog immediately
 }
 
-// ── Toggle ────────────────────────────────────────────────────────────────────
-function toggle(rule: AlertRule) {
+const toggle = (rule: AlertRule) => {
     router.post(
         route("speedtest.alert-rules.toggle", { alertRule: rule.id }, false),
         {},
@@ -165,8 +161,7 @@ function toggle(rule: AlertRule) {
     );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function lastTriggeredLabel(rule: AlertRule): string {
+const lastTriggeredLabel = (rule: AlertRule): string => {
     if (!rule.last_triggered_at) return "Never triggered";
 
     const diff = Date.now() - new Date(rule.last_triggered_at).getTime();
@@ -183,7 +178,7 @@ function lastTriggeredLabel(rule: AlertRule): string {
     return `Last triggered ${Math.floor(hrs / 24)}d ago`;
 }
 
-function actionsSummary(rule: AlertRule): string {
+const actionsSummary = (rule: AlertRule): string => {
     const emails = rule.actions.filter((a) => a.type === "email").length;
     const webhooks = rule.actions.filter((a) => a.type === "webhook").length;
     const parts = [];
