@@ -58,19 +58,19 @@ const openNew = () => {
     selectedId.value = null;
     isNew.value = true;
     showBuilder.value = true;
-}
+};
 
 const openEdit = (rule: AlertRule) => {
     selectedId.value = rule.id;
     isNew.value = false;
     showBuilder.value = true;
-}
+};
 
 const closeBuilder = () => {
     showBuilder.value = false;
     selectedId.value = null;
     isNew.value = false;
-}
+};
 
 const onSaved = () => {
     // Capture what we need before the Inertia reload resets things
@@ -84,7 +84,7 @@ const onSaved = () => {
         // For new rules — mark so the watcher picks the latest
         pendingSaveName.value = "__new__";
     }
-}
+};
 
 // Watch for rules to reload after Inertia redirect, then re-select
 watch(
@@ -129,7 +129,7 @@ const deleteTarget = ref<AlertRule | null>(null);
 
 const confirmDelete = (rule: AlertRule) => {
     deleteTarget.value = rule;
-}
+};
 
 const doDelete = () => {
     if (!deleteTarget.value) return;
@@ -151,7 +151,7 @@ const doDelete = () => {
     );
 
     deleteTarget.value = null; // close dialog immediately
-}
+};
 
 const toggle = (rule: AlertRule) => {
     router.post(
@@ -159,7 +159,7 @@ const toggle = (rule: AlertRule) => {
         {},
         { preserveScroll: true },
     );
-}
+};
 
 const lastTriggeredLabel = (rule: AlertRule): string => {
     if (!rule.last_triggered_at) return "Never triggered";
@@ -176,7 +176,7 @@ const lastTriggeredLabel = (rule: AlertRule): string => {
     if (hrs < 24) return `Last triggered ${hrs}h ago`;
 
     return `Last triggered ${Math.floor(hrs / 24)}d ago`;
-}
+};
 
 const actionsSummary = (rule: AlertRule): string => {
     const emails = rule.actions.filter((a) => a.type === "email").length;
@@ -188,7 +188,7 @@ const actionsSummary = (rule: AlertRule): string => {
     if (webhooks) parts.push(`${webhooks} webhook${webhooks > 1 ? "s" : ""}`);
 
     return parts.join(" + ") || "No actions";
-}
+};
 </script>
 
 <template>
