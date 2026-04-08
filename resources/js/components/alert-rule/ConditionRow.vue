@@ -40,7 +40,7 @@ const availableOperators = computed(() =>
         : OPERATOR_OPTIONS.filter((o) => !o.numericOnly),
 );
 
-function update(key: keyof AlertRuleCondition, value: string) {
+const update = (key: keyof AlertRuleCondition, value: string) => {
     const updated = { ...props.condition, [key]: value };
 
     // Reset value when metric type changes
@@ -65,7 +65,7 @@ function update(key: keyof AlertRuleCondition, value: string) {
     }
 
     emit("update", updated);
-}
+};
 </script>
 
 <template>

@@ -198,7 +198,7 @@ const actionsSummary = (rule: AlertRule): string => {
             <!-- ── Left: rules list ── -->
             <div
                 class="border-border flex flex-col border-r transition-all"
-                :class="showBuilder ? 'w-72 shrink-0' : 'flex-1'"
+                :class="showBuilder ? 'w-lg shrink-0' : 'w-2xl'"
             >
                 <!-- Header -->
                 <div
