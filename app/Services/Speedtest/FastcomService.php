@@ -2,51 +2,58 @@
 
 namespace App\Services\Speedtest;
 
+use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Override;
 
 class FastcomService extends AbstractSpeedtestService
 {
-    // fast-cli uses Puppeteer — give it more time
-    // https://github.com/sindresorhus/fast-cli
+    // mikkelam/fast-cli is a lightweight Zig binary — no Puppeteer overhead
+    // https://github.com/mikkelam/fast-cli
     #[Override]
     public function timeout(): int
     {
-        return 180;
+        return 120;
     }
 
     protected function buildCommand(): array
     {
-        // fast-cli is a Node.js binary — invoked via npx or global install
-        return ['fast', ...$this->provider->resolvedFlags()];
+        // fast-cli binary is named `fast-cli`, not `fast`
+        return ['fast-cli', ...$this->provider->resolvedFlags()];
     }
 
     protected function normalise(array $parsed, string $rawJson): array
     {
-        // fast-cli --json shape:
-        // { "downloadSpeed": <int>,  "downloadUnit": "Mbps",
-        //   "uploadSpeed":   <int>,  "uploadUnit":   "Mbps",
-        //   "downloaded":    <int>,  "uploaded":     <int>,
-        //   "latency":       <int>,
-        //   "bufferBloat":   <int>,
-        //   "userLocation":  "",
-        //   "userIp":        "" }
+        // fast-cli --upload --json shape:
+        // { "download_mbps": 131,   (float)
+        //   "ping_ms":       20.8,  (float|null)
+        //   "upload_mbps":   62,    (float|null)
+        //   "error":         null   (string|null) }
 
-        $this->requireField($parsed, 'downloadSpeed');
-        $this->requireField($parsed, 'uploadSpeed');
-        $this->requireField($parsed, 'latency');
+        // Surface any tool-level error before field validation
+        if (! empty($parsed['error'])) {
+            throw SpeedtestException::nonZeroExit(
+                server: $this->provider->slug,
+                code  : 1,
+                stderr: $parsed['error'],
+            );
+        }
+
+        $this->requireField($parsed, 'download_mbps');
+        $this->requireField($parsed, 'upload_mbps');
+        $this->requireField($parsed, 'ping_ms');
 
         return [
-            'download_mbps'   => (float) $parsed['downloadSpeed'],
-            'upload_mbps'     => (float) $parsed['uploadSpeed'],
-            'ping_ms'         => (float) $parsed['latency'],
+            'download_mbps'   => (float) $parsed['download_mbps'],
+            'upload_mbps'     => (float) ($parsed['upload_mbps'] ?? 0.0),
+            'ping_ms'         => (float) ($parsed['ping_ms'] ?? 0.0),
             'jitter_ms'       => null, // fast-cli does not report jitter
             'packet_loss'     => null, // fast-cli does not report packet loss
-            'download_bytes'  => isset($parsed['downloaded']) ? (int) $parsed['downloaded'] : null,
-            'upload_bytes'    => isset($parsed['uploaded']) ? (int) $parsed['uploaded'] : null,
+            'download_bytes'  => null, // not exposed by mikkelam/fast-cli
+            'upload_bytes'    => null, // not exposed by mikkelam/fast-cli
             'server_name'     => null, // fast.com does not expose server name
-            'server_location' => $parsed['userLocation'] ?? null,
+            'server_location' => null, // not exposed by mikkelam/fast-cli
             'isp'             => null,
-            'client_ip'       => $parsed['userIp'] ?? null,
+            'client_ip'       => null,
         ];
     }
 }

@@ -81,8 +81,7 @@ enum SpeedtestServer: string
     public function requiresChromium(): bool
     {
         return match ($this) {
-            self::NetflixSpeedtest => true,
-            self::Speedtest, self::Librespeed       => false,
+            self::NetflixSpeedtest , self::Speedtest, self::Librespeed       => false,
         };
     }
 }
