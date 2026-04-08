@@ -135,6 +135,11 @@ shadcn/vue components are generated into `resources/js/Components/ui` and styled
 
 Copy `.env.dev.example` to `.env` for local development or `.env.prod.example` for production and adjust your database and mail settings if needed. The setup script handles this automatically for development.
 
+## Speedtest CLI
+- [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)
+- [librespeed/speedtest-cli](https://github.com/librespeed/speedtest-cli)
+- [ookla/speedtest-cli](https://www.speedtest.net/apps/cli)
+
 ## License
 
 MIT
