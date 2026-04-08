@@ -15,6 +15,7 @@ use App\Events\Speedtest\Test\SpeedtestTestStartedEvent;
 use App\Models\MaintenanceWindow;
 use App\Models\Provider;
 use App\Models\SpeedResult;
+use App\Services\AlertRuleService;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
@@ -66,7 +67,7 @@ class RunSpeedtestJob implements ShouldQueue
         return "speedtest-provider-{$slug->value}";
     }
 
-    public function handle(): void
+    public function handle(AlertRuleService $alertRuleService): void
     {
         $slug = $this->provider->slug;
 
@@ -89,7 +90,7 @@ class RunSpeedtestJob implements ShouldQueue
         }
 
         if ($this->isUnderMaintenance($slug)) {
-            SpeedResult::recordSkipped(
+            $skipped = SpeedResult::recordSkipped(
                 provider: $this->provider,
             );
 
@@ -106,6 +107,9 @@ class RunSpeedtestJob implements ShouldQueue
                 'provider' => $slug->value,
             ]);
 
+            // Evaluate alert rules against the skipped result
+            $alertRuleService->evaluate($skipped);
+
             return;
         }
 
@@ -120,7 +124,7 @@ class RunSpeedtestJob implements ShouldQueue
         try {
             $result = $this->provider->service()->run();
 
-            SpeedResult::query()->create($result->toStorageArray());
+            $speedResult = SpeedResult::query()->create($result->toStorageArray());
 
             $this->provider->markSuccessful();
 
@@ -139,9 +143,12 @@ class RunSpeedtestJob implements ShouldQueue
                 'ping_ms'       => $result->pingMs,
             ]);
 
+            // Evaluate alert rules against the persisted Eloquent model
+            $alertRuleService->evaluate($speedResult);
+
         } catch (SpeedtestException $e) {
 
-            SpeedResult::recordFailed(
+            $failed = SpeedResult::recordFailed(
                 provider: $this->provider,
                 e       : $e,
             );
@@ -161,6 +168,9 @@ class RunSpeedtestJob implements ShouldQueue
                 'reason'   => $e->reason->value,
                 'message'  => $e->getMessage(),
             ]);
+
+            // Evaluate alert rules against the failed result
+            $alertRuleService->evaluate($failed);
 
         }
     }

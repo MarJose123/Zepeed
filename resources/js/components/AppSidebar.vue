@@ -65,8 +65,8 @@ const navigation: TSidebarNavigationItems = [
                         href: "#",
                     },
                     {
-                        title: "Alerts",
-                        href: "#",
+                        title: "Alert Rules",
+                        href: route("speedtest.alert-rules.index", {}, false),
                     },
                     {
                         title: "Email Templates",

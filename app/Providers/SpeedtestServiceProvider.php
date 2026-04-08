@@ -51,6 +51,11 @@ class SpeedtestServiceProvider extends ServiceProvider
     {
         $this->dynamicMailers();
 
+        $this->eventListeners();
+    }
+
+    protected function eventListeners(): void
+    {
         Event::listen(SpeedtestExceptionEvent::class, SendSpeedtestExceptionAlertListener::class);
     }
 

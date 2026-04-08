@@ -9,8 +9,32 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property string                      $id
+ * @property SpeedtestServer             $provider_slug
+ * @property string                      $status
+ * @property string|null                 $download_mbps
+ * @property string|null                 $upload_mbps
+ * @property string|null                 $ping_ms
+ * @property string|null                 $jitter_ms
+ * @property string|null                 $packet_loss
+ * @property int|null                    $download_bytes
+ * @property int|null                    $upload_bytes
+ * @property string|null                 $server_name
+ * @property string|null                 $server_location
+ * @property string|null                 $isp
+ * @property string|null                 $share_url
+ * @property string|null                 $client_ip
+ * @property SpeedtestFailureReason|null $failure_reason
+ * @property string|null                 $failure_message
+ * @property array|null                  $raw_json
+ * @property Carbon                      $measured_at
+ * @property Carbon|null                 $created_at
+ * @property Carbon|null                 $updated_at
+ */
 class SpeedResult extends Model
 {
     use HasUuids;
