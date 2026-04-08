@@ -67,8 +67,7 @@ watch(
     { immediate: false },
 );
 
-// ── Conditions ────────────────────────────────────────────────────────────────
-function addCondition() {
+const addCondition = () => {
     form.conditions.push({
         metric: "status",
         operator: "is",
@@ -77,19 +76,18 @@ function addCondition() {
     });
 }
 
-function updateCondition(index: number, updated: AlertRuleCondition) {
+const updateCondition = (index: number, updated: AlertRuleCondition) => {
     form.conditions[index] = { ...updated, sort_order: index };
 }
 
-function removeCondition(index: number) {
+const removeCondition = (index: number) => {
     form.conditions.splice(index, 1);
     form.conditions.forEach((c, i) => {
         c.sort_order = i;
     });
 }
 
-// ── Actions ───────────────────────────────────────────────────────────────────
-function addEmailAction() {
+const addEmailAction = () => {
     form.actions.push({
         type: "email",
         mail_provider_id: null,
@@ -100,7 +98,7 @@ function addEmailAction() {
     });
 }
 
-function addWebhookAction() {
+const addWebhookAction = () => {
     form.actions.push({
         type: "webhook",
         mail_provider_id: null,
@@ -111,19 +109,18 @@ function addWebhookAction() {
     });
 }
 
-function updateAction(index: number, updated: AlertRuleAction) {
+const updateAction = (index: number, updated: AlertRuleAction) => {
     form.actions[index] = { ...updated, sort_order: index };
 }
 
-function removeAction(index: number) {
+const removeAction = (index: number) => {
     form.actions.splice(index, 1);
     form.actions.forEach((a, i) => {
         a.sort_order = i;
     });
 }
 
-// ── Save ──────────────────────────────────────────────────────────────────────
-function save() {
+const save = () => {
     const method = props.isNew ? "post" : "patch";
     const routeName = props.isNew
         ? "speedtest.alert-rules.store"

@@ -28,7 +28,7 @@ const emit = defineEmits<{
     remove: [];
 }>();
 
-function update(key: keyof AlertRuleAction, value: string | null) {
+const update = (key: keyof AlertRuleAction, value: string | null) => {
     emit("update", { ...props.action, [key]: value });
 }
 </script>
