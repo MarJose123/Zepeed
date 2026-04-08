@@ -1,6 +1,5 @@
 # =============================================================================
 #  Stage 1 — CLI binaries (Ookla + LibreSpeed)
-#  Throwaway Alpine stage: curl/tar never land in the final image.
 # =============================================================================
 FROM alpine:3.21 AS cli-builder
 
@@ -24,9 +23,6 @@ RUN curl -sSL \
 
 # =============================================================================
 #  Stage 2 — fast-cli node_modules (runtime-only, stripped)
-#  - --ignore-scripts   prevents Puppeteer from attempting a Chromium download
-#  - --omit=dev         skips devDependencies
-#  - find …-delete      removes ~24 MB of maps, typedefs, and docs
 # =============================================================================
 FROM node:22-alpine AS node-builder
 
