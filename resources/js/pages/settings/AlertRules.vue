@@ -12,7 +12,6 @@ import { ref, watch } from "vue";
 import RuleBuilder from "@/components/alert-rule/RuleBuilder.vue";
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -418,11 +417,9 @@ function actionsSummary(rule: AlertRule): string {
                 <AlertDialogCancel @click="deleteTarget = null"
                     >Cancel</AlertDialogCancel
                 >
-                <AlertDialogAction as-child>
-                    <Button variant="destructive" @click="doDelete">
-                        Delete rule
-                    </Button>
-                </AlertDialogAction>
+                <Button variant="destructive" size="sm" @click="doDelete">
+                    Delete rule
+                </Button>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
