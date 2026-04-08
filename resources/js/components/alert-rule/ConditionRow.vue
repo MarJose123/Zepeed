@@ -65,7 +65,7 @@ const update = (key: keyof AlertRuleCondition, value: string) => {
     }
 
     emit("update", updated);
-}
+};
 </script>
 
 <template>

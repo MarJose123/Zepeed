@@ -30,7 +30,7 @@ const emit = defineEmits<{
 
 const update = (key: keyof AlertRuleAction, value: string | null) => {
     emit("update", { ...props.action, [key]: value });
-}
+};
 </script>
 
 <template>

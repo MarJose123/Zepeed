@@ -74,18 +74,18 @@ const addCondition = () => {
         value: "failed",
         sort_order: form.conditions.length,
     });
-}
+};
 
 const updateCondition = (index: number, updated: AlertRuleCondition) => {
     form.conditions[index] = { ...updated, sort_order: index };
-}
+};
 
 const removeCondition = (index: number) => {
     form.conditions.splice(index, 1);
     form.conditions.forEach((c, i) => {
         c.sort_order = i;
     });
-}
+};
 
 const addEmailAction = () => {
     form.actions.push({
@@ -96,7 +96,7 @@ const addEmailAction = () => {
         webhook_id: null,
         sort_order: form.actions.length,
     });
-}
+};
 
 const addWebhookAction = () => {
     form.actions.push({
@@ -107,18 +107,18 @@ const addWebhookAction = () => {
         webhook_id: props.webhooks[0]?.id ?? null,
         sort_order: form.actions.length,
     });
-}
+};
 
 const updateAction = (index: number, updated: AlertRuleAction) => {
     form.actions[index] = { ...updated, sort_order: index };
-}
+};
 
 const removeAction = (index: number) => {
     form.actions.splice(index, 1);
     form.actions.forEach((a, i) => {
         a.sort_order = i;
     });
-}
+};
 
 const save = () => {
     const method = props.isNew ? "post" : "patch";
@@ -143,7 +143,7 @@ const save = () => {
         preserveScroll: true,
         onSuccess: () => emit("saved"),
     } as any);
-}
+};
 
 const cooldownLabel = computed(() => {
     const m = form.cooldown_minutes;
