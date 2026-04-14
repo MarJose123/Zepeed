@@ -62,7 +62,11 @@ const navigation: TSidebarNavigationItems = [
                 items: [
                     {
                         title: "General",
-                        href: "#",
+                        href: route(
+                            "speedtest.general-settings.edit",
+                            {},
+                            false,
+                        ),
                     },
                     {
                         title: "Alert Rules",

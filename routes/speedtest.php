@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\GeneralSettingsController;
 use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
 use App\Http\Controllers\Provider\ProviderController;
@@ -66,7 +67,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         });
 
-        Route::prefix('alert-rules')
+        Route::prefix('alert-rules/')
             ->name('alert-rules.')
             ->group(function () {
                 Route::get('/', [AlertRuleController::class, 'index'])->name('index');
@@ -74,6 +75,24 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::patch('/{alertRule}', [AlertRuleController::class, 'update'])->name('update');
                 Route::delete('/{alertRule}', [AlertRuleController::class, 'destroy'])->name('destroy');
                 Route::post('/{alertRule}/toggle', [AlertRuleController::class, 'toggle'])->name('toggle');
+            });
+
+        Route::prefix('general-settings/')
+            ->name('general-settings.')
+            ->group(static function (): void {
+
+                Route::get('general', [GeneralSettingsController::class, 'edit'])
+                    ->name('edit');
+
+                Route::patch('general', [GeneralSettingsController::class, 'update'])
+                    ->name('update');
+
+                Route::post('general/danger/{action}', [GeneralSettingsController::class, 'danger'])
+                    ->name('danger');
+
+                Route::post('general/cache/{type}', [GeneralSettingsController::class, 'clearCache'])
+                    ->name('cache.clear');
+
             });
 
     });
