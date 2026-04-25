@@ -7,9 +7,10 @@ export interface TSchedulerJob {
 
 export interface TStorageTable {
     name: string;
-    size_mb: number; // raw MB float (may be < 1)
-    size_display: string; // human-readable: "284 MB" | "420 KB" | "< 1 KB"
+    size_mb: number;
+    size_display: string; // "284 MB" | "420 KB" | "< 1 KB"
     row_count: number;
+    empty: boolean; // true when InnoDB allocated space but table has 0 rows
     percentage: number;
 }
 
@@ -39,6 +40,7 @@ export interface TGeneralStats {
 
 export interface TGeneralSettings {
     app_url: string;
+    app_env: "production" | "local" | "staging";
     timezone: string;
     maintenance_enabled: boolean;
     bypass_secret: string;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers;
 
 use App\Actions\App\ClearCacheAction;
@@ -31,7 +29,7 @@ final class GeneralSettingsController extends Controller
      */
     public function edit(): Response
     {
-        return Inertia::render('settings/General', [
+        return Inertia::render('settings/GeneralSettings', [
             'settings'              => Setting::generalSettings(),
             'stats'                 => $this->updateAction->stats(),
             'scheduler_jobs'        => $this->updateAction->schedulerJobs(),
@@ -43,16 +41,54 @@ final class GeneralSettingsController extends Controller
     }
 
     /**
-     * Persist general settings and sync maintenance mode side-effects.
+     * Persist general settings, apply boot-time side-effects, and handle
+     * the maintenance mode bypass redirect correctly.
+     *
+     * Laravel's bypass mechanism works by visiting /{secret} as a PATH
+     * segment — NOT as a query string. That request sets the
+     * laravel_maintenance cookie and redirects to /.
+     *
+     * Because we exempt the settings route from maintenance mode above,
+     * the admin can always return directly to settings after the cookie
+     * is set without needing a second redirect chain.
      */
     public function update(GeneralSettingsData $data): RedirectResponse
     {
         try {
+            $maintenanceWasActive = (bool) Setting::get('maintenance_enabled', false);
+
             $this->updateAction->handle($data);
+
+            $maintenanceNowActive = $data->maintenance_enabled;
+
+            // Maintenance was just toggled ON — redirect through the bypass
+            // URL so the laravel_maintenance cookie is set in the admin's
+            // browser. Because the settings route is in the $except list,
+            // the admin can navigate back immediately after.
+            if (! $maintenanceWasActive && $maintenanceNowActive) {
+                $secret = (string) Setting::get('bypass_secret', '');
+
+                if ($secret !== '') {
+                    InertiaNotification::make()
+                        ->success()
+                        ->message('Maintenance mode enabled. Others user will be redirected to the service unavailable page.')
+                        ->send();
+
+                    redirect()->setIntendedUrl(route('speedtest.general-settings.edit'));
+
+                    // /{secret} is the Laravel-recognised bypass path that
+                    // issues the laravel_maintenance cookie then redirects to /.
+                    return redirect()->intended();
+                }
+            }
 
             InertiaNotification::make()
                 ->success()
-                ->message('Settings saved successfully.')
+                ->message(
+                    $maintenanceNowActive
+                        ? 'Settings saved. Maintenance mode is active.'
+                        : 'Settings saved successfully.'
+                )
                 ->send();
         } catch (Throwable $e) {
             report($e);
@@ -69,7 +105,7 @@ final class GeneralSettingsController extends Controller
     /**
      * Clear the specified application cache type.
      *
-     * Supported types: app | config | route | view
+     * Supported: app | config | route | view
      */
     public function clearCache(ClearCacheRequest $request): RedirectResponse
     {
@@ -106,7 +142,7 @@ final class GeneralSettingsController extends Controller
     /**
      * Execute a destructive danger-zone operation.
      *
-     * Supported actions: clear_results | clear_log | reset_config | factory_reset
+     * Supported: clear_results | clear_log | reset_config | factory_reset
      */
     public function danger(DangerActionRequest $request): RedirectResponse
     {

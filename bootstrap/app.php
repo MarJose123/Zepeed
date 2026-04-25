@@ -3,6 +3,7 @@
 use App\Enums\QueueWorkerName;
 use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\PreventRequestsDuringMaintenanceMiddleware;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
 use App\Models\ProviderSchedule;
@@ -11,6 +12,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->replaceInGroup('web', PreventRequestsDuringMaintenance::class, PreventRequestsDuringMaintenanceMiddleware::class);
 
         $middleware->web(append: [
             HandleAppearanceMiddleware::class,

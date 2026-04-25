@@ -71,8 +71,8 @@ const handleRetry = () => {
 
 <template>
     <Head :title="title" />
-    <div class="flex min-h-[70vh] items-center justify-center px-6 py-12">
-        <Empty class="w-full max-w-2xl">
+    <div class="flex w-full min-h-dvh items-center justify-center px-6 py-12">
+        <Empty>
             <EmptyHeader>
                 <span
                     class="rounded-full border border-border/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
@@ -80,9 +80,13 @@ const handleRetry = () => {
                     Status {{ statusCode }}
                 </span>
                 <EmptyTitle>{{ title }}</EmptyTitle>
-                <EmptyDescription>{{ description }}</EmptyDescription>
-                <EmptyDescription v-if="retryAfter">
-                    Retry after {{ retryAfter }} seconds.
+                <EmptyDescription>
+                    {{ description }}
+                    <template v-if="retryAfter">
+                        <span class="mt-2">
+                            Retry after {{ retryAfter }} seconds.
+                        </span>
+                    </template>
                 </EmptyDescription>
             </EmptyHeader>
             <EmptyContent class="sm:flex-row sm:justify-center">

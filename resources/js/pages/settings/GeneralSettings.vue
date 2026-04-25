@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, router, useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
+import { Head } from "@inertiajs/vue3";
 import {
     Activity,
     AlertTriangle,
@@ -15,7 +16,6 @@ import {
     RotateCcw,
     Save,
     Server,
-    Shield,
     Trash2,
     Zap,
 } from "lucide-vue-next";
@@ -64,7 +64,6 @@ import type {
     TDangerAction,
     TDangerActionConfig,
     TGeneralSettingsPageProps,
-    TJobStatus,
 } from "@/types/general-setting";
 
 // ─── Breadcrumbs ──────────────────────────────────────────────────────────
@@ -85,6 +84,7 @@ const props = defineProps<TGeneralSettingsPageProps>();
 
 const form = useForm({
     app_url: props.settings.app_url,
+    app_env: props.settings.app_env,
     timezone: props.settings.timezone,
     maintenance_enabled: props.settings.maintenance_enabled,
     bypass_secret: props.settings.bypass_secret,
@@ -293,16 +293,11 @@ const scheduleOptions = [
     { value: "custom", label: "Custom cron" },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
-
-const jobStatusVariant = (
-    status: TJobStatus,
-): "default" | "secondary" | "outline" =>
-    status === "healthy"
-        ? "default"
-        : status === "pending"
-          ? "secondary"
-          : "outline";
+const envOptions = [
+    { value: "production", label: "production" },
+    { value: "local", label: "local" },
+    { value: "staging", label: "staging" },
+];
 
 const retentionPct = (current: number, max: number): number =>
     Math.min(100, Math.round((current / max) * 100));
@@ -315,7 +310,7 @@ const barColor = (pct: number): string =>
     <Head title="General Settings" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-5 flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
             <!-- ── Page header ──────────────────────────────────────── -->
             <div class="flex items-start justify-between">
                 <div>
@@ -327,14 +322,24 @@ const barColor = (pct: number): string =>
                         lifecycle.
                     </p>
                 </div>
+                <Badge
+                    v-if="form.isDirty"
+                    variant="outline"
+                    class="text-amber-600 border-amber-400 bg-amber-50"
+                >
+                    <span
+                        class="size-1.5 rounded-full mr-1.5 inline-block bg-amber-500"
+                    />
+                    Unsaved changes
+                </Badge>
             </div>
 
             <!-- ── Tabs ─────────────────────────────────────────────── -->
-            <Tabs default-value="overview">
+            <Tabs default-value="application">
                 <TabsList>
-                    <TabsTrigger value="overview">
-                        <Activity class="size-3.5 mr-1.5" />
-                        Overview
+                    <TabsTrigger value="application">
+                        <Globe class="size-3.5 mr-1.5" />
+                        Application
                     </TabsTrigger>
                     <TabsTrigger value="maintenance">
                         <Zap class="size-3.5 mr-1.5" />
@@ -358,122 +363,50 @@ const barColor = (pct: number): string =>
                 </TabsList>
 
                 <!-- ════════════════════════════════════════════════════
-                     OVERVIEW
+                     APPLICATION
                 ════════════════════════════════════════════════════ -->
-                <TabsContent value="overview" class="mt-5 space-y-4">
-                    <!-- Stat cards -->
-                    <div class="grid grid-cols-4 gap-3">
-                        <Card>
-                            <CardContent class="p-4 flex items-start gap-3">
+                <!-- resources/js/pages/settings/GeneralSettings.vue -->
+                <!-- Only the APPLICATION TabsContent block changes — replace it entirely -->
+
+                <TabsContent value="application" class="mt-5 space-y-4">
+                    <Card>
+                        <CardHeader class="pb-3">
+                            <div class="flex items-center gap-2.5">
                                 <div
-                                    class="size-9 rounded-md bg-muted flex items-center justify-center shrink-0"
+                                    class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
                                 >
-                                    <Activity
-                                        class="size-4 text-muted-foreground"
+                                    <Globe
+                                        class="size-3.5 text-muted-foreground"
                                     />
                                 </div>
                                 <div>
-                                    <p
-                                        class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+                                    <CardTitle class="text-sm"
+                                        >Application</CardTitle
                                     >
-                                        Total Results
-                                    </p>
-                                    <p
-                                        class="text-lg font-bold mt-0.5 leading-none"
-                                    >
-                                        {{
-                                            stats.total_results.toLocaleString()
-                                        }}
-                                    </p>
-                                    <p
-                                        class="text-[11px] text-muted-foreground mt-1"
-                                    >
-                                        ↑ {{ stats.results_this_week }} this
-                                        week
-                                    </p>
+                                    <CardDescription>
+                                        Identity and display preferences —
+                                        applied globally on next boot
+                                    </CardDescription>
                                 </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent class="p-4 flex items-start gap-3">
-                                <div
-                                    class="size-9 rounded-md bg-blue-50 flex items-center justify-center shrink-0"
-                                >
-                                    <Database class="size-4 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
-                                    >
-                                        Database Size
+                            </div>
+                        </CardHeader>
+                        <CardContent class="space-y-5">
+                            <Alert>
+                                <Info class="size-4" />
+                                <AlertDescription as-child>
+                                    <p class="text-sm text-muted-foreground">
+                                        Changes to <strong>App URL</strong> and
+                                        <strong>Timezone</strong>
+                                        take effect on the next application
+                                        boot. The current session continues
+                                        using the previous values.
                                     </p>
-                                    <p
-                                        class="text-lg font-bold mt-0.5 leading-none"
-                                    >
-                                        {{ stats.db_size_mb }} MB
-                                    </p>
-                                    <p
-                                        class="text-[11px] text-muted-foreground mt-1"
-                                    >
-                                        {{ stats.db_name }} database
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent class="p-4 flex items-start gap-3">
-                                <div
-                                    class="size-9 rounded-md bg-emerald-50 flex items-center justify-center shrink-0"
-                                >
-                                    <Shield class="size-4 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
-                                    >
-                                        Uptime
-                                    </p>
-                                    <p
-                                        class="text-lg font-bold mt-0.5 leading-none"
-                                    >
-                                        {{ stats.uptime_percent }}%
-                                    </p>
-                                    <p
-                                        class="text-[11px] text-muted-foreground mt-1"
-                                    >
-                                        last 30 days
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                </AlertDescription>
+                            </Alert>
 
-                    <!-- Two-column layout -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Application -->
-                        <Card>
-                            <CardHeader class="pb-3">
-                                <div class="flex items-center gap-2.5">
-                                    <div
-                                        class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
-                                    >
-                                        <Globe
-                                            class="size-3.5 text-muted-foreground"
-                                        />
-                                    </div>
-                                    <div>
-                                        <CardTitle class="text-sm"
-                                            >Application</CardTitle
-                                        >
-                                        <CardDescription
-                                            >Identity &amp; display
-                                            preferences</CardDescription
-                                        >
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent class="space-y-4">
-                                <Field class="space-y-0">
+                            <div class="space-y-4 max-w-md">
+                                <!-- App URL -->
+                                <Field>
                                     <FieldContent>
                                         <FieldLabel for="app_url"
                                             >App URL</FieldLabel
@@ -481,8 +414,8 @@ const barColor = (pct: number): string =>
                                         <FieldDescription
                                             class="text-[11px] text-muted-foreground"
                                         >
-                                            Used in notification links and share
-                                            URLs
+                                            Used in notification links, email
+                                            headers, and share URLs
                                         </FieldDescription>
                                         <Input
                                             id="app_url"
@@ -493,15 +426,14 @@ const barColor = (pct: number): string =>
                                                     form.errors.app_url,
                                             }"
                                         />
-                                        <FieldError
-                                            v-if="form.errors.app_url"
-                                            class="text-xs"
-                                        >
+                                        <FieldError v-if="form.errors.app_url">
                                             {{ form.errors.app_url }}
                                         </FieldError>
                                     </FieldContent>
                                 </Field>
-                                <Field class="space-y-1.5">
+
+                                <!-- Timezone -->
+                                <Field>
                                     <FieldContent>
                                         <FieldLabel for="timezone"
                                             >Timezone</FieldLabel
@@ -509,7 +441,8 @@ const barColor = (pct: number): string =>
                                         <FieldDescription
                                             class="text-[11px] text-muted-foreground"
                                         >
-                                            All timestamps and schedules
+                                            All timestamps, schedules, and
+                                            displayed dates
                                         </FieldDescription>
                                         <Select v-model="form.timezone">
                                             <SelectTrigger id="timezone">
@@ -525,142 +458,56 @@ const barColor = (pct: number): string =>
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        <FieldError
-                                            v-if="form.errors.timezone"
-                                            class="text-xs text-destructive"
-                                        >
+                                        <FieldError v-if="form.errors.timezone">
                                             {{ form.errors.timezone }}
                                         </FieldError>
                                     </FieldContent>
                                 </Field>
-                            </CardContent>
-                        </Card>
 
-                        <!-- Right column -->
-                        <div class="space-y-4">
-                            <!-- Scheduler -->
-                            <Card>
-                                <CardHeader class="pb-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <div
-                                            class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
+                                <!-- Environment -->
+                                <Field>
+                                    <FieldContent>
+                                        <FieldLabel for="app_env"
+                                            >Environment</FieldLabel
                                         >
-                                            <Server
-                                                class="size-3.5 text-muted-foreground"
-                                            />
-                                        </div>
-                                        <div>
-                                            <CardTitle class="text-sm"
-                                                >Scheduler</CardTitle
-                                            >
-                                            <CardDescription
-                                                >Background job
-                                                status</CardDescription
-                                            >
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent
-                                    class="divide-y divide-border/60 p-0 px-6 pb-4"
-                                >
-                                    <div
-                                        v-for="job in scheduler_jobs"
-                                        :key="job.name"
-                                        class="grid grid-cols-[1fr_auto_auto] gap-3 items-center py-2.5"
-                                    >
-                                        <div>
-                                            <p class="text-[13px] font-medium">
-                                                {{ job.name }}
-                                            </p>
-                                            <p
-                                                class="text-[11px] text-muted-foreground mt-0.5"
-                                            >
-                                                {{ job.description }}
-                                            </p>
-                                        </div>
-                                        <span
-                                            class="text-[11px] text-muted-foreground whitespace-nowrap"
+                                        <FieldDescription
+                                            class="text-[11px] text-muted-foreground"
                                         >
-                                            {{ job.last_run }}
-                                        </span>
-                                        <Badge
-                                            :variant="
-                                                jobStatusVariant(job.status)
-                                            "
-                                            class="text-[10px]"
+                                            Controls debug output, error detail,
+                                            and caching behaviour
+                                        </FieldDescription>
+                                        <Select v-model="form.app_env">
+                                            <SelectTrigger id="app_env">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem
+                                                    v-for="opt in envOptions"
+                                                    :key="opt.value"
+                                                    :value="opt.value"
+                                                >
+                                                    {{ opt.label }}
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <p
+                                            class="text-[11px] text-muted-foreground mt-1"
                                         >
-                                            {{ job.status }}
-                                        </Badge>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <!-- Storage breakdown -->
-                            <Card>
-                                <CardHeader class="pb-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <div
-                                            class="size-8 rounded-md bg-blue-50 flex items-center justify-center shrink-0"
-                                        >
-                                            <Database
-                                                class="size-3.5 text-blue-600"
-                                            />
-                                        </div>
-                                        <div>
-                                            <CardTitle class="text-sm"
-                                                >Storage breakdown</CardTitle
+                                            Set to
+                                            <code class="text-[10px]"
+                                                >production</code
                                             >
-                                            <CardDescription>
-                                                Database table sizes ·
-                                                {{ stats.db_size_mb }} MB total
-                                            </CardDescription>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent class="space-y-3">
-                                    <div
-                                        v-for="tbl in storage_tables"
-                                        :key="tbl.name"
-                                    >
-                                        <div
-                                            class="flex justify-between mb-1.5"
-                                        >
-                                            <span
-                                                class="text-[12px] font-medium"
-                                                >{{ tbl.name }}</span
-                                            >
-                                            <span
-                                                class="text-[11px] text-muted-foreground"
-                                            >
-                                                {{ tbl.size_display }} |
-                                                {{
-                                                    tbl.row_count.toLocaleString()
-                                                }}
-                                                {{
-                                                    tbl.row_count === 1
-                                                        ? "row"
-                                                        : "rows"
-                                                }}
-                                            </span>
-                                        </div>
-                                        <div
-                                            class="h-1.5 rounded-full bg-muted overflow-hidden"
-                                        >
-                                            <div
-                                                class="h-full rounded-full transition-all duration-500"
-                                                :class="
-                                                    barColor(tbl.percentage)
-                                                "
-                                                :style="{
-                                                    width: `${tbl.percentage}%`,
-                                                }"
-                                            />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
+                                            to disable stack traces in live
+                                            deployments.
+                                        </p>
+                                        <FieldError v-if="form.errors.app_env">
+                                            {{ form.errors.app_env }}
+                                        </FieldError>
+                                    </FieldContent>
+                                </Field>
+                            </div>
+                        </CardContent>
+                    </Card>
 
                     <!-- Footer -->
                     <div class="flex justify-end gap-2 pb-2">
@@ -698,7 +545,7 @@ const barColor = (pct: number): string =>
                         </AlertDescription>
                     </Alert>
 
-                    <!-- Status -->
+                    <!-- Status card -->
                     <Card>
                         <CardHeader class="pb-3">
                             <div
@@ -802,7 +649,7 @@ const barColor = (pct: number): string =>
                                     <p class="text-muted-foreground text-sm">
                                         {{
                                             form.isDirty
-                                                ? "App will be in maintenance mode upon saving. make sure you have your bypass code ready."
+                                                ? "App will enter maintenance mode upon saving. Make sure your bypass secret is set."
                                                 : "App is currently in maintenance mode."
                                         }}
                                     </p>
@@ -811,7 +658,7 @@ const barColor = (pct: number): string =>
                         </CardContent>
                     </Card>
 
-                    <!-- Config -->
+                    <!-- Config card -->
                     <Card>
                         <CardHeader class="pb-3">
                             <div class="flex items-center gap-2.5">
@@ -837,7 +684,6 @@ const barColor = (pct: number): string =>
                         </CardHeader>
                         <CardContent>
                             <div class="grid grid-cols-2 gap-5">
-                                <!-- Bypass secret -->
                                 <div class="space-y-1.5">
                                     <Label>Bypass secret</Label>
                                     <p
@@ -847,7 +693,8 @@ const barColor = (pct: number): string =>
                                         <code class="text-[10px]"
                                             >/?secret=&lt;value&gt;</code
                                         >
-                                        during maintenance
+                                        during maintenance. Auto-generated if
+                                        left blank.
                                     </p>
                                     <div class="flex gap-2">
                                         <div class="relative flex-1">
@@ -858,7 +705,7 @@ const barColor = (pct: number): string =>
                                                         ? 'text'
                                                         : 'password'
                                                 "
-                                                placeholder="Enter or generate a secret"
+                                                placeholder="Leave blank to auto-generate on save"
                                                 class="pr-9"
                                             />
                                             <button
@@ -891,11 +738,29 @@ const barColor = (pct: number): string =>
                                     <p
                                         class="text-[11px] text-muted-foreground"
                                     >
-                                        Leave blank to disable bypass access.
+                                        <template
+                                            v-if="
+                                                form.maintenance_enabled &&
+                                                settings.bypass_secret
+                                            "
+                                        >
+                                            Bypass URL:
+                                            <code
+                                                class="text-[10px] select-all"
+                                            >
+                                                {{ settings.app_url }}?secret={{
+                                                    settings.bypass_secret
+                                                }}
+                                            </code>
+                                        </template>
+                                        <template v-else>
+                                            Leave blank — a secret will be
+                                            auto-generated when maintenance is
+                                            enabled.
+                                        </template>
                                     </p>
                                 </div>
 
-                                <!-- Retry-After -->
                                 <div class="space-y-1.5">
                                     <Label>Retry-After</Label>
                                     <p
@@ -954,7 +819,6 @@ const barColor = (pct: number): string =>
                                     </p>
                                 </div>
 
-                                <!-- Redirect URL -->
                                 <div class="col-span-2 space-y-1.5">
                                     <Label for="maintenance_redirect"
                                         >Redirect to URL</Label
@@ -1114,10 +978,10 @@ const barColor = (pct: number): string =>
                                         <CardTitle class="text-sm"
                                             >Speed results pruning</CardTitle
                                         >
-                                        <CardDescription>
-                                            Auto-delete old test records on a
-                                            schedule
-                                        </CardDescription>
+                                        <CardDescription
+                                            >Auto-delete old test records on a
+                                            schedule</CardDescription
+                                        >
                                     </div>
                                 </div>
                                 <Badge
@@ -1181,9 +1045,9 @@ const barColor = (pct: number): string =>
                                         "
                                         :disabled="!form.result_auto_purge"
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
+                                        <SelectTrigger
+                                            ><SelectValue
+                                        /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem
                                                 v-for="opt in retentionOptions"
@@ -1207,9 +1071,9 @@ const barColor = (pct: number): string =>
                                         v-model="form.prune_schedule"
                                         :disabled="!form.result_auto_purge"
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
+                                        <SelectTrigger
+                                            ><SelectValue
+                                        /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem
                                                 v-for="opt in scheduleOptions"
@@ -1371,9 +1235,9 @@ const barColor = (pct: number): string =>
                                             form.webhook_retention_days
                                         "
                                     >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
+                                        <SelectTrigger
+                                            ><SelectValue
+                                        /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem
                                                 v-for="opt in retentionOptions"
@@ -1430,7 +1294,7 @@ const barColor = (pct: number): string =>
                      DANGER ZONE
                 ════════════════════════════════════════════════════ -->
                 <TabsContent value="danger" class="mt-5 space-y-4">
-                    <!-- Cache management — safe, no confirmation needed -->
+                    <!-- Cache management -->
                     <Card>
                         <CardHeader class="pb-3">
                             <div class="flex items-center justify-between">
@@ -1577,9 +1441,9 @@ const barColor = (pct: number): string =>
                                 >
                                     <Alert variant="destructive" class="py-2">
                                         <AlertTriangle class="size-3.5" />
-                                        <AlertDescription class="text-xs">
-                                            {{ action.detail }}
-                                        </AlertDescription>
+                                        <AlertDescription class="text-xs">{{
+                                            action.detail
+                                        }}</AlertDescription>
                                     </Alert>
                                     <p class="text-xs text-destructive">
                                         Type

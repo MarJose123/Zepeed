@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
@@ -15,6 +16,8 @@ use Override;
  */
 final class Setting extends Model
 {
+    use HasUuids;
+
     /** @var list<string> */
     protected $fillable = ['key', 'value'];
 
@@ -62,6 +65,7 @@ final class Setting extends Model
     {
         return [
             'app_url'                    => (string) self::get('app_url', config('app.url', '')),
+            'app_env'                    => (string) self::get('app_env', config('app.env', 'production')),
             'timezone'                   => (string) self::get('timezone', config('app.timezone', 'UTC')),
 
             'maintenance_enabled'        => (bool) self::get('maintenance_enabled', false),

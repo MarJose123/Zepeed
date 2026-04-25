@@ -3,6 +3,7 @@
 namespace App\Actions\App;
 
 use App\Data\GeneralSettingsData;
+use App\Models\DowntimeLog;
 use App\Models\Setting;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Artisan;
@@ -42,14 +43,20 @@ final class UpdateGeneralSettings
             return;
         }
 
-        $actor = Auth::user()->email ?? 'system';
+        $actor = Auth::user()?->email ?? 'system';
 
         if ($is) {
-            $args = [];
+            // Auto-generate a bypass secret if none was provided so the admin
+            // is never locked out after enabling maintenance mode.
+            $secret = ($data->bypass_secret !== null && $data->bypass_secret !== '')
+                ? $data->bypass_secret
+                : $this->generateBypassSecret();
 
-            if ($data->bypass_secret !== null && $data->bypass_secret !== '') {
-                $args['--secret'] = $data->bypass_secret;
-            }
+            // Persist the (possibly auto-generated) secret so it is readable
+            // by the controller for the post-save redirect.
+            Setting::set('bypass_secret', $secret);
+
+            $args = ['--secret' => $secret];
 
             if ($data->retry_after_value > 0) {
                 $args['--retry'] = $data->retry_after_unit === 'minutes'
@@ -61,13 +68,11 @@ final class UpdateGeneralSettings
                 $args['--redirect'] = $data->maintenance_redirect;
             }
 
-            DB::table('downtime_logs')->insert([
+            DowntimeLog::create([
                 'event'        => 'DOWN',
                 'triggered_by' => $actor,
                 'duration'     => null,
                 'timestamp'    => now(),
-                'created_at'   => now(),
-                'updated_at'   => now(),
             ]);
 
             Artisan::call('down', $args);
@@ -77,30 +82,33 @@ final class UpdateGeneralSettings
 
         Artisan::call('up');
 
-        // Compute duration from the most-recent open DOWN entry.
-        $lastDown = DB::table('downtime_logs')
+        $lastDown = DowntimeLog::query()
             ->where('event', 'DOWN')
             ->whereNull('duration')
             ->orderByDesc('timestamp')
             ->first();
 
         if ($lastDown !== null) {
-            $duration = Date::parse($lastDown->timestamp)
-                ->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, true, 1);
-
-            DB::table('downtime_logs')
-                ->where('id', $lastDown->id)
-                ->update(['duration' => $duration, 'updated_at' => now()]);
+            $lastDown->update([
+                'duration' => Date::parse($lastDown->timestamp)
+                    ->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, true, 1),
+            ]);
         }
 
-        DB::table('downtime_logs')->insert([
+        DowntimeLog::create([
             'event'        => 'UP',
             'triggered_by' => $actor,
             'duration'     => null,
             'timestamp'    => now(),
-            'created_at'   => now(),
-            'updated_at'   => now(),
         ]);
+    }
+
+    /**
+     * Generate a cryptographically random bypass secret.
+     */
+    private function generateBypassSecret(): string
+    {
+        return bin2hex(random_bytes(12)); // 24-char hex string
     }
 
     // ─── Read-only data builders ──────────────────────────────────────────
@@ -170,6 +178,10 @@ final class UpdateGeneralSettings
                 'size_mb'      => round($t['_bytes'] / 1_048_576, 3),
                 'size_display' => $this->formatBytes($t['_bytes']),
                 'row_count'    => $t['row_count'],
+                // Flag tables that have allocated space but no rows — InnoDB
+                // always allocates at least one 16 KB page per table.
+                'empty'        => $t['row_count'] === 0 && $t['_bytes'] > 0
+                    && $t['name'] !== 'other tables',
                 'percentage'   => (int) round($t['_bytes'] / $totalBytes * 100),
             ],
             $tables,
@@ -309,11 +321,16 @@ final class UpdateGeneralSettings
      */
     public function downtimeLogs(): array
     {
-        return DB::table('downtime_logs')
+        return DowntimeLog::query()
             ->orderByDesc('timestamp')
             ->limit(10)
             ->get(['event', 'triggered_by', 'duration', 'timestamp'])
-            ->map(static fn (object $r) => (array) $r)
+            ->map(static fn (DowntimeLog $log) => [
+                'event'        => $log->event,
+                'triggered_by' => $log->triggered_by,
+                'duration'     => $log->duration,
+                'timestamp'    => $log->timestamp->toDateTimeString(),
+            ])
             ->all();
     }
 
