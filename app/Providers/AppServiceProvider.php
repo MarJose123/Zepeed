@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Override;
+use URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,12 +39,6 @@ class AppServiceProvider extends ServiceProvider
     private function applyGeneralSettings(): void
     {
         try {
-            // ── App name ──────────────────────────────────────────────────
-            $appName = Setting::get('app_name');
-
-            if (is_string($appName) && $appName !== '') {
-                config(['app.name' => $appName]);
-            }
 
             // ── App URL ───────────────────────────────────────────────────
             // Force the root URL and HTTPS scheme on all generated URLs
@@ -52,10 +47,10 @@ class AppServiceProvider extends ServiceProvider
 
             if (is_string($appUrl) && $appUrl !== '') {
                 config(['app.url' => $appUrl]);
-                URL::forceRootUrl($appUrl);
+                URL::useOrigin($appUrl);
 
                 if (str_starts_with($appUrl, 'https://')) {
-                    URL::forceScheme('https');
+                    URL::forceHttps();
                 }
             }
 
@@ -76,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
             // and error detail match what the user configured.
             $env = Setting::get('app_env');
 
-            if (is_string($env) && in_array($env, ['production', 'local', 'staging'], true)) {
+            if (in_array($env, ['production', 'local', 'staging'], true)) {
                 config(['app.env'   => $env]);
                 config(['app.debug' => $env !== 'production']);
             }
