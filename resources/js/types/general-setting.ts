@@ -17,8 +17,15 @@ export interface TStorageTable {
 export interface TDowntimeLog {
     event: "DOWN" | "UP";
     triggered_by: string;
-    duration: string;
+    duration: string | null;
     timestamp: string;
+}
+
+export interface TDowntimeLogPaginator {
+    data: TDowntimeLog[];
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 export interface TRetentionProjection {
@@ -49,9 +56,6 @@ export interface TGeneralSettings {
     maintenance_redirect: string;
     result_auto_purge: boolean;
     result_retention_days: number;
-    prune_schedule: string;
-    prune_cron: string;
-    batch_size: number;
     exempt_failed: boolean;
     webhook_retention_days: number;
     webhook_extended_retention: boolean;
@@ -62,7 +66,7 @@ export interface TGeneralSettingsPageProps {
     stats: TGeneralStats;
     scheduler_jobs: TSchedulerJob[];
     storage_tables: TStorageTable[];
-    downtime_logs: TDowntimeLog[];
+    downtime_logs: TDowntimeLogPaginator;
     retention_projections: TRetentionProjection[];
     timezones: string[];
 }

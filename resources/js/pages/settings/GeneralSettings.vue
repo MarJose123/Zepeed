@@ -18,6 +18,10 @@ import {
     Server,
     Trash2,
     Zap,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
 } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -93,9 +97,6 @@ const form = useForm({
     maintenance_redirect: props.settings.maintenance_redirect,
     result_auto_purge: props.settings.result_auto_purge,
     result_retention_days: props.settings.result_retention_days,
-    prune_schedule: props.settings.prune_schedule,
-    prune_cron: props.settings.prune_cron,
-    batch_size: props.settings.batch_size,
     exempt_failed: props.settings.exempt_failed,
     webhook_retention_days: props.settings.webhook_retention_days,
     webhook_extended_retention: props.settings.webhook_extended_retention,
@@ -108,6 +109,16 @@ const submit = () => {
 };
 
 const discard = () => form.reset();
+
+const goToPage = (page: number) => {
+    router.visit(route("speedtest.general-settings.edit"), {
+        method: "get",
+        data: { downtime_page: page },
+        preserveScroll: true,
+        preserveState: true,
+        only: ["downtime_logs"],
+    });
+};
 
 // ─── Cache management ─────────────────────────────────────────────────────
 
@@ -286,24 +297,11 @@ const retentionOptions = [
     { value: 730, label: "2 years" },
 ];
 
-const scheduleOptions = [
-    { value: "daily_02", label: "Daily at 02:00" },
-    { value: "daily_04", label: "Daily at 04:00" },
-    { value: "weekly", label: "Weekly (Sun 03:00)" },
-    { value: "custom", label: "Custom cron" },
-];
-
 const envOptions = [
     { value: "production", label: "production" },
     { value: "local", label: "local" },
     { value: "staging", label: "staging" },
 ];
-
-const retentionPct = (current: number, max: number): number =>
-    Math.min(100, Math.round((current / max) * 100));
-
-const barColor = (pct: number): string =>
-    pct > 80 ? "bg-destructive" : pct > 55 ? "bg-amber-500" : "bg-foreground";
 </script>
 
 <template>
@@ -365,8 +363,6 @@ const barColor = (pct: number): string =>
                 <!-- ════════════════════════════════════════════════════
                      APPLICATION
                 ════════════════════════════════════════════════════ -->
-                <!-- resources/js/pages/settings/GeneralSettings.vue -->
-                <!-- Only the APPLICATION TabsContent block changes — replace it entirely -->
 
                 <TabsContent value="application" class="mt-5 space-y-4">
                     <Card>
@@ -843,22 +839,97 @@ const barColor = (pct: number): string =>
                     <!-- Downtime log -->
                     <Card>
                         <CardHeader class="pb-3">
-                            <div class="flex items-center gap-2.5">
-                                <div
-                                    class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
-                                >
-                                    <Clock
-                                        class="size-3.5 text-muted-foreground"
-                                    />
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div
+                                        class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
+                                    >
+                                        <Clock
+                                            class="size-3.5 text-muted-foreground"
+                                        />
+                                    </div>
+                                    <div>
+                                        <CardTitle class="text-sm"
+                                            >Downtime log</CardTitle
+                                        >
+                                        <CardDescription>
+                                            Recent maintenance events
+                                            <span
+                                                class="text-muted-foreground/60"
+                                            >
+                                                ·
+                                                {{ downtime_logs.total }} total
+                                            </span>
+                                        </CardDescription>
+                                    </div>
                                 </div>
-                                <div>
-                                    <CardTitle class="text-sm"
-                                        >Downtime log</CardTitle
+                                <!-- Pagination controls -->
+                                <div
+                                    v-if="downtime_logs.last_page > 1"
+                                    class="flex items-center gap-1"
+                                >
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="h-7 w-7 p-0"
+                                        :disabled="
+                                            downtime_logs.current_page === 1
+                                        "
+                                        @click="goToPage(1)"
                                     >
-                                    <CardDescription
-                                        >Recent maintenance
-                                        events</CardDescription
+                                        <ChevronsLeft class="size-3.5" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="h-7 w-7 p-0"
+                                        :disabled="
+                                            downtime_logs.current_page === 1
+                                        "
+                                        @click="
+                                            goToPage(
+                                                downtime_logs.current_page - 1,
+                                            )
+                                        "
                                     >
+                                        <ChevronLeft class="size-3.5" />
+                                    </Button>
+                                    <span
+                                        class="text-xs text-muted-foreground px-1.5"
+                                    >
+                                        {{ downtime_logs.current_page }} /
+                                        {{ downtime_logs.last_page }}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="h-7 w-7 p-0"
+                                        :disabled="
+                                            downtime_logs.current_page ===
+                                            downtime_logs.last_page
+                                        "
+                                        @click="
+                                            goToPage(
+                                                downtime_logs.current_page + 1,
+                                            )
+                                        "
+                                    >
+                                        <ChevronRight class="size-3.5" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="h-7 w-7 p-0"
+                                        :disabled="
+                                            downtime_logs.current_page ===
+                                            downtime_logs.last_page
+                                        "
+                                        @click="
+                                            goToPage(downtime_logs.last_page)
+                                        "
+                                    >
+                                        <ChevronsRight class="size-3.5" />
+                                    </Button>
                                 </div>
                             </div>
                         </CardHeader>
@@ -882,7 +953,17 @@ const barColor = (pct: number): string =>
                                 </TableHeader>
                                 <TableBody>
                                     <TableRow
-                                        v-for="(log, i) in downtime_logs"
+                                        v-if="downtime_logs.data.length === 0"
+                                    >
+                                        <TableCell
+                                            colspan="4"
+                                            class="pl-6 py-6 text-center text-sm text-muted-foreground"
+                                        >
+                                            No maintenance events recorded yet.
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow
+                                        v-for="(log, i) in downtime_logs.data"
                                         :key="i"
                                     >
                                         <TableCell class="pl-6">
@@ -910,9 +991,9 @@ const barColor = (pct: number): string =>
                                         >
                                             {{ log.triggered_by }}
                                         </TableCell>
-                                        <TableCell class="text-xs">{{
-                                            log.duration
-                                        }}</TableCell>
+                                        <TableCell class="text-xs">
+                                            {{ log.duration ?? "—" }}
+                                        </TableCell>
                                         <TableCell
                                             class="text-xs text-muted-foreground"
                                         >
@@ -978,10 +1059,10 @@ const barColor = (pct: number): string =>
                                         <CardTitle class="text-sm"
                                             >Speed results pruning</CardTitle
                                         >
-                                        <CardDescription
-                                            >Auto-delete old test records on a
-                                            schedule</CardDescription
-                                        >
+                                        <CardDescription>
+                                            Auto-delete old test records on a
+                                            schedule
+                                        </CardDescription>
                                     </div>
                                 </div>
                                 <Badge
@@ -1024,7 +1105,7 @@ const barColor = (pct: number): string =>
                                     </p>
                                 </div>
                                 <Switch
-                                    v-model:checked="form.result_auto_purge"
+                                    v-model:model-value="form.result_auto_purge"
                                 />
                             </div>
 
@@ -1061,64 +1142,6 @@ const barColor = (pct: number): string =>
                                 </div>
 
                                 <div class="space-y-1.5">
-                                    <Label>Prune schedule</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
-                                        When the pruning job fires
-                                    </p>
-                                    <Select
-                                        v-model="form.prune_schedule"
-                                        :disabled="!form.result_auto_purge"
-                                    >
-                                        <SelectTrigger
-                                            ><SelectValue
-                                        /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem
-                                                v-for="opt in scheduleOptions"
-                                                :key="opt.value"
-                                                :value="opt.value"
-                                            >
-                                                {{ opt.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Input
-                                        v-if="form.prune_schedule === 'custom'"
-                                        v-model="form.prune_cron"
-                                        placeholder="0 2 * * *"
-                                        class="mt-2"
-                                        :disabled="!form.result_auto_purge"
-                                    />
-                                </div>
-
-                                <div class="space-y-1.5">
-                                    <Label>Batch size</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
-                                        Rows deleted per iteration. Smaller
-                                        values reduce database lock time.
-                                    </p>
-                                    <div class="relative">
-                                        <Input
-                                            v-model.number="form.batch_size"
-                                            type="number"
-                                            min="100"
-                                            max="10000"
-                                            :disabled="!form.result_auto_purge"
-                                            class="pr-20"
-                                        />
-                                        <span
-                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none"
-                                        >
-                                            rows / batch
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-1.5">
                                     <Label>Exempt failed results</Label>
                                     <p
                                         class="text-[11px] text-muted-foreground"
@@ -1128,71 +1151,12 @@ const barColor = (pct: number): string =>
                                     </p>
                                     <div class="pt-1">
                                         <Switch
-                                            v-model:checked="form.exempt_failed"
+                                            v-model:model-value="
+                                                form.exempt_failed
+                                            "
                                             :disabled="!form.result_auto_purge"
                                         />
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Retention projection -->
-                            <div
-                                class="rounded-md bg-muted/60 border border-border/60 p-4 space-y-3"
-                            >
-                                <p
-                                    class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
-                                >
-                                    Retention projection
-                                </p>
-                                <div
-                                    v-for="proj in retention_projections"
-                                    :key="proj.table"
-                                >
-                                    <div class="flex justify-between mb-1.5">
-                                        <span class="text-xs font-medium">{{
-                                            proj.table
-                                        }}</span>
-                                        <span
-                                            class="text-[11px] text-muted-foreground"
-                                        >
-                                            {{
-                                                proj.current_rows.toLocaleString()
-                                            }}
-                                            / ~{{
-                                                proj.max_rows.toLocaleString()
-                                            }}
-                                            max
-                                        </span>
-                                    </div>
-                                    <div
-                                        class="h-1.5 rounded-full bg-background overflow-hidden mb-1"
-                                    >
-                                        <div
-                                            class="h-full rounded-full transition-all duration-500"
-                                            :class="
-                                                barColor(
-                                                    retentionPct(
-                                                        proj.current_rows,
-                                                        proj.max_rows,
-                                                    ),
-                                                )
-                                            "
-                                            :style="{
-                                                width: `${retentionPct(proj.current_rows, proj.max_rows)}%`,
-                                            }"
-                                        />
-                                    </div>
-                                    <p
-                                        class="text-[10.5px] text-muted-foreground"
-                                    >
-                                        {{
-                                            retentionPct(
-                                                proj.current_rows,
-                                                proj.max_rows,
-                                            )
-                                        }}% of {{ proj.window_days }}-day window
-                                        used
-                                    </p>
                                 </div>
                             </div>
                         </CardContent>
@@ -1261,7 +1225,7 @@ const barColor = (pct: number): string =>
                                     </p>
                                     <div class="pt-1">
                                         <Switch
-                                            v-model:checked="
+                                            v-model:model-value="
                                                 form.webhook_extended_retention
                                             "
                                         />

@@ -317,21 +317,34 @@ final class UpdateGeneralSettings
     }
 
     /**
-     * @return list<array{event:string,triggered_by:string,duration:string|null,timestamp:string}>
+     * @param int $page
+     *
+     * @return array{
+     *     data: list<array{event:string,triggered_by:string,duration:string|null,timestamp:string}>,
+     *     current_page: int,
+     *     last_page: int,
+     *     total: int,
+     * }
      */
-    public function downtimeLogs(): array
+    public function downtimeLogs(int $page = 1): array
     {
-        return DowntimeLog::query()
-            ->orderByDesc('timestamp')
-            ->limit(10)
-            ->get(['event', 'triggered_by', 'duration', 'timestamp'])
-            ->map(static fn (DowntimeLog $log) => [
-                'event'        => $log->event,
-                'triggered_by' => $log->triggered_by,
-                'duration'     => $log->duration,
-                'timestamp'    => $log->timestamp->toDateTimeString(),
-            ])
-            ->all();
+        $paginator = DowntimeLog::query()
+            ->orderBy('timestamp', 'desc')
+            ->paginate(perPage: 10, page: $page);
+
+        return [
+            'data'         => collect($paginator->items())
+                ->map(static fn (DowntimeLog $log) => [
+                    'event'        => $log->event,
+                    'triggered_by' => $log->triggered_by,
+                    'duration'     => $log->duration,
+                    'timestamp'    => $log->timestamp->toDateTimeString(),
+                ])
+                ->all(),
+            'current_page' => $paginator->currentPage(),
+            'last_page'    => $paginator->lastPage(),
+            'total'        => $paginator->total(),
+        ];
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────

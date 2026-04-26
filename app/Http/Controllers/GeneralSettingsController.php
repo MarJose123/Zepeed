@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Services\InertiaNotification;
 use DateTimeZone;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -27,14 +28,16 @@ final class GeneralSettingsController extends Controller
     /**
      * Render the General Settings page with all supporting data.
      */
-    public function edit(): Response
+    public function edit(Request $request): Response
     {
         return Inertia::render('settings/GeneralSettings', [
             'settings'              => Setting::generalSettings(),
             'stats'                 => $this->updateAction->stats(),
             'scheduler_jobs'        => $this->updateAction->schedulerJobs(),
             'storage_tables'        => $this->updateAction->storageTables(),
-            'downtime_logs'         => $this->updateAction->downtimeLogs(),
+            'downtime_logs'         => $this->updateAction->downtimeLogs(
+                page: max(1, (int) $request->query('downtime_page', 1)),
+            ),
             'retention_projections' => $this->updateAction->retentionProjections(),
             'timezones'             => DateTimeZone::listIdentifiers(),
         ]);
@@ -78,7 +81,7 @@ final class GeneralSettingsController extends Controller
 
                     // /{secret} is the Laravel-recognised bypass path that
                     // issues the laravel_maintenance cookie then redirects to /.
-                    return redirect()->intended();
+                    return redirect(url("/{$secret}"));
                 }
             }
 

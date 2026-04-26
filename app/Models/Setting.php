@@ -76,9 +76,6 @@ final class Setting extends Model
 
             'result_auto_purge'          => (bool) self::get('result_auto_purge', false),
             'result_retention_days'      => (int) self::get('result_retention_days', 90),
-            'prune_schedule'             => (string) self::get('prune_schedule', 'daily_02'),
-            'prune_cron'                 => (string) self::get('prune_cron', '0 2 * * *'),
-            'batch_size'                 => (int) self::get('batch_size', 500),
             'exempt_failed'              => (bool) self::get('exempt_failed', false),
 
             'webhook_retention_days'     => (int) self::get('webhook_retention_days', 30),
