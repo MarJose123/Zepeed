@@ -100,6 +100,7 @@ const form = useForm({
     exempt_failed: props.settings.exempt_failed,
     webhook_retention_days: props.settings.webhook_retention_days,
     webhook_extended_retention: props.settings.webhook_extended_retention,
+    prune_schedule: props.settings.prune_schedule,
 });
 
 const submit = () => {
@@ -1158,6 +1159,32 @@ const envOptions = [
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <Label>Prune schedule</Label>
+                                <p class="text-[11px] text-muted-foreground">
+                                    When the pruning job fires
+                                </p>
+                                <Select
+                                    v-model="form.prune_schedule"
+                                    :disabled="!form.result_auto_purge"
+                                >
+                                    <SelectTrigger
+                                        ><SelectValue
+                                    /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="daily_02"
+                                            >Daily at 02:00</SelectItem
+                                        >
+                                        <SelectItem value="daily_04"
+                                            >Daily at 04:00</SelectItem
+                                        >
+                                        <SelectItem value="weekly"
+                                            >Weekly (Sun 03:00)</SelectItem
+                                        >
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </CardContent>
                     </Card>

@@ -29,6 +29,8 @@ final class GeneralSettingsData extends Data
         #[Min(30)]
         public readonly int $webhook_retention_days,
         public readonly bool $webhook_extended_retention,
+
+        public readonly string $prune_schedule,
     ) {}
 
     public static function rules(): array
@@ -44,6 +46,7 @@ final class GeneralSettingsData extends Data
             'retry_after_unit'     => ['required', 'string', 'in:seconds,minutes'],
             'maintenance_redirect' => ['nullable', 'url', 'max:255'],
             'bypass_secret'        => ['nullable', 'string', 'max:64'],
+            'prune_schedule'       => ['required', 'string', 'in:daily_02,daily_04,weekly'],
         ];
     }
 }

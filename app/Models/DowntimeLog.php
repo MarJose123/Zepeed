@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class DowntimeLog extends Model
 {
@@ -17,8 +18,13 @@ class DowntimeLog extends Model
         'timestamp',
     ];
 
-    /** @var array<string, string> */
-    protected $casts = [
-        'timestamp' => 'datetime',
-    ];
+    /**
+     * @return array<string, string> */
+    #[Override]
+    protected function casts(): array
+    {
+        return [
+            'timestamp' => 'datetime',
+        ];
+    }
 }

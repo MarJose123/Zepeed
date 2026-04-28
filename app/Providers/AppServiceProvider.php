@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Override;
+use Throwable;
 use URL;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        $this->applyGeneralSettings();
     }
 
     /**
@@ -63,7 +66,6 @@ class AppServiceProvider extends ServiceProvider
             if (is_string($timezone) && $timezone !== '') {
                 config(['app.timezone' => $timezone]);
                 date_default_timezone_set($timezone);
-                Date::setDefaultTimezone($timezone);
             }
 
             // ── Environment ───────────────────────────────────────────────
@@ -75,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
                 config(['app.env'   => $env]);
                 config(['app.debug' => $env !== 'production']);
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Silently fall back to .env defaults during install / CI /
             // before migrations have run.
         }

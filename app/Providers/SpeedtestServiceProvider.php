@@ -2,15 +2,19 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\PruneSpeedResultsCommand;
+use App\Console\Commands\PruneWebhookDeliveriesCommand;
 use App\Enums\SpeedtestServer;
 use App\Events\Speedtest\SpeedtestExceptionEvent;
 use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
+use App\Models\Setting;
 use App\Services\MailProviderService;
 use App\Services\Speedtest\Contracts\SpeedtestServiceInterface;
 use App\Services\Speedtest\FastcomService;
 use App\Services\Speedtest\LibrespeedService;
 use App\Services\Speedtest\OklaSpeedtestService;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
@@ -52,6 +56,10 @@ class SpeedtestServiceProvider extends ServiceProvider
         $this->dynamicMailers();
 
         $this->eventListeners();
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $this->scheduleSpeedtestPruning($schedule);
+        });
     }
 
     protected function eventListeners(): void
@@ -72,5 +80,40 @@ class SpeedtestServiceProvider extends ServiceProvider
                 'exception' => $th,
             ]);
         }
+    }
+
+    /**
+     * Register the pruning schedules.
+     *
+     * The prune time is driven by the stored `prune_schedule` setting so
+     * the user's selection in General Settings → Data Retention is honoured
+     * without redeploying or editing any files.
+     *
+     * Both commands are no-ops when pruning is disabled — the setting check
+     * lives inside the command itself so the schedule entry is always safe
+     * to register.
+     */
+    private function scheduleSpeedtestPruning(Schedule $schedule): void
+    {
+        $pruneSchedule = (string) Setting::get('prune_schedule', 'daily_02');
+
+        $speedResultJob = $schedule
+            ->command(PruneSpeedResultsCommand::class)
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->description('Prune old speed results');
+
+        $webhookJob = $schedule
+            ->command(PruneWebhookDeliveriesCommand::class)
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->description('Prune old webhook delivery logs');
+
+        // Apply the user-configured schedule to both jobs.
+        match ($pruneSchedule) {
+            'daily_04' => $speedResultJob->dailyAt('04:00') && $webhookJob->dailyAt('04:00'),
+            'weekly'   => $speedResultJob->weeklyOn(0, '03:00') && $webhookJob->weeklyOn(0, '03:00'),
+            default    => $speedResultJob->dailyAt('02:00') && $webhookJob->dailyAt('02:00'),
+        };
     }
 }

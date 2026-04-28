@@ -43,7 +43,7 @@ final class UpdateGeneralSettings
             return;
         }
 
-        $actor = Auth::user()?->email ?? 'system';
+        $actor = Auth::user()->email ?? 'system';
 
         if ($is) {
             // Auto-generate a bypass secret if none was provided so the admin
@@ -68,7 +68,7 @@ final class UpdateGeneralSettings
                 $args['--redirect'] = $data->maintenance_redirect;
             }
 
-            DowntimeLog::create([
+            DowntimeLog::query()->create([
                 'event'        => 'DOWN',
                 'triggered_by' => $actor,
                 'duration'     => null,
@@ -95,7 +95,7 @@ final class UpdateGeneralSettings
             ]);
         }
 
-        DowntimeLog::create([
+        DowntimeLog::query()->create([
             'event'        => 'UP',
             'triggered_by' => $actor,
             'duration'     => null,
@@ -147,8 +147,17 @@ final class UpdateGeneralSettings
      */
     public function schedulerJobs(): array
     {
+
+        $pruneSchedule = Setting::get('prune_schedule', 'daily_02');
+
+        $pruneLabel = match ($pruneSchedule) {
+            'daily_04' => 'daily at 04:00',
+            'weekly'   => 'weekly on Sunday at 03:00',
+            default    => 'daily at 02:00',
+        };
+
         return [
-            ['name' => 'results:prune',  'description' => 'daily at 02:00 · 90-day window',  'last_run' => 'yesterday', 'status' => 'healthy'],
+            ['name' => 'results:prune',  'description' => "{$pruneLabel} · retention window",  'last_run' => 'yesterday', 'status' => 'healthy'],
             ['name' => 'webhooks:retry', 'description' => 'every 5 min · failed deliveries', 'last_run' => '3 pending', 'status' => 'pending'],
         ];
     }

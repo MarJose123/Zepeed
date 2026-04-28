@@ -59,6 +59,7 @@ export interface TGeneralSettings {
     exempt_failed: boolean;
     webhook_retention_days: number;
     webhook_extended_retention: boolean;
+    prune_schedule: "daily_02" | "daily_04" | "weekly";
 }
 
 export interface TGeneralSettingsPageProps {
