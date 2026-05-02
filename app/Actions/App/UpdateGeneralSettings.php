@@ -148,16 +148,20 @@ final class UpdateGeneralSettings
     public function schedulerJobs(): array
     {
 
-        $pruneSchedule = Setting::get('prune_schedule', 'daily_02');
+        $frequency = (string) Setting::get('prune_frequency', 'daily');
+        $hour = str_pad((string) Setting::get('prune_hour', 2), 2, '0', STR_PAD_LEFT).':00';
+        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        $dayOfWeek = $days[(int) Setting::get('prune_day_of_week', 0)] ?? 'Sunday';
+        $dayOfMonth = (int) Setting::get('prune_day_of_month', 1);
 
-        $pruneLabel = match ($pruneSchedule) {
-            'daily_04' => 'daily at 04:00',
-            'weekly'   => 'weekly on Sunday at 03:00',
-            default    => 'daily at 02:00',
+        $suffix = match ($frequency) {
+            'weekly'  => "every {$dayOfWeek} at {$hour}",
+            'monthly' => "monthly on the {$dayOfMonth} at {$hour}",
+            default   => "daily at {$hour}",
         };
 
         return [
-            ['name' => 'results:prune',  'description' => "{$pruneLabel} · retention window",  'last_run' => 'yesterday', 'status' => 'healthy'],
+            ['name' => 'results:prune',  'description' => "{$suffix} · retention window",  'last_run' => 'yesterday', 'status' => 'healthy'],
             ['name' => 'webhooks:retry', 'description' => 'every 5 min · failed deliveries', 'last_run' => '3 pending', 'status' => 'pending'],
         ];
     }

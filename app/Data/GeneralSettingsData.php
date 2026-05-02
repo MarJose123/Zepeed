@@ -30,6 +30,11 @@ final class GeneralSettingsData extends Data
         public readonly int $webhook_retention_days,
         public readonly bool $webhook_extended_retention,
 
+        public readonly string $prune_frequency,   // daily | weekly | monthly
+        public readonly int $prune_hour,         // 0–23
+        public readonly int $prune_day_of_week,  // 0–6  (0 = Sunday) — used when weekly
+        public readonly int $prune_day_of_month, // 1–28               — used when monthly
+
         public readonly string $prune_schedule,
     ) {}
 
@@ -46,7 +51,11 @@ final class GeneralSettingsData extends Data
             'retry_after_unit'     => ['required', 'string', 'in:seconds,minutes'],
             'maintenance_redirect' => ['nullable', 'url', 'max:255'],
             'bypass_secret'        => ['nullable', 'string', 'max:64'],
-            'prune_schedule'       => ['required', 'string', 'in:daily_02,daily_04,weekly'],
+
+            'prune_frequency'    => ['required', 'string', 'in:daily,weekly,monthly'],
+            'prune_hour'         => ['required', 'integer', 'min:0', 'max:23'],
+            'prune_day_of_week'  => ['required', 'integer', 'min:0', 'max:6'],
+            'prune_day_of_month' => ['required', 'integer', 'min:1', 'max:28'],
         ];
     }
 }

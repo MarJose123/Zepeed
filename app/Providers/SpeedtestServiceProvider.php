@@ -95,25 +95,34 @@ class SpeedtestServiceProvider extends ServiceProvider
      */
     private function scheduleSpeedtestPruning(Schedule $schedule): void
     {
-        $pruneSchedule = (string) Setting::get('prune_schedule', 'daily_02');
+        $frequency = (string) Setting::get('prune_frequency', 'daily');
+        $hour = max(0, min(23, (int) Setting::get('prune_hour', 2)));
+        $dayOfWeek = max(0, min(6, (int) Setting::get('prune_day_of_week', 0)));
+        $dayOfMonth = max(1, min(28, (int) Setting::get('prune_day_of_month', 1)));
+
+        $time = str_pad((string) $hour, 2, '0', STR_PAD_LEFT).':00';
 
         $speedResultJob = $schedule
             ->command(PruneSpeedResultsCommand::class)
             ->withoutOverlapping()
+            ->runInBackground()
             ->onOneServer()
             ->description('Prune old speed results');
 
         $webhookJob = $schedule
             ->command(PruneWebhookDeliveriesCommand::class)
             ->withoutOverlapping()
+            ->runInBackground()
             ->onOneServer()
             ->description('Prune old webhook delivery logs');
 
-        // Apply the user-configured schedule to both jobs.
-        match ($pruneSchedule) {
-            'daily_04' => $speedResultJob->dailyAt('04:00') && $webhookJob->dailyAt('04:00'),
-            'weekly'   => $speedResultJob->weeklyOn(0, '03:00') && $webhookJob->weeklyOn(0, '03:00'),
-            default    => $speedResultJob->dailyAt('02:00') && $webhookJob->dailyAt('02:00'),
+        match ($frequency) {
+            'weekly'  => ($speedResultJob->weeklyOn($dayOfWeek, $time)
+                && $webhookJob->weeklyOn($dayOfWeek, $time)),
+            'monthly' => ($speedResultJob->monthlyOn($dayOfMonth, $time)
+                && $webhookJob->monthlyOn($dayOfMonth, $time)),
+            default   => ($speedResultJob->dailyAt($time)
+                && $webhookJob->dailyAt($time)),
         };
     }
 }
