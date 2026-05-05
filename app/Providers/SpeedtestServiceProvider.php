@@ -95,34 +95,20 @@ class SpeedtestServiceProvider extends ServiceProvider
      */
     private function scheduleSpeedtestPruning(Schedule $schedule): void
     {
-        $frequency = (string) Setting::get('prune_frequency', 'daily');
-        $hour = max(0, min(23, (int) Setting::get('prune_hour', 2)));
-        $dayOfWeek = max(0, min(6, (int) Setting::get('prune_day_of_week', 0)));
-        $dayOfMonth = max(1, min(28, (int) Setting::get('prune_day_of_month', 1)));
-
-        $time = str_pad((string) $hour, 2, '0', STR_PAD_LEFT).':00';
-
-        $speedResultJob = $schedule
+        $schedule
             ->command(PruneSpeedResultsCommand::class)
+            ->lastDayOfMonth()
             ->withoutOverlapping()
             ->runInBackground()
             ->onOneServer()
-            ->description('Prune old speed results');
+            ->description('Prune old speed results — runs last day of month at 00:00');
 
-        $webhookJob = $schedule
+        $schedule
             ->command(PruneWebhookDeliveriesCommand::class)
+            ->lastDayOfMonth()
             ->withoutOverlapping()
             ->runInBackground()
             ->onOneServer()
-            ->description('Prune old webhook delivery logs');
-
-        match ($frequency) {
-            'weekly'  => ($speedResultJob->weeklyOn($dayOfWeek, $time)
-                && $webhookJob->weeklyOn($dayOfWeek, $time)),
-            'monthly' => ($speedResultJob->monthlyOn($dayOfMonth, $time)
-                && $webhookJob->monthlyOn($dayOfMonth, $time)),
-            default   => ($speedResultJob->dailyAt($time)
-                && $webhookJob->dailyAt($time)),
-        };
+            ->description('Prune old webhook delivery logs — runs last day of month at 00:00');
     }
 }

@@ -77,11 +77,6 @@ final class Setting extends Model
             'result_retention_days'      => (int) self::get('result_retention_days', 90),
             'exempt_failed'              => (bool) self::get('exempt_failed', false),
 
-            'prune_frequency'    => (string) self::get('prune_frequency', 'daily'),
-            'prune_hour'         => (int) self::get('prune_hour', 2),
-            'prune_day_of_week'  => (int) self::get('prune_day_of_week', 0),
-            'prune_day_of_month' => (int) self::get('prune_day_of_month', 1),
-
             'webhook_retention_days'     => (int) self::get('webhook_retention_days', 30),
             'webhook_extended_retention' => (bool) self::get('webhook_extended_retention', true),
         ];

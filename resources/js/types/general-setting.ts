@@ -59,10 +59,6 @@ export interface TGeneralSettings {
     exempt_failed: boolean;
     webhook_retention_days: number;
     webhook_extended_retention: boolean;
-    prune_frequency: "daily" | "weekly" | "monthly";
-    prune_hour: number; // 0–23
-    prune_day_of_week: number; // 0–6
-    prune_day_of_month: number; // 1–28
 }
 
 export interface TGeneralSettingsPageProps {

@@ -100,10 +100,6 @@ const form = useForm({
     exempt_failed: props.settings.exempt_failed,
     webhook_retention_days: props.settings.webhook_retention_days,
     webhook_extended_retention: props.settings.webhook_extended_retention,
-    prune_frequency: props.settings.prune_frequency,
-    prune_hour: props.settings.prune_hour,
-    prune_day_of_week: props.settings.prune_day_of_week,
-    prune_day_of_month: props.settings.prune_day_of_month,
 });
 
 const submit = () => {
@@ -306,60 +302,6 @@ const envOptions = [
     { value: "local", label: "local" },
     { value: "staging", label: "staging" },
 ];
-
-const pruneFrequencyOptions = [
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
-];
-
-const pruneHourOptions = Array.from({ length: 24 }, (_, i) => ({
-    value: i,
-    label: String(i).padStart(2, "0") + ":00",
-}));
-
-const pruneDayOfWeekOptions = [
-    { value: 0, label: "Sunday" },
-    { value: 1, label: "Monday" },
-    { value: 2, label: "Tuesday" },
-    { value: 3, label: "Wednesday" },
-    { value: 4, label: "Thursday" },
-    { value: 5, label: "Friday" },
-    { value: 6, label: "Saturday" },
-];
-
-const pruneDayOfMonthOptions = Array.from({ length: 28 }, (_, i) => ({
-    value: i + 1,
-    label:
-        i + 1 === 1
-            ? "1st"
-            : i + 1 === 2
-              ? "2nd"
-              : i + 1 === 3
-                ? "3rd"
-                : `${i + 1}th`,
-}));
-
-// Human-readable summary shown below the selectors:
-const pruneScheduleSummary = computed(() => {
-    const h = String(form.prune_hour).padStart(2, "0") + ":00";
-
-    if (form.prune_frequency === "weekly") {
-        const day =
-            pruneDayOfWeekOptions[form.prune_day_of_week]?.label ?? "Sunday";
-
-        return `Every ${day} at ${h}`;
-    }
-
-    if (form.prune_frequency === "monthly") {
-        const day =
-            pruneDayOfMonthOptions[form.prune_day_of_month - 1]?.label ?? "1st";
-
-        return `Monthly on the ${day} at ${h}`;
-    }
-
-    return `Every day at ${h}`;
-});
 </script>
 
 <template>
@@ -1169,168 +1111,33 @@ const pruneScheduleSummary = computed(() => {
 
                             <Separator />
 
-                            <div class="grid grid-cols-2 gap-5">
-                                <div class="space-y-1.5">
-                                    <Label>Retention window</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
-                                        Results older than this are eligible for
-                                        deletion. Minimum 30 days.
-                                    </p>
-                                    <Select
-                                        v-model.number="
-                                            form.result_retention_days
-                                        "
-                                        :disabled="!form.result_auto_purge"
-                                    >
-                                        <SelectTrigger
-                                            ><SelectValue
-                                        /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem
-                                                v-for="opt in retentionOptions"
-                                                :key="opt.value"
-                                                :value="opt.value"
-                                            >
-                                                {{ opt.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div class="space-y-1.5">
-                                    <Label>Exempt failed results</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
-                                        Keep status = failed rows regardless of
-                                        the retention window
-                                    </p>
-                                    <div class="pt-1">
-                                        <Switch
-                                            v-model:model-value="
-                                                form.exempt_failed
-                                            "
-                                            :disabled="!form.result_auto_purge"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-span-2 space-y-1.5">
-                                <Label>Prune schedule</Label>
+                            <div class="space-y-1.5">
+                                <Label>Retention window</Label>
                                 <p class="text-[11px] text-muted-foreground">
-                                    When the pruning job fires
+                                    Results older than this are eligible for
+                                    deletion. Minimum 30 days.
                                 </p>
-
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <!-- Frequency -->
-                                    <Select
-                                        v-model="form.prune_frequency"
-                                        :disabled="!form.result_auto_purge"
-                                    >
-                                        <SelectTrigger class="w-32">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem
-                                                v-for="opt in pruneFrequencyOptions"
-                                                :key="opt.value"
-                                                :value="opt.value"
-                                            >
-                                                {{ opt.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-
-                                    <!-- Day of week — only when weekly -->
-                                    <template
-                                        v-if="form.prune_frequency === 'weekly'"
-                                    >
-                                        <span
-                                            class="text-xs text-muted-foreground"
-                                            >on</span
+                                <Select
+                                    v-model.number="form.result_retention_days"
+                                    :disabled="!form.result_auto_purge"
+                                >
+                                    <SelectTrigger
+                                        ><SelectValue
+                                    /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="opt in retentionOptions"
+                                            :key="opt.value"
+                                            :value="opt.value"
                                         >
-                                        <Select
-                                            v-model.number="
-                                                form.prune_day_of_week
-                                            "
-                                            :disabled="!form.result_auto_purge"
-                                        >
-                                            <SelectTrigger class="w-36">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem
-                                                    v-for="opt in pruneDayOfWeekOptions"
-                                                    :key="opt.value"
-                                                    :value="opt.value"
-                                                >
-                                                    {{ opt.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </template>
-
-                                    <!-- Day of month — only when monthly -->
-                                    <template
-                                        v-if="
-                                            form.prune_frequency === 'monthly'
-                                        "
-                                    >
-                                        <span
-                                            class="text-xs text-muted-foreground"
-                                            >on the</span
-                                        >
-                                        <Select
-                                            v-model.number="
-                                                form.prune_day_of_month
-                                            "
-                                            :disabled="!form.result_auto_purge"
-                                        >
-                                            <SelectTrigger class="w-28">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent class="max-h-52">
-                                                <SelectItem
-                                                    v-for="opt in pruneDayOfMonthOptions"
-                                                    :key="opt.value"
-                                                    :value="opt.value"
-                                                >
-                                                    {{ opt.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </template>
-
-                                    <!-- Hour — always shown -->
-                                    <span class="text-xs text-muted-foreground"
-                                        >at</span
-                                    >
-                                    <Select
-                                        v-model.number="form.prune_hour"
-                                        :disabled="!form.result_auto_purge"
-                                    >
-                                        <SelectTrigger class="w-24">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent class="max-h-52">
-                                            <SelectItem
-                                                v-for="opt in pruneHourOptions"
-                                                :key="opt.value"
-                                                :value="opt.value"
-                                            >
-                                                {{ opt.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <!-- Live summary -->
+                                            {{ opt.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <p class="text-[11px] text-muted-foreground">
                                     <span class="text-emerald-600">→</span>
-                                    {{ pruneScheduleSummary }}
+                                    Pruning runs automatically on the last day
+                                    of every month at 00:00.
                                 </p>
                             </div>
                         </CardContent>
@@ -1386,6 +1193,13 @@ const pruneScheduleSummary = computed(() => {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <p
+                                        class="text-[11px] text-muted-foreground"
+                                    >
+                                        <span class="text-emerald-600">→</span>
+                                        Pruning runs automatically on the last
+                                        day of every month at 00:00.
+                                    </p>
                                 </div>
                                 <div class="space-y-1.5">
                                     <Label
