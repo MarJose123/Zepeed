@@ -7,24 +7,19 @@ use InvalidArgumentException;
 
 class ClearCacheAction
 {
-    private const array COMMANDS = [
-        'app'    => 'cache:clear',
-        'config' => 'config:clear',
-        'route'  => 'route:clear',
-        'view'   => 'view:clear',
-    ];
+    private const array ALLOWED = ['optimize', 'optimize:clear'];
 
     /**
-     * Run the artisan clear command for the given cache type.
+     * Run the requested artisan cache command.
      *
      * @throws InvalidArgumentException
      */
-    public function handle(string $type): void
+    public function handle(string $command): void
     {
-        if (! array_key_exists($type, self::COMMANDS)) {
-            throw new InvalidArgumentException("Unknown cache type: {$type}");
+        if (! in_array($command, self::ALLOWED, true)) {
+            throw new InvalidArgumentException("Unknown cache command: {$command}");
         }
 
-        Artisan::call(self::COMMANDS[$type]);
+        Artisan::call($command);
     }
 }

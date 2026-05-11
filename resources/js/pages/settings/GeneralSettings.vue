@@ -123,16 +123,12 @@ const goToPage = (page: number) => {
 // ─── Cache management ─────────────────────────────────────────────────────
 
 const cacheClearing = ref<Record<TCacheKey, boolean>>({
-    app: false,
-    config: false,
-    route: false,
-    view: false,
+    optimize: false,
+    "optimize:clear": false,
 });
 const cacheCleared = ref<Record<TCacheKey, boolean>>({
-    app: false,
-    config: false,
-    route: false,
-    view: false,
+    optimize: false,
+    "optimize:clear": false,
 });
 
 const clearCache = (key: TCacheKey) => {
@@ -156,10 +152,7 @@ const clearCache = (key: TCacheKey) => {
     );
 };
 
-const clearAllCache = () => {
-    const keys: TCacheKey[] = ["app", "config", "route", "view"];
-    keys.forEach((k, i) => setTimeout(() => clearCache(k), i * 160));
-};
+const isProduction = computed(() => props.settings.app_env === "production");
 
 // ─── Danger zone ──────────────────────────────────────────────────────────
 
@@ -227,31 +220,6 @@ const retryAfterSeconds = computed<number>(() =>
         ? form.retry_after_value * 60
         : form.retry_after_value,
 );
-
-// ─── Static config ────────────────────────────────────────────────────────
-
-const cacheTypes: { key: TCacheKey; label: string; desc: string }[] = [
-    {
-        key: "app",
-        label: "Application cache",
-        desc: "Clears runtime data cached via Cache::put()",
-    },
-    {
-        key: "config",
-        label: "Config cache",
-        desc: "Re-reads all config files from disk",
-    },
-    {
-        key: "route",
-        label: "Route cache",
-        desc: "Forces route re-registration on next request",
-    },
-    {
-        key: "view",
-        label: "View cache",
-        desc: "Recompiles all Blade templates",
-    },
-];
 
 const dangerActions: TDangerActionConfig[] = [
     {
@@ -1249,61 +1217,50 @@ const envOptions = [
                     <!-- Cache management -->
                     <Card>
                         <CardHeader class="pb-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2.5">
-                                    <div
-                                        class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
-                                    >
-                                        <RefreshCw
-                                            class="size-3.5 text-muted-foreground"
-                                        />
-                                    </div>
-                                    <div>
-                                        <CardTitle class="text-sm"
-                                            >Cache management</CardTitle
-                                        >
-                                        <CardDescription>
-                                            Clear compiled caches without
-                                            affecting any stored data
-                                        </CardDescription>
-                                    </div>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    @click="clearAllCache"
+                            <div class="flex items-center gap-2.5">
+                                <div
+                                    class="size-8 rounded-md bg-muted flex items-center justify-center shrink-0"
                                 >
-                                    <RefreshCw class="size-3.5 mr-1.5" />Clear
-                                    all
-                                </Button>
+                                    <RefreshCw
+                                        class="size-3.5 text-muted-foreground"
+                                    />
+                                </div>
+                                <div>
+                                    <CardTitle class="text-sm"
+                                        >Cache management</CardTitle
+                                    >
+                                    <CardDescription>
+                                        Optimize or clear application caches
+                                    </CardDescription>
+                                </div>
                             </div>
                         </CardHeader>
-                        <CardContent
-                            class="divide-y divide-border/60 p-0 px-6 pb-2"
-                        >
+                        <CardContent class="space-y-3 pt-0">
+                            <!-- optimize -->
                             <div
-                                v-for="ct in cacheTypes"
-                                :key="ct.key"
-                                class="flex items-center justify-between gap-4 py-3"
+                                class="flex items-start justify-between gap-4 rounded-lg border border-border p-4"
                             >
-                                <div>
-                                    <p class="text-sm font-medium">
-                                        {{ ct.label }}
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-medium leading-none">
+                                        Optimize
                                     </p>
                                     <p
-                                        class="text-xs text-muted-foreground mt-0.5"
+                                        class="text-xs text-muted-foreground mt-1.5"
                                     >
-                                        {{ ct.desc }}
+                                        Caches config, routes, views, and events
+                                        for faster response times. Run after
+                                        every deployment.
                                     </p>
                                 </div>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    :disabled="cacheClearing[ct.key]"
-                                    @click="clearCache(ct.key)"
+                                    class="shrink-0"
+                                    :disabled="cacheClearing['optimize']"
+                                    @click="clearCache('optimize')"
                                 >
                                     <Check
-                                        v-if="cacheCleared[ct.key]"
+                                        v-if="cacheCleared['optimize']"
                                         class="size-3.5 mr-1.5 text-emerald-600"
                                     />
                                     <RefreshCw
@@ -1311,21 +1268,92 @@ const envOptions = [
                                         class="size-3.5 mr-1.5"
                                         :class="{
                                             'animate-spin':
-                                                cacheClearing[ct.key],
+                                                cacheClearing['optimize'],
                                         }"
                                     />
                                     <span
                                         :class="{
                                             'text-emerald-600':
-                                                cacheCleared[ct.key],
+                                                cacheCleared['optimize'],
                                         }"
                                     >
                                         {{
-                                            cacheCleared[ct.key]
-                                                ? "Cleared"
-                                                : cacheClearing[ct.key]
+                                            cacheCleared["optimize"]
+                                                ? "Done"
+                                                : cacheClearing["optimize"]
+                                                  ? "Running…"
+                                                  : "Run optimize"
+                                        }}
+                                    </span>
+                                </Button>
+                            </div>
+
+                            <!-- optimize:clear -->
+                            <div
+                                class="flex items-start justify-between gap-4 rounded-lg border p-4 transition-colors"
+                                :class="
+                                    isProduction
+                                        ? 'border-border bg-muted/40'
+                                        : 'border-border'
+                                "
+                            >
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-medium leading-none">
+                                        Optimize:Clear
+                                    </p>
+                                    <p
+                                        class="text-xs text-muted-foreground mt-1.5"
+                                    >
+                                        Clears all compiled caches — config,
+                                        routes, views, events, and application
+                                        cache. Not recommended in production.
+                                    </p>
+                                    <p
+                                        v-if="isProduction"
+                                        class="text-[11px] text-amber-600 mt-2 flex items-center gap-1"
+                                    >
+                                        <AlertTriangle
+                                            class="size-3 shrink-0"
+                                        />
+                                        Disabled in production environment.
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    class="shrink-0"
+                                    :disabled="
+                                        isProduction ||
+                                        cacheClearing['optimize:clear']
+                                    "
+                                    @click="clearCache('optimize:clear')"
+                                >
+                                    <Check
+                                        v-if="cacheCleared['optimize:clear']"
+                                        class="size-3.5 mr-1.5 text-emerald-600"
+                                    />
+                                    <RefreshCw
+                                        v-else
+                                        class="size-3.5 mr-1.5"
+                                        :class="{
+                                            'animate-spin':
+                                                cacheClearing['optimize:clear'],
+                                        }"
+                                    />
+                                    <span
+                                        :class="{
+                                            'text-emerald-600':
+                                                cacheCleared['optimize:clear'],
+                                        }"
+                                    >
+                                        {{
+                                            cacheCleared["optimize:clear"]
+                                                ? "Done"
+                                                : cacheClearing[
+                                                        "optimize:clear"
+                                                    ]
                                                   ? "Clearing…"
-                                                  : "Clear"
+                                                  : "Run optimize:clear"
                                         }}
                                     </span>
                                 </Button>
@@ -1346,39 +1374,40 @@ const envOptions = [
 
                     <!-- Danger actions -->
                     <div class="space-y-3">
-                        <div
+                        <Card
                             v-for="action in dangerActions"
                             :key="action.key"
-                            class="rounded-lg border border-destructive/30 overflow-hidden"
+                            class="border-destructive/30 overflow-hidden"
                         >
-                            <div
-                                class="flex items-start justify-between gap-3 p-4"
-                            >
-                                <div>
-                                    <p
-                                        class="text-sm font-semibold text-destructive"
-                                    >
-                                        {{ action.title }}
-                                    </p>
-                                    <p
-                                        class="text-xs text-muted-foreground mt-1"
-                                    >
-                                        {{ action.desc }}
-                                    </p>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    class="border-destructive/40 text-destructive hover:bg-destructive/10 shrink-0"
-                                    @click="toggleDanger(action.key)"
+                            <CardHeader class="pb-3">
+                                <div
+                                    class="flex items-start justify-between gap-3"
                                 >
-                                    {{
-                                        dangerOpen[action.key]
-                                            ? "Cancel"
-                                            : action.label
-                                    }}
-                                </Button>
-                            </div>
+                                    <div>
+                                        <CardTitle
+                                            class="text-sm text-destructive"
+                                        >
+                                            {{ action.title }}
+                                        </CardTitle>
+                                        <CardDescription class="mt-1">
+                                            {{ action.desc }}
+                                        </CardDescription>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                                        @click="toggleDanger(action.key)"
+                                    >
+                                        {{
+                                            dangerOpen[action.key]
+                                                ? "Cancel"
+                                                : action.label
+                                        }}
+                                    </Button>
+                                </div>
+                            </CardHeader>
+
                             <Transition
                                 enter-active-class="transition-all duration-200 ease-out"
                                 enter-from-class="opacity-0 -translate-y-1"
@@ -1387,25 +1416,27 @@ const envOptions = [
                                 leave-from-class="opacity-100 translate-y-0"
                                 leave-to-class="opacity-0 -translate-y-1"
                             >
-                                <div
+                                <CardContent
                                     v-if="dangerOpen[action.key]"
-                                    class="border-t border-destructive/30 bg-destructive/5 p-4 space-y-3"
+                                    class="pt-0 space-y-3 border-t border-destructive/20 bg-destructive/5"
                                 >
-                                    <Alert variant="destructive" class="py-2">
+                                    <Alert variant="destructive" class="mt-4">
                                         <AlertTriangle class="size-3.5" />
-                                        <AlertDescription class="text-xs">{{
-                                            action.detail
-                                        }}</AlertDescription>
+                                        <AlertDescription class="text-xs">
+                                            {{ action.detail }}
+                                        </AlertDescription>
                                     </Alert>
+
                                     <p class="text-xs text-destructive">
                                         Type
                                         <code
-                                            class="bg-destructive/10 px-1 py-0.5 rounded text-[11px]"
+                                            class="bg-destructive/10 px-1.5 py-0.5 rounded text-[11px]"
                                         >
                                             {{ action.word }}
                                         </code>
                                         to confirm.
                                     </p>
+
                                     <div class="flex gap-2">
                                         <Input
                                             v-model="dangerConfirm[action.key]"
@@ -1430,9 +1461,9 @@ const envOptions = [
                                             }}
                                         </Button>
                                     </div>
-                                </div>
+                                </CardContent>
                             </Transition>
-                        </div>
+                        </Card>
                     </div>
                 </TabsContent>
             </Tabs>

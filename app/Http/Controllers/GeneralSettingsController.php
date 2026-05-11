@@ -119,23 +119,21 @@ final class GeneralSettingsController extends Controller
             $this->cacheAction->handle($type);
 
             $label = match ($type) {
-                'app'    => 'Application',
-                'config' => 'Config',
-                'route'  => 'Route',
-                'view'   => 'View',
-                default  => ucfirst($type),
+                'optimize'       => 'Application optimized',
+                'optimize:clear' => 'Cache cleared',
+                default          => ucfirst($type),
             };
 
             InertiaNotification::make()
                 ->success()
-                ->message("{$label} cache cleared successfully.")
+                ->message("{$label} successfully.")
                 ->send();
         } catch (Throwable $e) {
             report($e);
 
             InertiaNotification::make()
                 ->error()
-                ->message('Failed to clear cache: '.$e->getMessage())
+                ->message('Failed: '.$e->getMessage())
                 ->send();
         }
 

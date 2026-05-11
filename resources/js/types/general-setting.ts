@@ -90,4 +90,4 @@ export interface TDangerActionConfig {
 
 export type TJobStatus = TSchedulerJob["status"];
 export type TDowntimeEvent = TDowntimeLog["event"];
-export type TCacheKey = "app" | "config" | "route" | "view";
+export type TCacheKey = "optimize" | "optimize:clear";
