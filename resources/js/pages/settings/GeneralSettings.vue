@@ -227,7 +227,7 @@ const dangerActions: TDangerActionConfig[] = [
         title: "Clear all speed results",
         desc: "Truncates the speed_results table. All historical test rows are permanently deleted. Providers, alert rules, schedules, and mail providers are not affected.",
         word: "CLEAR RESULTS",
-        label: "Clear results",
+        label: "Execute",
         detail: "All speedtest rows will be permanently deleted. This cannot be undone.",
     },
     {
@@ -235,7 +235,7 @@ const dangerActions: TDangerActionConfig[] = [
         title: "Clear webhook delivery log",
         desc: "Deletes all records from webhook_deliveries. Webhook endpoints and configurations are preserved.",
         word: "CLEAR LOG",
-        label: "Clear log",
+        label: "Execute",
         detail: "All webhook delivery records will be deleted. Endpoint configurations are preserved.",
     },
     {
@@ -243,7 +243,7 @@ const dangerActions: TDangerActionConfig[] = [
         title: "Reset all configuration",
         desc: "Deletes all providers, alert rules, mail providers, webhooks, email templates, schedules, and maintenance windows. Speed results and user accounts are fully preserved.",
         word: "RESET CONFIG",
-        label: "Reset config",
+        label: "Execute",
         detail: "All configuration will be wiped. Speed results and user accounts are fully preserved.",
     },
     {
@@ -251,7 +251,7 @@ const dangerActions: TDangerActionConfig[] = [
         title: "⚠ Factory reset",
         desc: "Truncates all tables except users. Re-runs all database seeders. Returns Zepeed to a completely fresh state.",
         word: "FACTORY RESET",
-        label: "Factory reset",
+        label: "Execute",
         detail: "All data except users will be permanently erased and seeders will re-run.",
     },
 ];
@@ -1001,12 +1001,7 @@ const envOptions = [
                         <AlertDescription as-child>
                             <p class="text-muted-foreground text-sm">
                                 Pruning runs as a
-                                <strong>scheduled background job</strong>. Only
-                                <strong>speed_results</strong> rows older than
-                                the configured window are removed. Providers,
-                                alert rules, mail providers, webhooks, and users
-                                are <strong>never touched</strong>. Minimum
-                                retention is 30 days.
+                                <strong>scheduled background job</strong>.
                             </p>
                         </AlertDescription>
                     </Alert>
@@ -1242,7 +1237,7 @@ const envOptions = [
                             >
                                 <div class="space-y-0.5">
                                     <p class="text-sm font-medium leading-none">
-                                        Optimize
+                                        Build and compile Cache to optimize
                                     </p>
                                     <p
                                         class="text-xs text-muted-foreground mt-1.5"
@@ -1282,7 +1277,7 @@ const envOptions = [
                                                 ? "Done"
                                                 : cacheClearing["optimize"]
                                                   ? "Running…"
-                                                  : "Run optimize"
+                                                  : "Execute"
                                         }}
                                     </span>
                                 </Button>
@@ -1299,7 +1294,7 @@ const envOptions = [
                             >
                                 <div class="space-y-0.5">
                                     <p class="text-sm font-medium leading-none">
-                                        Optimize:Clear
+                                        Delete all build and compiled cached
                                     </p>
                                     <p
                                         class="text-xs text-muted-foreground mt-1.5"
@@ -1353,7 +1348,7 @@ const envOptions = [
                                                         "optimize:clear"
                                                     ]
                                                   ? "Clearing…"
-                                                  : "Run optimize:clear"
+                                                  : "Execute"
                                         }}
                                     </span>
                                 </Button>
@@ -1361,37 +1356,52 @@ const envOptions = [
                         </CardContent>
                     </Card>
 
-                    <!-- Irreversible warning -->
-                    <Alert variant="destructive">
-                        <AlertTriangle class="size-4" />
-                        <AlertDescription>
-                            <strong>Actions below are irreversible.</strong>
-                            Each operation requires typed confirmation before it
-                            can be executed. User accounts and login credentials
-                            are never affected.
-                        </AlertDescription>
-                    </Alert>
-
                     <!-- Danger actions -->
-                    <div class="space-y-3">
-                        <Card
-                            v-for="action in dangerActions"
-                            :key="action.key"
-                            class="border-destructive/30 overflow-hidden"
-                        >
-                            <CardHeader class="pb-3">
+                    <Card class="border-destructive/30">
+                        <CardHeader class="pb-3">
+                            <div class="flex items-center gap-2.5">
                                 <div
-                                    class="flex items-start justify-between gap-3"
+                                    class="size-8 rounded-md bg-destructive/10 flex items-center justify-center shrink-0"
                                 >
-                                    <div>
-                                        <CardTitle
-                                            class="text-sm text-destructive"
+                                    <AlertTriangle
+                                        class="size-3.5 text-destructive"
+                                    />
+                                </div>
+                                <div>
+                                    <CardTitle class="text-sm text-destructive"
+                                        >Danger Zone</CardTitle
+                                    >
+                                    <CardDescription>
+                                        Actions below are irreversible. Each
+                                        operation requires typed confirmation
+                                        before it can be executed. User accounts
+                                        and login credentials are never
+                                        affected.
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent class="space-y-3 pt-0">
+                            <div
+                                v-for="action in dangerActions"
+                                :key="action.key"
+                                class="rounded-lg border border-destructive/20 overflow-hidden"
+                            >
+                                <!-- Row header -->
+                                <div
+                                    class="flex items-start justify-between gap-3 p-4"
+                                >
+                                    <div class="space-y-0.5">
+                                        <p
+                                            class="text-sm font-medium text-destructive leading-none"
                                         >
                                             {{ action.title }}
-                                        </CardTitle>
-                                        <CardDescription class="mt-1">
+                                        </p>
+                                        <p
+                                            class="text-xs text-muted-foreground mt-1.5"
+                                        >
                                             {{ action.desc }}
-                                        </CardDescription>
+                                        </p>
                                     </div>
                                     <Button
                                         variant="outline"
@@ -1406,65 +1416,74 @@ const envOptions = [
                                         }}
                                     </Button>
                                 </div>
-                            </CardHeader>
 
-                            <Transition
-                                enter-active-class="transition-all duration-200 ease-out"
-                                enter-from-class="opacity-0 -translate-y-1"
-                                enter-to-class="opacity-100 translate-y-0"
-                                leave-active-class="transition-all duration-150 ease-in"
-                                leave-from-class="opacity-100 translate-y-0"
-                                leave-to-class="opacity-0 -translate-y-1"
-                            >
-                                <CardContent
-                                    v-if="dangerOpen[action.key]"
-                                    class="pt-0 space-y-3 border-t border-destructive/20 bg-destructive/5"
+                                <!-- Confirm panel -->
+                                <Transition
+                                    enter-active-class="transition-all duration-200 ease-out"
+                                    enter-from-class="opacity-0 -translate-y-1"
+                                    enter-to-class="opacity-100 translate-y-0"
+                                    leave-active-class="transition-all duration-150 ease-in"
+                                    leave-from-class="opacity-100 translate-y-0"
+                                    leave-to-class="opacity-0 -translate-y-1"
                                 >
-                                    <Alert variant="destructive" class="mt-4">
-                                        <AlertTriangle class="size-3.5" />
-                                        <AlertDescription class="text-xs">
-                                            {{ action.detail }}
-                                        </AlertDescription>
-                                    </Alert>
-
-                                    <p class="text-xs text-destructive">
-                                        Type
-                                        <code
-                                            class="bg-destructive/10 px-1.5 py-0.5 rounded text-[11px]"
-                                        >
-                                            {{ action.word }}
-                                        </code>
-                                        to confirm.
-                                    </p>
-
-                                    <div class="flex gap-2">
-                                        <Input
-                                            v-model="dangerConfirm[action.key]"
-                                            :placeholder="action.word"
-                                            class="h-8 text-xs border-destructive/40 focus-visible:ring-destructive/40"
-                                        />
-                                        <Button
+                                    <div
+                                        v-if="dangerOpen[action.key]"
+                                        class="border-t border-destructive/20 bg-destructive/5 p-4 space-y-3"
+                                    >
+                                        <Alert
                                             variant="destructive"
-                                            size="sm"
-                                            :disabled="
-                                                dangerConfirm[action.key] !==
-                                                    action.word ||
-                                                dangerProcessing[action.key]
-                                            "
-                                            @click="executeDanger(action.key)"
+                                            class="py-2"
                                         >
-                                            <Trash2 class="size-3.5 mr-1.5" />
-                                            {{
-                                                dangerProcessing[action.key]
-                                                    ? "Running…"
-                                                    : "Confirm"
-                                            }}
-                                        </Button>
+                                            <AlertTriangle class="size-3.5" />
+                                            <AlertDescription class="text-xs">
+                                                {{ action.detail }}
+                                            </AlertDescription>
+                                        </Alert>
+                                        <p class="text-xs text-destructive">
+                                            Type
+                                            <code
+                                                class="bg-destructive/10 px-1.5 py-0.5 rounded text-[11px]"
+                                            >
+                                                {{ action.word }}
+                                            </code>
+                                            to confirm.
+                                        </p>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                v-model="
+                                                    dangerConfirm[action.key]
+                                                "
+                                                :placeholder="action.word"
+                                                class="h-8 text-xs border-destructive/40 focus-visible:ring-destructive/40"
+                                            />
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                :disabled="
+                                                    dangerConfirm[
+                                                        action.key
+                                                    ] !== action.word ||
+                                                    dangerProcessing[action.key]
+                                                "
+                                                @click="
+                                                    executeDanger(action.key)
+                                                "
+                                            >
+                                                <Trash2
+                                                    class="size-3.5 mr-1.5"
+                                                />
+                                                {{
+                                                    dangerProcessing[action.key]
+                                                        ? "Running…"
+                                                        : "Confirm"
+                                                }}
+                                            </Button>
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Transition>
-                        </Card>
-                    </div>
+                                </Transition>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
         </div>
