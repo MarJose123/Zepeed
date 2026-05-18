@@ -87,10 +87,10 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::patch('general', [GeneralSettingsController::class, 'update'])
                     ->name('update');
 
-                Route::post('general/danger/{action}', [GeneralSettingsController::class, 'danger'])
+                Route::post('general/danger', [GeneralSettingsController::class, 'danger'])
                     ->name('danger');
 
-                Route::post('general/cache/{type}', [GeneralSettingsController::class, 'clearCache'])
+                Route::post('general/cache', [GeneralSettingsController::class, 'clearCache'])
                     ->name('cache.clear');
 
             });

@@ -45,6 +45,7 @@ final class Setting extends Model
      *
      * @return array{
      *     app_url: string,
+     *     app_env: string,
      *     timezone: string,
      *     maintenance_enabled: bool,
      *     bypass_secret: string,
@@ -53,11 +54,9 @@ final class Setting extends Model
      *     maintenance_redirect: string,
      *     result_auto_purge: bool,
      *     result_retention_days: int,
-     *     prune_schedule: string,
      *     exempt_failed: bool,
      *     webhook_retention_days: int,
      *     webhook_extended_retention: bool,
-     *     prune_schedule: string,
      * }
      */
     public static function generalSettings(): array

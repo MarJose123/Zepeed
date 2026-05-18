@@ -135,8 +135,8 @@ const clearCache = (key: TCacheKey) => {
     cacheClearing.value[key] = true;
 
     router.post(
-        route("speedtest.general-settings.cache.clear", { type: key }),
-        {},
+        route("speedtest.general-settings.cache.clear"),
+        { type: key },
         {
             preserveScroll: true,
             onFinish: () => {
@@ -185,8 +185,8 @@ const executeDanger = (action: TDangerAction) => {
     dangerProcessing.value[action] = true;
 
     router.post(
-        route("speedtest.general-settings.danger", { action }),
-        {},
+        route("speedtest.general-settings.danger"),
+        { action: action },
         {
             preserveScroll: true,
             onFinish: () => {
@@ -355,19 +355,6 @@ const envOptions = [
                             </div>
                         </CardHeader>
                         <CardContent class="space-y-5">
-                            <Alert>
-                                <Info class="size-4" />
-                                <AlertDescription as-child>
-                                    <p class="text-sm text-muted-foreground">
-                                        Changes to <strong>App URL</strong> and
-                                        <strong>Timezone</strong>
-                                        take effect on the next application
-                                        boot. The current session continues
-                                        using the previous values.
-                                    </p>
-                                </AlertDescription>
-                            </Alert>
-
                             <div class="space-y-4 max-w-md">
                                 <!-- App URL -->
                                 <Field>
