@@ -23,8 +23,7 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 12, Ine
 - PHP 8.4+
 - Composer
 - Bun (recommended) or Node 22+
-- A database (SQLite/MySQL/Postgres)
-- Speedtest CLI tools (depending on the provider used)
+- Docker Desktop or Orbstack
 
 ## Quick start
 
@@ -44,14 +43,6 @@ This installs PHP/JS deps, creates `.env`, generates an app key, runs migrations
 
 ```bash
 composer run dev
-```
-
-Runs Vite + queue worker + scheduler + Reverb + Mailpit in one terminal.
-
-If you are using Laravel Herd:
-
-```bash
-composer run herd:dev
 ```
 
 ## Contributing
@@ -101,12 +92,6 @@ We welcome contributions! Please follow these steps:
     ```bash
     php artisan migrate --force
     ```
-
-### Server Requirements
-
-- PHP 8.4+
-- Extension requirements (BCMath, Ctype, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML)
-- A supported database (MariaDB, MySQL, PostgreSQL, or SQLite)
 
 ## Useful scripts
 

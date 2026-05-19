@@ -1,5 +1,7 @@
 <?php
 
+use App\Console\Commands\PruneSpeedResultsCommand;
+use App\Console\Commands\PruneWebhookDeliveriesCommand;
 use App\Console\Commands\SpeedtestRunCommand;
 use Illuminate\Support\Facades\Artisan;
 
@@ -26,3 +28,12 @@ Artisan::command('speedtest:run {provider?} {--sync} {--queue}', function (?stri
         '--queue'  => $this->option('queue'),
     ]));
 })->purpose('Manually trigger a speedtest run for one or all providers');
+
+// Manual trigger for speed result pruning (useful for one-off runs or testing)
+Artisan::command('speedtest:prune-now', function (): void {
+    $this->call(PruneSpeedResultsCommand::class);
+})->purpose('Manually trigger speed result pruning');
+
+Artisan::command('webhooks:prune-now', function (): void {
+    $this->call(PruneWebhookDeliveriesCommand::class);
+})->purpose('Manually trigger webhook delivery log pruning');
