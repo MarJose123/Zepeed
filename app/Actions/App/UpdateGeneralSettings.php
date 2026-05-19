@@ -340,18 +340,24 @@ final class UpdateGeneralSettings
     public function downtimeLogs(int $page = 1): array
     {
         $paginator = DowntimeLog::query()
-            ->orderBy('timestamp', 'desc')
+            ->orderBy('timestamp')
             ->paginate(perPage: 10, page: $page);
 
+        /** @var list<DowntimeLog> $items */
+        $items = $paginator->items();
+
+        $data = array_map(
+            static fn (DowntimeLog $log): array => [
+                'event'        => (string) $log->event,
+                'triggered_by' => (string) $log->triggered_by,
+                'duration'     => $log->duration !== null ? (string) $log->duration : null,
+                'timestamp'    => (string) $log->getRawOriginal('timestamp'),
+            ],
+            $items,
+        );
+
         return [
-            'data'         => collect($paginator->items())
-                ->map(static fn (DowntimeLog $log) => [
-                    'event'        => $log->event,
-                    'triggered_by' => $log->triggered_by,
-                    'duration'     => $log->duration,
-                    'timestamp'    => $log->timestamp->toDateTimeString(),
-                ])
-                ->all(),
+            'data'         => array_values($data),
             'current_page' => $paginator->currentPage(),
             'last_page'    => $paginator->lastPage(),
             'total'        => $paginator->total(),
