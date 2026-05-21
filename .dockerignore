@@ -3,6 +3,7 @@
 .idea/
 .vscode/
 .bin/
+.showcase/
 
 # Environment files
 .env
