@@ -1,6 +1,7 @@
 import type { Auth, UserAppearance } from "@/types/auth";
 import type { INotification } from "@/types/notification";
 import type { Provider } from "@/types/provider";
+import "@tanstack/vue-table";
 
 // Extend ImportMeta interface for Vite...
 declare module "vite/client" {
@@ -36,5 +37,12 @@ declare module "vue" {
         $inertia: typeof Router;
         $page: Page;
         $headManager: ReturnType<typeof createHeadManager>;
+    }
+}
+
+declare module "@tanstack/vue-table" {
+    interface ColumnMeta<TData, TValue> {
+        headerClass?: string;
+        cellClass?: string;
     }
 }

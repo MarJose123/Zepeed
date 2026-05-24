@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
+import { downloadColumns } from "@/components/speed-result/columns/download";
+import DataTable from "@/components/speed-result/DataTable.vue";
 import ResultsFilter from "@/components/speed-result/ResultsFilter.vue";
 import ResultsStatCards from "@/components/speed-result/ResultsStatCards.vue";
-import ResultsTable from "@/components/speed-result/ResultsTable.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TPagedResource } from "@/types";
 import type {
@@ -25,7 +26,6 @@ const ACCENT = "oklch(0.52 0.17 155)";
 
 <template>
     <Head title="Download Results" />
-
     <AppLayout
         :breadcrumbs="[
             {
@@ -47,33 +47,25 @@ const ACCENT = "oklch(0.52 0.17 155)";
                     Download Speed
                     <span
                         class="font-mono text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.03_155)] text-[oklch(0.52_0.17_155)]"
+                        >↓ Mbps</span
                     >
-                        ↓ Mbps
-                    </span>
                 </h1>
                 <p class="font-mono text-[11px] text-muted-foreground mt-0.5">
                     {{ stats.total }} records
                 </p>
             </div>
-
             <ResultsStatCards
                 :stats="stats"
                 metric="download"
                 :accent-var="ACCENT"
             />
-
             <ResultsFilter
                 :providers="providers"
                 :months="months"
                 :filters="filters"
                 route-name="speedtest.results.download"
             />
-
-            <ResultsTable
-                :results="results"
-                metric="download"
-                :accent-var="ACCENT"
-            />
+            <DataTable :columns="downloadColumns" :results="results" />
         </div>
     </AppLayout>
 </template>

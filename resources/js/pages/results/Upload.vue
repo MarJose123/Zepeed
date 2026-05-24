@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
+import { uploadColumns } from "@/components/speed-result/columns/upload";
+import DataTable from "@/components/speed-result/DataTable.vue";
 import ResultsFilter from "@/components/speed-result/ResultsFilter.vue";
 import ResultsStatCards from "@/components/speed-result/ResultsStatCards.vue";
-import ResultsTable from "@/components/speed-result/ResultsTable.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TPagedResource } from "@/types";
 import type {
@@ -25,7 +26,6 @@ const ACCENT = "oklch(0.48 0.19 260)";
 
 <template>
     <Head title="Upload Results" />
-
     <AppLayout
         :breadcrumbs="[
             {
@@ -47,33 +47,25 @@ const ACCENT = "oklch(0.48 0.19 260)";
                     Upload Speed
                     <span
                         class="font-mono text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.025_260)] text-[oklch(0.48_0.19_260)]"
+                        >↑ Mbps</span
                     >
-                        ↑ Mbps
-                    </span>
                 </h1>
                 <p class="font-mono text-[11px] text-muted-foreground mt-0.5">
                     {{ stats.total }} records
                 </p>
             </div>
-
             <ResultsStatCards
                 :stats="stats"
                 metric="upload"
                 :accent-var="ACCENT"
             />
-
             <ResultsFilter
                 :providers="providers"
                 :months="months"
                 :filters="filters"
                 route-name="speedtest.results.upload"
             />
-
-            <ResultsTable
-                :results="results"
-                metric="upload"
-                :accent-var="ACCENT"
-            />
+            <DataTable :columns="uploadColumns" :results="results" />
         </div>
     </AppLayout>
 </template>
