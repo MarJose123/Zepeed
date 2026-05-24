@@ -71,6 +71,16 @@ const modalConfig = computed<TwoFactorConfigContent>(() => {
     };
 });
 
+function getTwoFactorCodeError(
+    errors: Record<string, unknown>,
+): string | undefined {
+    const err = errors.confirmTwoFactorAuthentication as
+        | { code?: string }
+        | undefined;
+
+    return err?.code;
+}
+
 const handleModalNextStep = () => {
     if (props.requiresConfirmation) {
         showVerificationStep.value = true;
@@ -300,21 +310,10 @@ watch(
                                         </InputOTPGroup>
                                     </InputOTP>
                                     <FieldError
-                                        v-if="
-                                            (
-                                                errors.confirmTwoFactorAuthentication as {
-                                                    code?: string;
-                                                }
-                                            )?.code
-                                        "
-                                        >{{
-                                            (
-                                                errors.confirmTwoFactorAuthentication as {
-                                                    code?: string;
-                                                }
-                                            )?.code
-                                        }}</FieldError
+                                        v-if="getTwoFactorCodeError(errors)"
                                     >
+                                        {{ getTwoFactorCodeError(errors) }}
+                                    </FieldError>
                                 </div>
 
                                 <div
