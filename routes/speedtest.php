@@ -8,9 +8,17 @@ use App\Http\Controllers\MaintenanceWindowController;
 use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\ProviderScheduleController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SpeedResultController;
 use App\Http\Controllers\WebhookController;
 
 Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.')->group(function () {
+
+    // Results Menu
+    Route::prefix('results/')->name('results.')->group(function () {
+        Route::get('download', [SpeedResultController::class, 'download'])->name('download');
+        Route::get('upload', [SpeedResultController::class, 'upload'])->name('upload');
+        Route::get('latency', [SpeedResultController::class, 'ping'])->name('latency');
+    });
 
     // Settings Menu
     Route::prefix('settings/')->group(function () {

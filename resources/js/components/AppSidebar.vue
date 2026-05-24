@@ -44,15 +44,15 @@ const navigation: TSidebarNavigationItems = [
                 items: [
                     {
                         title: "Download",
-                        href: "#",
+                        href: route("speedtest.results.download", {}, false),
                     },
                     {
                         title: "Upload",
-                        href: "#",
+                        href: route("speedtest.results.upload", {}, false),
                     },
                     {
-                        title: "Pings",
-                        href: "#",
+                        title: "Latency",
+                        href: route("speedtest.results.latency", {}, false),
                     },
                 ],
             },
