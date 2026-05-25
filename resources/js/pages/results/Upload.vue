@@ -59,13 +59,16 @@ const ACCENT = "oklch(0.48 0.19 260)";
                 metric="upload"
                 :accent-var="ACCENT"
             />
-            <ResultsFilter
-                :providers="providers"
-                :months="months"
-                :filters="filters"
-                route-name="speedtest.results.upload"
-            />
-            <DataTable :columns="uploadColumns" :results="results" />
+            <DataTable :columns="uploadColumns" :results="results">
+                <template #toolbar>
+                    <ResultsFilter
+                        :providers="providers"
+                        :months="months"
+                        :filters="filters"
+                        route-name="speedtest.results.upload"
+                    />
+                </template>
+            </DataTable>
         </div>
     </AppLayout>
 </template>

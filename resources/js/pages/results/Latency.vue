@@ -28,7 +28,7 @@ const ACCENT = "oklch(0.48 0.22 305)";
     <Head title="Ping Latency" />
     <AppLayout
         :breadcrumbs="[
-            { title: 'Ping Latency', href: route('speedtest.results.ping') },
+            { title: 'Ping Latency', href: route('speedtest.results.latency') },
         ]"
     >
         <div class="flex flex-col gap-5 p-6">
@@ -56,13 +56,16 @@ const ACCENT = "oklch(0.48 0.22 305)";
                 metric="ping"
                 :accent-var="ACCENT"
             />
-            <ResultsFilter
-                :providers="providers"
-                :months="months"
-                :filters="filters"
-                route-name="speedtest.results.ping"
-            />
-            <DataTable :columns="latencyColumns" :results="results" />
+            <DataTable :columns="latencyColumns" :results="results">
+                <template #toolbar>
+                    <ResultsFilter
+                        :providers="providers"
+                        :months="months"
+                        :filters="filters"
+                        route-name="speedtest.results.latency"
+                    />
+                </template>
+            </DataTable>
         </div>
     </AppLayout>
 </template>

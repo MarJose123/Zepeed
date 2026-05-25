@@ -47,108 +47,113 @@ const table = useVueTable({
 </script>
 
 <template>
-    <div class="rounded-xl border border-border bg-card overflow-hidden">
-        <!-- Table header row -->
-        <div
-            class="flex items-center justify-between px-4 py-3 border-b border-border"
-        >
-            <span
-                class="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
-            >
-                Test log
-            </span>
-            <span
-                class="font-mono text-[10px] px-2 py-0.5 border border-border rounded-full text-muted-foreground"
-            >
-                {{ results.meta.total }} records
-            </span>
+    <div>
+        <!-- Toolbar -->
+        <div v-if="$slots.toolbar" class="flex items-center justify-end py-4">
+            <slot name="toolbar" />
         </div>
 
-        <Table>
-            <TableHeader>
-                <TableRow
-                    v-for="headerGroup in table.getHeaderGroups()"
-                    :key="headerGroup.id"
-                    class="hover:bg-transparent border-border"
-                >
-                    <TableHead
-                        v-for="header in headerGroup.headers"
-                        :key="header.id"
-                        class="font-mono text-[10px] uppercase tracking-[0.07em]"
-                        :class="header.column.columnDef.meta?.headerClass"
-                    >
-                        <FlexRender
-                            v-if="!header.isPlaceholder"
-                            :render="header.column.columnDef.header"
-                            :props="header.getContext()"
-                        />
-                    </TableHead>
-                </TableRow>
-            </TableHeader>
-
-            <TableBody>
-                <template v-if="table.getRowModel().rows.length">
+        <!-- Table -->
+        <div class="rounded-md border">
+            <Table class="table-fixed w-full">
+                <TableHeader>
                     <TableRow
-                        v-for="row in table.getRowModel().rows"
-                        :key="row.id"
-                        class="hover:bg-transparent border-border"
+                        v-for="headerGroup in table.getHeaderGroups()"
+                        :key="headerGroup.id"
                     >
-                        <TableCell
-                            v-for="cell in row.getVisibleCells()"
-                            :key="cell.id"
-                            :class="cell.column.columnDef.meta?.cellClass"
+                        <TableHead
+                            v-for="header in headerGroup.headers"
+                            :key="header.id"
+                            :class="header.column.columnDef.meta?.headerClass"
                         >
                             <FlexRender
-                                :render="cell.column.columnDef.cell"
-                                :props="cell.getContext()"
+                                v-if="!header.isPlaceholder"
+                                :render="header.column.columnDef.header"
+                                :props="header.getContext()"
                             />
+                        </TableHead>
+                    </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                    <template v-if="table.getRowModel().rows.length">
+                        <TableRow
+                            v-for="row in table.getRowModel().rows"
+                            :key="row.id"
+                            :data-state="
+                                row.getIsSelected() ? 'selected' : undefined
+                            "
+                        >
+                            <TableCell
+                                v-for="cell in row.getVisibleCells()"
+                                :key="cell.id"
+                                :class="cell.column.columnDef.meta?.cellClass"
+                            >
+                                <FlexRender
+                                    :render="cell.column.columnDef.cell"
+                                    :props="cell.getContext()"
+                                />
+                            </TableCell>
+                        </TableRow>
+                    </template>
+
+                    <TableRow v-else>
+                        <TableCell
+                            :colspan="columns.length"
+                            class="h-24 text-center"
+                        >
+                            No results found for the selected filters.
                         </TableCell>
                     </TableRow>
-                </template>
-
-                <TableRow v-else>
-                    <TableCell
-                        :colspan="columns.length"
-                        class="h-32 text-center font-mono text-xs text-muted-foreground"
-                    >
-                        No results found for the selected filters.
-                    </TableCell>
-                </TableRow>
-            </TableBody>
-        </Table>
+                </TableBody>
+            </Table>
+        </div>
 
         <!-- Pagination -->
-        <div
-            class="flex items-center justify-between px-4 py-2.5 border-t border-border"
-        >
-            <span class="font-mono text-[10px] text-muted-foreground">
-                Showing {{ results.meta.from ?? 0 }}–{{
+        <div class="flex items-center justify-between py-4">
+            <p class="text-sm text-muted-foreground">
+                Showing
+                <span class="font-medium text-foreground">{{
+                    results.meta.from ?? 0
+                }}</span>
+                –
+                <span class="font-medium text-foreground">{{
                     results.meta.to ?? 0
-                }}
-                of {{ results.meta.total }} results
-            </span>
-            <div class="flex gap-1">
+                }}</span>
+                of
+                <span class="font-medium text-foreground">{{
+                    results.meta.total
+                }}</span>
+                results
+            </p>
+            <div class="flex gap-2">
                 <Button
-                    v-if="results.links.prev"
                     variant="outline"
                     size="sm"
-                    class="font-mono text-[10px] h-7"
-                    as-child
+                    :disabled="!results.links.prev"
                 >
-                    <Link :href="results.links.prev" preserve-scroll
-                        >← Prev</Link
+                    <Link
+                        v-if="results.links.prev"
+                        :href="results.links.prev"
+                        preserve-scroll
                     >
+                        Previous
+                    </Link>
+                    <span v-else>Previous</span>
                 </Button>
                 <Button
-                    v-if="results.links.next"
                     variant="outline"
                     size="sm"
-                    class="font-mono text-[10px] h-7"
-                    as-child
+                    :disabled="!results.links.next"
                 >
-                    <Link :href="results.links.next" preserve-scroll
-                        >Next →</Link
+                    <Link
+                        v-if="results.links.next"
+                        :href="results.links.next"
+                        preserve-scroll
                     >
+                        Next
+                    </Link>
+                    <span v-else>Next</span>
                 </Button>
             </div>
         </div>

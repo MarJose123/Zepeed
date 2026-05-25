@@ -19,20 +19,18 @@ const colorMap = {
     bad: "text-destructive",
 };
 
-const barMap = {
-    good: "bg-emerald-500",
-    warn: "bg-amber-500",
-    bad: "bg-destructive",
-};
-
 export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
+        meta: {
+            headerClass: "w-[220px]",
+            cellClass: "w-[220px]",
+        },
         cell: ({ row }) =>
             h(
                 "span",
-                { class: "font-mono text-[11.5px] text-muted-foreground" },
+                { class: "text-sm text-muted-foreground" },
                 new Date(row.getValue("measured_at")).toLocaleString(
                     "default",
                     {
@@ -48,11 +46,13 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "provider_name",
         header: "Provider",
+        meta: {
+            headerClass: "w-[160px]",
+            cellClass: "w-[160px]",
+        },
         cell: ({ row }) =>
-            h(
-                Badge,
-                { variant: "outline", class: "font-mono text-[10px]" },
-                () => row.getValue("provider_name"),
+            h(Badge, { variant: "outline", class: "text-xs" }, () =>
+                row.getValue("provider_name"),
             ),
     },
     {
@@ -63,40 +63,27 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "◎ Ping",
             ),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "w-[140px] text-right",
+            cellClass: "w-[140px] text-right",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number>("ping") ?? 0;
-            // For ping: bar width proportional to 200ms max — higher = worse
-            const barW = Math.min(100, Math.round((v / 200) * 100));
             const cls = metricClass(v);
 
-            return h("div", { class: "flex flex-col items-end gap-0.5" }, [
+            return h("div", { class: "text-right" }, [
                 h(
                     "span",
                     {
-                        class: `font-mono text-sm font-semibold leading-none ${colorMap[cls]}`,
+                        class: `text-sm font-semibold tabular-nums ${colorMap[cls]}`,
                     },
                     [
                         `${v}`,
                         h(
                             "span",
-                            {
-                                class: "text-[9.5px] font-normal opacity-45 ml-0.5",
-                            },
+                            { class: "text-xs font-normal opacity-45 ml-0.5" },
                             "ms",
                         ),
-                    ],
-                ),
-                h(
-                    "div",
-                    {
-                        class: "w-[52px] h-[2px] rounded-full bg-border overflow-hidden",
-                    },
-                    [
-                        h("div", {
-                            class: `h-full rounded-full ${barMap[cls]}`,
-                            style: `width:${barW}%`,
-                        }),
                     ],
                 ),
             ]);
@@ -105,30 +92,40 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "jitter",
         header: () => h("div", { class: "text-right" }, "Jitter"),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "w-[120px] text-right",
+            cellClass: "w-[120px] text-right",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number | null>("jitter");
 
-            return h(
-                "span",
-                { class: "font-mono text-xs text-muted-foreground" },
-                [
-                    v !== null ? `${v}` : "—",
-                    v !== null
-                        ? h(
-                              "span",
-                              { class: "opacity-45 ml-0.5 text-[9.5px]" },
-                              "ms",
-                          )
-                        : "",
-                ],
-            );
+            return h("div", { class: "text-right" }, [
+                h(
+                    "span",
+                    { class: "text-sm tabular-nums text-muted-foreground" },
+                    [
+                        v !== null ? `${v}` : "—",
+                        v !== null
+                            ? h(
+                                  "span",
+                                  {
+                                      class: "text-xs font-normal opacity-45 ml-0.5",
+                                  },
+                                  "ms",
+                              )
+                            : "",
+                    ],
+                ),
+            ]);
         },
     },
     {
         accessorKey: "share_url",
         header: () => h("div", { class: "text-right" }, "Share"),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "w-[80px] text-right",
+            cellClass: "w-[80px] text-right",
+        },
         cell: ({ row }) => {
             const url = row.getValue<string | null>("share_url");
 
@@ -139,15 +136,11 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
                           href: url,
                           target: "_blank",
                           rel: "noopener noreferrer",
-                          class: "font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors",
+                          class: "text-sm text-muted-foreground hover:text-foreground transition-colors",
                       },
                       "↗ view",
                   )
-                : h(
-                      "span",
-                      { class: "font-mono text-[10px] text-muted-foreground" },
-                      "—",
-                  );
+                : h("span", { class: "text-sm text-muted-foreground" }, "—");
         },
     },
 ];

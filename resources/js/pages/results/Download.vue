@@ -59,13 +59,16 @@ const ACCENT = "oklch(0.52 0.17 155)";
                 metric="download"
                 :accent-var="ACCENT"
             />
-            <ResultsFilter
-                :providers="providers"
-                :months="months"
-                :filters="filters"
-                route-name="speedtest.results.download"
-            />
-            <DataTable :columns="downloadColumns" :results="results" />
+            <DataTable :columns="downloadColumns" :results="results">
+                <template #toolbar>
+                    <ResultsFilter
+                        :providers="providers"
+                        :months="months"
+                        :filters="filters"
+                        route-name="speedtest.results.download"
+                    />
+                </template>
+            </DataTable>
         </div>
     </AppLayout>
 </template>
