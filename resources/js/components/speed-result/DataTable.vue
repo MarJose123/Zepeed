@@ -48,14 +48,12 @@ const table = useVueTable({
 
 <template>
     <div>
-        <!-- Toolbar -->
         <div v-if="$slots.toolbar" class="flex items-center justify-end py-4">
             <slot name="toolbar" />
         </div>
 
-        <!-- Table -->
         <div class="rounded-md border">
-            <Table class="table-fixed w-full">
+            <Table>
                 <TableHeader>
                     <TableRow
                         v-for="headerGroup in table.getHeaderGroups()"
@@ -109,7 +107,6 @@ const table = useVueTable({
             </Table>
         </div>
 
-        <!-- Pagination -->
         <div class="flex items-center justify-between py-4">
             <p class="text-sm text-muted-foreground">
                 Showing

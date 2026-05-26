@@ -23,10 +23,6 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
-        meta: {
-            headerClass: "w-[220px]",
-            cellClass: "w-[220px]",
-        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -46,10 +42,6 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "provider_name",
         header: "Provider",
-        meta: {
-            headerClass: "w-[160px]",
-            cellClass: "w-[160px]",
-        },
         cell: ({ row }) =>
             h(Badge, { variant: "outline", class: "text-xs" }, () =>
                 row.getValue("provider_name"),
@@ -63,10 +55,7 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "◎ Ping",
             ),
-        meta: {
-            headerClass: "w-[140px] text-right",
-            cellClass: "w-[140px] text-right",
-        },
+        meta: { headerClass: "text-right", cellClass: "text-right" },
         cell: ({ row }) => {
             const v = row.getValue<number>("ping") ?? 0;
             const cls = metricClass(v);
@@ -92,10 +81,7 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "jitter",
         header: () => h("div", { class: "text-right" }, "Jitter"),
-        meta: {
-            headerClass: "w-[120px] text-right",
-            cellClass: "w-[120px] text-right",
-        },
+        meta: { headerClass: "text-right", cellClass: "text-right" },
         cell: ({ row }) => {
             const v = row.getValue<number | null>("jitter");
 
@@ -122,10 +108,7 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "share_url",
         header: () => h("div", { class: "text-right" }, "Share"),
-        meta: {
-            headerClass: "w-[80px] text-right",
-            cellClass: "w-[80px] text-right",
-        },
+        meta: { headerClass: "text-right", cellClass: "text-right" },
         cell: ({ row }) => {
             const url = row.getValue<string | null>("share_url");
 

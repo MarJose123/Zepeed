@@ -13,11 +13,10 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
 
 <template>
     <div class="grid grid-cols-4 gap-3">
-        <!-- Average — always first, accent left border -->
         <Card class="border-l-[3px]" :style="`border-left-color:${accentVar}`">
             <CardContent class="pt-4 pb-4 px-4">
                 <p
-                    class="font-mono text-[9.5px] uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
+                    class="text-xs uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
                 >
                     <span
                         class="inline-block w-1.5 h-1.5 rounded-full"
@@ -26,7 +25,7 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                     Average
                 </p>
                 <p
-                    class="font-mono text-[26px] font-semibold tracking-tight leading-none"
+                    class="text-[26px] font-semibold tracking-tight leading-none"
                     :style="`color:${accentVar}`"
                 >
                     {{ stats.average ?? "—"
@@ -34,17 +33,16 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                         unit
                     }}</span>
                 </p>
-                <p class="font-mono text-[10px] text-muted-foreground mt-1">
+                <p class="text-xs text-muted-foreground mt-1">
                     across {{ stats.total }} tests
                 </p>
             </CardContent>
         </Card>
 
-        <!-- Peak / Best -->
         <Card>
             <CardContent class="pt-4 pb-4 px-4">
                 <p
-                    class="font-mono text-[9.5px] uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
+                    class="text-xs uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
                 >
                     <span
                         class="inline-block w-1.5 h-1.5 rounded-full"
@@ -53,7 +51,7 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                     {{ metric === "ping" ? "Best (lowest)" : "Peak" }}
                 </p>
                 <p
-                    class="font-mono text-[26px] font-semibold tracking-tight leading-none"
+                    class="text-[26px] font-semibold tracking-tight leading-none"
                     :style="`color:${accentVar}`"
                 >
                     {{ (metric === "ping" ? stats.best : stats.peak) ?? "—"
@@ -61,17 +59,14 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                         unit
                     }}</span>
                 </p>
-                <p class="font-mono text-[10px] text-muted-foreground mt-1">
-                    &nbsp;
-                </p>
+                <p class="text-xs text-muted-foreground mt-1">&nbsp;</p>
             </CardContent>
         </Card>
 
-        <!-- Lowest / Worst -->
         <Card>
             <CardContent class="pt-4 pb-4 px-4">
                 <p
-                    class="font-mono text-[9.5px] uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
+                    class="text-xs uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
                 >
                     <span
                         class="inline-block w-1.5 h-1.5 rounded-full bg-destructive"
@@ -79,24 +74,21 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                     {{ metric === "ping" ? "Worst (highest)" : "Lowest" }}
                 </p>
                 <p
-                    class="font-mono text-[26px] font-semibold tracking-tight leading-none text-destructive"
+                    class="text-[26px] font-semibold tracking-tight leading-none text-destructive"
                 >
                     {{ (metric === "ping" ? stats.worst : stats.lowest) ?? "—"
                     }}<span class="text-xs font-normal opacity-40 ml-1">{{
                         unit
                     }}</span>
                 </p>
-                <p class="font-mono text-[10px] text-muted-foreground mt-1">
-                    &nbsp;
-                </p>
+                <p class="text-xs text-muted-foreground mt-1">&nbsp;</p>
             </CardContent>
         </Card>
 
-        <!-- Threshold count -->
         <Card>
             <CardContent class="pt-4 pb-4 px-4">
                 <p
-                    class="font-mono text-[9.5px] uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
+                    class="text-xs uppercase tracking-[0.09em] text-muted-foreground mb-1.5 flex items-center gap-1.5"
                 >
                     <span
                         class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"
@@ -104,14 +96,14 @@ const unit = props.metric === "ping" ? "ms" : "Mbps";
                     {{ stats.threshold_label }}
                 </p>
                 <p
-                    class="font-mono text-[26px] font-semibold tracking-tight leading-none text-amber-500"
+                    class="text-[26px] font-semibold tracking-tight leading-none text-amber-500"
                 >
                     {{ stats.threshold_count
                     }}<span class="text-xs font-normal opacity-40 ml-1"
                         >tests</span
                     >
                 </p>
-                <p class="font-mono text-[10px] text-muted-foreground mt-1">
+                <p class="text-xs text-muted-foreground mt-1">
                     {{ stats.threshold_pct }}% of total
                 </p>
             </CardContent>

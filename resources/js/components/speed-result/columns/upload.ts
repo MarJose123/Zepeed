@@ -23,10 +23,6 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
-        meta: {
-            headerClass: "w-[220px]",
-            cellClass: "w-[220px]",
-        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -46,10 +42,6 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "provider_name",
         header: "Provider",
-        meta: {
-            headerClass: "w-[160px]",
-            cellClass: "w-[160px]",
-        },
         cell: ({ row }) =>
             h(Badge, { variant: "outline", class: "text-xs" }, () =>
                 row.getValue("provider_name"),
@@ -63,10 +55,7 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "↑ Upload",
             ),
-        meta: {
-            headerClass: "w-[160px] text-right",
-            cellClass: "w-[160px] text-right",
-        },
+        meta: { headerClass: "text-right", cellClass: "text-right" },
         cell: ({ row }) => {
             const v = row.getValue<number>("upload") ?? 0;
             const cls = metricClass(v);
@@ -92,10 +81,7 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "share_url",
         header: () => h("div", { class: "text-right" }, "Share"),
-        meta: {
-            headerClass: "w-[80px] text-right",
-            cellClass: "w-[80px] text-right",
-        },
+        meta: { headerClass: "text-right", cellClass: "text-right" },
         cell: ({ row }) => {
             const url = row.getValue<string | null>("share_url");
 

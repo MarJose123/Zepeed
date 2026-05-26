@@ -36,6 +36,10 @@ const hasActiveFilters = computed(
     () => provider.value !== "all" || month.value !== "all",
 );
 
+const activeCount = computed(
+    () => (provider.value !== "all" ? 1 : 0) + (month.value !== "all" ? 1 : 0),
+);
+
 function formatMonth(value: string): string {
     const [year, mon] = value.split("-");
 
@@ -73,7 +77,7 @@ watch([provider, month, perPage], apply);
             <Button
                 variant="outline"
                 size="sm"
-                class="h-8 gap-2 font-mono text-xs"
+                class="h-8 gap-2"
                 :class="hasActiveFilters ? 'border-primary text-primary' : ''"
             >
                 <ListFilter class="h-3.5 w-3.5" />
@@ -82,9 +86,7 @@ watch([provider, month, perPage], apply);
                     v-if="hasActiveFilters"
                     class="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground"
                 >
-                    {{
-                        (provider !== "all" ? 1 : 0) + (month !== "all" ? 1 : 0)
-                    }}
+                    {{ activeCount }}
                 </span>
             </Button>
         </PopoverTrigger>
@@ -93,12 +95,12 @@ watch([provider, month, perPage], apply);
             <div class="space-y-4">
                 <div class="space-y-1.5">
                     <p
-                        class="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                        class="text-xs uppercase tracking-[0.08em] text-muted-foreground"
                     >
                         Provider
                     </p>
                     <Select v-model="provider">
-                        <SelectTrigger class="h-8 w-full font-mono text-xs">
+                        <SelectTrigger class="h-8 w-full text-sm">
                             <SelectValue placeholder="All Providers" />
                         </SelectTrigger>
                         <SelectContent>
@@ -116,12 +118,12 @@ watch([provider, month, perPage], apply);
 
                 <div class="space-y-1.5">
                     <p
-                        class="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                        class="text-xs uppercase tracking-[0.08em] text-muted-foreground"
                     >
                         Month
                     </p>
                     <Select v-model="month">
-                        <SelectTrigger class="h-8 w-full font-mono text-xs">
+                        <SelectTrigger class="h-8 w-full text-sm">
                             <SelectValue placeholder="All Months" />
                         </SelectTrigger>
                         <SelectContent>
@@ -135,12 +137,12 @@ watch([provider, month, perPage], apply);
 
                 <div class="space-y-1.5">
                     <p
-                        class="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                        class="text-xs uppercase tracking-[0.08em] text-muted-foreground"
                     >
                         Rows per page
                     </p>
                     <Select v-model="perPage">
-                        <SelectTrigger class="h-8 w-full font-mono text-xs">
+                        <SelectTrigger class="h-8 w-full text-sm">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -157,7 +159,7 @@ watch([provider, month, perPage], apply);
                 <Button
                     variant="ghost"
                     size="sm"
-                    class="w-full h-8 font-mono text-xs text-muted-foreground"
+                    class="w-full h-8 text-sm text-muted-foreground"
                     :disabled="!hasActiveFilters"
                     @click="reset"
                 >
