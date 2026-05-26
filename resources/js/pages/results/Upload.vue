@@ -37,7 +37,7 @@ const ACCENT = "oklch(0.48 0.19 260)";
         <div class="flex flex-col gap-5 p-6">
             <div>
                 <p
-                    class="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground mb-1"
+                    class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
                 >
                     results / upload
                 </p>
@@ -46,11 +46,11 @@ const ACCENT = "oklch(0.48 0.19 260)";
                 >
                     Upload Speed
                     <span
-                        class="font-mono text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.025_260)] text-[oklch(0.48_0.19_260)]"
+                        class="text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.025_260)] text-[oklch(0.48_0.19_260)]"
                         >↑ Mbps</span
                     >
                 </h1>
-                <p class="font-mono text-[11px] text-muted-foreground mt-0.5">
+                <p class="text-[11px] text-muted-foreground mt-0.5">
                     {{ stats.total }} records
                 </p>
             </div>
