@@ -436,7 +436,7 @@ watch(
                             <Select
                                 :model-value="windowForm.providers[0]"
                                 @update:model-value="
-                                    windowForm.providers = [$event]
+                                    windowForm.providers = [$event as string]
                                 "
                             >
                                 <SelectTrigger>
