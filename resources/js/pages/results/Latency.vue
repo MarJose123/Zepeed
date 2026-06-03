@@ -26,43 +26,42 @@ const ACCENT = "oklch(0.48 0.22 305)";
 
 <template>
     <Head title="Ping Latency" />
+
     <AppLayout
         :breadcrumbs="[
+            {
+                title: 'Speedtest Result',
+                href: '#',
+            },
             { title: 'Ping Latency', href: route('speedtest.results.latency') },
         ]"
     >
-        <div class="flex flex-col gap-5 p-6">
-            <div>
-                <p
-                    class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
-                >
-                    results / ping
-                </p>
-                <h1
-                    class="text-xl font-semibold tracking-tight flex items-center gap-2.5"
-                >
-                    Ping Latency
-                    <span
-                        class="text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.025_305)] text-[oklch(0.48_0.22_305)]"
-                        >◎ ms</span
-                    >
-                </h1>
-                <p class="text-[11px] text-muted-foreground mt-0.5">
-                    {{ stats.total }} records · lower is better
-                </p>
+        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">
+                        Ping Latency
+                    </h1>
+                    <p class="text-sm text-muted-foreground mt-1">
+                        Historical ping and jitter measurements across all
+                        providers.
+                    </p>
+                </div>
             </div>
+
             <ResultsStatCards
                 :stats="stats"
                 metric="ping"
                 :accent-var="ACCENT"
             />
+
             <DataTable :columns="latencyColumns" :results="results">
                 <template #toolbar>
                     <ResultsFilter
                         :providers="providers"
                         :months="months"
                         :filters="filters"
-                        route-name="speedtest.results.latency"
+                        route-name="speedtest.results.ping"
                     />
                 </template>
             </DataTable>

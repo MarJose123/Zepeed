@@ -26,39 +26,35 @@ const ACCENT = "oklch(0.48 0.19 260)";
 
 <template>
     <Head title="Upload Results" />
+
     <AppLayout
         :breadcrumbs="[
+            { title: 'Speedtest Result', href: '#' },
             {
                 title: 'Upload Results',
                 href: route('speedtest.results.upload'),
             },
         ]"
     >
-        <div class="flex flex-col gap-5 p-6">
-            <div>
-                <p
-                    class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
-                >
-                    results / upload
-                </p>
-                <h1
-                    class="text-xl font-semibold tracking-tight flex items-center gap-2.5"
-                >
-                    Upload Speed
-                    <span
-                        class="text-[10.5px] font-medium px-2.5 py-0.5 rounded-full border border-border bg-[oklch(0.97_0.025_260)] text-[oklch(0.48_0.19_260)]"
-                        >↑ Mbps</span
-                    >
-                </h1>
-                <p class="text-[11px] text-muted-foreground mt-0.5">
-                    {{ stats.total }} records
-                </p>
+        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">
+                        Upload Results
+                    </h1>
+                    <p class="text-sm text-muted-foreground mt-1">
+                        Historical upload speed measurements across all
+                        providers.
+                    </p>
+                </div>
             </div>
+
             <ResultsStatCards
                 :stats="stats"
                 metric="upload"
                 :accent-var="ACCENT"
             />
+
             <DataTable :columns="uploadColumns" :results="results">
                 <template #toolbar>
                     <ResultsFilter
