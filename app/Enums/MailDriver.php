@@ -65,7 +65,7 @@ enum MailDriver: string
     {
         return match ($this) {
             self::Resend, self::Mailgun, self::Postmark, self::Ses => true,
-            default => false,
+            default                                                => false,
         };
     }
 }

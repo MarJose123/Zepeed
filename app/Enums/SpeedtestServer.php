@@ -68,7 +68,7 @@ enum SpeedtestServer: string
     public function supportServerUrl(): bool
     {
         return match ($this) {
-            self::Librespeed => true,
+            self::Librespeed                        => true,
             self::Speedtest, self::NetflixSpeedtest => false,
         };
     }
