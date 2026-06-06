@@ -67,7 +67,7 @@ class PublicDashboardController extends Controller
             ->limit(20)
             ->get()
             ->map(fn ($row) => [
-                'id'           => $row->id,
+                'id'            => $row->id,
                 'provider_name' => $row->provider_name,
                 'download_mbps' => $row->download_mbps,
                 'upload_mbps'   => $row->upload_mbps,
