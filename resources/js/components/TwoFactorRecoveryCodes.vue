@@ -6,7 +6,7 @@ import {
     LockKeyhole,
     RefreshCw,
     AlertCircleIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { nextTick, onMounted, ref, useTemplateRef } from "vue";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

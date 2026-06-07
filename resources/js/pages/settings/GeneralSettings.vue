@@ -22,7 +22,7 @@ import {
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { computed, ref } from "vue";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";

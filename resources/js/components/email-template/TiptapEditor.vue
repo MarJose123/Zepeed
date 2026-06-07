@@ -12,7 +12,7 @@ import {
     Redo,
     Heading1,
     Heading2,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { watch } from "vue";
 import { useMergeFieldSuggestion } from "@/components/email-template/useMergeFieldSuggestion";
 import { Button } from "@/components/ui/button";

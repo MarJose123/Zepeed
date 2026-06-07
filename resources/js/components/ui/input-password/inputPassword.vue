@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { EyeIcon, EyeOffIcon } from "lucide-vue-next";
+import { EyeIcon, EyeOffIcon } from "@lucide/vue";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

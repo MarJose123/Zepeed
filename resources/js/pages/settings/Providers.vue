@@ -7,7 +7,7 @@ import {
     Radio,
     Server,
     Bell,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { ref, watch } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

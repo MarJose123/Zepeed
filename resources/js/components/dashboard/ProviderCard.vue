@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Clock } from "lucide-vue-next";
+import { Clock } from "@lucide/vue";
 import { computed, ref } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";

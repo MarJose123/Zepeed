@@ -7,7 +7,7 @@ import {
     Trash2,
     CheckCircle2,
     PauseCircle,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { ref, watch } from "vue";
 import RuleBuilder from "@/components/alert-rule/RuleBuilder.vue";
 import {

@@ -6,7 +6,7 @@ import {
     CheckCircle2Icon,
     XCircleIcon,
     AlertCircleIcon,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Mail, Link2, Trash2 } from "lucide-vue-next";
+import { Mail, Link2, Trash2 } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

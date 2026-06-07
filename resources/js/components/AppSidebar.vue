@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 import { Link } from "@inertiajs/vue3";
 import {
     Cable,
     ChartGantt,
-    Github,
     LayoutDashboard,
     LifeBuoy,
     Settings2,
-} from "lucide-vue-next";
+} from "@lucide/vue";
+import { h } from "vue";
 import AppLogo from "@/components/AppLogo.vue";
 import NavMain from "@/components/NavMain.vue";
 import NavSidebarFooter from "@/components/NavSidebarFooter.vue";
@@ -112,6 +113,7 @@ const navigation: TSidebarNavigationItems = [
     },
 ];
 
+const GithubIcon = () => h(Icon, { icon: 'simple-icons:github' })
 const footerNavigation: TFooterNavigationItems = {
     title: "Links",
     items: [
@@ -123,7 +125,7 @@ const footerNavigation: TFooterNavigationItems = {
         {
             title: "GitHub",
             href: "https://github.com/MarJose123/Zepeed?ref=zepeed-app",
-            icon: Github,
+            icon: GithubIcon,
         },
     ],
 };
