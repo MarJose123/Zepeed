@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-    Database,
-    ArrowDown,
-    ArrowUp,
-    Server,
-    Activity,
-} from "@lucide/vue";
+import { Database, ArrowDown, ArrowUp, Server, Activity } from "@lucide/vue";
 import { Card, CardContent } from "@/components/ui/card";
 
 const iconMap = {
