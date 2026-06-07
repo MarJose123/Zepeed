@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
-import { UserLock } from 'lucide-vue-next';
+import { UserLock } from "lucide-vue-next";
 import AppLogoIcon from "@/components/AppLogoIcon.vue";
 </script>
 
@@ -10,7 +10,7 @@ import AppLogoIcon from "@/components/AppLogoIcon.vue";
             class="bg-background/90 border-border sticky top-0 z-30 border-b backdrop-blur-sm"
         >
             <div
-                class="mx-auto flex h-12 max-w-screen-xl items-center justify-between px-5"
+                class="mx-auto flex h-12 max-w-7xl items-center justify-between px-5"
             >
                 <div class="flex items-center gap-2.5">
                     <div
@@ -34,7 +34,7 @@ import AppLogoIcon from "@/components/AppLogoIcon.vue";
                 </Link>
             </div>
         </header>
-        <main class="mx-auto max-w-screen-xl px-5 py-5">
+        <main class="mx-auto max-w-7xl px-5 py-5">
             <slot />
         </main>
     </div>

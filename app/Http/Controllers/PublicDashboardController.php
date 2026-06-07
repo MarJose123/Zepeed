@@ -17,21 +17,21 @@ class PublicDashboardController extends Controller
     public function __invoke(): Response
     {
         $stats = [
-            'total_tests'  => SpeedResult::query()->count(),
-            'avg_download' => round((float) SpeedResult::query()
+            'total_tests'    => SpeedResult::query()->count(),
+            'avg_download'   => round((float) SpeedResult::query()
                 ->where('measured_at', '>=', now()->subHours(24))
                 ->avg('download_mbps'), 1),
-            'avg_upload'   => round((float) SpeedResult::query()
+            'avg_upload'     => round((float) SpeedResult::query()
                 ->where('measured_at', '>=', now()->subHours(24))
                 ->avg('upload_mbps'), 1),
-            'avg_ping'     => round((float) SpeedResult::query()
+            'avg_ping'       => round((float) SpeedResult::query()
                 ->where('measured_at', '>=', now()->subHours(24))
                 ->avg('ping_ms'), 1),
             'provider_count' => Provider::query()->count(),
         ];
 
         /** @var array<int, array{label: string, download: float, upload: float, ping: float}> $trend */
-        $trend = SpeedResult::query()
+        $trend = DB::table('speed_results')
             ->select([
                 DB::raw('DATE_FORMAT(measured_at, "%Y-%m-%d %H:00:00") as hour_bucket'),
                 DB::raw('ROUND(AVG(download_mbps), 1) as download'),
@@ -42,8 +42,8 @@ class PublicDashboardController extends Controller
             ->groupBy('hour_bucket')
             ->orderBy('hour_bucket')
             ->get()
-            ->map(fn ($row) => [
-                'label'    => $row->hour_bucket,
+            ->map(static fn (object $row): array => [
+                'label'    => (string) $row->hour_bucket,
                 'download' => (float) $row->download,
                 'upload'   => (float) $row->upload,
                 'ping'     => (float) $row->ping,
@@ -51,10 +51,10 @@ class PublicDashboardController extends Controller
             ->values()
             ->all();
 
-        $recentResults = SpeedResult::query()
+        /** @var array<int, array{id: string, provider_name: string, download_mbps: float|null, upload_mbps: float|null, ping_ms: float|null, jitter_ms: float|null, measured_at: string}> $recentResults */
+        $recentResults = DB::table('speed_results')
             ->select([
                 'speed_results.id',
-                'speed_results.provider_slug',
                 'speed_results.download_mbps',
                 'speed_results.upload_mbps',
                 'speed_results.ping_ms',
@@ -66,29 +66,31 @@ class PublicDashboardController extends Controller
             ->latest('speed_results.measured_at')
             ->limit(10)
             ->get()
-            ->map(fn ($row) => [
-                'id'            => $row->id,
-                'provider_name' => $row->provider_name,
-                'download_mbps' => $row->download_mbps,
-                'upload_mbps'   => $row->upload_mbps,
-                'ping_ms'       => $row->ping_ms,
-                'jitter_ms'     => $row->jitter_ms,
-                'measured_at'   => $row->measured_at,
-            ]);
+            ->map(static fn (object $row): array => [
+                'id'            => (string) $row->id,
+                'provider_name' => (string) $row->provider_name,
+                'download_mbps' => $row->download_mbps !== null ? (float) $row->download_mbps : null,
+                'upload_mbps'   => $row->upload_mbps !== null ? (float) $row->upload_mbps : null,
+                'ping_ms'       => $row->ping_ms !== null ? (float) $row->ping_ms : null,
+                'jitter_ms'     => $row->jitter_ms !== null ? (float) $row->jitter_ms : null,
+                'measured_at'   => (string) $row->measured_at,
+            ])
+            ->values()
+            ->all();
 
         $alertHistory = AlertRule::query()
             ->select(['id', 'name', 'is_active', 'updated_at'])
             ->latest('updated_at')
             ->limit(10)
             ->get()
-            ->map(fn (AlertRule $rule) => [
+            ->map(fn (AlertRule $rule): array => [
                 'id'         => $rule->id,
                 'name'       => $rule->name,
                 'is_enabled' => $rule->is_active,
                 'updated_at' => $rule->updated_at?->toIso8601String(),
             ]);
 
-        return Inertia::render('public/Dashboard', [
+        return Inertia::render('Public/Dashboard', [
             'stats'         => $stats,
             'trend'         => $trend,
             'recentResults' => $recentResults,
