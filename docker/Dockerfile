@@ -7,7 +7,7 @@ ARG LIBRESPEED_VERSION=1.0.12
 ARG SPEEDTEST_VERSION=1.2.0
 ARG FAST_CLI_VERSION=0.3.5
 
-RUN apk add --no-cache curl tar
+RUN apk add --no-cache curl tar bash
 
 # Ookla Speedtest CLI
 RUN curl -sSL "https://install.speedtest.net/app/cli/ookla-speedtest-${SPEEDTEST_VERSION}-linux-x86_64.tgz" \
@@ -22,10 +22,7 @@ RUN curl -sSL \
     && chmod 755 /usr/local/bin/librespeed-cli
 
 # Netflix Fast CLI
-RUN curl -sSL \
-    "https://github.com/mikkelam/fast-cli/releases/download/v${FAST_CLI_VERSION}/fast-cli-x86_64-linux.tar.gz" \
-    | tar -xz -C /usr/local/bin \
-    && chmod 755 /usr/local/bin/fast-cli
+RUN curl -sSL https://raw.githubusercontent.com/mikkelam/fast-cli/main/install.sh | bash
 
 
 # =============================================================================
