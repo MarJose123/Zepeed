@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useHttp } from "@inertiajs/vue3";
-import { Moon, Sun } from "lucide-vue-next";
+import { Moon, Sun } from "@lucide/vue";
 import { computed } from "vue";
 import { Switch } from "@/components/ui/switch";
 import type { Appearance } from "@/composables/useAppearance";

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
-import { Eye, Loader2 } from "lucide-vue-next";
+import { Eye, Loader2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { nextTick } from "vue";
 import MergeFieldPicker from "@/components/email-template/MergeFieldPicker.vue";

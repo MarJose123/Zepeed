@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
-import { Loader2 } from "lucide-vue-next";
+import { Loader2 } from "@lucide/vue";
 import { ref, computed } from "vue";
 import DriverConfigForm from "@/components/mail/DriverConfigForm.vue";
 import DriverPicker from "@/components/mail/DriverPicker.vue";

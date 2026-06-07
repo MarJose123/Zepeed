@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
-import { CheckCircle2, Loader2, Plus, Trash2, XCircle } from "lucide-vue-next";
+import { CheckCircle2, Loader2, Plus, Trash2, XCircle } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import {

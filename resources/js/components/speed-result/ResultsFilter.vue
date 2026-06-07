@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
-import { ListFilter } from "lucide-vue-next";
+import { ListFilter } from "@lucide/vue";
 import { ref, watch, computed } from "vue";
 import { Button } from "@/components/ui/button";
 import {

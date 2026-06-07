@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Placeholder from "@tiptap/extension-placeholder";
-import StarterKit from "@tiptap/starter-kit";
-import { EditorContent, useEditor } from "@tiptap/vue-3";
 import {
     Bold,
     Italic,
@@ -12,7 +9,10 @@ import {
     Redo,
     Heading1,
     Heading2,
-} from "lucide-vue-next";
+} from "@lucide/vue";
+import Placeholder from "@tiptap/extension-placeholder";
+import StarterKit from "@tiptap/starter-kit";
+import { EditorContent, useEditor } from "@tiptap/vue-3";
 import { watch } from "vue";
 import { useMergeFieldSuggestion } from "@/components/email-template/useMergeFieldSuggestion";
 import { Button } from "@/components/ui/button";

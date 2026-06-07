@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
+import { ChevronRight, Loader2, Clock } from "@lucide/vue";
 import cronstrue from "cronstrue";
-import { ChevronRight, Loader2, Clock } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

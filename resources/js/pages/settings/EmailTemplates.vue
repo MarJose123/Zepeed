@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
-import { HelpCircle, PlusIcon } from "lucide-vue-next";
+import { HelpCircle, PlusIcon } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import TemplateEditor from "@/components/email-template/TemplateEditor.vue";
 import { Badge } from "@/components/ui/badge";

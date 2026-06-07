@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from "@inertiajs/vue3";
-import { Link2, Plus } from "lucide-vue-next";
+import { Link2, Plus } from "@lucide/vue";
 import { ref } from "vue";
 import {
     AlertDialog,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
-import { Link2, Pencil, Trash2 } from "lucide-vue-next";
+import { Link2, Pencil, Trash2 } from "@lucide/vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Webhook } from "@/types/webhook";

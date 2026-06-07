@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
-import { Loader2, Plus } from "lucide-vue-next";
+import { Loader2, Plus } from "@lucide/vue";
 import { computed, watch } from "vue";
 import ActionRow from "@/components/alert-rule/ActionRow.vue";
 import ConditionRow from "@/components/alert-rule/ConditionRow.vue";
