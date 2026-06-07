@@ -64,7 +64,7 @@ class PublicDashboardController extends Controller
             ])
             ->leftJoin('providers', 'providers.slug', '=', 'speed_results.provider_slug')
             ->latest('speed_results.measured_at')
-            ->limit(20)
+            ->limit(10)
             ->get()
             ->map(fn ($row) => [
                 'id'            => $row->id,
