@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from "@inertiajs/vue3";
-import { ArrowLeft } from "lucide-vue-next";
+import { ArrowLeft } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import {
     Card,

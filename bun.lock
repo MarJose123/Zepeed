@@ -7,6 +7,7 @@
         "@floating-ui/vue": "1.1.11",
         "@inertiajs/vite": "3.0.0",
         "@inertiajs/vue3": "3.0.0",
+        "@lucide/vue": "1.17.0",
         "@tanstack/vue-table": "8.21.3",
         "@tiptap/extension-mention": "3.21.0",
         "@tiptap/extension-placeholder": "3.21.0",
@@ -24,7 +25,6 @@
         "cronstrue": "3.14.0",
         "eslint-plugin-unused-imports": "4.4.1",
         "install": "0.13.0",
-        "lucide-vue-next": "0.563.0",
         "reka-ui": "2.9.7",
         "tailwind-merge": "3.5.0",
         "tailwindcss": "4.2.2",
@@ -35,7 +35,7 @@
       },
       "devDependencies": {
         "@eslint/js": "9.39.4",
-        "@iconify/vue": "5.0.0",
+        "@iconify/vue": "5.0.1",
         "@laravel/echo-vue": "2.3.1",
         "@stylistic/eslint-plugin": "5.10.0",
         "@tailwindcss/vite": "4.2.2",
@@ -196,7 +196,7 @@
 
     "@iconify/types": ["@iconify/types@2.0.0", "", {}, "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg=="],
 
-    "@iconify/vue": ["@iconify/vue@5.0.0", "", { "dependencies": { "@iconify/types": "^2.0.0" }, "peerDependencies": { "vue": ">=3" } }, "sha512-C+KuEWIF5nSBrobFJhT//JS87OZ++QDORB6f2q2Wm6fl2mueSTpFBeBsveK0KW9hWiZ4mNiPjsh6Zs4jjdROSg=="],
+    "@iconify/vue": ["@iconify/vue@5.0.1", "", { "dependencies": { "@iconify/types": "^2.0.0" }, "peerDependencies": { "vue": ">=3.0.0" } }, "sha512-aumwwooJlFJ5H5qYWB6ZTAyM0C8hpfcSVLB9/a3qnH1GGvIJ+FEbpEs4s/HfErYe/M5qZeLjwmESR5fFm3lXEw=="],
 
     "@inertiajs/core": ["@inertiajs/core@3.0.0", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.31", "es-toolkit": "^1.33.0", "laravel-precognition": "^2.0.0" }, "peerDependencies": { "axios": "^1.13.2" }, "optionalPeers": ["axios"] }, "sha512-LkdXfOXJGLIFQeqirO66lQ401ciO1f7yEiQV7ZWFbt9f2ElgilSkm6aOXLbPwHJF77h27jdtja0OJDS8+l7Svw=="],
 
@@ -223,6 +223,8 @@
     "@kurkle/color": ["@kurkle/color@0.3.4", "", {}, "sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w=="],
 
     "@laravel/echo-vue": ["@laravel/echo-vue@2.3.1", "", { "peerDependencies": { "pusher-js": "*", "socket.io-client": "*", "vue": "^3.0.0" } }, "sha512-hLSULxA4HMeNjSVIqIIn4V7vp7C7+sihScoi+FBy12iLNbM4TSdLnowEYtQHZm8Xx3UibYYNz4bgVJGY4Iyphg=="],
+
+    "@lucide/vue": ["@lucide/vue@1.17.0", "", { "peerDependencies": { "vue": ">=3.0.1" } }, "sha512-6Q1ZHgr5FbmJzKWe5BxlNdjLj2lbmuH1zwDtVzUJofX0w9UREwKgq4F4jwKqFYyyIS4Rj3FiJvDi2k6djukmmw=="],
 
     "@mapbox/geojson-rewind": ["@mapbox/geojson-rewind@0.5.2", "", { "dependencies": { "get-stream": "^6.0.1", "minimist": "^1.2.6" }, "bin": { "geojson-rewind": "geojson-rewind" } }, "sha512-tJaT+RbYGJYStt7wI3cq4Nl4SXxG8W7JDG5DMJu97V25RnbNg3QtQtf+KD+VLjNpWKYsRvXDNmNrBgEETr1ifA=="],
 
@@ -1167,8 +1169,6 @@
     "lodash.merge": ["lodash.merge@4.6.2", "", {}, "sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ=="],
 
     "lru-cache": ["lru-cache@5.1.1", "", { "dependencies": { "yallist": "^3.0.2" } }, "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="],
-
-    "lucide-vue-next": ["lucide-vue-next@0.563.0", "", { "peerDependencies": { "vue": ">=3.0.1" } }, "sha512-zsE/lCKtmaa7bGfhSpN84br1K9YoQ5pCN+2oKWjQQG3Lo6ufUUKBuHSjNFI6RvUevxaajNXb8XwFUKeTXG3sIA=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 

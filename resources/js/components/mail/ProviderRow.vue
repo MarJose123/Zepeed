@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
-import { GripVertical, Loader2, Pencil, Trash2 } from "lucide-vue-next";
+import { GripVertical, Loader2, Pencil, Trash2 } from "@lucide/vue";
 import { ref } from "vue";
 import DriverConfigForm from "@/components/mail/DriverConfigForm.vue";
 import { Badge } from "@/components/ui/badge";

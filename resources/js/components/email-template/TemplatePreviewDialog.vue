@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useHttp } from "@inertiajs/vue3";
-import { Loader2, Monitor, Smartphone } from "lucide-vue-next";
+import { Loader2, Monitor, Smartphone } from "@lucide/vue";
 import { ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
-import { KeyRound, RadioTower, ShieldCheck, User } from "lucide-vue-next";
+import { KeyRound, RadioTower, ShieldCheck, User } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCurrentUrl } from "@/composables/useCurrentUrl";
