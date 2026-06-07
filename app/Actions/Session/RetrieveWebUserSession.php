@@ -23,7 +23,7 @@ final class RetrieveWebUserSession
      *
      * @param Request $request
      *
-     * @return Collection<int, Fluent>
+     * @return Collection<int, Fluent<string, mixed>>
      */
     private function userSessions(Request $request): Collection
     {
@@ -36,7 +36,7 @@ final class RetrieveWebUserSession
                 ->where('user_id', $request->user()->getAuthIdentifier())
                 ->orderBy('last_activity', 'desc')
                 ->get()
-        )->map(function ($session) use ($request) {
+        )->map(function ($session) use ($request): Fluent {
             $agent = $this->createAgent($session);
             /** @var Position|false $location */
             $location = Location::get(trim((string) $session->ip_address));
@@ -53,14 +53,13 @@ final class RetrieveWebUserSession
                     'latitude'     => $location ? $location->latitude : null,
                     'longitude'    => $location ? $location->longitude : null,
                 ],
-                'session_id'         => $session->id,
-                'ip_address'         => $session->ip_address,
-                'is_current_device'  => $session->id === $request->session()->getId(),
-                'last_active'        => Date::createFromTimestamp($session->last_activity)->diffForHumans(),
-                'risk'               => $location ? (int) $location->risk : null,
+                'session_id'        => $session->id,
+                'ip_address'        => $session->ip_address,
+                'is_current_device' => $session->id === $request->session()->getId(),
+                'last_active'       => Date::createFromTimestamp($session->last_activity)->diffForHumans(),
+                'risk'              => $location ? (int) $location->risk : null,
             ]);
         });
-
     }
 
     /**
