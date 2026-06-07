@@ -90,7 +90,7 @@ class PublicDashboardController extends Controller
                 'updated_at' => $rule->updated_at?->toIso8601String(),
             ]);
 
-        return Inertia::render('Public/Dashboard', [
+        return Inertia::render('public/Dashboard', [
             'stats'         => $stats,
             'trend'         => $trend,
             'recentResults' => $recentResults,

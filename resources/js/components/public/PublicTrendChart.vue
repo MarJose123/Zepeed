@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, Zap } from "lucide-vue-next";
+import { ArrowDown, ArrowUp, Zap } from "@lucide/vue";
 import { computed } from "vue";
 import { Card, CardContent } from "@/components/ui/card";
 import type { TrendPoint } from "@/types/public";

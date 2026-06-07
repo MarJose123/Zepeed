@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
-import { UserLock } from "lucide-vue-next";
+import { UserLock } from "@lucide/vue";
 import AppLogoIcon from "@/components/AppLogoIcon.vue";
 </script>
 

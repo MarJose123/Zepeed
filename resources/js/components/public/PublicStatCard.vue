@@ -5,7 +5,7 @@ import {
     ArrowUp,
     Server,
     Activity,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { Card, CardContent } from "@/components/ui/card";
 
 const iconMap = {
