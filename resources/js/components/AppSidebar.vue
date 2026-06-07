@@ -113,7 +113,7 @@ const navigation: TSidebarNavigationItems = [
     },
 ];
 
-const GithubIcon = () => h(Icon, { icon: 'simple-icons:github' })
+const GithubIcon = () => h(Icon, { icon: "simple-icons:github" });
 const footerNavigation: TFooterNavigationItems = {
     title: "Links",
     items: [

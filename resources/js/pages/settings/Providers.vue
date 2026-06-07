@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm } from "@inertiajs/vue3";
-import {
-    ExternalLink,
-    Loader2,
-    Info,
-    Radio,
-    Server,
-    Bell,
-} from "@lucide/vue";
+import { ExternalLink, Loader2, Info, Radio, Server, Bell } from "@lucide/vue";
 import { ref, watch } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

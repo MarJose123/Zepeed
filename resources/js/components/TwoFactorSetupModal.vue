@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from "@inertiajs/vue3";
-import { useClipboard } from "@vueuse/core";
 import { AlertCircleIcon, Check, Copy, ScanLine } from "@lucide/vue";
+import { useClipboard } from "@vueuse/core";
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
