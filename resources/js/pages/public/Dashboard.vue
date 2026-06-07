@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
+import { computed } from "vue";
 import PublicAlertHistory from "@/components/public/PublicAlertHistory.vue";
 import PublicResultsTable from "@/components/public/PublicResultsTable.vue";
 import PublicStatCard from "@/components/public/PublicStatCard.vue";
@@ -12,12 +13,14 @@ import type {
     PublicAlertItem,
 } from "@/types/public";
 
-defineProps<{
+const props = defineProps<{
     stats: PublicStats;
     trend: TrendPoint[];
     recentResults: PublicSpeedResult[];
     alertHistory: PublicAlertItem[];
 }>();
+
+const limitedResults = computed(() => props.recentResults.slice(0, 10));
 </script>
 
 <template>
@@ -35,25 +38,30 @@ defineProps<{
                     <PublicStatCard
                         label="Total tests"
                         :value="stats.total_tests.toLocaleString()"
+                        icon="database"
                     />
                     <PublicStatCard
                         label="Avg download"
                         :value="stats.avg_download"
+                        icon="arrow-down"
                         unit="Mbps"
                     />
                     <PublicStatCard
                         label="Avg upload"
                         :value="stats.avg_upload"
+                        icon="arrow-up"
                         unit="Mbps"
                     />
                     <PublicStatCard
                         label="Avg latency"
                         :value="stats.avg_ping"
+                        icon="activity"
                         unit="ms"
                     />
                     <PublicStatCard
                         label="Providers"
                         :value="stats.provider_count"
+                        icon="server"
                     />
                 </div>
             </section>
@@ -94,7 +102,7 @@ defineProps<{
                 >
                     Recent results
                 </p>
-                <PublicResultsTable :results="recentResults" />
+                <PublicResultsTable :results="limitedResults" />
             </section>
 
             <!-- Alert history -->

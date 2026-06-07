@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
+import { UserLock } from 'lucide-vue-next';
+import AppLogoIcon from "@/components/AppLogoIcon.vue";
 </script>
 
 <template>
@@ -12,22 +14,9 @@ import { Link } from "@inertiajs/vue3";
             >
                 <div class="flex items-center gap-2.5">
                     <div
-                        class="bg-foreground flex h-5.5 w-5.5 items-center justify-center rounded-md"
+                        class="bg-sidebar-primary text-sidebar-primary-foreground flex size-7 items-center justify-center rounded-lg"
                     >
-                        <svg
-                            class="text-background h-3 w-3"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                            />
-                        </svg>
+                        <AppLogoIcon class="size-4" />
                     </div>
                     <span class="text-sm font-bold tracking-tight">Zepeed</span>
                     <span
@@ -40,20 +29,7 @@ import { Link } from "@inertiajs/vue3";
                     :href="route('login')"
                     class="border-border text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors"
                 >
-                    <svg
-                        class="h-3 w-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-                        />
-                    </svg>
+                    <UserLock class="size-4" />
                     Sign in
                 </Link>
             </div>

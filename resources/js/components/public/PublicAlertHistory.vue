@@ -18,21 +18,21 @@ const fmtDate = (iso: string | null): string => {
 </script>
 
 <template>
-    <div class="bg-card border-border overflow-hidden rounded-lg border">
+    <div class="border-border overflow-hidden rounded-lg border">
         <div
             v-for="alert in alerts"
             :key="alert.id"
-            class="border-border flex items-center justify-between border-b px-3 py-2.5 last:border-b-0"
+            class="border-border flex flex-col gap-1.5 border-b px-4 py-3 last:border-b-0"
         >
             <p class="text-sm font-medium">{{ alert.name }}</p>
-            <div class="flex shrink-0 items-center gap-2.5">
+            <div class="flex items-center gap-2">
                 <span
                     :class="
                         alert.is_enabled
-                            ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
                             : 'bg-muted text-muted-foreground'
                     "
-                    class="rounded-full px-2 py-0.5 text-[10px]"
+                    class="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
                 >
                     {{ alert.is_enabled ? "Active" : "Disabled" }}
                 </span>
@@ -43,7 +43,7 @@ const fmtDate = (iso: string | null): string => {
         </div>
         <div
             v-if="alerts.length === 0"
-            class="text-muted-foreground px-3 py-6 text-center text-sm"
+            class="text-muted-foreground px-4 py-6 text-center text-sm"
         >
             No alert rules configured
         </div>
