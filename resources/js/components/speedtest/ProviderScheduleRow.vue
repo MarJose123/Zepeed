@@ -161,13 +161,13 @@ const toggleEnabled = (val: boolean) => {
         >
             <!-- Favicon with Clock lucide fallback -->
             <div
-                class="bg-muted border-border flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border"
+                class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md"
             >
                 <img
                     v-if="!faviconError"
                     :src="`https://www.google.com/s2/favicons?domain=${schedule.website_link}&sz=32`"
                     :alt="schedule.provider_name"
-                    class="h-4 w-4 object-contain"
+                    class="size-7 object-cover"
                     @error="onFaviconError"
                 />
                 <Clock v-else class="text-muted-foreground h-4 w-4" />
