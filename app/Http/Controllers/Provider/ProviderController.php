@@ -6,8 +6,10 @@ use App\Enums\QueueWorkerName;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
+use App\Http\Resources\ProviderScheduleResource;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
+use App\Models\ProviderSchedule;
 use App\Services\InertiaNotification;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Exception;
@@ -19,14 +21,32 @@ class ProviderController extends Controller
 {
     /**
      * Render the Providers settings page.
-     * Passes all 3 providers to Vue; tab switching is client-side only.
+     *
+     * Passes all providers and their associated schedules to Vue.
+     * The schedules map is keyed by provider slug so the dialog can
+     * resolve affected schedules purely client-side.
      */
     public function index(): Response
     {
+        $providers = Provider::query()->orderBy('id')->get();
+
+        /** @var array<string, list<array<string, mixed>>> $schedulesMap */
+        $schedulesMap = [];
+
+        foreach ($providers as $provider) {
+            $schedulesMap[$provider->slug->value] = ProviderScheduleResource::collection(
+                ProviderSchedule::query()
+                    ->where('provider_slug', $provider->slug->value)
+                    ->where('is_enabled', true)
+                    ->whereNotNull('cron_expression')
+                    ->oldest()
+                    ->get()
+            )->resolve();
+        }
+
         return Inertia::render('settings/Providers', [
-            'providers' => ProviderResource::collection(
-                Provider::query()->orderBy('id')->get()
-            )->resolve(),
+            'providers'    => ProviderResource::collection($providers)->resolve(),
+            'schedulesMap' => $schedulesMap,
         ]);
     }
 
@@ -66,13 +86,9 @@ class ProviderController extends Controller
     }
 
     /**
-     * Test run under the provider
-     *
-     * @param Provider $provider
+     * Test run under the provider.
      *
      * @throws Exception
-     *
-     * @return RedirectResponse
      */
     public function test(Provider $provider): RedirectResponse
     {
