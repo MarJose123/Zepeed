@@ -84,8 +84,8 @@ class MailProvider extends Model
                 'host'       => $config['host'],
                 'port'       => (int) $config['port'],
                 'encryption' => $config['encryption'],
-                'username'   => $config['username'],
-                'password'   => $config['password'],
+                'username'   => $config['username'] ?? null,
+                'password'   => $config['password'] ?? null,
             ],
             MailDriver::Resend => [
                 'transport' => 'resend',

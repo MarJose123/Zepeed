@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,46 +33,32 @@ const emit = defineEmits<{
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 const statusVariant = (p: MailProvider) => {
-    if (p.failure_count > 3) {
-        return "destructive";
-    }
+    if (p.failure_count > 3) return "destructive";
 
-    if (p.last_used_at) {
-        return "default";
-    }
+    if (p.last_used_at) return "default";
 
     return "secondary";
 };
 
 const statusLabel = (p: MailProvider) => {
-    if (p.failure_count > 3) {
-        return "failed";
-    }
+    if (p.failure_count > 3) return "failed";
 
-    if (p.last_used_at) {
-        return "connected";
-    }
+    if (p.last_used_at) return "connected";
 
     return "not tested";
 };
 
 const lastUsedLabel = (p: MailProvider) => {
-    if (!p.last_used_at) {
-        return "Never";
-    }
+    if (!p.last_used_at) return "Never";
 
     const diff = Date.now() - new Date(p.last_used_at).getTime();
     const mins = Math.floor(diff / 60_000);
 
-    if (mins < 60) {
-        return `${mins} min ago`;
-    }
+    if (mins < 60) return `${mins} min ago`;
 
     const hrs = Math.floor(mins / 60);
 
-    if (hrs < 24) {
-        return `${hrs}h ago`;
-    }
+    if (hrs < 24) return `${hrs}h ago`;
 
     return `${Math.floor(hrs / 24)}d ago`;
 };
@@ -165,12 +151,10 @@ const driverIcons: Record<string, string> = {
         @drop.prevent="emit('drop', $event)"
         @dragend="emit('dragend')"
     >
-        <!-- Drag handle -->
         <div class="text-muted-foreground cursor-grab active:cursor-grabbing">
             <GripVertical class="h-4 w-4" />
         </div>
 
-        <!-- Priority badge -->
         <div
             class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium"
             :class="
@@ -182,14 +166,12 @@ const driverIcons: Record<string, string> = {
             {{ provider.priority }}
         </div>
 
-        <!-- Provider icon -->
         <div
             class="bg-muted border-border flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-sm"
         >
             {{ driverIcons[provider.driver] }}
         </div>
 
-        <!-- Info -->
         <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-sm font-medium">{{ provider.label }}</span>
@@ -217,7 +199,6 @@ const driverIcons: Record<string, string> = {
             </div>
         </div>
 
-        <!-- Actions -->
         <div class="flex shrink-0 items-center gap-1.5">
             <Button
                 variant="outline"
@@ -297,32 +278,64 @@ const driverIcons: Record<string, string> = {
             <div class="space-y-3 py-2">
                 <div class="space-y-1.5">
                     <Label class="text-xs">Label</Label>
-                    <Input v-model="editForm.label" class="text-xs" />
+                    <Input
+                        v-model="editForm.label"
+                        class="text-xs"
+                        :class="{ 'border-destructive': editForm.errors.label }"
+                    />
                     <p
                         v-if="editForm.errors.label"
-                        class="text-destructive text-xs"
+                        class="text-destructive text-[10px]"
                     >
                         {{ editForm.errors.label }}
                     </p>
                 </div>
+
                 <Separator />
+
+                <!-- Driver config — errors threaded in -->
                 <DriverConfigForm
                     :driver="provider.driver"
                     :config="editForm.config"
+                    :errors="editForm.errors"
                     @update:config="editForm.config = $event"
                 />
+
                 <Separator />
+
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <Label class="text-xs">From address</Label>
                         <Input
                             v-model="editForm.from_address"
                             class="text-xs"
+                            :class="{
+                                'border-destructive':
+                                    editForm.errors.from_address,
+                            }"
                         />
+                        <p
+                            v-if="editForm.errors.from_address"
+                            class="text-destructive text-[10px]"
+                        >
+                            {{ editForm.errors.from_address }}
+                        </p>
                     </div>
                     <div class="space-y-1.5">
                         <Label class="text-xs">From name</Label>
-                        <Input v-model="editForm.from_name" class="text-xs" />
+                        <Input
+                            v-model="editForm.from_name"
+                            class="text-xs"
+                            :class="{
+                                'border-destructive': editForm.errors.from_name,
+                            }"
+                        />
+                        <p
+                            v-if="editForm.errors.from_name"
+                            class="text-destructive text-[10px]"
+                        >
+                            {{ editForm.errors.from_name }}
+                        </p>
                     </div>
                 </div>
             </div>

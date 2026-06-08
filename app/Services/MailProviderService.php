@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\QueueWorkerName;
 use App\Mail\TestConnectionMail;
 use App\Models\MailProvider;
 use Exception;
@@ -54,11 +53,9 @@ class MailProviderService
             "mail.mailers.test_{$provider->id}" => $provider->toMailerConfig(),
         ]);
 
-        $message = new TestConnectionMail($provider)->onQueue(QueueWorkerName::Mail->value);
-
         Mail::mailer("test_{$provider->id}")
             ->to($to)
-            ->queue($message);
+            ->send(new TestConnectionMail($provider));
     }
 
     /**

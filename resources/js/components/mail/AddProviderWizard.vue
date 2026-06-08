@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { router, useForm } from "@inertiajs/vue3";
 import { Loader2 } from "@lucide/vue";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import DriverConfigForm from "@/components/mail/DriverConfigForm.vue";
 import DriverPicker from "@/components/mail/DriverPicker.vue";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +52,7 @@ const stepLabel = computed(
         })[step.value],
 );
 
-// ── Driver helpers ─────────────────────────────────────────────────────────────
+// ── Driver helpers ────────────────────────────────────────────────────────────
 const driverLabel = computed(() => {
     const map: Record<MailDriver, string> = {
         smtp: "SMTP",
@@ -66,7 +66,6 @@ const driverLabel = computed(() => {
     return form.driver ? map[form.driver] : "";
 });
 
-// Label placeholder — personalized per driver
 const labelPlaceholder = computed(() => {
     const map: Record<MailDriver, string> = {
         smtp: "e.g. Office365 SMTP, Gmail SMTP",
@@ -80,7 +79,6 @@ const labelPlaceholder = computed(() => {
     return form.driver ? map[form.driver] : "Provider label";
 });
 
-// From address placeholder — personalized per driver
 const fromAddressPlaceholder = computed(() => {
     const map: Record<MailDriver, string> = {
         smtp: "noreply@yourdomain.com",
@@ -94,24 +92,25 @@ const fromAddressPlaceholder = computed(() => {
     return form.driver ? map[form.driver] : "noreply@yourdomain.com";
 });
 
-// From address hint — extra context per driver
 const fromAddressHint = computed(() => {
-    if (form.driver === "ses") {
+    if (form.driver === "ses")
         return "Must be a verified identity in your AWS SES account.";
-    }
 
-    if (form.driver === "mailgun") {
+    if (form.driver === "mailgun")
         return "Must match your Mailgun sending domain.";
-    }
 
-    if (form.driver === "postmark") {
+    if (form.driver === "postmark")
         return "Must be a verified sender signature in Postmark.";
-    }
 
     return null;
 });
 
-// ── Step guards ────────────────────────────────────────────────────────────────
+// True when any config.* key has an error from the backend
+const hasConfigErrors = computed(() =>
+    Object.keys(form.errors).some((k) => k.startsWith("config.")),
+);
+
+// ── Step guards ───────────────────────────────────────────────────────────────
 const canProceedStep1 = computed(() => form.driver !== null);
 
 const canProceedStep2 = computed(
@@ -122,17 +121,13 @@ const canProceedStep2 = computed(
         Object.keys(form.config).length > 0,
 );
 
-// ── Navigation ─────────────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────────────────
 function next() {
-    if (step.value < 3) {
-        step.value = (step.value + 1) as Step;
-    }
+    if (step.value < 3) step.value = (step.value + 1) as Step;
 }
 
 function back() {
-    if (step.value > 1) {
-        step.value = (step.value - 1) as Step;
-    }
+    if (step.value > 1) step.value = (step.value - 1) as Step;
 
     testResult.value = null;
     testErrorMsg.value = null;
@@ -149,9 +144,7 @@ function close() {
     }, 200);
 }
 
-// ── Save then test ─────────────────────────────────────────────────────────────
-// We save first to get the provider ID, then fire the real test endpoint.
-// The provider is removed if the user closes without confirming.
+// ── Save then test ────────────────────────────────────────────────────────────
 function saveAndProceedToTest() {
     form.post(route("speedtest.integration.smtp.store", {}, false), {
         preserveScroll: true,
@@ -166,9 +159,8 @@ function saveAndProceedToTest() {
 
 // ── Real backend test ─────────────────────────────────────────────────────────
 function sendTest() {
-    if (!form.test_email.trim() || !savedId.value || testProcessing.value) {
+    if (!form.test_email.trim() || !savedId.value || testProcessing.value)
         return;
-    }
 
     testProcessing.value = true;
     testResult.value = null;
@@ -244,17 +236,18 @@ function sendTest() {
 
             <!-- Step 2: Configure -->
             <div v-else-if="step === 2" class="space-y-3">
-                <!-- Label — personalized placeholder -->
+                <!-- Label -->
                 <div class="space-y-1.5">
                     <Label class="text-xs">Provider label</Label>
                     <Input
                         v-model="form.label"
                         :placeholder="labelPlaceholder"
                         class="text-xs"
+                        :class="{ 'border-destructive': form.errors.label }"
                     />
                     <p
                         v-if="form.errors.label"
-                        class="text-destructive text-xs"
+                        class="text-destructive text-[10px]"
                     >
                         {{ form.errors.label }}
                     </p>
@@ -262,13 +255,22 @@ function sendTest() {
 
                 <Separator />
 
-                <!-- Driver-specific config fields -->
+                <!-- Driver config — errors threaded in -->
                 <DriverConfigForm
                     v-if="form.driver"
                     :driver="form.driver"
                     :config="form.config"
+                    :errors="form.errors"
                     @update:config="form.config = $event"
                 />
+
+                <!-- Config-level error summary (catches generic 'config' key) -->
+                <p
+                    v-if="form.errors.config"
+                    class="text-destructive text-[10px]"
+                >
+                    {{ form.errors.config }}
+                </p>
 
                 <Separator />
 
@@ -281,16 +283,19 @@ function sendTest() {
                             type="email"
                             :placeholder="fromAddressPlaceholder"
                             class="text-xs"
+                            :class="{
+                                'border-destructive': form.errors.from_address,
+                            }"
                         />
                         <p
-                            v-if="fromAddressHint"
+                            v-if="fromAddressHint && !form.errors.from_address"
                             class="text-muted-foreground text-[10px]"
                         >
                             {{ fromAddressHint }}
                         </p>
                         <p
                             v-if="form.errors.from_address"
-                            class="text-destructive text-xs"
+                            class="text-destructive text-[10px]"
                         >
                             {{ form.errors.from_address }}
                         </p>
@@ -301,18 +306,32 @@ function sendTest() {
                             v-model="form.from_name"
                             placeholder="Zepeed"
                             class="text-xs"
+                            :class="{
+                                'border-destructive': form.errors.from_name,
+                            }"
                         />
                         <p
                             v-if="form.errors.from_name"
-                            class="text-destructive text-xs"
+                            class="text-destructive text-[10px]"
                         >
                             {{ form.errors.from_name }}
                         </p>
                     </div>
                 </div>
+
+                <!-- General config error banner shown when fields have errors -->
+                <div
+                    v-if="hasConfigErrors"
+                    class="rounded border border-destructive/30 bg-destructive/5 px-3 py-2"
+                >
+                    <p class="text-destructive text-[10px]">
+                        Some configuration fields need attention — check the
+                        fields above.
+                    </p>
+                </div>
             </div>
 
-            <!-- Step 3: Test & save -->
+            <!-- Step 3: Test & confirm -->
             <div v-else-if="step === 3" class="space-y-3">
                 <div class="space-y-1.5">
                     <Label class="text-xs">Send test email to</Label>
@@ -347,7 +366,6 @@ function sendTest() {
                     </p>
                 </div>
 
-                <!-- Success result -->
                 <div
                     v-if="testResult === 'success'"
                     class="flex items-start gap-2 rounded-md border border-green-300 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950"
@@ -368,7 +386,6 @@ function sendTest() {
                     </div>
                 </div>
 
-                <!-- Failed result -->
                 <div
                     v-else-if="testResult === 'failed'"
                     class="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3"
@@ -387,7 +404,6 @@ function sendTest() {
                     </div>
                 </div>
 
-                <!-- Neutral hint when not yet tested -->
                 <p
                     v-if="testResult === null && !testProcessing"
                     class="text-muted-foreground text-[10px]"
@@ -418,7 +434,6 @@ function sendTest() {
                         {{ step === 3 ? "Close" : "Cancel" }}
                     </Button>
 
-                    <!-- Step 1 → 2 -->
                     <Button
                         v-if="step === 1"
                         size="sm"
@@ -428,7 +443,6 @@ function sendTest() {
                         Next →
                     </Button>
 
-                    <!-- Step 2 → save + go to step 3 -->
                     <Button
                         v-else-if="step === 2"
                         size="sm"
@@ -442,7 +456,6 @@ function sendTest() {
                         Save & test →
                     </Button>
 
-                    <!-- Step 3 — done -->
                     <Button v-else-if="step === 3" size="sm" @click="close">
                         Done
                     </Button>
