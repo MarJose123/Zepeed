@@ -37,8 +37,8 @@ class StoreMailProviderRequest extends FormRequest
                 'config.host'       => ['required', 'string'],
                 'config.port'       => ['required', 'integer', 'min:1', 'max:65535'],
                 'config.encryption' => ['required', Rule::in(['tls', 'ssl', 'none'])],
-                'config.username'   => ['required', 'string'],
-                'config.password'   => ['required', 'string'],
+                'config.username'   => ['nullable', 'string'],
+                'config.password'   => ['nullable', 'string'],
             ],
             MailDriver::Resend => [
                 'config.api_key' => ['required', 'string'],

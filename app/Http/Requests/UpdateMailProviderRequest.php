@@ -35,8 +35,8 @@ class UpdateMailProviderRequest extends FormRequest
                 'config.host'       => ['sometimes', 'string'],
                 'config.port'       => ['sometimes', 'integer', 'min:1', 'max:65535'],
                 'config.encryption' => ['sometimes', Rule::in(['tls', 'ssl', 'none'])],
-                'config.username'   => ['sometimes', 'string'],
-                'config.password'   => ['sometimes', 'string'],
+                'config.username'   => ['nullable', 'string'],
+                'config.password'   => ['nullable', 'string'],
             ],
             MailDriver::Resend => [
                 'config.api_key' => ['sometimes', 'string'],
