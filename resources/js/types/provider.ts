@@ -1,6 +1,8 @@
+export type ProviderSlug = "ookla" | "librespeed" | "netflix";
+
 export interface Provider {
     id: number;
-    slug: "speedtest" | "librespeed" | "fastcom";
+    slug: ProviderSlug;
     name: string;
     website_link: string;
     requires_server_url: boolean;
@@ -20,7 +22,7 @@ export interface Provider {
 
 export interface ProviderSchedule {
     id: string;
-    provider_slug: "speedtest" | "librespeed" | "fastcom";
+    provider_slug: ProviderSlug;
     provider_name: string;
     website_link: string;
     cron_expression: string | null;

@@ -64,13 +64,13 @@ const lastRunLabel = computed(() => {
             <div class="mb-3 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div
-                        class="border-border bg-muted flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md border"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md"
                     >
                         <img
                             v-if="!faviconError"
                             :src="`https://www.google.com/s2/favicons?domain=${provider.website_link}&sz=32`"
                             :alt="provider.name"
-                            class="h-3.5 w-3.5 object-contain"
+                            class="size-7 object-cover"
                             @error="faviconError = true"
                         />
                         <Clock

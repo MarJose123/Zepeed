@@ -8,25 +8,33 @@ use App\Services\Speedtest\OklaSpeedtestService;
 
 enum SpeedtestServer: string
 {
-    case Speedtest = 'speedtest';
+    case Ookla = 'ookla';
     case Librespeed = 'librespeed';
-    case NetflixSpeedtest = 'netflix-speedtest';
+    case Netflix = 'netflix';
 
     public function label(): string
     {
         return match ($this) {
-            self::Speedtest           => 'Speedtest Ookla',
-            self::Librespeed          => 'LibreSpeed',
-            self::NetflixSpeedtest    => 'Netflix Speedtest',
+            SpeedtestServer::Ookla      => 'Ookla',
+            SpeedtestServer::Librespeed => 'LibreSpeed',
+            SpeedtestServer::Netflix    => 'Netflix',
         };
+    }
+
+    /**
+     * Get the slug value (alias for the backing value).
+     */
+    public function slug(): string
+    {
+        return $this->value;
     }
 
     public function websiteLink(): string
     {
         return match ($this) {
-            self::Speedtest           => 'https://www.speedtest.net/',
+            self::Ookla               => 'https://www.speedtest.net/',
             self::Librespeed          => 'https://librespeed.org/',
-            self::NetflixSpeedtest    => 'https://fast.com/',
+            self::Netflix             => 'https://fast.com/',
         };
     }
 
@@ -38,9 +46,9 @@ enum SpeedtestServer: string
     public function serviceClass(): string
     {
         return match ($this) {
-            self::Speedtest           => OklaSpeedtestService::class,
+            self::Ookla               => OklaSpeedtestService::class,
             self::Librespeed          => LibrespeedService::class,
-            self::NetflixSpeedtest    => FastcomService::class,
+            self::Netflix             => FastcomService::class,
         };
     }
 
@@ -52,16 +60,16 @@ enum SpeedtestServer: string
     public function defaultFlags(): array
     {
         return match ($this) {
-            self::Speedtest           => ['--format=json', '--accept-license', '--accept-gdpr'],
+            self::Ookla               => ['--format=json', '--accept-license', '--accept-gdpr'],
             self::Librespeed          => ['--json', '--share', '--no-icmp'],
-            self::NetflixSpeedtest    => ['--upload', '--json'],
+            self::Netflix             => ['--upload', '--json'],
         };
     }
 
     public function requiresServerUrl(): bool
     {
         return match ($this) {
-            self::Librespeed, self::Speedtest, self::NetflixSpeedtest => false,
+            self::Librespeed, self::Ookla, self::Netflix => false,
         };
     }
 
@@ -69,7 +77,7 @@ enum SpeedtestServer: string
     {
         return match ($this) {
             self::Librespeed                        => true,
-            self::Speedtest, self::NetflixSpeedtest => false,
+            self::Ookla, self::Netflix              => false,
         };
     }
 
@@ -81,7 +89,7 @@ enum SpeedtestServer: string
     public function requiresChromium(): bool
     {
         return match ($this) {
-            self::NetflixSpeedtest , self::Speedtest, self::Librespeed       => false,
+            self::Netflix , self::Ookla, self::Librespeed       => false,
         };
     }
 }

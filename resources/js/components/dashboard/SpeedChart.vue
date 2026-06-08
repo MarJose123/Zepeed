@@ -49,23 +49,23 @@ const subtitle = computed(
 
 // Use CSS chart variables — SVG is part of the DOM so they resolve correctly
 const providerColors = {
-    speedtest: "var(--chart-1)",
+    ookla: "var(--chart-1)",
     librespeed: "var(--chart-3)",
-    "netflix-speedtest": "var(--chart-5)",
+    netflix: "var(--chart-5)",
 };
 
 const chartConfig = {
     speedtest: {
-        label: "Ookla Speedtest",
-        color: providerColors.speedtest,
+        label: "Ookla",
+        color: providerColors.ookla,
     },
     librespeed: {
         label: "LibreSpeed",
         color: providerColors.librespeed,
     },
-    "netflix-speedtest": {
-        label: "Netflix Speedtest",
-        color: providerColors["netflix-speedtest"],
+    netflix: {
+        label: "Netflix",
+        color: providerColors.netflix,
     },
 } satisfies ChartConfig;
 
@@ -74,10 +74,9 @@ const chartPoints = computed(() => {
 
     return rangeData.labels.map((label, i) => ({
         label,
-        speedtest: rangeData.datasets["speedtest"]?.[props.metric]?.[i] ?? 0,
+        speedtest: rangeData.datasets["ookla"]?.[props.metric]?.[i] ?? 0,
         librespeed: rangeData.datasets["librespeed"]?.[props.metric]?.[i] ?? 0,
-        "netflix-speedtest":
-            rangeData.datasets["netflix-speedtest"]?.[props.metric]?.[i] ?? 0,
+        netflix: rangeData.datasets["netflix"]?.[props.metric]?.[i] ?? 0,
     }));
 });
 
@@ -88,20 +87,18 @@ const xAccessor = (_d: DataPoint, i: number) => i;
 const yAccessors = [
     (d: DataPoint) => d.speedtest,
     (d: DataPoint) => d.librespeed,
-    (d: DataPoint) => d["netflix-speedtest"],
+    (d: DataPoint) => d.netflix,
 ];
 
 const colorAccessor = (_d: DataPoint, i: number) =>
-    [
-        providerColors.speedtest,
-        providerColors.librespeed,
-        providerColors["netflix-speedtest"],
-    ][i] ?? "var(--chart-1)";
+    [providerColors.ookla, providerColors.librespeed, providerColors.netflix][
+        i
+    ] ?? "var(--chart-1)";
 
 const colors = [
-    providerColors.speedtest,
+    providerColors.ookla,
     providerColors.librespeed,
-    providerColors["netflix-speedtest"],
+    providerColors.netflix,
 ];
 
 const xTickFormat = (i: number) => chartPoints.value[i]?.label ?? "";
@@ -123,7 +120,7 @@ const yTickFormat = (v: number) => `${v.toLocaleString()}`;
                     }}</CardDescription>
                 </div>
                 <Select v-model="selectedRange">
-                    <SelectTrigger class="h-8 w-auto min-w-[130px] text-xs">
+                    <SelectTrigger class="h-8 w-auto min-w-32.5 text-xs">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="end">

@@ -43,9 +43,9 @@ class SpeedtestServiceProvider extends ServiceProvider
                     );
 
                 return match ($provider->slug) {
-                    SpeedtestServer::Speedtest           => new OklaSpeedtestService($provider),
+                    SpeedtestServer::Ookla               => new OklaSpeedtestService($provider),
                     SpeedtestServer::Librespeed          => new LibrespeedService($provider),
-                    SpeedtestServer::NetflixSpeedtest    => new FastcomService($provider),
+                    SpeedtestServer::Netflix             => new FastcomService($provider),
                 };
             }
         );
