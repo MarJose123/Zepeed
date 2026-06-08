@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class RealtimeCredentialsCommand extends Command
 {
-    protected $signature = 'realtime:credentials
+    protected $signature = 'app:realtime-credential
                             {--force : Overwrite existing credentials}';
 
     protected $description = 'Generate secure Soketi/Pusher credentials and write them to .env';

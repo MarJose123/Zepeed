@@ -13,13 +13,13 @@ final class PruneWebhookDeliveriesCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'webhooks:prune
+    protected $signature = 'app:webhooks-prune
                             {--dry-run : Preview how many rows would be deleted without actually deleting}';
 
     /**
      * @var string
      */
-    protected $description = 'Prune webhook_deliveries rows older than the configured retention window';
+    protected $description = 'Prune webhooks delivery history rows older than the configured retention window';
 
     public function handle(): int
     {
