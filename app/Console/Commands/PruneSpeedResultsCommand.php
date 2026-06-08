@@ -14,7 +14,7 @@ final class PruneSpeedResultsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'speedtest:prune
+    protected $signature = 'app:speedtest-prune
                             {--dry-run : Preview how many rows would be deleted without actually deleting}';
 
     /**
@@ -22,7 +22,7 @@ final class PruneSpeedResultsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Prune speed_results rows older than the configured retention window';
+    protected $description = 'Prune speed test result rows older than the configured retention window';
 
     /**
      * Execute the console command.
