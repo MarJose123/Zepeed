@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,16 +30,6 @@ const updateSelect = (key: string, value: unknown) => {
     }
 };
 
-const applyMailpitDefaults = () => {
-    emit("update:config", {
-        host: "127.0.0.1",
-        port: "1025",
-        encryption: "none",
-        username: "",
-        password: "",
-    });
-};
-
 /** Resolve a dotted key e.g. "config.host" → errors["config.host"] */
 const e = (field: string): string | undefined =>
     props.errors?.[`config.${field}`];
@@ -49,24 +38,6 @@ const e = (field: string): string | undefined =>
 <template>
     <!-- SMTP -->
     <template v-if="driver === 'smtp'">
-        <div
-            class="flex items-center justify-between gap-2 rounded border border-dashed border-amber-400/60 bg-amber-50 px-3 py-2 dark:border-amber-700/50 dark:bg-amber-950/20"
-        >
-            <p class="text-[10px] text-amber-800 dark:text-amber-300">
-                <span class="font-medium">Using Mailpit?</span>
-                Auto-fill localhost defaults.
-            </p>
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                class="h-6 text-[10px]"
-                @click="applyMailpitDefaults"
-            >
-                Use Mailpit
-            </Button>
-        </div>
-
         <div class="grid grid-cols-3 gap-3">
             <div class="col-span-1 space-y-1.5">
                 <Label class="text-xs">Host</Label>
