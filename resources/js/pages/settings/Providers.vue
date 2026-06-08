@@ -38,7 +38,7 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
-const activeTab = ref<string>(props.providers[0]?.slug ?? "speedtest");
+const activeTab = ref<string>(props.providers[0]?.slug ?? "ookla");
 const testing = ref(false);
 const faviconError = ref(false);
 
@@ -222,7 +222,7 @@ const submitForm = () => {
                                             <img
                                                 :src="`https://www.google.com/s2/favicons?domain=${provider.website_link}&sz=32`"
                                                 :alt="provider.name"
-                                                class="h-4 w-4 object-contain"
+                                                class="size-7 object-cover"
                                                 @error="onFaviconError"
                                             />
                                             <div>
@@ -383,7 +383,7 @@ const submitForm = () => {
 
                             <!-- Server ID — Speedtest · Ookla only -->
                             <Field
-                                v-if="provider.slug === 'speedtest'"
+                                v-if="provider.slug === 'ookla'"
                                 class="py-4"
                             >
                                 <div

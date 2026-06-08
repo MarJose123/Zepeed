@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('providers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('slug')
-                ->comment("values: 'speedtest' | 'librespeed' | 'fastcom'")
                 ->unique();
             $table->string('name');
             $table->boolean('is_enabled')->default(false);
