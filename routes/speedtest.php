@@ -42,8 +42,14 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
             Route::get('/', [ScheduleController::class, 'index'])
                 ->name('index');
 
+            Route::post('/', [ProviderScheduleController::class, 'store'])
+                ->name('store');
+
             Route::patch('{providerSchedule}', [ProviderScheduleController::class, 'update'])
                 ->name('update');
+
+            Route::delete('{providerSchedule}', [ProviderScheduleController::class, 'destroy'])
+                ->name('destroy');
         });
 
         Route::prefix('maintenance/')->name('maintenance.')->group(function () {
