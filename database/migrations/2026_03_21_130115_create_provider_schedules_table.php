@@ -10,18 +10,16 @@ return new class extends Migration
     {
         Schema::create('provider_schedules', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('provider_slug')->unique(); // one schedule row per provider — unique constraint enforced
-
+            $table->string('provider_slug');
+            $table->string('label')->default('Default');
             $table->string('cron_expression')->nullable(); // e.g. "*/30 * * * *" — null means disabled / not configured yet
-
             $table->boolean('is_enabled')->default(false); // independent of the provider's is_enabled provider can be enabled but schedule paused
-
             $table->timestamp('last_scheduled_at')->nullable(); // updated every time the scheduler fires this provider
 
             $table->timestamps();
 
-            $table->index('provider_slug');
-            $table->index('is_enabled');
+            $table->unique(['provider_slug', 'label']);
+            $table->index(['provider_slug', 'is_enabled']);
         });
     }
 

@@ -6,12 +6,13 @@ use App\Models\ProviderSchedule;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProviderScheduleRequest extends FormRequest
+class StoreProviderScheduleRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'label'           => ['sometimes', 'string', 'max:100'],
+            'provider_slug'   => ['required', 'string'],
+            'label'           => ['required', 'string', 'max:100'],
             'cron_expression' => [
                 'nullable',
                 'string',
@@ -21,7 +22,7 @@ class UpdateProviderScheduleRequest extends FormRequest
                     }
                 },
             ],
-            'is_enabled' => ['sometimes', 'boolean'],
+            'is_enabled' => ['required', 'boolean'],
         ];
     }
 }

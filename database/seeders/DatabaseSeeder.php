@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ProviderSeeder::class,
-            ProviderScheduleSeeder::class,
             EmailTemplateSeeder::class,
         ]);
     }

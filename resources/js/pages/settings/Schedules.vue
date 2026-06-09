@@ -2,7 +2,7 @@
 import { Head } from "@inertiajs/vue3";
 import { ref } from "vue";
 import MaintenanceTab from "@/components/speedtest/MaintenanceTab.vue";
-import ProviderScheduleRow from "@/components/speedtest/ProviderScheduleRow.vue";
+import ProviderScheduleGroup from "@/components/speedtest/ProviderScheduleGroup.vue";
 import {
     Card,
     CardDescription,
@@ -15,13 +15,11 @@ import type { TBreadcrumbItem } from "@/types";
 import type {
     MaintenanceWindow,
     MaintenanceWindowStats,
-    Provider,
-    ProviderSchedule,
+    ProviderWithSchedules,
 } from "@/types/provider";
 
 defineProps<{
-    providers: Provider[];
-    schedules: ProviderSchedule[];
+    providers: ProviderWithSchedules[];
     windows: MaintenanceWindow[];
     stats: MaintenanceWindowStats;
     globalPause: boolean;
@@ -40,7 +38,7 @@ const activeTab = ref<"schedules" | "maintenance">("schedules");
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div class="flex flex-col gap-1 py-5">
-                <h1 class="text-xl font-semibold">Schedules</h1>
+                <h1 class="text-xl font-bold tracking-tight">Schedules</h1>
                 <p class="text-muted-foreground text-sm">
                     Control when each provider runs and manage maintenance
                     windows
@@ -69,19 +67,20 @@ const activeTab = ref<"schedules" | "maintenance">("schedules");
                                         Provider schedules
                                     </CardTitle>
                                     <CardDescription class="text-xs">
-                                        Click a provider row to edit its
-                                        schedule
+                                        Organize multiple schedules per provider
                                     </CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
 
-                        <ProviderScheduleRow
-                            v-for="(schedule, index) in schedules"
-                            :key="schedule.provider_slug"
-                            :schedule="schedule"
-                            :default-open="index === 0"
-                        />
+                        <div>
+                            <ProviderScheduleGroup
+                                v-for="(provider, index) in providers"
+                                :key="provider.slug"
+                                :provider="provider"
+                                :default-open="index === 0"
+                            />
+                        </div>
                     </Card>
                 </TabsContent>
 

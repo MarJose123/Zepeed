@@ -18,6 +18,7 @@ class ProviderScheduleResource extends JsonResource
         return [
             'id'                  => $schedule->id,
             'provider_slug'       => $schedule->provider_slug->value,
+            'label'               => $schedule->label,
             'provider_name'       => $schedule->provider_slug->label(),
             'website_link'        => $schedule->provider_slug->websiteLink(),
             'cron_expression'     => $schedule->cron_expression,
