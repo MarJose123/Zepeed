@@ -50,10 +50,47 @@ class ProviderController extends Controller
 
     /**
      * Update a single provider's configuration.
+     *
+     * When a previously enabled provider is disabled, all its associated
+     * schedules are also disabled so they do not linger as orphaned active entries.
      */
     public function update(UpdateProviderRequest $request, Provider $provider): RedirectResponse
     {
+        $wasEnabled = $provider->is_enabled;
+        $willDisable = $wasEnabled && ! $request->boolean('is_enabled');
+
         $provider->update($request->validated());
+
+        if ($willDisable) {
+            $disabledCount = ProviderSchedule::query()
+                ->where('provider_slug', $provider->slug->value)
+                ->where('is_enabled', true)
+                ->update(['is_enabled' => false]);
+
+            InertiaNotification::make()
+                ->success()
+                ->title('Provider disabled')
+                ->message("{$provider->slug->label()} has been disabled.")
+                ->send();
+
+            if ($disabledCount > 0) {
+                InertiaNotification::make()
+                    ->warning()
+                    ->title(
+                        $disabledCount === 1
+                            ? '1 schedule disabled'
+                            : "{$disabledCount} schedules disabled"
+                    )
+                    ->message(
+                        $disabledCount === 1
+                            ? "1 active schedule for {$provider->slug->label()} has been disabled."
+                            : "{$disabledCount} active schedules for {$provider->slug->label()} have been disabled."
+                    )
+                    ->send();
+            }
+
+            return to_route('speedtest.server.providers.index');
+        }
 
         InertiaNotification::make()
             ->success()
