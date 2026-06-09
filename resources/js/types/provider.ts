@@ -20,13 +20,6 @@ export interface Provider {
     status_badge: "success" | "danger" | "warning" | "neutral";
 }
 
-export interface ProviderScheduleSummary {
-    id: string;
-    label: string;
-    cron_expression: string | null;
-    is_enabled: boolean;
-}
-
 export interface ProviderSchedule {
     id: string;
     provider_slug: ProviderSlug;
@@ -101,4 +94,6 @@ export interface SpeedtestSkippedPayload extends SpeedtestEventPayload {
     reason: string;
 }
 
-export type ProviderSchedulesMap = Record<string, ProviderScheduleSummary[]>;
+// Provider disable dialog
+
+export type ProviderSchedulesMap = Record<ProviderSlug, ProviderSchedule[]>;

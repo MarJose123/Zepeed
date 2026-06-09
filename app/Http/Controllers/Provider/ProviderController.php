@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Enums\QueueWorkerName;
+use App\Enums\SpeedtestServer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
@@ -22,9 +23,9 @@ class ProviderController extends Controller
     /**
      * Render the Providers settings page.
      *
-     * Passes all providers and their associated schedules to Vue.
-     * The schedules map is keyed by provider slug so the dialog can
-     * resolve affected schedules purely client-side.
+     * Passes all providers and a schedulesMap keyed by provider slug.
+     * Only enabled schedules with a cron expression are included —
+     * these are the ones that will stop running when a provider is disabled.
      */
     public function index(): Response
     {
@@ -33,14 +34,11 @@ class ProviderController extends Controller
         /** @var array<string, list<array<string, mixed>>> $schedulesMap */
         $schedulesMap = [];
 
-        foreach ($providers as $provider) {
-            $schedulesMap[$provider->slug->value] = ProviderScheduleResource::collection(
-                ProviderSchedule::query()
-                    ->where('provider_slug', $provider->slug->value)
-                    ->where('is_enabled', true)
-                    ->whereNotNull('cron_expression')
-                    ->oldest()
-                    ->get()
+        foreach (SpeedtestServer::cases() as $server) {
+            $schedulesMap[$server->value] = ProviderScheduleResource::collection(
+                ProviderSchedule::enabledForProvider($server)
+                    ->filter(fn (ProviderSchedule $s): bool => filled($s->cron_expression))
+                    ->values()
             )->resolve();
         }
 

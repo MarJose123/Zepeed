@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm } from "@inertiajs/vue3";
-import {
-    Bell,
-    ExternalLink,
-    Info,
-    Loader2,
-    Radio,
-    Server,
-} from "lucide-vue-next";
+import { Bell, ExternalLink, Info, Loader2, Radio, Server } from "@lucide/vue";
 import { ref, watch } from "vue";
 import ProviderDisableDialog from "@/components/speedtest/ProviderDisableDialog.vue";
 import { Badge } from "@/components/ui/badge";
@@ -62,10 +55,7 @@ const runNow = (provider: Provider) => {
             provider: provider.slug,
         }),
         {},
-        {
-            preserveScroll: true,
-            onSuccess: () => router.reload(),
-        },
+        { preserveScroll: true, onSuccess: () => router.reload() },
     );
 };
 
@@ -103,7 +93,7 @@ const statusLabel = (status: Provider["last_run_status"]) =>
         null: "Never run",
     })[status ?? "null"] ?? "Never run";
 
-// ── Form ────────────────────────────────────────────────────────────────────
+// ── Form ─────────────────────────────────────────────────────────────────────
 const form = useForm({
     is_enabled: false,
     server_url: "",
@@ -119,7 +109,7 @@ const syncFormToProvider = (slug: string) => {
     form.defaults({
         is_enabled: provider.is_enabled,
         server_url: provider.server_url ?? "",
-        server_id: (provider.server_id as string) ?? "",
+        server_id: provider.server_id ?? "",
         alert_on_failure: provider.alert_on_failure,
     });
     form.reset();
@@ -136,12 +126,7 @@ watch(
     { immediate: true },
 );
 
-// ── Disable guard ────────────────────────────────────────────────────────────
-/**
- * Called by the Switch @update:modelValue.
- * Only intercepts the transition enabled → disabled.
- * Enabling a disabled provider proceeds without a dialog.
- */
+// ── Disable guard ─────────────────────────────────────────────────────────────
 const onToggleEnabled = (newValue: boolean) => {
     const currentProvider = props.providers.find(
         (p) => p.slug === activeTab.value,
@@ -149,14 +134,11 @@ const onToggleEnabled = (newValue: boolean) => {
     const wasEnabled = currentProvider?.is_enabled ?? false;
 
     if (wasEnabled && !newValue) {
-        // Disabling an active provider — show confirmation first,
-        // do NOT update the form yet.
         dialogOpen.value = true;
 
         return;
     }
 
-    // Enabling — apply directly.
     form.is_enabled = newValue;
 };
 
@@ -167,10 +149,10 @@ const onDialogConfirm = () => {
 
 const onDialogCancel = () => {
     dialogOpen.value = false;
-    // Revert: the form still holds the original `true` value, nothing to do.
+    // form.is_enabled still holds the original `true` — no revert needed.
 };
 
-// ── Submit ───────────────────────────────────────────────────────────────────
+// ── Submit ────────────────────────────────────────────────────────────────────
 const submitForm = () => {
     form.patch(
         route("speedtest.server.providers.update", {
@@ -514,13 +496,14 @@ const submitForm = () => {
             </Tabs>
         </div>
 
-        <!-- Disable confirmation dialog — rendered outside Tabs to avoid stacking context issues -->
         <ProviderDisableDialog
             :open="dialogOpen"
             :provider-name="
                 providers.find((p) => p.slug === activeTab)?.name ?? ''
             "
-            :schedules="schedulesMap[activeTab] ?? []"
+            :schedules="
+                schedulesMap[activeTab as keyof ProviderSchedulesMap] ?? []
+            "
             @confirm="onDialogConfirm"
             @cancel="onDialogCancel"
         />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, CalendarClock } from "lucide-vue-next";
+import { AlertTriangle, CalendarClock } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -9,12 +9,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { ProviderScheduleSummary } from "@/types/provider";
+import type { ProviderSchedule } from "@/types/provider";
 
 const props = defineProps<{
     open: boolean;
     providerName: string;
-    schedules: ProviderScheduleSummary[];
+    schedules: ProviderSchedule[];
 }>();
 
 const emit = defineEmits<{
@@ -65,9 +65,7 @@ const emit = defineEmits<{
                         <span class="text-sm truncate">{{
                             schedule.label
                         }}</span>
-                        <span
-                            class="text-[11px] text-muted-foreground font-mono"
-                        >
+                        <span class="text-[11px] text-muted-foreground">
                             {{ schedule.cron_expression ?? "—" }}
                         </span>
                     </div>
