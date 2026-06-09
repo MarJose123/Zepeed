@@ -6,6 +6,7 @@ use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Override;
 /**
  * @property string               $id
  * @property SpeedtestServer      $provider_slug
+ * @property string               $label
  * @property string|null          $cron_expression
  * @property bool                 $is_enabled
  * @property CarbonImmutable|null $last_scheduled_at
@@ -30,6 +32,7 @@ class ProviderSchedule extends Model
 
     protected $fillable = [
         'provider_slug',
+        'label',
         'cron_expression',
         'is_enabled',
         'last_scheduled_at',
@@ -57,12 +60,19 @@ class ProviderSchedule extends Model
         $query->where('provider_slug', $server->value);
     }
 
-    public static function forProvider(SpeedtestServer $server): ?self
+    public static function allForProvider(SpeedtestServer $server): Collection
+    {
+        return self::query()
+            ->forProvider($server)->oldest()
+            ->get();
+    }
+
+    public static function enabledForProvider(SpeedtestServer $server): Collection
     {
         return self::query()
             ->enabled()
-            ->forProvider($server)
-            ->first();
+            ->forProvider($server)->oldest()
+            ->get();
     }
 
     public function nextRunAt(): ?CarbonImmutable

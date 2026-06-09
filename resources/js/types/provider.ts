@@ -30,6 +30,7 @@ export interface ProviderScheduleSummary {
 export interface ProviderSchedule {
     id: string;
     provider_slug: ProviderSlug;
+    label: string;
     provider_name: string;
     website_link: string;
     cron_expression: string | null;
@@ -37,6 +38,12 @@ export interface ProviderSchedule {
     provider_is_enabled: boolean;
     next_run_at: string | null;
     last_scheduled_at: string | null;
+}
+
+export interface ProviderWithSchedules extends Provider {
+    label: string;
+    schedules: ProviderSchedule[];
+    schedule_count: number;
 }
 
 export interface MaintenanceWindow {

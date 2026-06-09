@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProviderScheduleRequest;
 use App\Http\Requests\UpdateProviderScheduleRequest;
 use App\Models\Provider;
 use App\Models\ProviderSchedule;
@@ -10,25 +11,42 @@ use Illuminate\Http\RedirectResponse;
 
 class ProviderScheduleController extends Controller
 {
+    public function store(StoreProviderScheduleRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $providerSchedule = ProviderSchedule::query()->create($data);
+
+        InertiaNotification::make()
+            ->success()
+            ->title('Schedule created')
+            ->message("Schedule \"{$data['label']}\" has been created.")
+            ->send();
+
+        return back();
+    }
+
     public function update(
         UpdateProviderScheduleRequest $request,
         ProviderSchedule $providerSchedule,
     ): RedirectResponse {
-        $providerSchedule->update($request->validated());
+        $data = $request->validated();
+
+        $wasEnabled = $providerSchedule->is_enabled;
+
+        $providerSchedule->update($data);
 
         InertiaNotification::make()
             ->success()
             ->title('Schedule updated')
-            ->message("{$providerSchedule->provider_slug->label()} schedule has been saved.")
+            ->message("\"{$providerSchedule->label}\" schedule has been saved.")
             ->send();
 
-        // Warn if cron expression is set but the provider itself is disabled
         $hasCron = filled($providerSchedule->cron_expression);
         $scheduleDisabled = ! $providerSchedule->is_enabled;
         $providerDisabled = $providerSchedule->provider instanceof Provider
             && ! $providerSchedule->provider->is_enabled;
 
-        // Only warn if there is something configured that won't run
         if ($hasCron || $providerSchedule->is_enabled) {
             if ($scheduleDisabled && $providerDisabled) {
                 InertiaNotification::make()
@@ -44,11 +62,11 @@ class ProviderScheduleController extends Controller
                     ->warning()
                     ->title('Schedule is disabled')
                     ->message(
-                        "{$providerSchedule->provider_slug->label()} has a cron expression set ".
-                        'but the schedule is disabled. Enable the schedule to start running.'
+                        "\"{$providerSchedule->label}\" has a cron expression set ".
+                        'but is disabled. Enable it to start running.'
                     )
                     ->send();
-            } elseif ($providerDisabled) {
+            } elseif ($providerDisabled && ! $wasEnabled && $providerSchedule->is_enabled) {
                 InertiaNotification::make()
                     ->warning()
                     ->title("{$providerSchedule->provider_slug->label()} provider is disabled")
@@ -59,6 +77,20 @@ class ProviderScheduleController extends Controller
                     ->send();
             }
         }
+
+        return back();
+    }
+
+    public function destroy(ProviderSchedule $providerSchedule): RedirectResponse
+    {
+        $label = $providerSchedule->label;
+        $providerSchedule->delete();
+
+        InertiaNotification::make()
+            ->success()
+            ->title('Schedule deleted')
+            ->message("Schedule \"{$label}\" has been removed.")
+            ->send();
 
         return back();
     }
