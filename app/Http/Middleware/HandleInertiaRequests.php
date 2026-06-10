@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
                     ->with('latestResult')
                     ->orderBy('id')
                     ->get()
-            ) : [],
+            )->resolve() : [],
         ];
     }
 }

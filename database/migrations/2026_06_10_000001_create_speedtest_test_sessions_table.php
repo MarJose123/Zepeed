@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('speedtest_test_sessions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('provider_id')->constrained('providers')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->enum('status', ['pending', 'running', 'completed', 'failed', 'cancelled', 'skipped'])
                 ->default('pending');
             $table->text('error_message')->nullable();

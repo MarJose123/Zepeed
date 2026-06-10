@@ -11,7 +11,7 @@ use Override;
 /**
  * @property string               $id
  * @property string               $provider_id
- * @property string               $user_id
+ * @property int                  $user_id
  * @property string               $status
  * @property string|null          $error_message
  * @property CarbonImmutable|null $started_at

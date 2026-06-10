@@ -5,8 +5,8 @@ import {
     ExternalLink,
     Info,
     Loader2,
-    Server,
     Radio,
+    Server,
     Zap,
 } from "@lucide/vue";
 import { reactive, ref, watch } from "vue";
@@ -34,8 +34,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotification } from "@/composables/useNotification";
 import {
-    cancelProviderTest,
-    startProviderTest,
+    useProviderTestHttp,
     useSpeedtestTestChannel,
 } from "@/composables/useSpeedtestTestChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -60,6 +59,7 @@ const breadcrumbs: TBreadcrumbItem[] = [
 ];
 
 const { notify } = useNotification();
+const { startTest, cancelTest: cancelProviderTest } = useProviderTestHttp();
 
 const activeTab = ref<string>(props.providers[0]?.slug ?? "ookla");
 const faviconError = ref(false);
@@ -82,8 +82,8 @@ const testStates = reactive<Record<string, ProviderTestState>>(
 );
 
 // Subscribe to the WebSocket test channel for every provider.
-// useSpeedtestTestChannel calls useEcho internally which is scoped
-// to the component lifecycle — cleanup happens on unmount automatically.
+// useEcho (called inside useSpeedtestTestChannel) is lifecycle-scoped
+// and cleans up automatically on component unmount.
 props.providers.forEach((p) => {
     useSpeedtestTestChannel(p.slug, {
         onStarted: () => {
@@ -100,28 +100,13 @@ props.providers.forEach((p) => {
                 server_location: payload.server_location,
                 isp: payload.isp,
             };
-            notify({
-                type: "success",
-                title: `${p.name} test completed`,
-                message: `↓ ${payload.download_mbps} Mbps  ↑ ${payload.upload_mbps} Mbps  ↔ ping ${payload.ping_ms} ms`,
-            });
         },
         onException: (payload) => {
             testStates[p.slug].status = "failed";
             testStates[p.slug].errorMessage = payload.message;
-            notify({
-                type: "error",
-                title: `${p.name} test failed`,
-                message: payload.message,
-            });
         },
         onSkipped: () => {
             testStates[p.slug].status = "skipped";
-            notify({
-                type: "warning",
-                title: `${p.name} test skipped`,
-                message: "Maintenance window is currently active.",
-            });
         },
         onCancelled: () => {
             testStates[p.slug].status = "cancelled";
@@ -152,13 +137,12 @@ const testRun = async (provider: Provider) => {
     if (!state || state.status === "pending" || state.status === "running")
         return;
 
-    // Reset to pending immediately so the button disappears.
     state.status = "pending";
     state.result = null;
     state.errorMessage = null;
     state.sessionId = null;
 
-    const data = await startProviderTest(provider.slug);
+    const data = await startTest(provider.slug);
 
     if (!data) {
         state.status = "idle";
@@ -408,7 +392,7 @@ const submitForm = () => {
                                         :disabled="!provider.is_enabled"
                                         @click="testRun(provider)"
                                     >
-                                        <Zap class="mr-1.5 h-3.5 w-3.5" />
+                                        <Zap class="h-3.5 w-3.5" />
                                         Test
                                     </Button>
 

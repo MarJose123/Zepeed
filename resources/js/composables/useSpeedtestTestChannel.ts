@@ -1,3 +1,4 @@
+import { useHttp } from "@inertiajs/vue3";
 import { useEcho } from "@laravel/echo-vue";
 import type {
     SpeedtestCompletedPayload,
@@ -58,61 +59,46 @@ export function useSpeedtestTestChannel(
 }
 
 /**
- * POST /speedtest/settings/server/providers/{provider}/test
- * Returns 202 with { test_session_id, provider_slug }.
+ * Composable that exposes startTest and cancelTest as useHttp-backed methods.
+ * Must be called inside a component <script setup> context.
  */
-export async function startProviderTest(
-    providerSlug: string,
-): Promise<{ test_session_id: string; provider_slug: string } | null> {
-    const csrf =
-        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
-            ?.content ?? "";
+export function useProviderTestHttp() {
+    const startHttp = useHttp({});
+    const cancelHttp = useHttp({});
 
-    const res = await fetch(
-        route("speedtest.server.providers.test", { provider: providerSlug }),
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": csrf,
-            },
-        },
-    );
+    async function startTest(
+        providerSlug: string,
+    ): Promise<{ test_session_id: string; provider_slug: string } | null> {
+        try {
+            const data = await startHttp.post(
+                route("speedtest.server.providers.test", {
+                    provider: providerSlug,
+                }),
+            );
 
-    if (res.status === 202) {
-        return res.json() as Promise<{
-            test_session_id: string;
-            provider_slug: string;
-        }>;
+            return data as { test_session_id: string; provider_slug: string };
+        } catch {
+            return null;
+        }
     }
 
-    return null;
-}
+    async function cancelTest(
+        providerSlug: string,
+        testSessionId: string,
+    ): Promise<boolean> {
+        try {
+            await cancelHttp.delete(
+                route("speedtest.server.providers.test.cancel", {
+                    provider: providerSlug,
+                    testSessionId,
+                }),
+            );
 
-/**
- * DELETE /speedtest/settings/server/providers/{provider}/test/{testSessionId}
- */
-export async function cancelProviderTest(
-    providerSlug: string,
-    testSessionId: string,
-): Promise<boolean> {
-    const csrf =
-        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
-            ?.content ?? "";
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
-    const res = await fetch(
-        route("speedtest.server.providers.test.cancel", {
-            provider: providerSlug,
-            testSessionId,
-        }),
-        {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": csrf,
-            },
-        },
-    );
-
-    return res.ok;
+    return { startTest, cancelTest };
 }
