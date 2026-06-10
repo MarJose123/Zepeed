@@ -32,7 +32,7 @@ class ScheduleController extends Controller
         $allSchedules = ProviderSchedule::query()
             ->oldest()
             ->get()
-            ->groupBy('provider_slug');
+            ->groupBy(fn (ProviderSchedule $schedule): string => $schedule->provider_slug->value);
 
         $providers = Provider::query()
             ->get()
