@@ -12,6 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ProviderSchedule, ProviderWithSchedules } from "@/types/provider";
 
@@ -63,9 +64,22 @@ const handleDelete = () => {
         class="flex items-center justify-between gap-3 rounded-md bg-muted/30 px-3 py-2.5"
     >
         <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-foreground">
-                {{ schedule.label }}
-            </p>
+            <div class="mb-1 flex items-center gap-2">
+                <p class="text-sm font-medium text-foreground">
+                    {{ schedule.label }}
+                </p>
+                <Badge
+                    variant="outline"
+                    class="rounded-full text-[10px]"
+                    :class="
+                        schedule.is_enabled
+                            ? 'border-green-600/30 bg-green-50 text-green-700 dark:border-green-400/20 dark:bg-green-950 dark:text-green-400'
+                            : 'border-border bg-transparent text-muted-foreground'
+                    "
+                >
+                    {{ schedule.is_enabled ? "Enabled" : "Disabled" }}
+                </Badge>
+            </div>
             <p class="text-muted-foreground text-xs">
                 <template v-if="schedule.cron_expression && previewLabel">
                     {{ previewLabel }}

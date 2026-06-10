@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { Head, router, useForm } from "@inertiajs/vue3";
-import { ExternalLink, Loader2, Info, Radio, Server, Bell } from "@lucide/vue";
+import { Bell, ExternalLink, Info, Loader2, Radio, Server } from "@lucide/vue";
 import { ref, watch } from "vue";
+import ProviderDisableDialog from "@/components/speedtest/ProviderDisableDialog.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
     CardDescription,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
     Field,
@@ -21,13 +22,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
-import type { Provider } from "@/types/provider";
+import type { Provider, ProviderSchedulesMap } from "@/types/provider";
 
 const props = defineProps<{
     providers: Provider[];
+    schedulesMap: ProviderSchedulesMap;
 }>();
 
 const breadcrumbs: TBreadcrumbItem[] = [
@@ -41,6 +43,7 @@ const breadcrumbs: TBreadcrumbItem[] = [
 const activeTab = ref<string>(props.providers[0]?.slug ?? "ookla");
 const testing = ref(false);
 const faviconError = ref(false);
+const dialogOpen = ref(false);
 
 function onFaviconError() {
     faviconError.value = true;
@@ -52,12 +55,7 @@ const runNow = (provider: Provider) => {
             provider: provider.slug,
         }),
         {},
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                router.reload();
-            },
-        },
+        { preserveScroll: true, onSuccess: () => router.reload() },
     );
 };
 
@@ -95,6 +93,7 @@ const statusLabel = (status: Provider["last_run_status"]) =>
         null: "Never run",
     })[status ?? "null"] ?? "Never run";
 
+// ── Form ─────────────────────────────────────────────────────────────────────
 const form = useForm({
     is_enabled: false,
     server_url: "",
@@ -102,44 +101,58 @@ const form = useForm({
     alert_on_failure: false,
 });
 
+const syncFormToProvider = (slug: string) => {
+    const provider = props.providers.find((p) => p.slug === slug);
+
+    if (!provider) return;
+
+    form.defaults({
+        is_enabled: provider.is_enabled,
+        server_url: provider.server_url ?? "",
+        server_id: provider.server_id ?? "",
+        alert_on_failure: provider.alert_on_failure,
+    });
+    form.reset();
+};
+
 watch(
     () => activeTab.value,
-    (newTab) => {
-        const provider = props.providers.find((p) => p.slug === newTab);
-
-        if (provider) {
-            form.defaults({
-                is_enabled: provider.is_enabled,
-                server_url: provider.server_url ?? "",
-                server_id: (provider.server_id as string) ?? "",
-                alert_on_failure: provider.alert_on_failure,
-            });
-            form.reset();
-        }
-    },
+    (slug) => syncFormToProvider(slug),
     { immediate: true },
 );
-
 watch(
     () => props.providers,
-    (updatedProviders) => {
-        const provider = updatedProviders.find(
-            (p) => p.slug === activeTab.value,
-        );
-
-        if (provider) {
-            form.defaults({
-                is_enabled: provider.is_enabled,
-                server_url: provider.server_url ?? "",
-                server_id: (provider.server_id as string) ?? "",
-                alert_on_failure: provider.alert_on_failure,
-            });
-            form.reset();
-        }
-    },
+    () => syncFormToProvider(activeTab.value),
     { immediate: true },
 );
 
+// ── Disable guard ─────────────────────────────────────────────────────────────
+const onToggleEnabled = (newValue: boolean) => {
+    const currentProvider = props.providers.find(
+        (p) => p.slug === activeTab.value,
+    );
+    const wasEnabled = currentProvider?.is_enabled ?? false;
+
+    if (wasEnabled && !newValue) {
+        dialogOpen.value = true;
+
+        return;
+    }
+
+    form.is_enabled = newValue;
+};
+
+const onDialogConfirm = () => {
+    dialogOpen.value = false;
+    form.is_enabled = false;
+};
+
+const onDialogCancel = () => {
+    dialogOpen.value = false;
+    // form.is_enabled still holds the original `true` — no revert needed.
+};
+
+// ── Submit ────────────────────────────────────────────────────────────────────
 const submitForm = () => {
     form.patch(
         route("speedtest.server.providers.update", {
@@ -161,19 +174,21 @@ const submitForm = () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div class="flex flex-col gap-1 py-5">
-                <h1 class="text-xl font-semibold">Speedtest Providers</h1>
-                <p class="text-muted-foreground text-sm">
+                <h1 class="text-xl font-bold tracking-tight">
+                    Speedtest Providers
+                </h1>
+                <p class="text-sm text-muted-foreground mt-1">
                     Configure and enable each speedtest provider
                 </p>
             </div>
 
             <div
                 v-if="!providers.length"
-                class="border-border rounded-lg border border-dashed py-16 text-center"
+                class="rounded-lg border border-dashed border-border py-16 text-center"
             >
-                <p class="text-muted-foreground text-sm">
+                <p class="text-sm text-muted-foreground">
                     No providers found. Run
-                    <code class="font-mono text-xs"
+                    <code class="text-xs"
                         >php artisan db:seed --class=ProviderSeeder</code
                     >
                 </p>
@@ -199,22 +214,23 @@ const submitForm = () => {
                     <!-- Chromium warning -->
                     <div
                         v-if="provider.requires_chromium"
-                        class="bg-muted border-border mb-4 flex items-start gap-2 rounded-lg border p-3"
+                        class="mb-4 flex items-start gap-2 rounded-lg border border-border bg-muted p-3"
                     >
                         <Info
-                            class="text-muted-foreground mt-0.5 h-4 w-4 shrink-0"
+                            class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
                         />
-                        <p class="text-muted-foreground text-sm">
+                        <p class="text-sm text-muted-foreground">
                             This provider requires Chromium to run. Chromium is
                             pre-installed in the Docker image and no additional
                             setup is required.
                         </p>
                     </div>
+
                     <Card>
                         <CardHeader class="pb-1">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="space-y-1">
-                                    <CardTitle class="text-base pb-1">
+                                    <CardTitle class="text-sm font-medium pb-1">
                                         <div
                                             v-if="!faviconError"
                                             class="flex flex-row items-center gap-1"
@@ -225,13 +241,9 @@ const submitForm = () => {
                                                 class="size-7 object-cover"
                                                 @error="onFaviconError"
                                             />
-                                            <div>
-                                                {{ provider.name }}
-                                            </div>
+                                            <span>{{ provider.name }}</span>
                                         </div>
-                                        <div v-else class="flex flex-row">
-                                            {{ provider.name }}
-                                        </div>
+                                        <span v-else>{{ provider.name }}</span>
                                     </CardTitle>
                                     <CardDescription
                                         class="flex items-center gap-2"
@@ -261,7 +273,6 @@ const submitForm = () => {
                                     </CardDescription>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <!-- Test — always available regardless of is_enabled -->
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -275,8 +286,6 @@ const submitForm = () => {
                                         />
                                         Test
                                     </Button>
-
-                                    <!-- Run Now — respects is_runnable (enabled + not in maintenance) -->
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -298,7 +307,9 @@ const submitForm = () => {
                                 </div>
                             </div>
                         </CardHeader>
+
                         <Separator />
+
                         <CardContent>
                             <!-- Provider status -->
                             <Field class="py-4">
@@ -307,10 +318,10 @@ const submitForm = () => {
                                 >
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Radio
-                                                class="text-muted-foreground h-4 w-4"
+                                                class="h-4 w-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -327,7 +338,10 @@ const submitForm = () => {
                                         <Switch
                                             id="is_enabled"
                                             name="is_enabled"
-                                            v-model="form.is_enabled"
+                                            :model-value="form.is_enabled"
+                                            @update:model-value="
+                                                onToggleEnabled
+                                            "
                                         />
                                     </div>
                                 </div>
@@ -343,10 +357,10 @@ const submitForm = () => {
                                 >
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Server
-                                                class="text-muted-foreground h-4 w-4"
+                                                class="h-4 w-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -366,10 +380,10 @@ const submitForm = () => {
                                     </div>
                                     <div class="flex justify-end">
                                         <Input
-                                            name="server_url"
-                                            v-model="form.server_url"
-                                            type="url"
                                             id="server_url"
+                                            v-model="form.server_url"
+                                            name="server_url"
+                                            type="url"
                                             placeholder="https://speed.example.com"
                                             class="max-w-xs"
                                             :class="{
@@ -381,7 +395,7 @@ const submitForm = () => {
                                 </div>
                             </Field>
 
-                            <!-- Server ID — Speedtest · Ookla only -->
+                            <!-- Server ID — Ookla only -->
                             <Field
                                 v-if="provider.slug === 'ookla'"
                                 class="py-4"
@@ -391,10 +405,10 @@ const submitForm = () => {
                                 >
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Server
-                                                class="text-muted-foreground h-4 w-4"
+                                                class="h-4 w-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -412,10 +426,10 @@ const submitForm = () => {
                                     </div>
                                     <div class="flex justify-end">
                                         <Input
-                                            name="server_id"
-                                            type="text"
                                             id="server_id"
                                             v-model="form.server_id"
+                                            name="server_id"
+                                            type="text"
                                             placeholder="e.g. 12345"
                                             class="max-w-xs"
                                             :class="{
@@ -434,10 +448,10 @@ const submitForm = () => {
                                 >
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Bell
-                                                class="text-muted-foreground h-4 w-4"
+                                                class="h-4 w-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -453,20 +467,21 @@ const submitForm = () => {
                                     <div class="flex justify-end">
                                         <Switch
                                             id="alert_on_failure"
-                                            name="alert_on_failure"
                                             v-model="form.alert_on_failure"
+                                            name="alert_on_failure"
                                         />
                                     </div>
                                 </div>
                             </Field>
                         </CardContent>
+
                         <CardFooter>
-                            <div class="flex items-center ml-auto">
+                            <div class="ml-auto flex items-center">
                                 <Button
                                     type="button"
-                                    @click.prevent="submitForm"
                                     size="sm"
                                     :disabled="form.processing || !form.isDirty"
+                                    @click.prevent="submitForm"
                                 >
                                     <Loader2
                                         v-if="form.processing"
@@ -480,5 +495,17 @@ const submitForm = () => {
                 </TabsContent>
             </Tabs>
         </div>
+
+        <ProviderDisableDialog
+            :open="dialogOpen"
+            :provider-name="
+                providers.find((p) => p.slug === activeTab)?.name ?? ''
+            "
+            :schedules="
+                schedulesMap[activeTab as keyof ProviderSchedulesMap] ?? []
+            "
+            @confirm="onDialogConfirm"
+            @cancel="onDialogCancel"
+        />
     </AppLayout>
 </template>

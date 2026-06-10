@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Enums\QueueWorkerName;
+use App\Enums\SpeedtestServer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
+use App\Http\Resources\ProviderScheduleResource;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
+use App\Models\ProviderSchedule;
 use App\Services\InertiaNotification;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Exception;
@@ -19,23 +22,75 @@ class ProviderController extends Controller
 {
     /**
      * Render the Providers settings page.
-     * Passes all 3 providers to Vue; tab switching is client-side only.
+     *
+     * Passes all providers and a schedulesMap keyed by provider slug.
+     * Only enabled schedules with a cron expression are included —
+     * these are the ones that will stop running when a provider is disabled.
      */
     public function index(): Response
     {
+        $providers = Provider::query()->orderBy('id')->get();
+
+        /** @var array<string, list<array<string, mixed>>> $schedulesMap */
+        $schedulesMap = [];
+
+        foreach (SpeedtestServer::cases() as $server) {
+            $schedulesMap[$server->value] = ProviderScheduleResource::collection(
+                ProviderSchedule::enabledForProvider($server)
+                    ->filter(fn (ProviderSchedule $s): bool => filled($s->cron_expression))
+                    ->values()
+            )->resolve();
+        }
+
         return Inertia::render('settings/Providers', [
-            'providers' => ProviderResource::collection(
-                Provider::query()->orderBy('id')->get()
-            )->resolve(),
+            'providers'    => ProviderResource::collection($providers)->resolve(),
+            'schedulesMap' => $schedulesMap,
         ]);
     }
 
     /**
      * Update a single provider's configuration.
+     *
+     * When a previously enabled provider is disabled, all its associated
+     * schedules are also disabled so they do not linger as orphaned active entries.
      */
     public function update(UpdateProviderRequest $request, Provider $provider): RedirectResponse
     {
+        $wasEnabled = $provider->is_enabled;
+        $willDisable = $wasEnabled && ! $request->boolean('is_enabled');
+
         $provider->update($request->validated());
+
+        if ($willDisable) {
+            $disabledCount = ProviderSchedule::query()
+                ->where('provider_slug', $provider->slug->value)
+                ->where('is_enabled', true)
+                ->update(['is_enabled' => false]);
+
+            InertiaNotification::make()
+                ->success()
+                ->title('Provider disabled')
+                ->message("{$provider->slug->label()} has been disabled.")
+                ->send();
+
+            if ($disabledCount > 0) {
+                InertiaNotification::make()
+                    ->warning()
+                    ->title(
+                        $disabledCount === 1
+                            ? '1 schedule disabled'
+                            : "{$disabledCount} schedules disabled"
+                    )
+                    ->message(
+                        $disabledCount === 1
+                            ? "1 active schedule for {$provider->slug->label()} has been disabled."
+                            : "{$disabledCount} active schedules for {$provider->slug->label()} have been disabled."
+                    )
+                    ->send();
+            }
+
+            return to_route('speedtest.server.providers.index');
+        }
 
         InertiaNotification::make()
             ->success()
@@ -66,13 +121,9 @@ class ProviderController extends Controller
     }
 
     /**
-     * Test run under the provider
-     *
-     * @param Provider $provider
+     * Test run under the provider.
      *
      * @throws Exception
-     *
-     * @return RedirectResponse
      */
     public function test(Provider $provider): RedirectResponse
     {

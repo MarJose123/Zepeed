@@ -13,25 +13,17 @@ class ProviderScheduleResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $schedule = $this->schedule();
-
         return [
-            'id'                  => $schedule->id,
-            'provider_slug'       => $schedule->provider_slug->value,
-            'label'               => $schedule->label,
-            'provider_name'       => $schedule->provider_slug->label(),
-            'website_link'        => $schedule->provider_slug->websiteLink(),
-            'cron_expression'     => $schedule->cron_expression,
-            'is_enabled'          => $schedule->is_enabled,
-            'provider_is_enabled' => $schedule->provider->is_enabled ?? false,
-            'next_run_at'         => $schedule->nextRunAt()?->toIso8601String(),
-            'last_scheduled_at'   => $schedule->last_scheduled_at?->toIso8601String(),
+            'id'                  => $this->id,
+            'provider_slug'       => $this->provider_slug->value,
+            'label'               => $this->label,
+            'provider_name'       => $this->provider_slug->label(),
+            'website_link'        => $this->provider_slug->websiteLink(),
+            'cron_expression'     => $this->cron_expression,
+            'is_enabled'          => $this->is_enabled,
+            'provider_is_enabled' => $this->provider->is_enabled ?? false,
+            'next_run_at'         => $this->nextRunAt()?->toIso8601String(),
+            'last_scheduled_at'   => $this->last_scheduled_at?->toIso8601String(),
         ];
-    }
-
-    private function schedule(): ProviderSchedule
-    {
-        /** @var ProviderSchedule */
-        return $this->resource;
     }
 }

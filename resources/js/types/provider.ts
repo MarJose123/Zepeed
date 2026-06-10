@@ -93,3 +93,7 @@ export interface SpeedtestExceptionPayload extends SpeedtestEventPayload {
 export interface SpeedtestSkippedPayload extends SpeedtestEventPayload {
     reason: string;
 }
+
+// Provider disable dialog
+
+export type ProviderSchedulesMap = Record<ProviderSlug, ProviderSchedule[]>;
