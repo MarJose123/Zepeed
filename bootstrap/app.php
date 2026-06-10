@@ -5,7 +5,6 @@ use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventRequestsDuringMaintenanceMiddleware;
 use App\Jobs\RunSpeedtestJob;
-use App\Models\Provider;
 use App\Models\ProviderSchedule;
 use App\Services\InertiaNotification;
 use Illuminate\Console\Scheduling\Schedule;
