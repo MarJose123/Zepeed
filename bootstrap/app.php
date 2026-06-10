@@ -43,25 +43,22 @@ return Application::configure(basePath: dirname(__DIR__))
         // Load enabled providers that are fully configured
         // withoutOverlapping() is handled at the Job level via uniqueId()
         // so we don't need it here — avoids a cache dependency in bootstrap
-
-        Provider::query()
+        ProviderSchedule::query()
             ->enabled()
+            ->whereHas('provider', fn ($q) => $q->enabled())
             ->get()
-            ->each(function (Provider $provider) use ($schedule) {
-                // Fetch the Schedule record for this provider
-                // Falls back to a safe default if no schedule row exists yet
-                $providerSchedule = ProviderSchedule::forProvider(
-                    $provider->slug
-                );
-
-                if (! $providerSchedule?->cron_expression) {
-                    return; // no cron configured — skip silently
+            ->each(function (ProviderSchedule $providerSchedule) use ($schedule) {
+                if (! $providerSchedule->cron_expression) {
+                    return;
                 }
 
                 $schedule
-                    ->job(new RunSpeedtestJob($provider), queue: QueueWorkerName::Speedtest->value)
+                    ->job(
+                        new RunSpeedtestJob($providerSchedule->provider),
+                        queue: QueueWorkerName::Speedtest->value,
+                    )
                     ->cron($providerSchedule->cron_expression)
-                    ->name("speedtest:{$provider->slug->value}")
+                    ->name("speedtest:{$providerSchedule->provider_slug->value}:{$providerSchedule->id}")
                     ->withoutOverlapping(expiresAt: 10);
             });
     })
