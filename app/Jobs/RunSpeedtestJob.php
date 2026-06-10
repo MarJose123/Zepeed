@@ -15,6 +15,7 @@ use App\Events\Speedtest\Test\SpeedtestTestStartedEvent;
 use App\Models\MaintenanceWindow;
 use App\Models\Provider;
 use App\Models\SpeedResult;
+use App\Models\SpeedtestTestSession;
 use App\Services\AlertRuleService;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use Carbon\CarbonImmutable;
@@ -54,6 +55,7 @@ class RunSpeedtestJob implements ShouldQueue
         public readonly Provider $provider,
         public bool $testOnly = false,
         public bool $runFromConsole = false,
+        public readonly ?string $testSessionId = null,
     ) {}
 
     public function uniqueId(): string
@@ -79,8 +81,6 @@ class RunSpeedtestJob implements ShouldQueue
             return;
         }
 
-        // Guard against misconfigured providers (e.g. LibreSpeed
-        // enabled but server_url not set yet).
         if (! $this->provider->is_runnable) {
             Log::info('Speedtest job skipped — provider not runnable.', [
                 'provider' => $slug->value,
@@ -89,16 +89,28 @@ class RunSpeedtestJob implements ShouldQueue
             return;
         }
 
-        if ($this->isUnderMaintenance($slug)) {
-            $skipped = SpeedResult::recordSkipped(
-                provider: $this->provider,
-            );
+        // Bail early if the test session was cancelled while the job was queued.
+        if ($this->testOnly && $this->testSessionId && $this->resolveSession()?->isCancelled()) {
+            Log::info('Speedtest test job abandoned — session was cancelled before pickup.', [
+                'provider'         => $slug->value,
+                'test_session_id'  => $this->testSessionId,
+            ]);
 
+            return;
+        }
+
+        if ($this->isUnderMaintenance($slug)) {
+            $skipped = SpeedResult::recordSkipped(provider: $this->provider);
             $this->provider->markSkipped();
+
+            if ($this->testOnly && $this->testSessionId) {
+                $this->resolveSession()?->markSkipped();
+            }
 
             if (! $this->runFromConsole && $this->testOnly) {
                 event(new SpeedtestTestSkippedEvent($this->provider, 'Maintenance window active.'));
             }
+
             if (! $this->runFromConsole && ! $this->testOnly) {
                 event(new SpeedtestSkippedEvent($this->provider, 'Maintenance window active.'));
             }
@@ -107,16 +119,20 @@ class RunSpeedtestJob implements ShouldQueue
                 'provider' => $slug->value,
             ]);
 
-            // Evaluate alert rules against the skipped result
             $alertRuleService->evaluate($skipped);
 
             return;
         }
 
-        // Broadcast started
+        // Mark session running and broadcast started.
+        if ($this->testOnly && $this->testSessionId) {
+            $this->resolveSession()?->markRunning();
+        }
+
         if (! $this->runFromConsole && $this->testOnly) {
             event(new SpeedtestTestStartedEvent($this->provider));
         }
+
         if (! $this->runFromConsole && ! $this->testOnly) {
             event(new SpeedtestStartedEvent($this->provider));
         }
@@ -125,13 +141,16 @@ class RunSpeedtestJob implements ShouldQueue
             $result = $this->provider->service()->run();
 
             $speedResult = SpeedResult::query()->create($result->toStorageArray());
-
             $this->provider->markSuccessful();
 
-            // Broadcast completed with metrics
+            if ($this->testOnly && $this->testSessionId) {
+                $this->resolveSession()?->markCompleted();
+            }
+
             if (! $this->runFromConsole && $this->testOnly) {
                 event(new SpeedtestTestCompletedEvent($this->provider, $result));
             }
+
             if (! $this->runFromConsole && ! $this->testOnly) {
                 event(new SpeedtestCompletedEvent($this->provider, $result));
             }
@@ -143,22 +162,21 @@ class RunSpeedtestJob implements ShouldQueue
                 'ping_ms'       => $result->pingMs,
             ]);
 
-            // Evaluate alert rules against the persisted Eloquent model
             $alertRuleService->evaluate($speedResult);
 
         } catch (SpeedtestException $e) {
 
-            $failed = SpeedResult::recordFailed(
-                provider: $this->provider,
-                e       : $e,
-            );
-
+            $failed = SpeedResult::recordFailed(provider: $this->provider, e: $e);
             $this->provider->markFailed();
 
-            // Broadcast both failed + exception events
+            if ($this->testOnly && $this->testSessionId) {
+                $this->resolveSession()?->markFailed($e->getMessage());
+            }
+
             if (! $this->runFromConsole && $this->testOnly) {
                 event(new SpeedtestTestExceptionEvent($this->provider, $e));
             }
+
             if (! $this->runFromConsole && ! $this->testOnly) {
                 event(new SpeedtestExceptionEvent($this->provider, $e));
             }
@@ -169,10 +187,20 @@ class RunSpeedtestJob implements ShouldQueue
                 'message'  => $e->getMessage(),
             ]);
 
-            // Evaluate alert rules against the failed result
             $alertRuleService->evaluate($failed);
-
         }
+    }
+
+    /**
+     * Resolve the test session model once per call site.
+     */
+    private function resolveSession(): ?SpeedtestTestSession
+    {
+        if (! $this->testSessionId) {
+            return null;
+        }
+
+        return SpeedtestTestSession::query()->find($this->testSessionId);
     }
 
     private function isUnderMaintenance(SpeedtestServer $slug): bool
@@ -213,6 +241,10 @@ class RunSpeedtestJob implements ShouldQueue
     public function failed(Throwable $exception): void
     {
         $this->provider->markFailed();
+
+        if ($this->testOnly && $this->testSessionId) {
+            $this->resolveSession()?->markFailed($exception->getMessage());
+        }
 
         $slug = $this->provider->slug;
 

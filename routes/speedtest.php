@@ -35,6 +35,9 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
             Route::post('providers/{provider}/test', [ProviderController::class, 'test'])
                 ->name('providers.test');
+
+            Route::delete('providers/{provider}/test/{testSessionId}', [ProviderController::class, 'cancelTest'])
+                ->name('providers.test.cancel');
         });
 
         Route::prefix('schedules/')->name('schedules.')->group(function () {

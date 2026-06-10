@@ -1,26 +1,28 @@
 import { useEcho } from "@laravel/echo-vue";
 import type {
-    SpeedtestEventPayload,
     SpeedtestCompletedPayload,
+    SpeedtestEventPayload,
     SpeedtestExceptionPayload,
     SpeedtestSkippedPayload,
+    SpeedtestTestCancelledPayload,
 } from "@/types/provider";
 
-interface UseSpeedtestChannelOptions {
+interface UseSpeedtestTestChannelOptions {
     onStarted?: (payload: SpeedtestEventPayload) => void;
     onCompleted?: (payload: SpeedtestCompletedPayload) => void;
     onFailed?: (payload: SpeedtestEventPayload) => void;
     onSkipped?: (payload: SpeedtestSkippedPayload) => void;
     onException?: (payload: SpeedtestExceptionPayload) => void;
+    onCancelled?: (payload: SpeedtestTestCancelledPayload) => void;
 }
 
 export function useSpeedtestTestChannel(
     providerSlug: string,
-    options: UseSpeedtestChannelOptions = {},
+    options: UseSpeedtestTestChannelOptions = {},
 ) {
     useEcho<SpeedtestEventPayload>(
         `speedtest.test.${providerSlug}`,
-        ".speedtest.tes.started",
+        ".speedtest.test.started",
         (e) => options.onStarted?.(e),
     );
 
@@ -47,4 +49,70 @@ export function useSpeedtestTestChannel(
         ".speedtest.test.exception",
         (e) => options.onException?.(e),
     );
+
+    useEcho<SpeedtestTestCancelledPayload>(
+        `speedtest.test.${providerSlug}`,
+        ".speedtest.test.cancelled",
+        (e) => options.onCancelled?.(e),
+    );
+}
+
+/**
+ * POST /speedtest/settings/server/providers/{provider}/test
+ * Returns 202 with { test_session_id, provider_slug }.
+ */
+export async function startProviderTest(
+    providerSlug: string,
+): Promise<{ test_session_id: string; provider_slug: string } | null> {
+    const csrf =
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+            ?.content ?? "";
+
+    const res = await fetch(
+        route("speedtest.server.providers.test", { provider: providerSlug }),
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrf,
+            },
+        },
+    );
+
+    if (res.status === 202) {
+        return res.json() as Promise<{
+            test_session_id: string;
+            provider_slug: string;
+        }>;
+    }
+
+    return null;
+}
+
+/**
+ * DELETE /speedtest/settings/server/providers/{provider}/test/{testSessionId}
+ */
+export async function cancelProviderTest(
+    providerSlug: string,
+    testSessionId: string,
+): Promise<boolean> {
+    const csrf =
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+            ?.content ?? "";
+
+    const res = await fetch(
+        route("speedtest.server.providers.test.cancel", {
+            provider: providerSlug,
+            testSessionId,
+        }),
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrf,
+            },
+        },
+    );
+
+    return res.ok;
 }

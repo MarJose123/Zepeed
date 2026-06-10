@@ -94,6 +94,37 @@ export interface SpeedtestSkippedPayload extends SpeedtestEventPayload {
     reason: string;
 }
 
+export interface SpeedtestTestCancelledPayload extends SpeedtestEventPayload {
+    reason: string;
+}
+
 // Provider disable dialog
 
 export type ProviderSchedulesMap = Record<ProviderSlug, ProviderSchedule[]>;
+
+// Test session state (frontend only — not persisted)
+
+export type TestStatus =
+    | "idle"
+    | "pending"
+    | "running"
+    | "completed"
+    | "failed"
+    | "skipped"
+    | "cancelled";
+
+export interface ProviderTestState {
+    status: TestStatus;
+    sessionId: string | null;
+    result: Pick<
+        SpeedtestCompletedPayload,
+        | "download_mbps"
+        | "upload_mbps"
+        | "ping_ms"
+        | "jitter_ms"
+        | "server_name"
+        | "server_location"
+        | "isp"
+    > | null;
+    errorMessage: string | null;
+}
