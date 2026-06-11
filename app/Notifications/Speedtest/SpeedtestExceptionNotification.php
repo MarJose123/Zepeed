@@ -13,6 +13,13 @@ class SpeedtestExceptionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Database write + optional SMTP send should finish in a few seconds.
+     * 45s is a conservative ceiling that stays well within the mail-worker's
+     * 120s process timeout.
+     */
+    public int $timeout = 45;
+
     public function __construct(
         public readonly Provider $provider,
         public readonly SpeedtestException $exception,

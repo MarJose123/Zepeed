@@ -3,6 +3,6 @@
 exec php /var/www/html/artisan queue:work \
     --queue=speedtest \
     --tries=3 \
-    --timeout=90 \
+    --timeout=350 \
     --sleep=3 \
     --max-jobs=500

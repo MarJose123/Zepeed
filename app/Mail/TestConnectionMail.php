@@ -14,6 +14,13 @@ class TestConnectionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * SMTP handshake + send should comfortably finish well under 30s.
+     * 60s gives ample headroom for slow or congested mail servers while
+     * remaining well within the mail-worker's 120s process timeout.
+     */
+    public int $timeout = 60;
+
     public function __construct(
         public readonly MailProvider $provider,
     ) {}
