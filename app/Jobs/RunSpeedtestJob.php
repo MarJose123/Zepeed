@@ -81,7 +81,10 @@ class RunSpeedtestJob implements ShouldQueue
             return;
         }
 
-        if (! $this->provider->is_runnable) {
+        // For scheduled/manual runs, skip misconfigured or disabled providers.
+        // For test-only runs the user explicitly requested the test regardless
+        // of enabled state, so bypass this guard entirely.
+        if (! $this->testOnly && ! $this->provider->is_runnable) {
             Log::info('Speedtest job skipped — provider not runnable.', [
                 'provider' => $slug->value,
             ]);
@@ -92,8 +95,8 @@ class RunSpeedtestJob implements ShouldQueue
         // Bail early if the test session was cancelled while the job was queued.
         if ($this->testOnly && $this->testSessionId && $this->resolveSession()?->isCancelled()) {
             Log::info('Speedtest test job abandoned — session was cancelled before pickup.', [
-                'provider'         => $slug->value,
-                'test_session_id'  => $this->testSessionId,
+                'provider'        => $slug->value,
+                'test_session_id' => $this->testSessionId,
             ]);
 
             return;
@@ -140,8 +143,13 @@ class RunSpeedtestJob implements ShouldQueue
         try {
             $result = $this->provider->service()->run();
 
-            $speedResult = SpeedResult::query()->create($result->toStorageArray());
-            $this->provider->markSuccessful();
+            // Never persist test-only runs — they are diagnostic and should
+            // not pollute the historical results dataset.
+            if (! $this->testOnly) {
+                $speedResult = SpeedResult::query()->create($result->toStorageArray());
+                $this->provider->markSuccessful();
+                $alertRuleService->evaluate($speedResult);
+            }
 
             if ($this->testOnly && $this->testSessionId) {
                 $this->resolveSession()?->markCompleted();
@@ -162,12 +170,14 @@ class RunSpeedtestJob implements ShouldQueue
                 'ping_ms'       => $result->pingMs,
             ]);
 
-            $alertRuleService->evaluate($speedResult);
-
         } catch (SpeedtestException $e) {
 
-            $failed = SpeedResult::recordFailed(provider: $this->provider, e: $e);
-            $this->provider->markFailed();
+            // Similarly, do not persist failed results for test-only runs.
+            if (! $this->testOnly) {
+                $failed = SpeedResult::recordFailed(provider: $this->provider, e: $e);
+                $this->provider->markFailed();
+                $alertRuleService->evaluate($failed);
+            }
 
             if ($this->testOnly && $this->testSessionId) {
                 $this->resolveSession()?->markFailed($e->getMessage());
@@ -186,8 +196,6 @@ class RunSpeedtestJob implements ShouldQueue
                 'reason'   => $e->reason->value,
                 'message'  => $e->getMessage(),
             ]);
-
-            $alertRuleService->evaluate($failed);
         }
     }
 

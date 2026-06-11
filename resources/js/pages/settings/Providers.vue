@@ -156,6 +156,12 @@ const testRun = async (provider: Provider) => {
     }
 
     state.sessionId = data.test_session_id;
+
+    notify({
+        type: "info",
+        title: `${provider.name} test started`,
+        message: "Running in the background. You can navigate away freely.",
+    });
 };
 
 const cancelTest = async (provider: Provider) => {
