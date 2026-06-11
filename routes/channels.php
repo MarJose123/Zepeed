@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Broadcast;
 
-// Any authenticated user can subscribe to per-provider events
+// Authenticated users can listen on any provider's channel
 Broadcast::channel('speedtest.{providerSlug}',
     fn ($user, string $providerSlug) => auth()->check());
 
@@ -10,8 +10,8 @@ Broadcast::channel('speedtest.{providerSlug}',
 Broadcast::channel('speedtest.test.{providerSlug}',
     fn ($user, string $providerSlug) => auth()->check());
 
-// Authenticated dashboard — presence channel so all active sessions
-// receive refresh broadcasts after a speedtest completes
+// Presence channel for authenticated dashboard — all active sessions
+// receive the refresh broadcast after a speedtest completes
 Broadcast::channel('dashboard', function ($user): array|false {
     if (! auth()->check()) {
         return false;
