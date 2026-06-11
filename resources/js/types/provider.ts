@@ -128,3 +128,16 @@ export interface ProviderTestState {
     > | null;
     errorMessage: string | null;
 }
+
+export interface OoklaServer {
+    id: number;
+    sponsor: string;
+    name: string;
+    country: string;
+    distance: number;
+}
+
+export interface OoklaServerSearchResponse {
+    results: OoklaServer[];
+    count: number;
+}

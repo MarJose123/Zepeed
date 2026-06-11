@@ -6,6 +6,7 @@ use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
 use App\Events\Speedtest\Test\SpeedtestTestCancelledEvent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OoklaServerSearchRequest;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
 use App\Http\Resources\ProviderScheduleResource;
@@ -15,6 +16,7 @@ use App\Models\ProviderSchedule;
 use App\Models\SpeedtestTestSession;
 use App\Models\User;
 use App\Services\InertiaNotification;
+use App\Services\OoklaServerSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -181,5 +183,41 @@ class ProviderController extends Controller
         event(new SpeedtestTestCancelledEvent($provider));
 
         return response()->json(['message' => 'Test cancelled.']);
+    }
+
+    /**
+     * Search for Ookla speedtest servers.
+     *
+     * Results are drawn from a 24-hour server-side cache. On a cache miss
+     * the Ookla API is called once, the full list stored, then filtered.
+     * Subsequent requests within the TTL are served instantly from cache.
+     */
+    public function searchOoklaServers(
+        OoklaServerSearchRequest $request,
+        OoklaServerSearchService $service,
+    ): JsonResponse {
+        $query = (string) $request->string('q')->trim();
+        $results = $service->search($query);
+
+        return response()->json([
+            'results' => $results,
+            'count'   => $results->count(),
+        ]);
+    }
+
+    /**
+     * Bust the Ookla server list cache.
+     *
+     * Intended as an escape hatch when the cached list is stale.
+     * The fresh list is fetched from the API immediately and re-cached.
+     */
+    public function refreshOoklaServersCache(OoklaServerSearchService $service): JsonResponse
+    {
+        $servers = $service->refreshCache();
+
+        return response()->json([
+            'message' => 'Ookla server cache refreshed.',
+            'count'   => $servers->count(),
+        ]);
     }
 }

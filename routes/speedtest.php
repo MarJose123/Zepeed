@@ -38,6 +38,12 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
             Route::delete('providers/{provider}/test/{testSessionId}', [ProviderController::class, 'cancelTest'])
                 ->name('providers.test.cancel');
+
+            Route::get('ookla/servers/search', [ProviderController::class, 'searchOoklaServers'])
+                ->name('ookla.servers.search');
+
+            Route::post('ookla/servers/cache/refresh', [ProviderController::class, 'refreshOoklaServersCache'])
+                ->name('ookla.servers.cache.refresh');
         });
 
         Route::prefix('schedules/')->name('schedules.')->group(function () {
