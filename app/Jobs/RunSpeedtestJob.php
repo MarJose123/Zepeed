@@ -143,8 +143,18 @@ class RunSpeedtestJob implements ShouldQueue
         try {
             $result = $this->provider->service()->run();
 
-            // Never persist test-only runs — they are diagnostic and should
-            // not pollute the historical results dataset.
+            // Re-fetch cancellation status from DB — the user may have cancelled
+            // while service()->run() was blocking (30-120s). If so, suppress all
+            // broadcasts and do not persist anything.
+            if ($this->testOnly && $this->isCancelledFresh()) {
+                Log::info('Speedtest test completed but session was cancelled mid-run — suppressing broadcast.', [
+                    'provider'        => $slug->value,
+                    'test_session_id' => $this->testSessionId,
+                ]);
+
+                return;
+            }
+
             if (! $this->testOnly) {
                 $speedResult = SpeedResult::query()->create($result->toStorageArray());
                 $this->provider->markSuccessful();
@@ -172,7 +182,16 @@ class RunSpeedtestJob implements ShouldQueue
 
         } catch (SpeedtestException $e) {
 
-            // Similarly, do not persist failed results for test-only runs.
+            // Same cancellation check for the failure path.
+            if ($this->testOnly && $this->isCancelledFresh()) {
+                Log::info('Speedtest test failed but session was cancelled mid-run — suppressing broadcast.', [
+                    'provider'        => $slug->value,
+                    'test_session_id' => $this->testSessionId,
+                ]);
+
+                return;
+            }
+
             if (! $this->testOnly) {
                 $failed = SpeedResult::recordFailed(provider: $this->provider, e: $e);
                 $this->provider->markFailed();
@@ -209,6 +228,22 @@ class RunSpeedtestJob implements ShouldQueue
         }
 
         return SpeedtestTestSession::query()->find($this->testSessionId);
+    }
+
+    /**
+     * Fresh DB read — do NOT use resolveSession() here since it may be
+     * cached in memory from an earlier call. We need the current value
+     * after service()->run() has been blocking for up to 120 seconds.
+     */
+    private function isCancelledFresh(): bool
+    {
+        if (! $this->testSessionId) {
+            return false;
+        }
+
+        return SpeedtestTestSession::query()
+            ->where('id', $this->testSessionId)
+            ->value('status') === 'cancelled';
     }
 
     private function isUnderMaintenance(SpeedtestServer $slug): bool
