@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { Head, router, useForm } from "@inertiajs/vue3";
-import { Bell, ExternalLink, Info, Loader2, Radio, Server } from "@lucide/vue";
-import { ref, watch } from "vue";
+import {
+    Bell,
+    ExternalLink,
+    Info,
+    Loader2,
+    Radio,
+    Server,
+    Zap,
+} from "@lucide/vue";
+import { reactive, ref, watch } from "vue";
 import ProviderDisableDialog from "@/components/speedtest/ProviderDisableDialog.vue";
+import ProviderTestStatus from "@/components/speedtest/ProviderTestStatus.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,9 +32,18 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNotification } from "@/composables/useNotification";
+import {
+    useProviderTestHttp,
+    useSpeedtestTestChannel,
+} from "@/composables/useSpeedtestTestChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
-import type { Provider, ProviderSchedulesMap } from "@/types/provider";
+import type {
+    Provider,
+    ProviderSchedulesMap,
+    ProviderTestState,
+} from "@/types/provider";
 
 const props = defineProps<{
     providers: Provider[];
@@ -40,14 +58,68 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
+const { notify } = useNotification();
+const { startTest, cancelTest: cancelProviderTest } = useProviderTestHttp();
+
 const activeTab = ref<string>(props.providers[0]?.slug ?? "ookla");
-const testing = ref(false);
 const faviconError = ref(false);
 const dialogOpen = ref(false);
+
+// ── Per-provider test state ───────────────────────────────────────────────────
+
+const testStates = reactive<Record<string, ProviderTestState>>(
+    Object.fromEntries(
+        props.providers.map((p) => [
+            p.slug,
+            {
+                status: "idle",
+                sessionId: null,
+                result: null,
+                errorMessage: null,
+            },
+        ]),
+    ),
+);
+
+// Subscribe to the WebSocket test channel for every provider.
+// useEcho (called inside useSpeedtestTestChannel) is lifecycle-scoped
+// and cleans up automatically on component unmount.
+props.providers.forEach((p) => {
+    useSpeedtestTestChannel(p.slug, {
+        onStarted: () => {
+            testStates[p.slug].status = "running";
+        },
+        onCompleted: (payload) => {
+            testStates[p.slug].status = "completed";
+            testStates[p.slug].result = {
+                download_mbps: payload.download_mbps,
+                upload_mbps: payload.upload_mbps,
+                ping_ms: payload.ping_ms,
+                jitter_ms: payload.jitter_ms,
+                server_name: payload.server_name,
+                server_location: payload.server_location,
+                isp: payload.isp,
+            };
+        },
+        onException: (payload) => {
+            testStates[p.slug].status = "failed";
+            testStates[p.slug].errorMessage = payload.message;
+        },
+        onSkipped: () => {
+            testStates[p.slug].status = "skipped";
+        },
+        onCancelled: () => {
+            testStates[p.slug].status = "cancelled";
+            testStates[p.slug].sessionId = null;
+        },
+    });
+});
 
 function onFaviconError() {
     faviconError.value = true;
 }
+
+// ── Run / test actions ────────────────────────────────────────────────────────
 
 const runNow = (provider: Provider) => {
     router.post(
@@ -59,23 +131,56 @@ const runNow = (provider: Provider) => {
     );
 };
 
-const testRun = (provider: Provider) => {
-    testing.value = true;
-    router.post(
-        route(
-            "speedtest.server.providers.test",
-            { provider: provider.slug },
-            false,
-        ),
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                testing.value = false;
-            },
-        },
-    );
+const testRun = async (provider: Provider) => {
+    const state = testStates[provider.slug];
+
+    if (!state || state.status === "pending" || state.status === "running")
+        return;
+
+    state.status = "pending";
+    state.result = null;
+    state.errorMessage = null;
+    state.sessionId = null;
+
+    const data = await startTest(provider.slug);
+
+    if (!data) {
+        state.status = "idle";
+        notify({
+            type: "error",
+            title: "Could not start test",
+            message: "Server returned an unexpected response.",
+        });
+
+        return;
+    }
+
+    state.sessionId = data.test_session_id;
+
+    notify({
+        type: "info",
+        title: `${provider.name} test started`,
+        message: "Running in the background. You can navigate away freely.",
+    });
 };
+
+const cancelTest = async (provider: Provider) => {
+    const state = testStates[provider.slug];
+
+    if (!state?.sessionId) return;
+
+    const ok = await cancelProviderTest(provider.slug, state.sessionId);
+
+    if (!ok) {
+        notify({
+            type: "error",
+            title: "Cancel failed",
+            message: "Could not cancel the test.",
+        });
+    }
+};
+
+// ── Status helpers ────────────────────────────────────────────────────────────
 
 const statusBadgeVariant = (badge: Provider["status_badge"]) =>
     ({
@@ -94,6 +199,7 @@ const statusLabel = (status: Provider["last_run_status"]) =>
     })[status ?? "null"] ?? "Never run";
 
 // ── Form ─────────────────────────────────────────────────────────────────────
+
 const form = useForm({
     is_enabled: false,
     server_url: "",
@@ -127,6 +233,7 @@ watch(
 );
 
 // ── Disable guard ─────────────────────────────────────────────────────────────
+
 const onToggleEnabled = (newValue: boolean) => {
     const currentProvider = props.providers.find(
         (p) => p.slug === activeTab.value,
@@ -149,10 +256,10 @@ const onDialogConfirm = () => {
 
 const onDialogCancel = () => {
     dialogOpen.value = false;
-    // form.is_enabled still holds the original `true` — no revert needed.
 };
 
 // ── Submit ────────────────────────────────────────────────────────────────────
+
 const submitForm = () => {
     form.patch(
         route("speedtest.server.providers.update", {
@@ -272,20 +379,28 @@ const submitForm = () => {
                                         >
                                     </CardDescription>
                                 </div>
-                                <div class="flex items-center gap-2">
+
+                                <div class="flex items-center gap-3">
+                                    <!-- Inline test status or Test button -->
+                                    <ProviderTestStatus
+                                        v-if="
+                                            testStates[provider.slug]
+                                                ?.status !== 'idle'
+                                        "
+                                        :state="testStates[provider.slug]"
+                                        @cancel="cancelTest(provider)"
+                                    />
                                     <Button
+                                        v-else
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        :disabled="testing"
                                         @click="testRun(provider)"
                                     >
-                                        <Loader2
-                                            v-if="testing"
-                                            class="mr-2 h-4 w-4 animate-spin"
-                                        />
+                                        <Zap class="h-3.5 w-3.5" />
                                         Test
                                     </Button>
+
                                     <Button
                                         type="button"
                                         variant="outline"

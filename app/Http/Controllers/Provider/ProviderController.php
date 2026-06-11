@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Provider;
 
 use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
+use App\Events\Speedtest\Test\SpeedtestTestCancelledEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Http\Resources\ProviderResource;
@@ -11,10 +12,12 @@ use App\Http\Resources\ProviderScheduleResource;
 use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
 use App\Models\ProviderSchedule;
+use App\Models\SpeedtestTestSession;
+use App\Models\User;
 use App\Services\InertiaNotification;
-use App\Services\Speedtest\Exceptions\SpeedtestException;
-use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -121,31 +124,62 @@ class ProviderController extends Controller
     }
 
     /**
-     * Test run under the provider.
+     * Start an async test run for a provider.
      *
-     * @throws Exception
+     * Returns 202 Accepted immediately. The test runs as a queued job
+     * and broadcasts WebSocket events to the frontend via the private
+     * channel speedtest.test.{providerSlug}.
      */
-    public function test(Provider $provider): RedirectResponse
+    public function test(Request $request, Provider $provider): JsonResponse
     {
-        try {
-            $result = $provider->service()->run();
+        /** @var User $user */
+        $user = $request->user();
 
-            InertiaNotification::make()
-                ->success()
-                ->title("{$provider->slug->label()} test completed")
-                ->message("↓ {$result->downloadMbps} Mbps  ↑ {$result->uploadMbps} Mbps ↔ ping {$result->pingMs} ms")
-                ->send();
+        $session = SpeedtestTestSession::query()->create([
+            'provider_id' => $provider->id,
+            'user_id'     => $user->id,
+            'status'      => 'pending',
+        ]);
 
-            return to_route('speedtest.server.providers.index');
+        dispatch(new RunSpeedtestJob(
+            provider      : $provider,
+            testOnly      : true,
+            testSessionId : $session->id,
+        ))->onQueue(QueueWorkerName::Speedtest->value);
 
-        } catch (SpeedtestException $e) {
-            InertiaNotification::make()
-                ->error()
-                ->title("{$provider->slug->label()} test failed")
-                ->message($e->getMessage())
-                ->send();
+        return response()->json([
+            'test_session_id' => $session->id,
+            'provider_slug'   => $provider->slug->value,
+        ], 202);
+    }
 
-            return to_route('speedtest.server.providers.index');
+    /**
+     * Cancel an in-progress or pending test session.
+     *
+     * Marks the session as cancelled so the job abandons execution
+     * if it has not started yet, and broadcasts the cancellation event
+     * so the frontend can update immediately.
+     */
+    public function cancelTest(Request $request, Provider $provider, string $testSessionId): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        /** @var SpeedtestTestSession $session */
+        $session = SpeedtestTestSession::query()
+            ->where('id', $testSessionId)
+            ->where('user_id', $user->id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+
+        if (in_array($session->status, ['completed', 'failed', 'cancelled', 'skipped'], true)) {
+            return response()->json(['message' => 'Test has already finished.'], 422);
         }
+
+        $session->markCancelled();
+
+        event(new SpeedtestTestCancelledEvent($provider));
+
+        return response()->json(['message' => 'Test cancelled.']);
     }
 }
