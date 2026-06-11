@@ -7,7 +7,7 @@
 
 # Zepeed
 
-Zepeed is a powerful speedtest aggregator and monitor built with Laravel 12, Inertia.js, and Vue 3. It allows you to schedule and run speedtests using multiple providers like Speedtest Ookla, LibreSpeed, and Fast.com, providing a unified dashboard for monitoring your network performance.
+Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Inertia.js, and Vue 3. It allows you to schedule and run speedtests using multiple providers like Speedtest Ookla, LibreSpeed, and Fast.com, providing a unified dashboard for monitoring your network performance.
 
 ![banner.png](/.showcase/banner.png)
 
