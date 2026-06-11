@@ -15,10 +15,13 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 12, Ine
 
 - **Multiple Providers**: Support for Speedtest Ookla, LibreSpeed, and Fast.com.
 - **Scheduled Runs**: Automated speedtests with customizable schedules.
+- **Customizable Templates**: Create and manage your own speedtest templates email notifications.
 - **Maintenance Windows**: Define periods where tests should be paused or restricted.
 - **Manual Triggers**: Run speedtests on demand from the dashboard.
 - **Real-time Notifications**: Get notified of run successes or failures via Inertia notifications.
 - **Modern Stack**: Built with Laravel 12, Vue 3, shadcn/vue, and Tailwind CSS v4.
+- **Webhooks**: Integrate with your favorite services for real-time notifications.
+- **Email Services**: Send speedtest results via SMTP, Mailgun, Postmark, AWS SES, and more.
 
 ## Stack
 
