@@ -23,34 +23,14 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 12, Ine
 - **Backend**: Laravel 12, Fortify, Inertia.js (Laravel adapter)
 - **Frontend**: Vue 3, shadcn/vue (reka-ui), Tailwind CSS v4
 - **Tooling**: Vite, TypeScript, ESLint, Prettier, Pint, PHPStan, Rector
-- **Extras**: Ziggy, Mailpit, Soketi/Reverb-ready scripts
+- **Extras**: Mailpit, Soketi/Reverb-ready scripts
 
 ## Requirements
 
 - PHP 8.4+
 - Composer
-- Bun (recommended) or Node 22+
+- Bun
 - Docker Desktop or Orbstack
-
-## Quick start
-
-### Native Setup
-
-If you prefer to run things locally:
-
-```bash
-composer run setup
-```
-
-This installs PHP/JS deps, creates `.env`, generates an app key, runs migrations, and builds assets.
-
-## Development
-
-### Native Development
-
-```bash
-composer run dev
-```
 
 ## Contributing
 
@@ -71,35 +51,6 @@ We welcome contributions! Please follow these steps:
     ```
 6.  **Submit PR**: Push your branch and create a Pull Request with a clear description of your changes.
 
-## Deployment
-
-### Production Environment
-
-1.  **Environment File**: Copy `.env.prod.example` to `.env` and configure your production database, mail, and other settings.
-    ```bash
-    cp .env.prod.example .env
-    ```
-2.  **Install Dependencies**:
-    ```bash
-    composer install --no-dev --optimize-autoloader
-    bun install
-    ```
-3.  **Build Assets**:
-    ```bash
-    bun run build
-    ```
-4.  **Optimize**:
-    Laravel provides several commands to cache configurations and routes for better performance:
-    ```bash
-    php artisan optimize
-    ```
-    *(Note: If `AUTORUN_LARAVEL_OPTIMIZE` is set to `true` in your `.env`, some deployments might handle this automatically).*
-
-5.  **Migrations**: Run your migrations in production:
-    ```bash
-    php artisan migrate --force
-    ```
-
 ## Useful scripts
 
 ```bash
@@ -108,24 +59,6 @@ composer run analyse    # PHPStan
 composer run test       # PHPUnit
 composer run rector     # Rector fixes
 ```
-
-## Frontend structure
-
-- `resources/js/Pages` for Inertia pages
-- `resources/js/Components` for shared components
-- `resources/js/Components/ui` for shadcn/vue components
-
-## Inertia + Vue
-
-Server-side routes live in `routes/web.php` and `routes/speedtest.php`, rendering Inertia pages that map to Vue files under `resources/js/Pages`.
-
-## shadcn/vue
-
-shadcn/vue components are generated into `resources/js/Components/ui` and styled with Tailwind. Configure components via `components.json`.
-
-## Environment
-
-Copy `.env.dev.example` to `.env` for local development or `.env.prod.example` for production and adjust your database and mail settings if needed. The setup script handles this automatically for development.
 
 ## Speedtest Providers
 - [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)
