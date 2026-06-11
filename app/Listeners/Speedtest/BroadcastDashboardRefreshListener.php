@@ -5,16 +5,13 @@ namespace App\Listeners\Speedtest;
 use App\Events\Dashboard\DashboardRefreshEvent;
 use App\Events\Dashboard\PublicDashboardRefreshEvent;
 use App\Events\Speedtest\SpeedtestCompletedEvent;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
-class BroadcastDashboardRefreshListener implements ShouldQueue
+class BroadcastDashboardRefreshListener
 {
-    use InteractsWithQueue;
-
     /**
-     * SpeedtestCompletedEvent is only ever dispatched for non-testOnly
-     * runs (see RunSpeedtestJob line 172), so no extra guard is needed.
+     * Fires two in-memory broadcast events — no I/O, no queue needed.
+     * SpeedtestCompletedEvent is only dispatched for non-testOnly runs
+     * (RunSpeedtestJob line 173), so no extra guard is required here.
      */
     public function handle(SpeedtestCompletedEvent $event): void
     {
