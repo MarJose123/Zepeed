@@ -49,7 +49,7 @@ const emit = defineEmits<{
         </span>
         <span class="text-[11px] text-muted-foreground">·</span>
         <span class="text-xs tabular-nums text-muted-foreground">
-            {{ state.result.ping_ms }}&nbsp;ms
+            ↔ {{ state.result.ping_ms }}&nbsp;ms
         </span>
     </div>
 

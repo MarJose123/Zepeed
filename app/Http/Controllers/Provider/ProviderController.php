@@ -132,8 +132,6 @@ class ProviderController extends Controller
      */
     public function test(Request $request, Provider $provider): JsonResponse
     {
-        abort_unless($provider->is_enabled, 422, 'Provider is disabled.');
-
         /** @var User $user */
         $user = $request->user();
 

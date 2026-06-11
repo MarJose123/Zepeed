@@ -389,7 +389,6 @@ const submitForm = () => {
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        :disabled="!provider.is_enabled"
                                         @click="testRun(provider)"
                                     >
                                         <Zap class="h-3.5 w-3.5" />
