@@ -3,18 +3,9 @@
 namespace App\Services\Speedtest;
 
 use App\Services\Speedtest\Exceptions\SpeedtestException;
-use Override;
 
 class FastcomService extends AbstractSpeedtestService
 {
-    // mikkelam/fast-cli is a lightweight Zig binary — no Puppeteer overhead
-    // https://github.com/mikkelam/fast-cli
-    #[Override]
-    public function timeout(): int
-    {
-        return 120;
-    }
-
     protected function buildCommand(): array
     {
         // fast-cli binary is named `fast-cli`, not `fast`

@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { ref } from "vue";
 import PublicAlertHistory from "@/components/public/PublicAlertHistory.vue";
 import PublicResultsTable from "@/components/public/PublicResultsTable.vue";
 import PublicStatCard from "@/components/public/PublicStatCard.vue";
 import PublicTrendChart from "@/components/public/PublicTrendChart.vue";
+import { usePublicDashboardRefresh } from "@/composables/usePublicDashboardRefresh";
 import PublicLayout from "@/layouts/PublicLayout.vue";
 import type {
+    PublicAlertItem,
+    PublicDashboardRefreshPayload,
+    PublicSpeedResult,
     PublicStats,
     TrendPoint,
-    PublicSpeedResult,
-    PublicAlertItem,
 } from "@/types/public";
 
 const props = defineProps<{
@@ -20,14 +23,44 @@ const props = defineProps<{
     alertHistory: PublicAlertItem[];
 }>();
 
-const limitedResults = computed(() => props.recentResults.slice(0, 10));
+const page = usePage<{
+    stats: PublicStats;
+    trend: TrendPoint[];
+    recentResults: PublicSpeedResult[];
+}>();
+
+const stats = ref<PublicStats>(props.stats);
+const trend = ref<TrendPoint[]>(props.trend);
+const recentResults = ref<PublicSpeedResult[]>(props.recentResults);
+
+usePublicDashboardRefresh((payload: PublicDashboardRefreshPayload) => {
+    const incoming: PublicSpeedResult = {
+        id: `pending-${payload.result.measured_at}`,
+        provider_name: payload.result.provider_name,
+        download_mbps: payload.result.download_mbps,
+        upload_mbps: payload.result.upload_mbps,
+        ping_ms: payload.result.ping_ms,
+        jitter_ms: payload.result.jitter_ms,
+        measured_at: payload.result.measured_at,
+    };
+
+    recentResults.value = [incoming, ...recentResults.value].slice(0, 10);
+
+    router.reload({
+        only: ["stats", "trend", "recentResults"],
+        onSuccess: () => {
+            stats.value = page.props.stats;
+            trend.value = page.props.trend;
+            recentResults.value = page.props.recentResults;
+        },
+    });
+});
 </script>
 
 <template>
     <Head title="Public Dashboard" />
     <PublicLayout>
         <div class="flex flex-col gap-4">
-            <!-- Overview -->
             <section>
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
@@ -66,7 +99,6 @@ const limitedResults = computed(() => props.recentResults.slice(0, 10));
                 </div>
             </section>
 
-            <!-- 24-hour trend -->
             <section>
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
@@ -95,17 +127,15 @@ const limitedResults = computed(() => props.recentResults.slice(0, 10));
                 </div>
             </section>
 
-            <!-- Recent results -->
             <section>
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     Recent results
                 </p>
-                <PublicResultsTable :results="limitedResults" />
+                <PublicResultsTable :results="recentResults" />
             </section>
 
-            <!-- Alert history -->
             <section>
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"

@@ -39,3 +39,7 @@ export interface ChartData {
     "7d": ChartRangeData;
     "30d": ChartRangeData;
 }
+
+export interface DashboardRefreshPayload {
+    provider_slug: string;
+}
