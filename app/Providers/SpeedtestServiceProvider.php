@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Console\Commands\PruneSpeedResultsCommand;
 use App\Console\Commands\PruneWebhookDeliveriesCommand;
 use App\Enums\SpeedtestServer;
+use App\Events\Speedtest\SpeedtestCompletedEvent;
 use App\Events\Speedtest\SpeedtestExceptionEvent;
+use App\Listeners\Speedtest\BroadcastDashboardRefreshListener;
 use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
 use App\Models\Setting;
@@ -65,6 +67,7 @@ class SpeedtestServiceProvider extends ServiceProvider
     protected function eventListeners(): void
     {
         Event::listen(SpeedtestExceptionEvent::class, SendSpeedtestExceptionAlertListener::class);
+        Event::listen(SpeedtestCompletedEvent::class, BroadcastDashboardRefreshListener::class);
     }
 
     protected function dynamicMailers(): void

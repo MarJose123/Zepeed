@@ -29,3 +29,15 @@ export interface PublicAlertItem {
     is_enabled: boolean;
     updated_at: string | null;
 }
+
+export interface PublicDashboardRefreshPayload {
+    result: {
+        provider_slug: string;
+        provider_name: string;
+        download_mbps: number;
+        upload_mbps: number;
+        ping_ms: number;
+        jitter_ms: number | null;
+        measured_at: string;
+    };
+}
