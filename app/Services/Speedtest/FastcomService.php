@@ -3,7 +3,6 @@
 namespace App\Services\Speedtest;
 
 use App\Services\Speedtest\Exceptions\SpeedtestException;
-use Override;
 
 class FastcomService extends AbstractSpeedtestService
 {
