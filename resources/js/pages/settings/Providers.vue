@@ -8,8 +8,10 @@ import {
     Radio,
     Server,
     Zap,
+    Search,
 } from "@lucide/vue";
 import { reactive, ref, watch } from "vue";
+import OoklaServerSearchModal from "@/components/speedtest/OoklaServerSearchModal.vue";
 import ProviderDisableDialog from "@/components/speedtest/ProviderDisableDialog.vue";
 import ProviderTestStatus from "@/components/speedtest/ProviderTestStatus.vue";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +46,7 @@ import type {
     ProviderSchedulesMap,
     ProviderTestState,
 } from "@/types/provider";
+import type { OoklaServer } from "@/types/provider";
 
 const props = defineProps<{
     providers: Provider[];
@@ -64,6 +67,12 @@ const { startTest, cancelTest: cancelProviderTest } = useProviderTestHttp();
 const activeTab = ref<string>(props.providers[0]?.slug ?? "ookla");
 const faviconError = ref(false);
 const dialogOpen = ref(false);
+
+const serverSearchOpen = ref(false);
+
+const onServerSelect = (server: OoklaServer) => {
+    form.server_id = String(server.id);
+};
 
 // ── Per-provider test state ───────────────────────────────────────────────────
 
@@ -539,19 +548,32 @@ const submitForm = () => {
                                             </FieldError>
                                         </div>
                                     </div>
-                                    <div class="flex justify-end">
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
                                         <Input
                                             id="server_id"
                                             v-model="form.server_id"
                                             name="server_id"
                                             type="text"
                                             placeholder="e.g. 12345"
-                                            class="max-w-xs"
+                                            class="max-w-[160px]"
                                             :class="{
                                                 'border-destructive':
                                                     form.errors.server_id,
                                             }"
                                         />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            @click="serverSearchOpen = true"
+                                        >
+                                            <Search
+                                                class="h-3.5 w-3.5 mr-1.5"
+                                            />
+                                            Search
+                                        </Button>
                                     </div>
                                 </div>
                             </Field>
@@ -610,6 +632,12 @@ const submitForm = () => {
                 </TabsContent>
             </Tabs>
         </div>
+
+        <OoklaServerSearchModal
+            :open="serverSearchOpen"
+            @select="onServerSelect"
+            @close="serverSearchOpen = false"
+        />
 
         <ProviderDisableDialog
             :open="dialogOpen"
