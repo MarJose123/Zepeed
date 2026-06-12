@@ -33,8 +33,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->applyGeneralSettings();
 
-        AboutCommand::add('Zepeed', fn() => [
-            'Version' => config('app.version'),
+        AboutCommand::add('Zepeed', fn () => [
+            'Version'    => config('app.version'),
             'Build Date' => config('app.build_date'),
         ]);
     }
