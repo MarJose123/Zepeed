@@ -12,6 +12,7 @@ use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
 use App\Models\Setting;
 use App\Services\MailProviderService;
+use App\Services\Speedtest\CloudflareSpeedService;
 use App\Services\Speedtest\Contracts\SpeedtestServiceInterface;
 use App\Services\Speedtest\FastcomService;
 use App\Services\Speedtest\LibrespeedService;
@@ -48,6 +49,7 @@ class SpeedtestServiceProvider extends ServiceProvider
                     SpeedtestServer::Ookla               => new OklaSpeedtestService($provider),
                     SpeedtestServer::Librespeed          => new LibrespeedService($provider),
                     SpeedtestServer::Netflix             => new FastcomService($provider),
+                    SpeedtestServer::Cloudflare          => new CloudflareSpeedService($provider),
                 };
             }
         );
