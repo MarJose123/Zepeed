@@ -69,6 +69,7 @@ composer run rector     # Rector fixes
 - [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)
 - [librespeed/speedtest-cli](https://github.com/librespeed/speedtest-cli)
 - [ookla/speedtest-cli](https://www.speedtest.net/apps/cli)
+- [kavehtehrani/cloudflare-speed-cli](https://github.com/kavehtehrani/cloudflare-speed-cli)
 
 ## License
 
