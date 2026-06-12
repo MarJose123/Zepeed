@@ -3,11 +3,15 @@ services:
     app:
         container_name: App
         build:
-            context: ./docker
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: docker/Dockerfile
             args:
                 TIMEZONE: '${APP_TIMEZONE:-UTC}'
                 HEALTHCHECK_PATH: '/up'
+                OOKLA_VERSION: '${OOKLA_VERSION:-1.2.0}'
+                LIBRESPEED_VERSION: '${LIBRESPEED_VERSION:-1.0.12}'
+                FAST_CLI_VERSION: '${FAST_CLI_VERSION:-0.3.5}'
+                CLOUDFLARE_SPEED_CLI_VERSION: '${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.5}'
         environment:
             # Autorun
             AUTORUN_ENABLED: 'true'

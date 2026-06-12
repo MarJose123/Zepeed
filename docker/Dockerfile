@@ -3,33 +3,25 @@
 # =============================================================================
 FROM alpine:3.22 AS cli-builder
 
+# -----------------------------------------------------------------------------
+#  Pinned versions — passed through to install-cli-tools.sh as env vars.
+#  Update versions here; the script reads these as overrides.
+# -----------------------------------------------------------------------------
+ARG OOKLA_VERSION=1.2.0
 ARG LIBRESPEED_VERSION=1.0.12
-ARG SPEEDTEST_VERSION=1.2.0
 ARG FAST_CLI_VERSION=0.3.5
+ARG CLOUDFLARE_SPEED_CLI_VERSION=1.0.5
+
+ENV OOKLA_VERSION=${OOKLA_VERSION} \
+    LIBRESPEED_VERSION=${LIBRESPEED_VERSION} \
+    FAST_CLI_VERSION=${FAST_CLI_VERSION} \
+    CLOUDFLARE_SPEED_CLI_VERSION=${CLOUDFLARE_SPEED_CLI_VERSION} \
+    INSTALL_DIR=/usr/local/bin
 
 RUN apk add --no-cache curl tar bash xz
 
-# Ookla Speedtest CLI
-RUN curl -sSL "https://install.speedtest.net/app/cli/ookla-speedtest-${SPEEDTEST_VERSION}-linux-x86_64.tgz" \
-    | tar -xz -C /tmp \
-    && mv /tmp/speedtest /usr/local/bin/speedtest \
-    && chmod 755 /usr/local/bin/speedtest
-
-# LibreSpeed CLI
-RUN curl -sSL \
-        "https://github.com/librespeed/speedtest-cli/releases/download/v${LIBRESPEED_VERSION}/librespeed-cli_${LIBRESPEED_VERSION}_linux_amd64.tar.gz" \
-    | tar -xz -C /usr/local/bin \
-    && chmod 755 /usr/local/bin/librespeed-cli
-
-# Netflix Fast CLI
-RUN curl -sSL https://raw.githubusercontent.com/mikkelam/fast-cli/main/install.sh | bash
-
-# Cloudflare Speed CLI
-# install.sh respects INSTALL_DIR — redirect straight to /usr/local/bin
-# to avoid needing PATH manipulation in the runtime stage.
-RUN curl -fsSL https://raw.githubusercontent.com/kavehtehrani/cloudflare-speed-cli/main/install.sh \
-    | sed 's|INSTALL_DIR="${HOME}/.local/bin"|INSTALL_DIR="/usr/local/bin"|' \
-    | sh
+COPY .bin/install-cli-tools.sh /tmp/install-cli-tools.sh
+RUN chmod +x /tmp/install-cli-tools.sh && /tmp/install-cli-tools.sh
 
 
 # =============================================================================
@@ -63,14 +55,14 @@ RUN apk add --no-cache \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 
-# ── Binaries from builder stages ─────────────────────────────────────────────
+# ── Binaries from builder stage ───────────────────────────────────────────────
 COPY --from=cli-builder /usr/local/bin/speedtest            /usr/local/bin/speedtest
 COPY --from=cli-builder /usr/local/bin/librespeed-cli       /usr/local/bin/librespeed-cli
 COPY --from=cli-builder /usr/local/bin/fast-cli             /usr/local/bin/fast-cli
 COPY --from=cli-builder /usr/local/bin/cloudflare-speed-cli /usr/local/bin/cloudflare-speed-cli
 
 # ── S6 Overlay service definitions ───────────────────────────────────────────
-COPY /etc/s6-overlay /etc/s6-overlay
+COPY docker/etc/s6-overlay /etc/s6-overlay
 RUN find /etc/s6-overlay/s6-rc.d -name "run" -o -name "finish" | xargs chmod 755
 
 USER www-data
