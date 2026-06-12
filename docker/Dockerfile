@@ -21,7 +21,9 @@ ENV OOKLA_VERSION=${OOKLA_VERSION} \
 RUN apk add --no-cache curl tar bash xz
 
 COPY .bin/install-cli-tools.sh /tmp/install-cli-tools.sh
+COPY .bin/fast-cli-install.sh  /tmp/fast-cli-install.sh
 RUN chmod +x /tmp/install-cli-tools.sh && /tmp/install-cli-tools.sh
+
 
 
 # =============================================================================

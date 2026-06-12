@@ -68,13 +68,9 @@ log "LibreSpeed CLI v${LIBRESPEED_VERSION} installed."
 # -----------------------------------------------------------------------------
 log "Installing fast-cli v${FAST_CLI_VERSION}..."
 
-FAST_CLI_URL="https://github.com/mikkelam/fast-cli/releases/download/v${FAST_CLI_VERSION}/fast-cli-x86_64-linux.tar.gz"
-FAST_CLI_TMP="$(mktemp -d)"
-
-curl -fsSL "${FAST_CLI_URL}" \
-    | tar -xz -C "${FAST_CLI_TMP}" \
-    && install -m 0755 "${FAST_CLI_TMP}/fast-cli" "${INSTALL_DIR}/fast-cli" \
-    && rm -rf "${FAST_CLI_TMP}" \
+FAST_CLI_VERSION="${FAST_CLI_VERSION}" \
+INSTALL_DIR="${INSTALL_DIR}" \
+    bash /tmp/fast-cli-install.sh \
     || die "Failed to install fast-cli"
 
 log "fast-cli v${FAST_CLI_VERSION} installed."
