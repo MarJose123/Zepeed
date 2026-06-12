@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Setting;
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         $this->applyGeneralSettings();
+
+        AboutCommand::add('Zepeed', fn() => [
+            'Version' => config('app.version'),
+            'Build Date' => config('app.build_date'),
+        ]);
     }
 
     /**
