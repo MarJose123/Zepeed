@@ -13,7 +13,7 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Ine
 
 ## Features
 
-- **Multiple Providers**: Support for Speedtest Ookla, LibreSpeed, and Fast.com.
+- **Multiple Providers**: Support for Speedtest Ookla, LibreSpeed, Cloudflare, and Fast.com.
 - **Scheduled Runs**: Automated speedtests with customizable schedules.
 - **Customizable Templates**: Create and manage your own speedtest templates email notifications.
 - **Maintenance Windows**: Define periods where tests should be paused or restricted.
@@ -69,6 +69,7 @@ composer run rector     # Rector fixes
 - [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)
 - [librespeed/speedtest-cli](https://github.com/librespeed/speedtest-cli)
 - [ookla/speedtest-cli](https://www.speedtest.net/apps/cli)
+- [kavehtehrani/cloudflare-speed-cli](https://github.com/kavehtehrani/cloudflare-speed-cli)
 
 ## License
 
