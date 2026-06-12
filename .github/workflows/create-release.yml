@@ -3,7 +3,7 @@ name: "Auto Release on Tag"
 on:
   push:
     tags:
-      - 'v*'  # Matches any tag starting with 'v'
+      - 'v*'
 
 jobs:
   release:
@@ -31,6 +31,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Extract version from tag
         if: steps.validate.outputs.valid == 'true'
@@ -99,12 +100,14 @@ jobs:
 
       - name: Commit and push updated config
         if: steps.validate.outputs.valid == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add config/app.php
-          git diff --staged --quiet || git commit -m "chore: update version and build_date to ${{ steps.version.outputs.version }}"
-          git push origin main
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update version and build_date to ${{ steps.version.outputs.version }}"
+          file_pattern: config/app.php
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          branch: main
 
       - name: Create GitHub Release
         if: steps.validate.outputs.valid == 'true'
