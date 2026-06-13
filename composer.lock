@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "61449a00581e09f30b4471e946470d84",
+    "content-hash": "150b44e565b81fdf29543115fa071d18",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -4935,6 +4935,65 @@
                 }
             ],
             "time": "2026-04-28T06:26:02+00:00"
+        },
+        {
+            "name": "spatie/ping",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/ping.git",
+                "reference": "9439e002ccdd47da9b13531274e89db54c9e3a63"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/ping/zipball/9439e002ccdd47da9b13531274e89db54c9e3a63",
+                "reference": "9439e002ccdd47da9b13531274e89db54c9e3a63",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.4",
+                "symfony/process": "^7.0|^8.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "pestphp/pest": "^4.3",
+                "spatie/pest-expectations": "^1.13",
+                "spatie/ray": "^1.28"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Ping\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Run an ICMP ping and get structured results",
+            "homepage": "https://github.com/spatie/ping",
+            "keywords": [
+                "ping",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/ping/issues",
+                "source": "https://github.com/spatie/ping/tree/1.2.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-05-22T12:01:59+00:00"
         },
         {
             "name": "spomky-labs/cbor-php",

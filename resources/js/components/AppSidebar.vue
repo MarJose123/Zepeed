@@ -7,6 +7,7 @@ import {
     LayoutDashboard,
     LifeBuoy,
     Settings2,
+    Network,
 } from "@lucide/vue";
 import { h } from "vue";
 import AppLogo from "@/components/AppLogo.vue";
@@ -106,6 +107,36 @@ const navigation: TSidebarNavigationItems = [
                     {
                         title: "Mailer",
                         href: route("speedtest.integration.smtp.index"),
+                    },
+                ],
+            },
+            {
+                title: "Network",
+                icon: Network,
+                items: [
+                    {
+                        title: "Ping Results",
+                        href: route(
+                            "speedtest.network.ping-results.index",
+                            {},
+                            false,
+                        ),
+                    },
+                    {
+                        title: "Ping Alerts",
+                        href: route(
+                            "speedtest.network.ping-alerts.index",
+                            {},
+                            false,
+                        ),
+                    },
+                    {
+                        title: "Ping Targets",
+                        href: route(
+                            "speedtest.network.ping-targets.index",
+                            {},
+                            false,
+                        ),
                     },
                 ],
             },

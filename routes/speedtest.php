@@ -5,25 +5,28 @@ use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\GeneralSettingsController;
 use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
+use App\Http\Controllers\PingAlertRuleController;
+use App\Http\Controllers\PingResultController;
+use App\Http\Controllers\PingTargetController;
 use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\ProviderScheduleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpeedResultController;
 use App\Http\Controllers\WebhookController;
 
-Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.')->group(static function () {
 
     // Results Menu
-    Route::prefix('results/')->name('results.')->group(function () {
+    Route::prefix('results/')->name('results.')->group(static function () {
         Route::get('download', [SpeedResultController::class, 'download'])->name('download');
         Route::get('upload', [SpeedResultController::class, 'upload'])->name('upload');
         Route::get('latency', [SpeedResultController::class, 'ping'])->name('latency');
     });
 
     // Settings Menu
-    Route::prefix('settings/')->group(function () {
+    Route::prefix('settings/')->group(static function () {
 
-        Route::prefix('server/')->name('server.')->group(function () {
+        Route::prefix('server/')->name('server.')->group(static function () {
             Route::get('providers', [ProviderController::class, 'index'])
                 ->name('providers.index');
 
@@ -46,7 +49,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 ->name('ookla.servers.cache.refresh');
         });
 
-        Route::prefix('schedules/')->name('schedules.')->group(function () {
+        Route::prefix('schedules/')->name('schedules.')->group(static function () {
 
             Route::get('/', [ScheduleController::class, 'index'])
                 ->name('index');
@@ -61,7 +64,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 ->name('destroy');
         });
 
-        Route::prefix('maintenance/')->name('maintenance.')->group(function () {
+        Route::prefix('maintenance/')->name('maintenance.')->group(static function () {
             Route::post('/global-pause', [MaintenanceWindowController::class, 'toggleGlobalPause'])
                 ->name('global-pause');
             Route::get('/', [MaintenanceWindowController::class, 'index'])
@@ -75,7 +78,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         });
 
-        Route::prefix('email-templates/')->name('email-templates.')->group(function () {
+        Route::prefix('email-templates/')->name('email-templates.')->group(static function () {
             Route::get('/', [EmailTemplateController::class, 'index'])
                 ->name('index');
             Route::post('/', [EmailTemplateController::class, 'store'])
@@ -92,7 +95,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         Route::prefix('alert-rules/')
             ->name('alert-rules.')
-            ->group(function () {
+            ->group(static function () {
                 Route::get('/', [AlertRuleController::class, 'index'])->name('index');
                 Route::post('/', [AlertRuleController::class, 'store'])->name('store');
                 Route::patch('/{alertRule}', [AlertRuleController::class, 'update'])->name('update');
@@ -121,10 +124,10 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
     });
 
     // Integration Menu
-    Route::prefix('integration/')->name('integration.')->group(function () {
+    Route::prefix('integration/')->name('integration.')->group(static function () {
         Route::prefix('smtp/')
             ->name('smtp.')
-            ->group(function () {
+            ->group(static function () {
                 Route::get('/', [MailProviderController::class, 'index'])->name('index');
                 Route::post('/', [MailProviderController::class, 'store'])->name('store');
                 Route::patch('/{mailProvider}', [MailProviderController::class, 'update'])->name('update');
@@ -135,7 +138,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         Route::prefix('webhooks/')
             ->name('webhooks.')
-            ->group(function () {
+            ->group(static function () {
                 Route::get('/', [WebhookController::class, 'index'])->name('index');
                 Route::post('/', [WebhookController::class, 'store'])->name('store');
                 Route::patch('/{webhook}', [WebhookController::class, 'update'])->name('update');
@@ -145,6 +148,30 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::get('/{webhook}/deliveries/json', [WebhookController::class, 'deliveriesJson'])->name('deliveries.json');
             });
 
+    });
+
+    // Network Menu
+    Route::prefix('network/')->name('network.')->group(static function () {
+
+        Route::prefix('ping-targets/')->name('ping-targets.')->group(static function () {
+            Route::get('/', [PingTargetController::class, 'index'])->name('index');
+            Route::post('/', [PingTargetController::class, 'store'])->name('store');
+            Route::patch('{pingTarget}', [PingTargetController::class, 'update'])->name('update');
+            Route::delete('{pingTarget}', [PingTargetController::class, 'destroy'])->name('destroy');
+            Route::post('{pingTarget}/run-now', [PingTargetController::class, 'runNow'])->name('run-now');
+        });
+
+        Route::prefix('ping-results/')->name('ping-results.')->group(static function () {
+            Route::get('/', [PingResultController::class, 'index'])->name('index');
+        });
+
+        Route::prefix('ping-alerts/')->name('ping-alerts.')->group(static function () {
+            Route::get('/', [PingAlertRuleController::class, 'index'])->name('index');
+            Route::post('/', [PingAlertRuleController::class, 'store'])->name('store');
+            Route::patch('{pingAlertRule}', [PingAlertRuleController::class, 'update'])->name('update');
+            Route::delete('{pingAlertRule}', [PingAlertRuleController::class, 'destroy'])->name('destroy');
+            Route::post('{pingAlertRule}/toggle', [PingAlertRuleController::class, 'toggle'])->name('toggle');
+        });
     });
 
 });

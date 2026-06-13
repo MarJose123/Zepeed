@@ -29,6 +29,7 @@
         "resend/resend-php": "^1.1",
         "spatie/laravel-data": "^4.20.1",
         "spatie/laravel-webhook-server": "^3.10",
+        "spatie/ping": "^1.2",
         "stevebauman/location": "^7.6",
         "symfony/http-client": "^8.0",
         "symfony/mailgun-mailer": "^8.0",
@@ -76,7 +77,7 @@
             "bunx --bun concurrently -c cyan,blue,green,yellow \"composer run reverb\" \"composer run queue\" \"composer run mailpit\" \"bun run dev\" --names=reverb,queue,mailserver,dev --kill-others"
         ],
         "format:be": [
-            "vendor/bin/pint"
+            "vendor/bin/pint --dirty --repair"
         ],
         "format:fe": [
             "bun run format",
