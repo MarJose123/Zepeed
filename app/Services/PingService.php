@@ -6,6 +6,8 @@ use App\Enums\PingResultStatus;
 use App\Models\PingResult;
 use App\Models\PingTarget;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Str;
+use Spatie\Ping\Enums\IpVersion;
 use Spatie\Ping\Enums\PingError;
 use Spatie\Ping\Ping;
 
@@ -19,9 +21,10 @@ class PingService
         $now = CarbonImmutable::now();
 
         $pingResult = new Ping(
-            hostname: $target->host,
+            hostname: Str::of($target->host)->toString(),
             timeoutInSeconds: $target->timeout_seconds,
             count: $target->packets,
+            ipVersion: IpVersion::Auto,
         )->run();
 
         $sent = $pingResult->packetsTransmitted() ?? $target->packets;

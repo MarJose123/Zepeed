@@ -1,4 +1,4 @@
-export type PingStatus = "pending" | "ok" | "warn" | "failed";
+export type PingStatus = "pending" | "success" | "ok" | "warn" | "failed";
 export type PingResultStatus = "success" | "partial" | "failed";
 export type PingAlertMetric =
     | "latency_avg"

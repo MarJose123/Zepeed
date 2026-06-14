@@ -123,17 +123,17 @@ const navigation: TSidebarNavigationItems = [
                         ),
                     },
                     {
-                        title: "Ping Alerts",
+                        title: "Ping Targets",
                         href: route(
-                            "speedtest.network.ping-alerts.index",
+                            "speedtest.network.ping-targets.index",
                             {},
                             false,
                         ),
                     },
                     {
-                        title: "Ping Targets",
+                        title: "Ping Alerts",
                         href: route(
-                            "speedtest.network.ping-targets.index",
+                            "speedtest.network.ping-alerts.index",
                             {},
                             false,
                         ),

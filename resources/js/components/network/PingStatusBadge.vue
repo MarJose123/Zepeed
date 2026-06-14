@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { PingStatus } from "@/types/ping";
 
 const props = defineProps<{ status: PingStatus }>();
@@ -8,8 +9,12 @@ const props = defineProps<{ status: PingStatus }>();
 const config = computed(
     () =>
         ({
+            success: {
+                label: "Success",
+                class: "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+            },
             ok: {
-                label: "OK",
+                label: "Ok",
                 class: "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
             },
             warn: {
@@ -29,7 +34,7 @@ const config = computed(
 </script>
 
 <template>
-    <Badge variant="outline" class="text-xs" :class="config.class">
+    <Badge variant="outline" :class="cn('text-xs', config.class)">
         {{ config.label }}
     </Badge>
 </template>

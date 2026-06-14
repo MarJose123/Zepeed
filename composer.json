@@ -77,7 +77,7 @@
             "bunx --bun concurrently -c cyan,blue,green,yellow \"composer run reverb\" \"composer run queue\" \"composer run mailpit\" \"bun run dev\" --names=reverb,queue,mailserver,dev --kill-others"
         ],
         "format:be": [
-            "vendor/bin/pint --dirty --repair"
+            "vendor/bin/pint --dirty"
         ],
         "format:fe": [
             "bun run format",
