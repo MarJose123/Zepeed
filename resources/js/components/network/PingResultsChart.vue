@@ -11,61 +11,116 @@ import {
 import {
     ChartContainer,
     ChartCrosshair,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
     componentToString,
 } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
-import type { PingTrendPoint } from "@/types/ping";
+import type { PingTarget, PingTrendBucket } from "@/types/ping";
 
-const props = defineProps<{ trend: PingTrendPoint[] }>();
+const props = defineProps<{
+    trend: PingTrendBucket[];
+    targets: PingTarget[];
+}>();
 
-// ── Latency ──────────────────────────────────────────────────────────────────
+// ── Colour palette — mirrors chart CSS variables ──────────────────────────────
+const CHART_COLORS = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+] as const;
 
-const latencyConfig = {
-    avg_ms: { label: "Avg Latency", color: "var(--chart-1)" },
-} satisfies ChartConfig;
+// ── Derive the set of active targets present in the trend data ────────────────
+// (only targets that actually have at least one bucket)
+const activeTargets = computed(() => {
+    const idsInTrend = new Set<string>();
 
-const latencyColor = "var(--chart-1)";
+    for (const bucket of props.trend) {
+        for (const key of Object.keys(bucket)) {
+            if (key !== "label") idsInTrend.add(key);
+        }
+    }
 
-type LatencyPoint = { i: number; label: string; avg_ms: number };
+    return props.targets.filter((t) => idsInTrend.has(t.id));
+});
 
-const latencyPoints = computed<LatencyPoint[]>(() =>
-    props.trend.map((p, i) => ({
-        i,
-        label: p.bucket.slice(11, 16),
-        avg_ms: p.avg_ms ?? 0,
-    })),
+// ── ChartConfig — one entry per target, drives colour + legend ────────────────
+const latencyConfig = computed<ChartConfig>(() =>
+    Object.fromEntries(
+        activeTargets.value.map((t, i) => [
+            t.id,
+            {
+                label: t.label,
+                color: CHART_COLORS[i % CHART_COLORS.length],
+            },
+        ]),
+    ),
 );
 
-const latencyX = (_d: LatencyPoint, i: number) => i;
-const latencyY = [(d: LatencyPoint) => d.avg_ms];
-const latencyColorAccessor = () => latencyColor;
-const latencyXFormat = (i: number) => latencyPoints.value[i]?.label ?? "";
+// Packet loss uses the same config (same targets, same colours)
+const lossConfig = computed<ChartConfig>(() => latencyConfig.value);
+
+// ── Data point shape ──────────────────────────────────────────────────────────
+// Each point: { label, [targetId]: value }
+type DataPoint = { label: string; [key: string]: number | string };
+
+const latencyPoints = computed<DataPoint[]>(() =>
+    props.trend.map((bucket) => {
+        const point: DataPoint = { label: bucket.label as string };
+
+        for (const target of activeTargets.value) {
+            const entry = bucket[target.id] as
+                | { avg_ms: number | null; loss: number | null }
+                | undefined;
+            point[target.id] = entry?.avg_ms ?? 0;
+        }
+
+        return point;
+    }),
+);
+
+const lossPoints = computed<DataPoint[]>(() =>
+    props.trend.map((bucket) => {
+        const point: DataPoint = { label: bucket.label as string };
+
+        for (const target of activeTargets.value) {
+            const entry = bucket[target.id] as
+                | { avg_ms: number | null; loss: number | null }
+                | undefined;
+            point[target.id] = entry?.loss ?? 0;
+        }
+
+        return point;
+    }),
+);
+
+// ── Unovis accessors ──────────────────────────────────────────────────────────
+const xAccessor = (_d: DataPoint, i: number) => i;
+
+const latencyYAccessors = computed(() =>
+    activeTargets.value.map((t) => (d: DataPoint) => (d[t.id] as number) ?? 0),
+);
+
+const lossYAccessors = computed(() =>
+    activeTargets.value.map((t) => (d: DataPoint) => (d[t.id] as number) ?? 0),
+);
+
+const colorAccessor = computed(
+    () => (_d: DataPoint, i: number) =>
+        CHART_COLORS[i % CHART_COLORS.length] ?? "var(--chart-1)",
+);
+
+const latencyColors = computed(() =>
+    activeTargets.value.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+);
+
+const lossColors = computed(() => latencyColors.value);
+
+const xTickFormat = (i: number) => latencyPoints.value[i]?.label ?? "";
 const latencyYFormat = (v: number) => `${v}`;
-
-// ── Packet Loss ───────────────────────────────────────────────────────────────
-
-const lossConfig = {
-    packet_loss: { label: "Packet Loss", color: "var(--chart-5)" },
-} satisfies ChartConfig;
-
-const lossColor = "var(--chart-5)";
-
-type LossPoint = { i: number; label: string; packet_loss: number };
-
-const lossPoints = computed<LossPoint[]>(() =>
-    props.trend.map((p, i) => ({
-        i,
-        label: p.bucket.slice(11, 16),
-        packet_loss: p.packet_loss ?? 0,
-    })),
-);
-
-const lossX = (_d: LossPoint, i: number) => i;
-const lossY = [(d: LossPoint) => d.packet_loss];
-const lossColorAccessor = () => lossColor;
-const lossXFormat = (i: number) => lossPoints.value[i]?.label ?? "";
 const lossYFormat = (v: number) => `${v}%`;
 </script>
 
@@ -76,7 +131,7 @@ const lossYFormat = (v: number) => `${v}%`;
             <CardHeader class="border-border border-b px-4 py-3">
                 <CardTitle class="text-sm font-medium">Latency Trend</CardTitle>
                 <CardDescription class="text-[11px]">
-                    Average round-trip time (ms)
+                    Average round-trip time per target (ms)
                 </CardDescription>
             </CardHeader>
             <CardContent class="px-4 pb-2 pt-4">
@@ -89,15 +144,15 @@ const lossYFormat = (v: number) => `${v}%`;
                     <VisXYContainer :data="latencyPoints" style="height: 210px">
                         <VisLine
                             :fallbackValue="0"
-                            :x="latencyX"
-                            :y="latencyY"
-                            :color="latencyColorAccessor"
+                            :x="xAccessor"
+                            :y="latencyYAccessors"
+                            :color="colorAccessor"
                             curve-type="basis"
                         />
                         <VisAxis
                             type="x"
-                            :x="latencyX"
-                            :tick-format="latencyXFormat"
+                            :x="xAccessor"
+                            :tick-format="xTickFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="false"
@@ -113,7 +168,7 @@ const lossYFormat = (v: number) => `${v}%`;
                         />
                         <ChartTooltip />
                         <ChartCrosshair
-                            :color="[latencyColor]"
+                            :color="latencyColors"
                             :template="
                                 componentToString(
                                     latencyConfig,
@@ -148,6 +203,12 @@ const lossYFormat = (v: number) => `${v}%`;
                             "
                         />
                     </VisXYContainer>
+
+                    <div
+                        class="border-border mt-1 flex items-center justify-center border-t pt-2"
+                    >
+                        <ChartLegendContent />
+                    </div>
                 </ChartContainer>
             </CardContent>
         </Card>
@@ -159,7 +220,7 @@ const lossYFormat = (v: number) => `${v}%`;
                     Packet Loss Trend
                 </CardTitle>
                 <CardDescription class="text-[11px]">
-                    Packet loss percentage over time
+                    Packet loss percentage per target
                 </CardDescription>
             </CardHeader>
             <CardContent class="px-4 pb-2 pt-4">
@@ -172,15 +233,15 @@ const lossYFormat = (v: number) => `${v}%`;
                     <VisXYContainer :data="lossPoints" style="height: 210px">
                         <VisLine
                             :fallbackValue="0"
-                            :x="lossX"
-                            :y="lossY"
-                            :color="lossColorAccessor"
+                            :x="xAccessor"
+                            :y="lossYAccessors"
+                            :color="colorAccessor"
                             curve-type="basis"
                         />
                         <VisAxis
                             type="x"
-                            :x="lossX"
-                            :tick-format="lossXFormat"
+                            :x="xAccessor"
+                            :tick-format="xTickFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="false"
@@ -196,7 +257,7 @@ const lossYFormat = (v: number) => `${v}%`;
                         />
                         <ChartTooltip />
                         <ChartCrosshair
-                            :color="[lossColor]"
+                            :color="lossColors"
                             :template="
                                 componentToString(
                                     lossConfig,
@@ -231,6 +292,12 @@ const lossYFormat = (v: number) => `${v}%`;
                             "
                         />
                     </VisXYContainer>
+
+                    <div
+                        class="border-border mt-1 flex items-center justify-center border-t pt-2"
+                    >
+                        <ChartLegendContent />
+                    </div>
                 </ChartContainer>
             </CardContent>
         </Card>

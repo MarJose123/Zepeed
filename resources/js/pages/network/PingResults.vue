@@ -11,14 +11,14 @@ import type {
     PingResultPagination,
     PingResultStats,
     PingTarget,
-    PingTrendPoint,
+    PingTrendBucket,
 } from "@/types/ping";
 
 defineProps<{
     results: PingResult[];
     pagination: PingResultPagination;
     stats: PingResultStats;
-    trend: PingTrendPoint[];
+    trend: PingTrendBucket[];
     targets: PingTarget[];
     filters: PingResultFilters;
 }>();
@@ -50,7 +50,7 @@ const breadcrumbs: TBreadcrumbItem[] = [
 
             <PingResultsStatCards :stats="stats" />
 
-            <PingResultsChart :trend="trend" />
+            <PingResultsChart :trend="trend" :targets="targets" />
 
             <PingResultsTable
                 :results="results"

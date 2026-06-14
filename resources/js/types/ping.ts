@@ -87,10 +87,10 @@ export interface PingAlertRule {
     created_at: string;
 }
 
-export interface PingTrendPoint {
-    bucket: string;
-    avg_ms: number | null;
-    packet_loss: number | null;
+export interface PingTrendBucket {
+    label: string;
+    // dynamic keys: ping_target_id → { avg_ms, loss }
+    [targetId: string]: string | { avg_ms: number | null; loss: number | null };
 }
 
 export interface PingResultStats {
