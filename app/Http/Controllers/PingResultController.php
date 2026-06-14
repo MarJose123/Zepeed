@@ -66,11 +66,11 @@ class PingResultController extends Controller
     }
 
     /**
-     * Build hourly bucketed trend data for charts.
+     * Build trend data for charts — minute buckets for 24h, hourly for 7d/30d.
      *
      * @return array<int, array{bucket: string, avg_ms: float|null, packet_loss: float|null}>
      */
-    private static function buildTrend(?string $targetId, string $range): array
+    private function buildTrend(?string $targetId, string $range): array
     {
         $hours = match ($range) {
             '7d'    => 168,
@@ -78,22 +78,29 @@ class PingResultController extends Controller
             default => 24,
         };
 
+        $format = match ($range) {
+            '7d', '30d' => '%Y-%m-%d %H:00:00',
+            default     => '%Y-%m-%d %H:%i:00',
+        };
+
         /** @var array<int, object{bucket: string, avg_ms: string|null, packet_loss: string|null}> $rows */
         $rows = DB::table('ping_results')
-            ->selectRaw("DATE_FORMAT(measured_at, '%Y-%m-%d %H:00:00') as bucket")
+            ->selectRaw("DATE_FORMAT(measured_at, '{$format}') as bucket")
             ->selectRaw('AVG(avg_ms) as avg_ms')
             ->selectRaw('AVG(packet_loss_percent) as packet_loss')
             ->where('measured_at', '>=', now()->subHours($hours))
             ->when($targetId, static fn ($q) => $q->where('ping_target_id', $targetId))
-            ->groupByRaw("DATE_FORMAT(measured_at, '%Y-%m-%d %H:00:00')")
+            ->groupByRaw("DATE_FORMAT(measured_at, '{$format}')")
             ->orderBy('bucket')
             ->get()
             ->all();
 
-        return array_map(static fn (object $row): array => [
-            'bucket'      => (string) $row->bucket,
-            'avg_ms'      => $row->avg_ms !== null ? round((float) $row->avg_ms, 2) : null,
-            'packet_loss' => $row->packet_loss !== null ? round((float) $row->packet_loss, 2) : null,
-        ], $rows);
+        return array_map(static function (object $row): array {
+            return [
+                'bucket'      => (string) $row->bucket,
+                'avg_ms'      => $row->avg_ms !== null ? round((float) $row->avg_ms, 2) : null,
+                'packet_loss' => $row->packet_loss !== null ? round((float) $row->packet_loss, 2) : null,
+            ];
+        }, $rows);
     }
 }

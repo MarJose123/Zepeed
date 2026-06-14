@@ -20,69 +20,84 @@ import type { PingTrendPoint } from "@/types/ping";
 
 const props = defineProps<{ trend: PingTrendPoint[] }>();
 
-const chartConfig = {
-    avg_ms: {
-        label: "Avg Latency",
-        color: "var(--chart-1)",
-    },
-    packet_loss: {
-        label: "Packet Loss %",
-        color: "var(--chart-5)",
-    },
+// ── Latency ──────────────────────────────────────────────────────────────────
+
+const latencyConfig = {
+    avg_ms: { label: "Avg Latency", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
-const latencyPoints = computed(() =>
+const latencyColor = "var(--chart-1)";
+
+type LatencyPoint = { i: number; label: string; avg_ms: number };
+
+const latencyPoints = computed<LatencyPoint[]>(() =>
     props.trend.map((p, i) => ({
         i,
-        value: p.avg_ms ?? 0,
         label: p.bucket.slice(11, 16),
+        avg_ms: p.avg_ms ?? 0,
     })),
 );
 
-const lossPoints = computed(() =>
+const latencyX = (_d: LatencyPoint, i: number) => i;
+const latencyY = [(d: LatencyPoint) => d.avg_ms];
+const latencyColorAccessor = (_d: LatencyPoint, _i: number) => latencyColor;
+const latencyXFormat = (i: number) => latencyPoints.value[i]?.label ?? "";
+const latencyYFormat = (v: number) => `${v}`;
+
+// ── Packet Loss ───────────────────────────────────────────────────────────────
+
+const lossConfig = {
+    packet_loss: { label: "Packet Loss", color: "var(--chart-5)" },
+} satisfies ChartConfig;
+
+const lossColor = "var(--chart-5)";
+
+type LossPoint = { i: number; label: string; packet_loss: number };
+
+const lossPoints = computed<LossPoint[]>(() =>
     props.trend.map((p, i) => ({
         i,
-        value: p.packet_loss ?? 0,
         label: p.bucket.slice(11, 16),
+        packet_loss: p.packet_loss ?? 0,
     })),
 );
 
-const xAccessor = (_d: { i: number }, i: number) => i;
-const yLatency = (d: { value: number }) => d.value;
-const yLoss = (d: { value: number }) => d.value;
-const xTickFormat = (i: number) => latencyPoints.value[i]?.label ?? "";
-const yMsFormat = (v: number) => `${v}`;
-const yPctFormat = (v: number) => `${v}%`;
+const lossX = (_d: LossPoint, i: number) => i;
+const lossY = [(d: LossPoint) => d.packet_loss];
+const lossColorAccessor = (_d: LossPoint, _i: number) => lossColor;
+const lossXFormat = (i: number) => lossPoints.value[i]?.label ?? "";
+const lossYFormat = (v: number) => `${v}%`;
 </script>
 
 <template>
     <div class="grid gap-4 lg:grid-cols-2">
-        <!-- Latency chart -->
+        <!-- Latency Trend -->
         <Card class="overflow-hidden p-0">
-            <CardHeader class="border-b border-border px-4 py-3">
+            <CardHeader class="border-border border-b px-4 py-3">
                 <CardTitle class="text-sm font-medium">Latency Trend</CardTitle>
-                <CardDescription class="text-xs"
-                    >Average round-trip time (ms)</CardDescription
-                >
+                <CardDescription class="text-[11px]">
+                    Average round-trip time (ms)
+                </CardDescription>
             </CardHeader>
             <CardContent class="px-4 pb-2 pt-4">
                 <ChartContainer
-                    :config="chartConfig"
+                    :config="latencyConfig"
                     class="w-full"
-                    style="height: 220px"
+                    style="height: 270px"
+                    :cursor="false"
                 >
-                    <VisXYContainer :data="latencyPoints" style="height: 180px">
+                    <VisXYContainer :data="latencyPoints" style="height: 210px">
                         <VisLine
-                            :fallback-value="0"
-                            :x="xAccessor"
-                            :y="yLatency"
-                            :color="() => 'var(--chart-1)'"
+                            :fallbackValue="0"
+                            :x="latencyX"
+                            :y="latencyY"
+                            :color="latencyColorAccessor"
                             curve-type="basis"
                         />
                         <VisAxis
                             type="x"
-                            :x="xAccessor"
-                            :tick-format="xTickFormat"
+                            :x="latencyX"
+                            :tick-format="latencyXFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="false"
@@ -90,7 +105,7 @@ const yPctFormat = (v: number) => `${v}%`;
                         />
                         <VisAxis
                             type="y"
-                            :tick-format="yMsFormat"
+                            :tick-format="latencyYFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="true"
@@ -98,27 +113,35 @@ const yPctFormat = (v: number) => `${v}%`;
                         />
                         <ChartTooltip />
                         <ChartCrosshair
-                            :color="['var(--chart-1)']"
+                            :color="[latencyColor]"
                             :template="
                                 componentToString(
-                                    chartConfig,
+                                    latencyConfig,
                                     ChartTooltipContent,
                                     {
                                         indicator: 'line',
                                         labelFormatter: (i: number | Date) =>
-                                            latencyPoints[Number(i)]?.label ??
-                                            '',
-                                        payload: (p: Record<string, any>) => {
-                                            const out: Record<string, any> = {};
-                                            Object.entries(p).forEach(
-                                                ([k, v]) => {
-                                                    out[k] =
-                                                        typeof v === 'number'
-                                                            ? `${v.toFixed(1)} ms`
-                                                            : v;
-                                                },
-                                            );
-                                            return out;
+                                            (latencyPoints as any)[Number(i)]
+                                                ?.label ?? undefined,
+                                        payload: (
+                                            originalPayload: Record<
+                                                string,
+                                                any
+                                            >,
+                                        ) => {
+                                            const formatted: Record<
+                                                string,
+                                                any
+                                            > = {};
+                                            Object.entries(
+                                                originalPayload,
+                                            ).forEach(([key, value]) => {
+                                                formatted[key] =
+                                                    typeof value === 'number'
+                                                        ? `${value.toFixed(1)} ms`
+                                                        : value;
+                                            });
+                                            return formatted;
                                         },
                                     },
                                 )
@@ -129,34 +152,35 @@ const yPctFormat = (v: number) => `${v}%`;
             </CardContent>
         </Card>
 
-        <!-- Packet loss chart -->
+        <!-- Packet Loss Trend -->
         <Card class="overflow-hidden p-0">
-            <CardHeader class="border-b border-border px-4 py-3">
-                <CardTitle class="text-sm font-medium"
-                    >Packet Loss Trend</CardTitle
-                >
-                <CardDescription class="text-xs"
-                    >Packet loss percentage over time</CardDescription
-                >
+            <CardHeader class="border-border border-b px-4 py-3">
+                <CardTitle class="text-sm font-medium">
+                    Packet Loss Trend
+                </CardTitle>
+                <CardDescription class="text-[11px]">
+                    Packet loss percentage over time
+                </CardDescription>
             </CardHeader>
             <CardContent class="px-4 pb-2 pt-4">
                 <ChartContainer
-                    :config="chartConfig"
+                    :config="lossConfig"
                     class="w-full"
-                    style="height: 220px"
+                    style="height: 270px"
+                    :cursor="false"
                 >
-                    <VisXYContainer :data="lossPoints" style="height: 180px">
+                    <VisXYContainer :data="lossPoints" style="height: 210px">
                         <VisLine
-                            :fallback-value="0"
-                            :x="xAccessor"
-                            :y="yLoss"
-                            :color="() => 'var(--chart-5)'"
+                            :fallbackValue="0"
+                            :x="lossX"
+                            :y="lossY"
+                            :color="lossColorAccessor"
                             curve-type="basis"
                         />
                         <VisAxis
                             type="x"
-                            :x="xAccessor"
-                            :tick-format="xTickFormat"
+                            :x="lossX"
+                            :tick-format="lossXFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="false"
@@ -164,7 +188,7 @@ const yPctFormat = (v: number) => `${v}%`;
                         />
                         <VisAxis
                             type="y"
-                            :tick-format="yPctFormat"
+                            :tick-format="lossYFormat"
                             :tick-line="false"
                             :domain-line="false"
                             :grid-line="true"
@@ -172,26 +196,35 @@ const yPctFormat = (v: number) => `${v}%`;
                         />
                         <ChartTooltip />
                         <ChartCrosshair
-                            :color="['var(--chart-5)']"
+                            :color="[lossColor]"
                             :template="
                                 componentToString(
-                                    chartConfig,
+                                    lossConfig,
                                     ChartTooltipContent,
                                     {
                                         indicator: 'line',
                                         labelFormatter: (i: number | Date) =>
-                                            lossPoints[Number(i)]?.label ?? '',
-                                        payload: (p: Record<string, any>) => {
-                                            const out: Record<string, any> = {};
-                                            Object.entries(p).forEach(
-                                                ([k, v]) => {
-                                                    out[k] =
-                                                        typeof v === 'number'
-                                                            ? `${v.toFixed(2)}%`
-                                                            : v;
-                                                },
-                                            );
-                                            return out;
+                                            (lossPoints as any)[Number(i)]
+                                                ?.label ?? undefined,
+                                        payload: (
+                                            originalPayload: Record<
+                                                string,
+                                                any
+                                            >,
+                                        ) => {
+                                            const formatted: Record<
+                                                string,
+                                                any
+                                            > = {};
+                                            Object.entries(
+                                                originalPayload,
+                                            ).forEach(([key, value]) => {
+                                                formatted[key] =
+                                                    typeof value === 'number'
+                                                        ? `${value.toFixed(2)}%`
+                                                        : value;
+                                            });
+                                            return formatted;
                                         },
                                     },
                                 )
