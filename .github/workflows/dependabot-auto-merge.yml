@@ -8,7 +8,8 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    timeout-minutes: 5
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'MarJose123/Zepeed' }}
     steps:
 
       - name: Dependabot metadata
