@@ -71,10 +71,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 $schedule
                     ->job(
                         new RunPingTestJob($target),
-                        queue: QueueWorkerName::default->value,
+                        queue: QueueWorkerName::Ping->value,
                     )
                     ->everyMinute()
                     ->name("ping-target:{$target->id}")
+                    ->description(sprintf('Pinging %s(%s)', $target->label, $target->host))
                     ->withoutOverlapping(expiresAt: 2);
             });
     })
