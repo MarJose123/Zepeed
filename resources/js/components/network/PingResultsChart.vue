@@ -40,7 +40,7 @@ const latencyPoints = computed<LatencyPoint[]>(() =>
 
 const latencyX = (_d: LatencyPoint, i: number) => i;
 const latencyY = [(d: LatencyPoint) => d.avg_ms];
-const latencyColorAccessor = (_d: LatencyPoint, _i: number) => latencyColor;
+const latencyColorAccessor = () => latencyColor;
 const latencyXFormat = (i: number) => latencyPoints.value[i]?.label ?? "";
 const latencyYFormat = (v: number) => `${v}`;
 
@@ -64,7 +64,7 @@ const lossPoints = computed<LossPoint[]>(() =>
 
 const lossX = (_d: LossPoint, i: number) => i;
 const lossY = [(d: LossPoint) => d.packet_loss];
-const lossColorAccessor = (_d: LossPoint, _i: number) => lossColor;
+const lossColorAccessor = () => lossColor;
 const lossXFormat = (i: number) => lossPoints.value[i]?.label ?? "";
 const lossYFormat = (v: number) => `${v}%`;
 </script>
