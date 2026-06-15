@@ -43,3 +43,13 @@ export interface ChartData {
 export interface DashboardRefreshPayload {
     provider_slug: string;
 }
+
+export interface RecentPingResult {
+    id: string;
+    target_label: string;
+    target_host: string;
+    status: "success" | "partial" | "failed";
+    avg_ms: number | null;
+    packet_loss_percent: number;
+    measured_at: string;
+}

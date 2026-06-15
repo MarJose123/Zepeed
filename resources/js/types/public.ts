@@ -41,3 +41,25 @@ export interface PublicDashboardRefreshPayload {
         measured_at: string;
     };
 }
+
+export interface PublicPingResult {
+    id: string;
+    target_label: string;
+    target_host: string;
+    status: "success" | "partial" | "failed";
+    avg_ms: number | null;
+    packet_loss_percent: number;
+    measured_at: string;
+}
+
+export interface PublicPingRefreshPayload {
+    result: {
+        target_id: string;
+        target_label: string;
+        target_host: string;
+        status: string;
+        avg_ms: number | null;
+        packet_loss_percent: number;
+        measured_at: string;
+    };
+}

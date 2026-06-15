@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AlertRule;
+use App\Models\PingResult;
 use App\Models\Provider;
 use App\Models\SpeedResult;
 use Illuminate\Support\Facades\DB;
@@ -78,12 +79,30 @@ class PublicDashboardController extends Controller
             ->values()
             ->all();
 
+        /** @var array<int, array<string, mixed>> $recentPingResults */
+        $recentPingResults = PingResult::query()
+            ->with('target')
+            ->latest('measured_at')
+            ->limit(10)
+            ->get()
+            ->map(static fn (PingResult $r): array => [
+                'id'                  => $r->id,
+                'target_label'        => $r->target->label,
+                'target_host'         => $r->target->host,
+                'status'              => $r->status->value,
+                'avg_ms'              => $r->avg_ms,
+                'packet_loss_percent' => $r->packet_loss_percent,
+                'measured_at'         => $r->measured_at->toIso8601String(),
+            ])
+            ->values()
+            ->all();
+
         $alertHistory = AlertRule::query()
             ->select(['id', 'name', 'is_active', 'updated_at'])
             ->latest('updated_at')
             ->limit(10)
             ->get()
-            ->map(fn (AlertRule $rule): array => [
+            ->map(static fn (AlertRule $rule): array => [
                 'id'         => $rule->id,
                 'name'       => $rule->name,
                 'is_enabled' => $rule->is_active,
@@ -91,10 +110,11 @@ class PublicDashboardController extends Controller
             ]);
 
         return Inertia::render('public/Dashboard', [
-            'stats'         => $stats,
-            'trend'         => $trend,
-            'recentResults' => $recentResults,
-            'alertHistory'  => $alertHistory,
+            'stats'             => $stats,
+            'trend'             => $trend,
+            'recentResults'     => $recentResults,
+            'recentPingResults' => $recentPingResults,
+            'alertHistory'      => $alertHistory,
         ]);
     }
 }
