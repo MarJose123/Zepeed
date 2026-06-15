@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
-import { ChevronDown, ChevronRight } from "@lucide/vue";
+import { ChevronDown, ChevronRight, HelpCircle } from "@lucide/vue";
 import type { ColumnDef } from "@tanstack/vue-table";
 import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
 import { h, ref } from "vue";
 import PingResultFilter from "@/components/network/PingResultFilter.vue";
-import PingStatusBadge from "@/components/network/PingStatusBadge.vue";
+import PingResultStatusBadge from "@/components/network/PingResultStatusBadge.vue";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,10 +16,17 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
     PingResult,
     PingResultFilters,
     PingResultPagination,
+    PingResultStatus,
     PingTarget,
 } from "@/types/ping";
 
@@ -51,6 +58,67 @@ const fmtDate = (iso: string) =>
 
 const fmtMs = (v: number | null) =>
     v !== null ? `${Number(v).toFixed(1)} ms` : "—";
+
+// Colour logic for Avg
+const avgClass = (v: number | null) => {
+    if (v === null) return "text-muted-foreground";
+
+    if (v < 20) return "text-emerald-600 dark:text-emerald-400";
+
+    if (v < 50) return "text-amber-600 dark:text-amber-400";
+
+    return "text-destructive";
+};
+
+// Avg column header with tooltip
+const AvgHeader = () =>
+    h(TooltipProvider, {}, () =>
+        h(Tooltip, {}, () => [
+            h(TooltipTrigger, { asChild: true }, () =>
+                h(
+                    "div",
+                    {
+                        class: "flex cursor-default items-center gap-1 select-none",
+                    },
+                    [
+                        "Avg",
+                        h(HelpCircle, {
+                            class: "h-3 w-3 text-muted-foreground",
+                        }),
+                    ],
+                ),
+            ),
+            h(
+                TooltipContent,
+                { side: "top", class: "max-w-48 space-y-1.5 p-3 text-xs" },
+                () => [
+                    h(
+                        "p",
+                        { class: "font-medium mb-1" },
+                        "Latency colour coding",
+                    ),
+                    h("div", { class: "flex items-center gap-2" }, [
+                        h("span", {
+                            class: "h-2 w-2 shrink-0 rounded-full bg-emerald-500",
+                        }),
+                        h("span", {}, "< 20 ms — Excellent"),
+                    ]),
+                    h("div", { class: "flex items-center gap-2" }, [
+                        h("span", {
+                            class: "h-2 w-2 shrink-0 rounded-full bg-amber-500",
+                        }),
+                        h("span", {}, "20 – 50 ms — Acceptable"),
+                    ]),
+                    h("div", { class: "flex items-center gap-2" }, [
+                        h("span", {
+                            class: "h-2 w-2 shrink-0 rounded-full bg-destructive",
+                        }),
+                        h("span", {}, "> 50 ms — High latency"),
+                    ]),
+                ],
+            ),
+        ]),
+    );
 
 const columns: ColumnDef<PingResult>[] = [
     {
@@ -93,7 +161,9 @@ const columns: ColumnDef<PingResult>[] = [
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) =>
-            h(PingStatusBadge, { status: row.original.status as any }),
+            h(PingResultStatusBadge, {
+                status: row.original.status as PingResultStatus,
+            }),
     },
     {
         accessorKey: "min_ms",
@@ -107,27 +177,13 @@ const columns: ColumnDef<PingResult>[] = [
     },
     {
         accessorKey: "avg_ms",
-        header: "Avg",
+        header: () => h(AvgHeader),
         cell: ({ row }) => {
             const v = row.original.avg_ms;
 
-            if (v === null)
-                return h(
-                    "span",
-                    { class: "text-sm text-muted-foreground" },
-                    "—",
-                );
-
-            const cls =
-                v < 20
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : v < 50
-                      ? "text-amber-600 dark:text-amber-400"
-                      : "text-destructive";
-
             return h(
                 "span",
-                { class: `text-sm font-medium tabular-nums ${cls}` },
+                { class: `text-sm font-medium tabular-nums ${avgClass(v)}` },
                 fmtMs(v),
             );
         },
@@ -204,7 +260,6 @@ const nextUrl = () => {
 
 <template>
     <div>
-        <!-- Toolbar -->
         <div class="flex items-center justify-end py-4">
             <PingResultFilter :targets="targets" :filters="filters" />
         </div>
@@ -255,7 +310,7 @@ const nextUrl = () => {
                                 </TableCell>
                             </TableRow>
 
-                            <!-- Expanded raw output row -->
+                            <!-- Expanded raw output -->
                             <TableRow
                                 v-if="expandedRows.has(row.original.id)"
                                 class="bg-muted/30 hover:bg-muted/30"
@@ -300,10 +355,11 @@ const nextUrl = () => {
                                             <Badge
                                                 variant="outline"
                                                 class="text-xs text-destructive border-destructive/30"
-                                                >{{
-                                                    row.original.failure_reason
-                                                }}</Badge
                                             >
+                                                {{
+                                                    row.original.failure_reason
+                                                }}
+                                            </Badge>
                                         </div>
                                     </div>
                                     <div
@@ -316,7 +372,7 @@ const nextUrl = () => {
                                             Raw Output
                                         </p>
                                         <pre
-                                            class="rounded-md bg-background p-2 text-[11px] leading-relaxed overflow-x-auto border border-border max-h-48"
+                                            class="max-h-48 overflow-x-auto rounded-md border border-border bg-background p-2 text-[11px] leading-relaxed"
                                             >{{ row.original.raw_output }}</pre
                                         >
                                     </div>
@@ -328,7 +384,7 @@ const nextUrl = () => {
                     <TableRow v-else>
                         <TableCell
                             :colspan="columns.length"
-                            class="h-24 text-center text-muted-foreground text-sm"
+                            class="h-24 text-center text-sm text-muted-foreground"
                         >
                             No results found for the selected filters.
                         </TableCell>
@@ -356,15 +412,15 @@ const nextUrl = () => {
             </p>
             <div class="flex gap-2">
                 <Button variant="outline" size="sm" :disabled="!prevUrl()">
-                    <Link v-if="prevUrl()" :href="prevUrl()!" preserve-scroll
-                        >Previous</Link
-                    >
+                    <Link v-if="prevUrl()" :href="prevUrl()!" preserve-scroll>
+                        Previous
+                    </Link>
                     <span v-else>Previous</span>
                 </Button>
                 <Button variant="outline" size="sm" :disabled="!nextUrl()">
-                    <Link v-if="nextUrl()" :href="nextUrl()!" preserve-scroll
-                        >Next</Link
-                    >
+                    <Link v-if="nextUrl()" :href="nextUrl()!" preserve-scroll>
+                        Next
+                    </Link>
                     <span v-else>Next</span>
                 </Button>
             </div>

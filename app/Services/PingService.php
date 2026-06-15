@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\PingResultStatus;
+use App\Events\Ping\PingResultCompletedEvent;
 use App\Models\PingResult;
 use App\Models\PingTarget;
 use Carbon\CarbonImmutable;
@@ -64,6 +65,8 @@ class PingService
         ]);
 
         $target->syncFromResult($result);
+
+        event(new PingResultCompletedEvent($target, $result));
 
         return $result;
     }
