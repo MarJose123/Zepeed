@@ -75,7 +75,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     )
                     ->everyMinute()
                     ->name("ping-target:{$target->id}")
-                    ->description(sprintf('Pinging %s(%s)', $target->label, $target->host))
+                    ->description(sprintf('Queuing %s(%s) for ping test', $target->label, $target->host))
                     ->withoutOverlapping(expiresAt: 2);
             });
     })
