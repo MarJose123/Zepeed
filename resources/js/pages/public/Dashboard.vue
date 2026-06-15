@@ -65,7 +65,7 @@ usePublicDashboardRefresh((payload: PublicDashboardRefreshPayload) => {
 
 usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
     const incoming: PublicPingResult = {
-        id: `pending-${payload.result.measured_at}`,
+        id: `ws-${payload.result.measured_at}`,
         target_label: payload.result.target_label,
         target_host: payload.result.target_host,
         status: payload.result.status as PublicPingResult["status"],
@@ -94,7 +94,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
         <div class="flex flex-col gap-4">
             <section>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     Overview · last 24 h
                 </p>
@@ -132,7 +132,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     24-hour trend · all providers
                 </p>
@@ -160,7 +160,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     Recent speedtest results
                 </p>
@@ -169,7 +169,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     Recent ping results
                 </p>
@@ -178,7 +178,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
                     Alert history
                 </p>

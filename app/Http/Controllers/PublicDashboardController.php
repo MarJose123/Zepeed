@@ -12,9 +12,6 @@ use Inertia\Response;
 
 class PublicDashboardController extends Controller
 {
-    /**
-     * Render the public read-only dashboard.
-     */
     public function __invoke(): Response
     {
         $stats = [

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 import {
     Table,
     TableBody,
@@ -10,7 +11,9 @@ import {
 } from "@/components/ui/table";
 import type { PublicPingResult } from "@/types/public";
 
-defineProps<{ results: PublicPingResult[] }>();
+const props = defineProps<{ results: PublicPingResult[] }>();
+
+const rows = computed(() => props.results);
 
 const statusConfig = (status: PublicPingResult["status"]) =>
     ({
@@ -25,7 +28,7 @@ const statusConfig = (status: PublicPingResult["status"]) =>
         failed: { label: "Failed", class: "text-destructive" },
     })[status];
 
-const avgClass = (v: number | null) => {
+const avgClass = (v: number | null): string => {
     if (v === null) return "text-muted-foreground";
 
     if (v < 20) return "text-emerald-600 dark:text-emerald-400";
@@ -35,7 +38,7 @@ const avgClass = (v: number | null) => {
     return "text-destructive";
 };
 
-const lossClass = (v: number) => {
+const lossClass = (v: number): string => {
     if (v === 0) return "text-emerald-600 dark:text-emerald-400";
 
     if (v < 10) return "text-amber-600 dark:text-amber-400";
@@ -43,10 +46,10 @@ const lossClass = (v: number) => {
     return "text-destructive";
 };
 
-const fmtMs = (v: number | null) =>
+const fmtMs = (v: number | null): string =>
     v !== null ? `${Number(v).toFixed(1)} ms` : "—";
 
-const fmtDate = (iso: string) =>
+const fmtDate = (iso: string): string =>
     new Date(iso).toLocaleString(undefined, {
         month: "short",
         day: "numeric",
@@ -56,7 +59,7 @@ const fmtDate = (iso: string) =>
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-lg border border-border">
+    <div class="border-border overflow-hidden rounded-lg border">
         <Table>
             <TableHeader>
                 <TableRow class="bg-muted/50 hover:bg-muted/50">
@@ -69,7 +72,7 @@ const fmtDate = (iso: string) =>
             </TableHeader>
             <TableBody>
                 <TableRow
-                    v-for="row in results"
+                    v-for="row in rows"
                     :key="row.id"
                     class="hover:bg-muted/50"
                 >
@@ -110,7 +113,7 @@ const fmtDate = (iso: string) =>
                     </TableCell>
                 </TableRow>
 
-                <TableRow v-if="results.length === 0">
+                <TableRow v-if="rows.length === 0">
                     <TableCell
                         colspan="5"
                         class="py-6 text-center text-sm text-muted-foreground"

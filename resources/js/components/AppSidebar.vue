@@ -131,7 +131,7 @@ const navigation: TSidebarNavigationItems = [
                         ),
                     },
                     {
-                        title: "Ping Alerts",
+                        title: "Ping Alert Rules",
                         href: route(
                             "speedtest.network.ping-alerts.index",
                             {},
