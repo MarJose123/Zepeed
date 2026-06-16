@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProviderSeeder::class,
             EmailTemplateSeeder::class,
+            PingEmailTemplateSeeder::class,
         ]);
     }
 }
