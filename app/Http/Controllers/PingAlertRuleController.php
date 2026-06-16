@@ -43,7 +43,10 @@ class PingAlertRuleController extends Controller
             )->resolve(),
 
             'email_templates' => EmailTemplateResource::collection(
-                EmailTemplate::query()->orderBy('name')->get()
+                EmailTemplate::query()
+                    ->where('template_type', 'ping')
+                    ->orderBy('name')
+                    ->get()
             )->resolve(),
 
             'webhooks' => WebhookResource::collection(

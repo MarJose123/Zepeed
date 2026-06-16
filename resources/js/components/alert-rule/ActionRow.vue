@@ -145,14 +145,24 @@ const update = (key: keyof AlertRuleAction, value: string | null) => {
                         <SelectValue placeholder="Select template" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem
-                            v-for="tpl in emailTemplates"
-                            :key="tpl.id"
-                            :value="tpl.id"
-                            class="text-xs"
+                        <template v-if="emailTemplates.length > 0">
+                            <SelectItem
+                                v-for="tpl in emailTemplates"
+                                :key="tpl.id"
+                                :value="tpl.id"
+                                class="text-xs"
+                            >
+                                {{ tpl.name }}
+                            </SelectItem>
+                        </template>
+                        <div
+                            v-else
+                            class="text-muted-foreground px-2 py-3 text-center text-xs"
                         >
-                            {{ tpl.name }}
-                        </SelectItem>
+                            No speedtest templates found.
+                            <br />
+                            Create one in Settings → Email Templates.
+                        </div>
                     </SelectContent>
                 </Select>
             </div>

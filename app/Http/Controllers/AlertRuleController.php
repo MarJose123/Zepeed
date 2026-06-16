@@ -35,7 +35,7 @@ class AlertRuleController extends Controller
 
             // Use SpeedtestServer enum for proper labels
             'providers' => collect(SpeedtestServer::cases())
-                ->map(fn ($case) => [
+                ->map(static fn ($case) => [
                     'slug'  => $case->value,
                     'label' => $case->label(),
                 ]),
@@ -45,7 +45,10 @@ class AlertRuleController extends Controller
             )->resolve(),
 
             'email_templates' => EmailTemplateResource::collection(
-                EmailTemplate::query()->orderBy('name')->get()
+                EmailTemplate::query()
+                    ->where('template_type', 'speedtest')
+                    ->orderBy('name')
+                    ->get()
             )->resolve(),
 
             'webhooks' => WebhookResource::collection(
@@ -56,7 +59,7 @@ class AlertRuleController extends Controller
 
     public function store(StoreAlertRuleRequest $request): RedirectResponse
     {
-        $rule = DB::transaction(function () use ($request): AlertRule {
+        $rule = DB::transaction(static function () use ($request): AlertRule {
             $validated = $request->validated();
 
             $rule = AlertRule::query()->create([
@@ -108,7 +111,7 @@ class AlertRuleController extends Controller
         UpdateAlertRuleRequest $request,
         AlertRule $alertRule,
     ): RedirectResponse {
-        DB::transaction(function () use ($request, $alertRule) {
+        DB::transaction(static function () use ($request, $alertRule) {
             $validated = $request->validated();
 
             // Build update array explicitly — avoid array_filter stripping falsy values
@@ -192,7 +195,7 @@ class AlertRuleController extends Controller
         InertiaNotification::make()
             ->success()
             ->title($alertRule->is_active ? 'Rule activated' : 'Rule paused')
-            ->message("\"{$alertRule->name}\" is now ".($alertRule->is_active ? 'active' : 'paused').'.')
+            ->message("\"{$alertRule->name}\" is now " . ($alertRule->is_active ? 'active' : 'paused') . '.')
             ->send();
 
         return back();
