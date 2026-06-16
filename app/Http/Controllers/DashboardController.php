@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SpeedtestServer;
+use App\Models\PingResult;
 use App\Models\Provider;
 use App\Models\ProviderSchedule;
 use App\Models\SpeedResult;
@@ -18,12 +19,36 @@ class DashboardController extends Controller
     {
         $providers = Provider::query()->get();
 
-        //        dd($this->buildProviderCards($providers));
-
         return Inertia::render('Dashboard', [
-            'providerCards' => $this->buildProviderCards($providers),
-            'chartData'     => $this->buildChartData(),
+            'providerCards'      => $this->buildProviderCards($providers),
+            'chartData'          => $this->buildChartData(),
+            'recentPingResults'  => self::buildRecentPingResults(),
         ]);
+    }
+
+    /**
+     * Build the 10 most recent ping results across all enabled targets.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function buildRecentPingResults(): array
+    {
+        return PingResult::query()
+            ->with('target')
+            ->latest('measured_at')
+            ->limit(10)
+            ->get()
+            ->map(static fn (PingResult $r): array => [
+                'id'                  => $r->id,
+                'target_label'        => $r->target->label,
+                'target_host'         => $r->target->host,
+                'status'              => $r->status->value,
+                'avg_ms'              => $r->avg_ms,
+                'packet_loss_percent' => $r->packet_loss_percent,
+                'measured_at'         => $r->measured_at->toIso8601String(),
+            ])
+            ->values()
+            ->all();
     }
 
     /**
@@ -76,7 +101,7 @@ class DashboardController extends Controller
             ->limit(12)
             ->get()
             ->reverse()
-            ->map(function (SpeedResult $r): array {
+            ->map(static function (SpeedResult $r): array {
                 /** @var Carbon $measuredAt */
                 $measuredAt = $r->measured_at;
 
@@ -121,25 +146,25 @@ class DashboardController extends Controller
         foreach (SpeedtestServer::cases() as $server) {
             /** @var Collection<int, SpeedResult> $providerResults */
             $providerResults = $results->filter(
-                fn (SpeedResult $r) => $r->provider_slug === $server
+                static fn (SpeedResult $r) => $r->provider_slug === $server
             );
 
             $grouped[$server->value] = $providerResults
-                ->groupBy(function (SpeedResult $r) use ($groupFormat): string {
+                ->groupBy(static function (SpeedResult $r) use ($groupFormat): string {
                     /** @var Carbon $measuredAt */
                     $measuredAt = $r->measured_at;
 
                     return $measuredAt->format($groupFormat);
                 })
-                ->map(function (Collection $group): array {
+                ->map(static function (Collection $group): array {
                     /** @var Collection<int, SpeedResult> $group */
                     return [
                         'download_mbps' => round(
-                            $group->avg(fn (SpeedResult $r) => (float) $r->download_mbps) ?? 0,
+                            $group->avg(static fn (SpeedResult $r) => (float) $r->download_mbps) ?? 0,
                             2
                         ),
                         'upload_mbps' => round(
-                            $group->avg(fn (SpeedResult $r) => (float) $r->upload_mbps) ?? 0,
+                            $group->avg(static fn (SpeedResult $r) => (float) $r->upload_mbps) ?? 0,
                             2
                         ),
                     ];
@@ -147,32 +172,29 @@ class DashboardController extends Controller
                 ->all();
         }
 
-        // Collect and sort all unique time bucket keys
         $rawKeys = collect($grouped)
-            ->flatMap(fn (array $data) => array_keys($data))
+            ->flatMap(static fn (array $data) => array_keys($data))
             ->unique()
             ->sort()
             ->values()
             ->all();
 
-        // Convert raw keys to human-readable labels
-        $labels = array_map(function (string $key) use ($groupFormat, $labelFormat): string {
+        $labels = array_map(static function (string $key) use ($groupFormat, $labelFormat): string {
             $date = Date::createFromFormat($groupFormat, $key);
 
             return $date ? $date->format($labelFormat) : $key;
         }, $rawKeys);
 
-        // Build per-provider download/upload arrays aligned to rawKeys
         $datasets = [];
         foreach (SpeedtestServer::cases() as $server) {
             $providerData = $grouped[$server->value];
             $datasets[$server->value] = [
                 'download' => array_map(
-                    fn (string $key) => $providerData[$key]['download_mbps'] ?? 0,
+                    static fn (string $key) => $providerData[$key]['download_mbps'] ?? 0,
                     $rawKeys
                 ),
                 'upload' => array_map(
-                    fn (string $key) => $providerData[$key]['upload_mbps'] ?? 0,
+                    static fn (string $key) => $providerData[$key]['upload_mbps'] ?? 0,
                     $rawKeys
                 ),
             ];

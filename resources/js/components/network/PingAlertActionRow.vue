@@ -1,0 +1,204 @@
+<script setup lang="ts">
+import { Link2, Mail, Trash2 } from "@lucide/vue";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import type { EmailTemplate } from "@/types/email-template";
+import type { MailProvider } from "@/types/mail";
+import type { PingAlertAction } from "@/types/ping";
+import type { Webhook } from "@/types/webhook";
+
+const props = defineProps<{
+    action: PingAlertAction;
+    index: number;
+    mailProviders: MailProvider[];
+    emailTemplates: EmailTemplate[];
+    webhooks: Webhook[];
+}>();
+
+const emit = defineEmits<{
+    update: [action: PingAlertAction];
+    remove: [];
+}>();
+
+const update = (key: keyof PingAlertAction, value: string | null) => {
+    emit("update", { ...props.action, [key]: value });
+};
+</script>
+
+<template>
+    <div
+        class="rounded-lg border p-3"
+        :class="
+            action.type === 'email'
+                ? 'border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30'
+                : 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/30'
+        "
+    >
+        <div class="mb-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div
+                    class="flex h-6 w-6 items-center justify-center rounded-md"
+                    :class="
+                        action.type === 'email'
+                            ? 'bg-blue-100 dark:bg-blue-900'
+                            : 'bg-green-100 dark:bg-green-900'
+                    "
+                >
+                    <Mail
+                        v-if="action.type === 'email'"
+                        class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
+                    />
+                    <Link2
+                        v-else
+                        class="h-3.5 w-3.5 text-green-600 dark:text-green-400"
+                    />
+                </div>
+                <span class="text-xs font-medium">
+                    {{
+                        action.type === "email"
+                            ? "Send email notification"
+                            : "Trigger webhook"
+                    }}
+                </span>
+            </div>
+            <Button
+                variant="ghost"
+                size="icon"
+                class="h-6 w-6 text-muted-foreground hover:text-destructive"
+                @click="emit('remove')"
+            >
+                <Trash2 class="h-3 w-3" />
+            </Button>
+        </div>
+
+        <!-- Email fields -->
+        <div v-if="action.type === 'email'" class="grid grid-cols-3 gap-2">
+            <div class="space-y-1">
+                <Label class="text-[10px]">Mail provider</Label>
+                <Select
+                    :model-value="action.mail_provider_id ?? 'auto'"
+                    @update:model-value="
+                        (v) =>
+                            update(
+                                'mail_provider_id',
+                                String(v) === 'auto' ? null : String(v),
+                            )
+                    "
+                >
+                    <SelectTrigger class="h-7 text-xs"
+                        ><SelectValue placeholder="Auto (failover)"
+                    /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="auto" class="text-xs"
+                            >Auto (failover chain)</SelectItem
+                        >
+                        <SelectItem
+                            v-for="mp in mailProviders"
+                            :key="mp.id"
+                            :value="mp.id"
+                            class="text-xs"
+                        >
+                            {{ mp.label
+                            }}<span
+                                v-if="mp.is_primary"
+                                class="ml-1 text-[10px] text-muted-foreground"
+                                >· primary</span
+                            >
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div class="space-y-1">
+                <Label class="text-[10px]">Email template</Label>
+                <Select
+                    :model-value="action.email_template_id ?? 'none'"
+                    @update:model-value="
+                        (v) =>
+                            update(
+                                'email_template_id',
+                                String(v) === 'none' ? null : String(v),
+                            )
+                    "
+                >
+                    <SelectTrigger class="h-7 text-xs"
+                        ><SelectValue placeholder="Select template"
+                    /></SelectTrigger>
+                    <SelectContent>
+                        <template v-if="emailTemplates.length > 0">
+                            <SelectItem
+                                v-for="tpl in emailTemplates"
+                                :key="tpl.id"
+                                :value="tpl.id"
+                                class="text-xs"
+                            >
+                                {{ tpl.name }}
+                            </SelectItem>
+                        </template>
+                        <div
+                            v-else
+                            class="text-muted-foreground px-2 py-3 text-center text-xs"
+                        >
+                            No ping templates found.
+                            <br />
+                            Create one in Settings → Email Templates.
+                        </div>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div class="space-y-1">
+                <Label class="text-[10px]">Recipient email</Label>
+                <Input
+                    :model-value="action.recipient_email ?? ''"
+                    type="email"
+                    placeholder="admin@mail.com"
+                    class="h-7 text-xs"
+                    @update:model-value="
+                        (v) => update('recipient_email', String(v) || null)
+                    "
+                />
+            </div>
+        </div>
+
+        <!-- Webhook fields -->
+        <div v-else class="space-y-1">
+            <Label class="text-[10px]">Webhook</Label>
+            <Select
+                :model-value="action.webhook_id ?? 'none'"
+                @update:model-value="
+                    (v) =>
+                        update(
+                            'webhook_id',
+                            String(v) === 'none' ? null : String(v),
+                        )
+                "
+            >
+                <SelectTrigger class="h-7 text-xs"
+                    ><SelectValue placeholder="Select webhook"
+                /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem
+                        v-for="wh in webhooks"
+                        :key="wh.id"
+                        :value="wh.id"
+                        class="text-xs"
+                    >
+                        {{ wh.name }}
+                        <span class="ml-1 text-[10px] text-muted-foreground">{{
+                            wh.method
+                        }}</span>
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+    </div>
+</template>

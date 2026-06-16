@@ -3,14 +3,18 @@ import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import { ref } from "vue";
 import PublicAlertHistory from "@/components/public/PublicAlertHistory.vue";
+import PublicPingResultsTable from "@/components/public/PublicPingResultsTable.vue";
 import PublicResultsTable from "@/components/public/PublicResultsTable.vue";
 import PublicStatCard from "@/components/public/PublicStatCard.vue";
 import PublicTrendChart from "@/components/public/PublicTrendChart.vue";
 import { usePublicDashboardRefresh } from "@/composables/usePublicDashboardRefresh";
+import { usePublicPingRefresh } from "@/composables/usePublicPingRefresh";
 import PublicLayout from "@/layouts/PublicLayout.vue";
 import type {
     PublicAlertItem,
     PublicDashboardRefreshPayload,
+    PublicPingRefreshPayload,
+    PublicPingResult,
     PublicSpeedResult,
     PublicStats,
     TrendPoint,
@@ -20,6 +24,7 @@ const props = defineProps<{
     stats: PublicStats;
     trend: TrendPoint[];
     recentResults: PublicSpeedResult[];
+    recentPingResults: PublicPingResult[];
     alertHistory: PublicAlertItem[];
 }>();
 
@@ -27,11 +32,13 @@ const page = usePage<{
     stats: PublicStats;
     trend: TrendPoint[];
     recentResults: PublicSpeedResult[];
+    recentPingResults: PublicPingResult[];
 }>();
 
 const stats = ref<PublicStats>(props.stats);
 const trend = ref<TrendPoint[]>(props.trend);
 const recentResults = ref<PublicSpeedResult[]>(props.recentResults);
+const recentPingResults = ref<PublicPingResult[]>(props.recentPingResults);
 
 usePublicDashboardRefresh((payload: PublicDashboardRefreshPayload) => {
     const incoming: PublicSpeedResult = {
@@ -52,6 +59,30 @@ usePublicDashboardRefresh((payload: PublicDashboardRefreshPayload) => {
             stats.value = page.props.stats;
             trend.value = page.props.trend;
             recentResults.value = page.props.recentResults;
+        },
+    });
+});
+
+usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
+    const incoming: PublicPingResult = {
+        id: `ws-${payload.result.measured_at}`,
+        target_label: payload.result.target_label,
+        target_host: payload.result.target_host,
+        status: payload.result.status as PublicPingResult["status"],
+        avg_ms: payload.result.avg_ms,
+        packet_loss_percent: payload.result.packet_loss_percent,
+        measured_at: payload.result.measured_at,
+    };
+
+    recentPingResults.value = [incoming, ...recentPingResults.value].slice(
+        0,
+        10,
+    );
+
+    router.reload({
+        only: ["recentPingResults"],
+        onSuccess: () => {
+            recentPingResults.value = page.props.recentPingResults;
         },
     });
 });
@@ -131,9 +162,18 @@ usePublicDashboardRefresh((payload: PublicDashboardRefreshPayload) => {
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
-                    Recent results
+                    Recent speedtest results
                 </p>
                 <PublicResultsTable :results="recentResults" />
+            </section>
+
+            <section>
+                <p
+                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                >
+                    Recent ping results
+                </p>
+                <PublicPingResultsTable :results="recentPingResults" />
             </section>
 
             <section>

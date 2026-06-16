@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EmailTemplateType;
 use App\Http\Requests\StoreEmailTemplateRequest;
 use App\Http\Requests\UpdateEmailTemplateRequest;
 use App\Http\Resources\EmailTemplateResource;
@@ -22,10 +23,15 @@ class EmailTemplateController extends Controller
     public function index(): Response
     {
         return Inertia::render('settings/EmailTemplates', [
-            'templates'    => EmailTemplateResource::collection(
+            'templates'          => EmailTemplateResource::collection(
                 EmailTemplate::query()->orderBy('is_system', 'desc')->orderBy('name')->get()
             )->resolve(),
-            'merge_fields' => MergeFields::all(),
+            'merge_fields'       => MergeFields::speedtest(),
+            'ping_merge_fields'  => MergeFields::ping(),
+            'template_types'     => array_map(
+                static fn (EmailTemplateType $t) => ['value' => $t->value, 'label' => $t->label()],
+                EmailTemplateType::cases(),
+            ),
         ]);
     }
 
@@ -35,7 +41,7 @@ class EmailTemplateController extends Controller
 
         EmailTemplate::query()->create([
             ...$validated,
-            'slug'      => Str::slug($validated['name']).'-'.Str::random(4),
+            'slug'      => Str::slug($validated['name']) . '-' . Str::random(4),
             'is_system' => false,
         ]);
 
@@ -87,40 +93,36 @@ class EmailTemplateController extends Controller
         return back();
     }
 
-    /**
-     * Render a preview of the template body with sample data.
-     */
     public function preview(EmailTemplate $emailTemplate): JsonResponse
     {
         try {
-            $rawData = MergeFields::sampleData();
+            $rawData = MergeFields::sampleData($emailTemplate->template_type);
 
             return response()->json([
                 'subject' => $emailTemplate->renderSubject($rawData),
-                'body'    => $emailTemplate->renderBody($rawData), // already calls buildRenderData internally
+                'body'    => $emailTemplate->renderBody($rawData),
             ]);
         } catch (Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
 
-    /**
-     * Preview arbitrary template content (unsaved / live preview).
-     * POST /settings/email-templates/preview-raw
-     */
     public function previewRaw(Request $request): JsonResponse
     {
         $request->validate([
-            'subject' => ['required', 'string'],
-            'body'    => ['required', 'string'],
+            'subject'       => ['required', 'string'],
+            'body'          => ['required', 'string'],
+            'template_type' => ['nullable', 'string'],
         ]);
 
         try {
-            $rawData = MergeFields::sampleData();
+            $type = EmailTemplateType::tryFrom($request->input('template_type', 'speedtest'))
+                ?? EmailTemplateType::Speedtest;
+            $rawData = MergeFields::sampleData($type);
 
-            $stripPills = fn (string $html): string => (string) preg_replace_callback(
+            $stripPills = static fn (string $html): string => (string) preg_replace_callback(
                 '/<span[^>]+data-merge-field="([^"]+)"[^>]*>.*?<\/span>/s',
-                fn ($m) => $m[1],
+                static fn ($m) => $m[1],
                 $html,
             );
 
@@ -128,13 +130,8 @@ class EmailTemplateController extends Controller
             $body = $stripPills($request->input('body'));
 
             return response()->json([
-                // Subject — plain text, no link wrapping
                 'subject' => Blade::render($subject, $rawData),
-                // Body — URLs become anchor tags
-                'body'    => Blade::render(
-                    $body,
-                    EmailTemplate::buildRenderData($rawData),
-                ),
+                'body'    => Blade::render($body, EmailTemplate::buildRenderData($rawData)),
             ]);
         } catch (Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 422);

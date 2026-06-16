@@ -1,3 +1,5 @@
+export type EmailTemplateType = "speedtest" | "ping";
+
 export interface MergeField {
     group: string;
     name: string;
@@ -13,8 +15,14 @@ export interface EmailTemplate {
     subject: string;
     body: string;
     is_system: boolean;
+    template_type: EmailTemplateType;
     is_used_in_rules: boolean;
     used_in_rule_names: string[];
     updated_at: string;
     created_at: string;
+}
+
+export interface TemplateTypeOption {
+    value: EmailTemplateType;
+    label: string;
 }

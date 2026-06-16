@@ -54,6 +54,7 @@ RUN apk add --no-cache \
         curl \
         tzdata \
         bash \
+        iputils \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 

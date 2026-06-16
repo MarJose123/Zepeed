@@ -4,7 +4,9 @@ use App\Enums\QueueWorkerName;
 use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventRequestsDuringMaintenanceMiddleware;
+use App\Jobs\RunPingTestJob;
 use App\Jobs\RunSpeedtestJob;
+use App\Models\PingTarget;
 use App\Models\ProviderSchedule;
 use App\Services\InertiaNotification;
 use Illuminate\Console\Scheduling\Schedule;
@@ -20,12 +22,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
+        web: __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
+        channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+    ->withMiddleware(static function (Middleware $middleware): void {
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
@@ -38,15 +40,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ])
             ->appendToPriorityList(StartSession::class, HandleInertiaRequests::class);
     })
-    ->withSchedule(function (Schedule $schedule) {
+    ->withSchedule(static function (Schedule $schedule) {
         // Load enabled providers that are fully configured
         // withoutOverlapping() is handled at the Job level via uniqueId()
         // so we don't need it here — avoids a cache dependency in bootstrap
         ProviderSchedule::query()
             ->enabled()
-            ->whereHas('provider', fn ($q) => $q->enabled())
+            ->whereHas('provider', static fn ($q) => $q->enabled())
             ->get()
-            ->each(function (ProviderSchedule $providerSchedule) use ($schedule) {
+            ->each(static function (ProviderSchedule $providerSchedule) use ($schedule) {
                 if (! $providerSchedule->cron_expression) {
                     return;
                 }
@@ -60,10 +62,26 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->name("speedtest:{$providerSchedule->provider_slug->value}:{$providerSchedule->id}")
                     ->withoutOverlapping(expiresAt: 10);
             });
+
+        // Network — Ping Targets (every minute)
+        PingTarget::query()
+            ->enabled()
+            ->get()
+            ->each(static function (PingTarget $target) use ($schedule): void {
+                $schedule
+                    ->job(
+                        new RunPingTestJob($target),
+                        queue: QueueWorkerName::Ping->value,
+                    )
+                    ->everyMinute()
+                    ->name("ping-target:{$target->id}")
+                    ->description(sprintf('Queuing %s(%s) for ping test', $target->label, $target->host))
+                    ->withoutOverlapping(expiresAt: 2);
+            });
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(static function (Exceptions $exceptions): void {
         //
-        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+        $exceptions->respond(static function (Response $response, Throwable $exception, Request $request) {
             if (! app()->environment(['testing']) && in_array($response->getStatusCode(), [500, 503, 404, 403])) {
                 $retryAfter = $response->headers->get('retry-after');
                 $inertiaResponse = Inertia::render('ErrorPage', [

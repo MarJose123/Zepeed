@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('email_templates', function (Blueprint $table) {
+        Schema::create('email_templates', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->string('slug')->unique();   // machine key e.g. "default-alert"
+            $table->string('slug')->unique();
             $table->string('subject');
-            $table->longText('body');           // raw Blade/Markdown string
-            $table->boolean('is_system')->default(false); // system templates protected from delete
+            $table->longText('body');
+            $table->boolean('is_system')->default(false);
+            $table->string('template_type')->default('speedtest');
             $table->timestamps();
         });
     }
