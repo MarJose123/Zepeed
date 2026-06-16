@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { Head, router } from "@inertiajs/vue3";
+import { Head, router, usePage } from "@inertiajs/vue3";
 import { Network, Plus } from "@lucide/vue";
 import { ref } from "vue";
 import PingTargetDeleteDialog from "@/components/network/PingTargetDeleteDialog.vue";
 import PingTargetDialog from "@/components/network/PingTargetDialog.vue";
 import PingTargetTable from "@/components/network/PingTargetTable.vue";
 import { Button } from "@/components/ui/button";
+import { useNotification } from "@/composables/useNotification";
+import { usePingResultsChannel } from "@/composables/usePingResultsChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type { PingTarget } from "@/types/ping";
 
-defineProps<{ targets: PingTarget[] }>();
+const props = defineProps<{ targets: PingTarget[] }>();
+
+const page = usePage<{ targets: PingTarget[] }>();
 
 const breadcrumbs: TBreadcrumbItem[] = [
     { title: "Network", href: "#" },
@@ -20,6 +24,9 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
+const targets = ref<PingTarget[]>(props.targets);
+const { notify } = useNotification();
+
 const showDialog = ref(false);
 const editTarget = ref<PingTarget | null>(null);
 const deleteTarget = ref<PingTarget | null>(null);
@@ -28,10 +35,12 @@ const openCreate = () => {
     editTarget.value = null;
     showDialog.value = true;
 };
+
 const openEdit = (t: PingTarget) => {
     editTarget.value = t;
     showDialog.value = true;
 };
+
 const openDelete = (t: PingTarget) => {
     deleteTarget.value = t;
 };
@@ -44,9 +53,44 @@ const runNow = (t: PingTarget) => {
             false,
         ),
         {},
-        { preserveScroll: true },
+        {
+            preserveScroll: true,
+            // Prevent Inertia from storing the back() redirect flash so it
+            // cannot be replayed when the subsequent router.reload() fires.
+            preserveState: true,
+            onSuccess: () => {
+                notify({
+                    type: "info",
+                    title: "Ping test queued",
+                    message: `Testing "${t.label}"....`,
+                });
+            },
+        },
     );
 };
+
+usePingResultsChannel({
+    onCompleted(payload) {
+        const idx = targets.value.findIndex((t) => t.id === payload.target_id);
+
+        if (idx !== -1) {
+            targets.value[idx] = {
+                ...targets.value[idx],
+                status: payload.status as PingTarget["status"],
+                last_avg_ms: payload.avg_ms,
+                last_loss_percent: payload.packet_loss_percent,
+                last_tested_at: payload.measured_at,
+            };
+        }
+
+        router.reload({
+            only: ["targets"],
+            onSuccess: () => {
+                targets.value = page.props.targets;
+            },
+        });
+    },
+});
 </script>
 
 <template>
@@ -69,7 +113,6 @@ const runNow = (t: PingTarget) => {
                 </Button>
             </div>
 
-            <!-- Empty state -->
             <div
                 v-if="targets.length === 0"
                 class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16"

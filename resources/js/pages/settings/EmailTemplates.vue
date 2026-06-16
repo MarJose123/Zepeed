@@ -254,9 +254,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     >
                         <p class="text-xs">
                             No
-                            {{
-                                activeFilter === "all" ? "" : activeFilter
-                            }}
+                            {{ activeFilter === "all" ? "" : activeFilter }}
                             templates yet.
                         </p>
                         <button

@@ -67,12 +67,6 @@ class PingTargetController extends Controller
     {
         dispatch(new RunPingTestJob($pingTarget));
 
-        InertiaNotification::make()
-            ->info()
-            ->title('Ping test queued')
-            ->message("Testing \"{$pingTarget->label}\"...")
-            ->send();
-
         return back();
     }
 }
