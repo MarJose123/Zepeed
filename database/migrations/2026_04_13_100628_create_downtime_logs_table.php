@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('downtime_logs', function (Blueprint $table) {
+        Schema::create('downtime_logs', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->enum('event', ['DOWN', 'UP']);
             $table->string('triggered_by')->default('system');

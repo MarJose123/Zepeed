@@ -29,8 +29,8 @@ final class ExecuteDangerAction
         }
 
         match ($action) {
-            'clear_results'  => $this->clearResults(),
-            'clear_log'      => $this->clearLog(),
+            'clear_results'  => self::clearResults(),
+            'clear_log'      => self::clearLog(),
             'reset_config'   => $this->resetConfig(),
             'factory_reset'  => $this->factoryReset(),
         };
@@ -39,7 +39,7 @@ final class ExecuteDangerAction
     /**
      * Truncate all speedtest result rows.
      */
-    private function clearResults(): void
+    private static function clearResults(): void
     {
         DB::table('speed_results')->truncate();
     }
@@ -47,7 +47,7 @@ final class ExecuteDangerAction
     /**
      * Truncate all webhook delivery log rows.
      */
-    private function clearLog(): void
+    private static function clearLog(): void
     {
         DB::table('webhook_deliveries')->truncate();
     }
@@ -71,9 +71,9 @@ final class ExecuteDangerAction
     {
         $protected = ['users', 'password_reset_tokens', 'sessions'];
 
-        DB::transaction(function () use ($protected): void {
+        DB::transaction(static function () use ($protected): void {
             $tables = DB::select('SHOW TABLES');
-            $dbKey = 'Tables_in_'.config('database.connections.'.config('database.default').'.database');
+            $dbKey = 'Tables_in_' . config('database.connections.' . config('database.default') . '.database');
 
             foreach ($tables as $row) {
                 $table = (array) $row;

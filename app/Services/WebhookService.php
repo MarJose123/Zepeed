@@ -66,8 +66,8 @@ class WebhookService
 
         try {
             $response = Http::timeout($webhook->timeout)
-                ->unless($webhook->verify_ssl, fn ($h) => $h->withoutVerifying())
-                ->withHeaders($this->buildHeaders($webhook))
+                ->unless($webhook->verify_ssl, static fn ($h) => $h->withoutVerifying())
+                ->withHeaders(self::buildHeaders($webhook))
                 ->{strtolower($webhook->method)}($webhook->url, [
                     'event'   => 'webhook.test',
                     'message' => 'This is a test delivery from Zepeed.',
@@ -109,7 +109,7 @@ class WebhookService
     /**
      * @return array<string, string>
      */
-    private function buildHeaders(Webhook $webhook): array
+    private static function buildHeaders(Webhook $webhook): array
     {
         if (empty($webhook->headers)) {
             return [];

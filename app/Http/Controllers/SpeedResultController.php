@@ -66,8 +66,8 @@ final class SpeedResultController extends Controller
             ->select('speed_results.*', 'providers.name as provider_name')
             ->leftJoin('providers', 'providers.slug', '=', 'speed_results.provider_slug')
             ->where('speed_results.status', 'success')
-            ->when($provider, fn ($q) => $q->where('speed_results.provider_slug', $provider))
-            ->when($month, function ($q) use ($month): void {
+            ->when($provider, static fn ($q) => $q->where('speed_results.provider_slug', $provider))
+            ->when($month, static function ($q) use ($month): void {
                 [$year, $mon] = explode('-', (string) $month);
                 $q->whereYear('speed_results.measured_at', $year)
                     ->whereMonth('speed_results.measured_at', $mon);
@@ -90,7 +90,7 @@ final class SpeedResultController extends Controller
             ->orderByRaw("DATE_FORMAT(measured_at, '%Y-%m') DESC")
             ->pluck('month');
 
-        $stats = $this->buildStats((clone $baseQuery)->get(), $metric);
+        $stats = self::buildStats((clone $baseQuery)->get(), $metric);
 
         $filters = [
             'provider' => $provider,
@@ -106,7 +106,7 @@ final class SpeedResultController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function buildStats(Collection $rows, string $metric): array
+    private static function buildStats(Collection $rows, string $metric): array
     {
         $column = match ($metric) {
             'download' => 'download_mbps',
@@ -130,15 +130,15 @@ final class SpeedResultController extends Controller
         }
 
         $values = $rows->pluck($column)
-            ->filter(fn ($v) => $v !== null)
-            ->map(fn ($v) => (float) $v);
+            ->filter(static fn ($v) => $v !== null)
+            ->map(static fn ($v) => (float) $v);
 
         $total = $values->count();
 
         $thresholdCount = match ($metric) {
-            'download' => $values->filter(fn ($v) => $v < 25)->count(),
-            'upload'   => $values->filter(fn ($v) => $v < 10)->count(),
-            'ping'     => $values->filter(fn ($v) => $v > 60)->count(),
+            'download' => $values->filter(static fn ($v) => $v < 25)->count(),
+            'upload'   => $values->filter(static fn ($v) => $v < 10)->count(),
+            'ping'     => $values->filter(static fn ($v) => $v > 60)->count(),
             default    => 0,
         };
 

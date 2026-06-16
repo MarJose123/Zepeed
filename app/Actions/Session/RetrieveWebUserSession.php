@@ -36,8 +36,8 @@ final class RetrieveWebUserSession
                 ->where('user_id', $request->user()->getAuthIdentifier())
                 ->orderBy('last_activity', 'desc')
                 ->get()
-        )->map(function ($session) use ($request): Fluent {
-            $agent = $this->createAgent($session);
+        )->map(static function ($session) use ($request): Fluent {
+            $agent = self::createAgent($session);
             /** @var Position|false $location */
             $location = Location::get(trim((string) $session->ip_address));
 
@@ -69,7 +69,7 @@ final class RetrieveWebUserSession
      *
      * @return Agent
      */
-    private function createAgent(mixed $session): Agent
+    private static function createAgent(mixed $session): Agent
     {
         return Agent::parse($session->user_agent);
     }

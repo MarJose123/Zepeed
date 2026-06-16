@@ -19,14 +19,14 @@ class StoreMailProviderRequest extends FormRequest
             'from_name'    => ['required', 'string', 'max:100'],
             'is_active'    => ['boolean'],
             'config'       => ['required', 'array'],
-            ...$this->driverConfigRules($driver),
+            ...self::driverConfigRules($driver),
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function driverConfigRules(?MailDriver $driver): array
+    private static function driverConfigRules(?MailDriver $driver): array
     {
         if (! $driver) {
             return [];

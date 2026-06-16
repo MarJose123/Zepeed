@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('speed_results', function (Blueprint $table) {
+        Schema::create('speed_results', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('provider_slug');
             $table->string('status')

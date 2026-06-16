@@ -45,11 +45,11 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => fn () => $request->user()
+                'user' => static fn () => $request->user()
                     ? new UserResource($request->user())
                     : null,
             ],
-            'speedtest' => fn () => $request->user() ? ProviderResource::collection(
+            'speedtest' => static fn () => $request->user() ? ProviderResource::collection(
                 Provider::query()
                     ->with('latestResult')
                     ->orderBy('id')

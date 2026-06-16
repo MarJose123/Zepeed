@@ -27,8 +27,8 @@ class OoklaServerSearchService
      */
     public function search(string $query): Collection
     {
-        return $this->all()->filter(
-            fn (array $server): bool => $this->matches($server, $query)
+        return self::all()->filter(
+            static fn (array $server): bool => self::matches($server, $query)
         )->take(20)->values();
     }
 
@@ -41,7 +41,7 @@ class OoklaServerSearchService
     {
         Cache::forget(self::CACHE_KEY);
 
-        return $this->all();
+        return self::all();
     }
 
     /**
@@ -49,13 +49,13 @@ class OoklaServerSearchService
      *
      * @return Collection<int, array<string, mixed>>
      */
-    private function all(): Collection
+    private static function all(): Collection
     {
         /** @var Collection<int, array<string, mixed>> $servers */
         $servers = Cache::remember(
             key: self::CACHE_KEY,
             ttl: now()->addMinutes(self::CACHE_MINUTES),
-            callback: fn (): Collection => $this->fetchFromApi(),
+            callback: static fn (): Collection => self::fetchFromApi(),
         );
 
         return $servers;
@@ -66,7 +66,7 @@ class OoklaServerSearchService
      *
      * @return Collection<int, array<string, mixed>>
      */
-    private function fetchFromApi(): Collection
+    private static function fetchFromApi(): Collection
     {
         return Http::retry(3, 250)
             ->get(self::API_URL, [
@@ -83,14 +83,14 @@ class OoklaServerSearchService
      *
      * @param array<string, mixed> $server
      */
-    private function matches(array $server, string $query): bool
+    private static function matches(array $server, string $query): bool
     {
         return collect([
             (string) ($server['name'] ?? ''),
             (string) ($server['sponsor'] ?? ''),
             (string) ($server['country'] ?? ''),
         ])->contains(
-            fn (string $field): bool => Str::containsAll($field, [$query], ignoreCase: true)
+            static fn (string $field): bool => Str::containsAll($field, [$query], ignoreCase: true)
         );
     }
 }

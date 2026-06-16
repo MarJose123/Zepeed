@@ -21,14 +21,14 @@ class UpdateMailProviderRequest extends FormRequest
             'from_name'    => ['sometimes', 'string', 'max:100'],
             'is_active'    => ['boolean'],
             'config'       => ['sometimes', 'array'],
-            ...$this->driverConfigRules($driver),
+            ...self::driverConfigRules($driver),
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function driverConfigRules(MailDriver $driver): array
+    private static function driverConfigRules(MailDriver $driver): array
     {
         return match ($driver) {
             MailDriver::Smtp => [

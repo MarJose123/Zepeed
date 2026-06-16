@@ -102,7 +102,7 @@ class RunSpeedtestJob implements ShouldQueue
             return;
         }
 
-        if ($this->isUnderMaintenance($slug)) {
+        if (self::isUnderMaintenance($slug)) {
             $skipped = SpeedResult::recordSkipped(provider: $this->provider);
             $this->provider->markSkipped();
 
@@ -246,20 +246,20 @@ class RunSpeedtestJob implements ShouldQueue
             ->value('status') === 'cancelled';
     }
 
-    private function isUnderMaintenance(SpeedtestServer $slug): bool
+    private static function isUnderMaintenance(SpeedtestServer $slug): bool
     {
         return MaintenanceWindow::query()
             ->active()
             ->forProvider($slug)
             ->get()
-            ->contains(fn (MaintenanceWindow $window): bool => match ($window->type) {
+            ->contains(static fn (MaintenanceWindow $window): bool => match ($window->type) {
                 MaintenanceWindowType::Indefinite => true,
-                MaintenanceWindowType::OneTime    => $this->isWithinOneTimeWindow($window),
-                MaintenanceWindowType::Recurring  => $this->isWithinRecurringWindow($window),
+                MaintenanceWindowType::OneTime    => self::isWithinOneTimeWindow($window),
+                MaintenanceWindowType::Recurring  => self::isWithinRecurringWindow($window),
             });
     }
 
-    private function isWithinOneTimeWindow(MaintenanceWindow $window): bool
+    private static function isWithinOneTimeWindow(MaintenanceWindow $window): bool
     {
         if (! $window->starts_at || ! $window->ends_at) {
             return false;
@@ -268,7 +268,7 @@ class RunSpeedtestJob implements ShouldQueue
         return CarbonImmutable::now()->between($window->starts_at, $window->ends_at);
     }
 
-    private function isWithinRecurringWindow(MaintenanceWindow $window): bool
+    private static function isWithinRecurringWindow(MaintenanceWindow $window): bool
     {
         $now = CarbonImmutable::now();
         $cron = new CronExpression($window->cron_expression ?? '* * * * *');

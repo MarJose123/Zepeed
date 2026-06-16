@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('alert_rule_actions', function (Blueprint $table) {
+        Schema::create('alert_rule_actions', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('alert_rule_id')->constrained()->cascadeOnDelete();
             $table->string('type');                       // email|webhook

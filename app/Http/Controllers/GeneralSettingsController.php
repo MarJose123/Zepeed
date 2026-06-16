@@ -98,7 +98,7 @@ final class GeneralSettingsController extends Controller
 
             InertiaNotification::make()
                 ->error()
-                ->message('Failed to save settings: '.$e->getMessage())
+                ->message('Failed to save settings: ' . $e->getMessage())
                 ->send();
         }
 
@@ -133,7 +133,7 @@ final class GeneralSettingsController extends Controller
 
             InertiaNotification::make()
                 ->error()
-                ->message('Failed: '.$e->getMessage())
+                ->message('Failed: ' . $e->getMessage())
                 ->send();
         }
 
@@ -170,7 +170,7 @@ final class GeneralSettingsController extends Controller
 
             InertiaNotification::make()
                 ->error()
-                ->message('Operation failed: '.$e->getMessage())
+                ->message('Operation failed: ' . $e->getMessage())
                 ->send();
         }
 

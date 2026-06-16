@@ -20,7 +20,7 @@ class ResetUserPasswordCommand extends Command
         $email = text(
             label: 'What is the email address?',
             required: true,
-            validate: fn (string $value) => match (true) {
+            validate: static fn (string $value) => match (true) {
                 ! User::query()->firstWhere('email', $value) => 'Email address not found. Please try again.',
                 default                                      => null
             }

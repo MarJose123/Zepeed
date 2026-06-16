@@ -31,9 +31,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        $this->applyGeneralSettings();
+        self::applyGeneralSettings();
 
-        AboutCommand::add('Zepeed', fn () => [
+        AboutCommand::add('Zepeed', static fn () => [
             'Version'    => config('app.version'),
             'Build Date' => config('app.build_date'),
         ]);
@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
      * Wrapped in a try/catch so a missing or not-yet-migrated settings
      * table never breaks the boot sequence during fresh installs or CI.
      */
-    private function applyGeneralSettings(): void
+    private static function applyGeneralSettings(): void
     {
         try {
 
@@ -97,7 +97,7 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): Password => app()->isProduction()
+        Password::defaults(static fn (): Password => app()->isProduction()
             ? Password::min(12)
                 ->mixedCase()
                 ->letters()

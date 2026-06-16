@@ -15,7 +15,7 @@ class UpdateProviderScheduleRequest extends FormRequest
             'cron_expression' => [
                 'nullable',
                 'string',
-                function (string $attribute, mixed $value, Closure $fail) {
+                static function (string $attribute, mixed $value, Closure $fail) {
                     if ($value && ! ProviderSchedule::isValidCron($value)) {
                         $fail('The cron expression is invalid.');
                     }

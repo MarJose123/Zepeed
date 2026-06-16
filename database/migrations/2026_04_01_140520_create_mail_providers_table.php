@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mail_providers', function (Blueprint $table) {
+        Schema::create('mail_providers', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('driver');
             $table->string('label');

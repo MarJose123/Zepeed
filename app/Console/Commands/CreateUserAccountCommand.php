@@ -35,7 +35,7 @@ class CreateUserAccountCommand extends Command
         password(
             label: 'Confirm your password',
             required: true,
-            validate: fn (string $value) => $value === $password ? null : 'Passwords do not match.',
+            validate: static fn (string $value) => $value === $password ? null : 'Passwords do not match.',
         );
 
         $user = User::query()->create([

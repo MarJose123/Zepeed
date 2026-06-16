@@ -78,7 +78,7 @@ class MailProviderController extends Controller
         MailProvider::query()
             ->ordered()
             ->get()
-            ->each(function (MailProvider $p, int $index) {
+            ->each(static function (MailProvider $p, int $index) {
                 $p->update(['priority' => $index + 1]);
             });
 

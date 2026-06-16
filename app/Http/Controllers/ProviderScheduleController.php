@@ -53,7 +53,7 @@ class ProviderScheduleController extends Controller
                     ->warning()
                     ->title('Schedule will not run')
                     ->message(
-                        "Both the schedule and the {$providerSchedule->provider_slug->label()} ".
+                        "Both the schedule and the {$providerSchedule->provider_slug->label()} " .
                         'provider are disabled. Enable both to start running.'
                     )
                     ->send();
@@ -62,7 +62,7 @@ class ProviderScheduleController extends Controller
                     ->warning()
                     ->title('Schedule is disabled')
                     ->message(
-                        "\"{$providerSchedule->label}\" has a cron expression set ".
+                        "\"{$providerSchedule->label}\" has a cron expression set " .
                         'but is disabled. Enable it to start running.'
                     )
                     ->send();
@@ -71,7 +71,7 @@ class ProviderScheduleController extends Controller
                     ->warning()
                     ->title("{$providerSchedule->provider_slug->label()} provider is disabled")
                     ->message(
-                        'The schedule is active but will not run until '.
+                        'The schedule is active but will not run until ' .
                         "{$providerSchedule->provider_slug->label()} is enabled in Speedtest Providers."
                     )
                     ->send();

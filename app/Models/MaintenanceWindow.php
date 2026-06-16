@@ -66,7 +66,7 @@ class MaintenanceWindow extends Model
     /** @param Builder<MaintenanceWindow> $query */
     protected function scopeForProvider(Builder $query, SpeedtestServer $server): void
     {
-        $query->where(function (Builder $q) use ($server) {
+        $query->where(static function (Builder $q) use ($server) {
             $q->whereJsonContains('providers', 'all')
                 ->orWhereJsonContains('providers', $server->value);
         });

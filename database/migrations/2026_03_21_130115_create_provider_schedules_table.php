@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('provider_schedules', function (Blueprint $table) {
+        Schema::create('provider_schedules', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('provider_slug');
             $table->string('label')->default('Default');

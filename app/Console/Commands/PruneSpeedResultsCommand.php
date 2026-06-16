@@ -66,8 +66,8 @@ final class PruneSpeedResultsCommand extends Command
         // Chunked delete to avoid long table locks on large datasets.
         $deleted = 0;
 
-        DB::transaction(function () use ($query, &$deleted): void {
-            $query->chunkById(500, function ($chunk) use (&$deleted): void {
+        DB::transaction(static function () use ($query, &$deleted): void {
+            $query->chunkById(500, static function ($chunk) use (&$deleted): void {
                 $ids = $chunk->pluck('id')->all();
                 $deleted += SpeedResult::query()->whereIn('id', $ids)->delete();
             });

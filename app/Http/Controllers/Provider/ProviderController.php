@@ -42,7 +42,7 @@ class ProviderController extends Controller
         foreach (SpeedtestServer::cases() as $server) {
             $schedulesMap[$server->value] = ProviderScheduleResource::collection(
                 ProviderSchedule::enabledForProvider($server)
-                    ->filter(fn (ProviderSchedule $s): bool => filled($s->cron_expression))
+                    ->filter(static fn (ProviderSchedule $s): bool => filled($s->cron_expression))
                     ->values()
             )->resolve();
         }

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('speedtest_test_sessions', function (Blueprint $table) {
+        Schema::create('speedtest_test_sessions', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('provider_id')->constrained('providers')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();

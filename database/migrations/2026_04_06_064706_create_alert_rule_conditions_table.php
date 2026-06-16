@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('alert_rule_conditions', function (Blueprint $table) {
+        Schema::create('alert_rule_conditions', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('alert_rule_id')->constrained()->cascadeOnDelete();
             $table->string('metric');   // status|download_mbps|upload_mbps|ping_ms|jitter_ms|packet_loss

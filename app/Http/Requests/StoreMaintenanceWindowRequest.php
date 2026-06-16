@@ -57,7 +57,7 @@ class StoreMaintenanceWindowRequest extends FormRequest
             'cron_expression' => [
                 $type?->requiresCronExpression() ? 'required' : 'nullable',
                 'string',
-                function (string $attribute, mixed $value, Closure $fail) {
+                static function (string $attribute, mixed $value, Closure $fail) {
                     if (! $value) {
                         return;
                     }
