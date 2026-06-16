@@ -16,6 +16,7 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type {
     EmailTemplate,
+    EmailTemplateType,
     MergeField,
     TemplateTypeOption,
 } from "@/types/email-template";
@@ -35,11 +36,36 @@ const breadcrumbs: TBreadcrumbItem[] = [
     },
 ];
 
+// ── Filter ────────────────────────────────────────────────────────────────────
+
+type FilterTab = "all" | EmailTemplateType;
+
+const activeFilter = ref<FilterTab>("all");
+
+const filterTabs: { value: FilterTab; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "speedtest", label: "Speedtest" },
+    { value: "ping", label: "Ping" },
+];
+
+const filteredTemplates = computed<EmailTemplate[]>(() =>
+    activeFilter.value === "all"
+        ? props.templates
+        : props.templates.filter((t) => t.template_type === activeFilter.value),
+);
+
+const filterCount = (tab: FilterTab): number =>
+    tab === "all"
+        ? props.templates.length
+        : props.templates.filter((t) => t.template_type === tab).length;
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+
 const selectedId = ref<string | null>(props.templates[0]?.id ?? null);
 const isNew = ref(false);
 const showHelp = ref(false);
 
-const selectedTemplate = computed(
+const selectedTemplate = computed<EmailTemplate | null>(
     () => props.templates.find((t) => t.id === selectedId.value) ?? null,
 );
 
@@ -53,16 +79,28 @@ const startNew = () => {
     isNew.value = true;
 };
 
+watch(activeFilter, () => {
+    isNew.value = false;
+    selectedId.value = filteredTemplates.value[0]?.id ?? null;
+});
+
 watch(
     () => props.templates,
     (list) => {
         if (isNew.value) return;
 
-        if (!list.find((t) => t.id === selectedId.value)) {
-            selectedId.value = list[0]?.id ?? null;
+        const visible =
+            activeFilter.value === "all"
+                ? list
+                : list.filter((t) => t.template_type === activeFilter.value);
+
+        if (!visible.find((t) => t.id === selectedId.value)) {
+            selectedId.value = visible[0]?.id ?? null;
         }
     },
 );
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const lastUpdatedLabel = (tpl: EmailTemplate): string => {
     const diff = Date.now() - new Date(tpl.updated_at).getTime();
@@ -91,8 +129,9 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
     <Head title="Email templates" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full min-h-0 flex-1">
-            <!-- Left: template list -->
+            <!-- ── Left: template list ── -->
             <div class="border-border flex w-md shrink-0 flex-col border-r">
+                <!-- Header row -->
                 <div
                     class="border-border flex items-center justify-between border-b px-3 py-3"
                 >
@@ -113,9 +152,37 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     </div>
                 </div>
 
+                <!-- Filter tab strip -->
+                <div class="border-border flex border-b px-3">
+                    <button
+                        v-for="tab in filterTabs"
+                        :key="tab.value"
+                        class="flex items-center gap-1.5 border-b-2 py-2 pr-4 text-xs transition-colors"
+                        :class="
+                            activeFilter === tab.value
+                                ? 'border-primary text-primary font-medium'
+                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                        "
+                        @click="activeFilter = tab.value"
+                    >
+                        {{ tab.label }}
+                        <span
+                            class="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px]"
+                            :class="
+                                activeFilter === tab.value
+                                    ? 'bg-primary/15 text-primary'
+                                    : 'bg-muted text-muted-foreground'
+                            "
+                        >
+                            {{ filterCount(tab.value) }}
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Template list -->
                 <div class="flex-1 overflow-y-auto">
                     <div
-                        v-for="template in templates"
+                        v-for="template in filteredTemplates"
                         :key="template.id"
                         class="border-border cursor-pointer border-b px-3 py-3 transition-colors"
                         :class="{
@@ -147,6 +214,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             {{ template.subject }}
                         </div>
                         <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            <!-- system / custom badge -->
                             <Badge
                                 variant="outline"
                                 class="text-[9px]"
@@ -158,8 +226,10 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             >
                                 {{ template.is_system ? "system" : "custom" }}
                             </Badge>
-                            <!-- Template type pill -->
+
+                            <!-- type badge — only shown in "All" tab -->
                             <Badge
+                                v-if="activeFilter === 'all'"
                                 variant="outline"
                                 class="text-[9px]"
                                 :class="
@@ -170,19 +240,27 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             >
                                 {{ typeLabel(template) }}
                             </Badge>
+
                             <span class="text-muted-foreground text-[10px]">
                                 {{ lastUpdatedLabel(template) }}
                             </span>
                         </div>
                     </div>
 
+                    <!-- Empty state -->
                     <div
-                        v-if="templates.length === 0"
-                        class="text-muted-foreground px-3 py-8 text-center text-xs"
+                        v-if="filteredTemplates.length === 0"
+                        class="text-muted-foreground flex flex-col items-center gap-2 px-3 py-10 text-center"
                     >
-                        No templates yet.
+                        <p class="text-xs">
+                            No
+                            {{
+                                activeFilter === "all" ? "" : activeFilter
+                            }}
+                            templates yet.
+                        </p>
                         <button
-                            class="text-primary underline"
+                            class="text-primary text-xs underline underline-offset-2"
                             @click="startNew"
                         >
                             Create one
@@ -191,7 +269,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                 </div>
             </div>
 
-            <!-- Right: editor -->
+            <!-- ── Right: editor ── -->
             <div class="flex flex-1 flex-col overflow-hidden">
                 <TemplateEditor
                     v-if="isNew || selectedTemplate"
@@ -202,7 +280,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     :template-types="template_types"
                     :is-new="isNew"
                     @saved="isNew = false"
-                    @deleted="selectedId = templates[0]?.id ?? null"
+                    @deleted="selectedId = filteredTemplates[0]?.id ?? null"
                 />
 
                 <div
@@ -219,7 +297,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
             </div>
         </div>
 
-        <!-- Help dialog — unchanged -->
+        <!-- ── Help dialog ── -->
         <Dialog v-model:open="showHelp">
             <DialogContent class="max-w-md">
                 <DialogHeader>
@@ -241,7 +319,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                         >
                             Type
                             <Kbd
-                                class="border-border bg-muted rounded border px-1.5 py-0.5 font-mono text-[10px]"
+                                class="border-border bg-muted rounded border px-1.5 py-0.5 text-[10px]"
                                 >#</Kbd
                             >
                             anywhere in the subject or body to open the merge
@@ -252,11 +330,11 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     <div class="space-y-1.5">
                         <p class="text-xs font-medium">Blade directives</p>
                         <pre
-                            class="bg-muted rounded-lg p-3 font-mono text-[11px] leading-relaxed"
+                            class="bg-muted rounded-lg p-3 text-[11px] leading-relaxed"
                             v-text="bladeSnippet"
                         />
                         <pre
-                            class="bg-muted rounded-lg p-3 font-mono text-[11px] leading-relaxed"
+                            class="bg-muted rounded-lg p-3 text-[11px] leading-relaxed"
                             v-text="bladeSnippet2"
                         />
                     </div>
