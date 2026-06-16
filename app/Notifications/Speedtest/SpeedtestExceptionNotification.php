@@ -49,10 +49,10 @@ class SpeedtestExceptionNotification extends Notification implements ShouldQueue
             ->subject("[Zepeed] {$this->provider->slug->label()} speedtest failed")
             ->greeting("Speedtest Exception — {$this->provider->slug->label()}")
             ->line('A speedtest run encountered an exception and could not complete.')
-            ->line('**Reason:** '.$this->exception->reason->value)
-            ->line('**Message:** '.$this->exception->getMessage())
-            ->line('**Provider:** '.$this->provider->slug->label())
-            ->line('**Time:** '.now()->toDateTimeString())
+            ->line('**Reason:** ' . $this->exception->reason->value)
+            ->line('**Message:** ' . $this->exception->getMessage())
+            ->line('**Provider:** ' . $this->provider->slug->label())
+            ->line('**Time:** ' . now()->toDateTimeString())
             ->action('View Results', url(route('dashboard')))
             ->line('You are receiving this because alert on failure is enabled for this provider.');
     }
@@ -76,6 +76,6 @@ class SpeedtestExceptionNotification extends Notification implements ShouldQueue
      */
     public function uniqueId(): string
     {
-        return $this->provider->slug->value.':'.now()->format('Y-m-d-H-i');
+        return $this->provider->slug->value . ':' . now()->format('Y-m-d-H-i');
     }
 }

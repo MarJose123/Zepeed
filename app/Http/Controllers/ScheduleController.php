@@ -23,7 +23,7 @@ class ScheduleController extends Controller
         // Exclude the global pause window from the list —
         // it is controlled separately via the toggle
         $windowList = $windows->reject(
-            fn (MaintenanceWindow $w): bool => $w->type === MaintenanceWindowType::Indefinite
+            static fn (MaintenanceWindow $w): bool => $w->type === MaintenanceWindowType::Indefinite
                 && $w->coversAllProviders()
                 && $w->label === 'Global pause'
         );
@@ -32,11 +32,11 @@ class ScheduleController extends Controller
         $allSchedules = ProviderSchedule::query()
             ->oldest()
             ->get()
-            ->groupBy(fn (ProviderSchedule $schedule): string => $schedule->provider_slug->value);
+            ->groupBy(static fn (ProviderSchedule $schedule): string => $schedule->provider_slug->value);
 
         $providers = Provider::query()
             ->get()
-            ->map(function (Provider $provider) use ($allSchedules) {
+            ->map(static function (Provider $provider) use ($allSchedules) {
                 $providerSchedules = $allSchedules->get($provider->slug->value, collect());
 
                 return [
@@ -66,7 +66,7 @@ class ScheduleController extends Controller
             'stats' => [
                 'total'            => $windowList->count(),
                 'currently_active' => $windowList
-                    ->filter(fn (MaintenanceWindow $w) => $w->isCurrentlyActive())
+                    ->filter(static fn (MaintenanceWindow $w) => $w->isCurrentlyActive())
                     ->count(),
             ],
 

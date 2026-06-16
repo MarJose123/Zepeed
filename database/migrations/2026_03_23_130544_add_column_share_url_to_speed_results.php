@@ -8,14 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('speed_results', function (Blueprint $table) {
+        Schema::table('speed_results', static function (Blueprint $table) {
             $table->string('share_url')->nullable()->after('isp');
         });
     }
 
     public function down(): void
     {
-        Schema::table('speed_results', function (Blueprint $table) {
+        Schema::table('speed_results', static function (Blueprint $table) {
             $table->dropColumn('share_url');
         });
     }

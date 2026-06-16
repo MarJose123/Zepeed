@@ -17,9 +17,9 @@ final class InertiaNotification
 
     public function __construct(protected Request $request, protected ?string $key) {}
 
-    public static function make(?string $name = null): InertiaNotification
+    public static function make(?string $name = null): self
     {
-        return resolve(InertiaNotification::class, [
+        return resolve(self::class, [
             'key' => $name ?? 'notification',
         ]);
     }

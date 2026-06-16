@@ -19,12 +19,12 @@ final readonly class DeleteUserSession
     {
 
         if ($request->has('session_id')) {
-            $this->revokeSession($request);
+            self::revokeSession($request);
             event(new OtherDeviceLogout(auth()->getDefaultDriver(), $request->user()));
         } else {
             $this->guard->logoutOtherDevices($request->input('password'));
 
-            $this->deleteOtherSessionRecords($request);
+            self::deleteOtherSessionRecords($request);
         }
 
     }
@@ -36,7 +36,7 @@ final readonly class DeleteUserSession
      *
      * @return void
      */
-    private function deleteOtherSessionRecords(Request $request): void
+    private static function deleteOtherSessionRecords(Request $request): void
     {
         if (config('session.driver') !== 'database') {
             return;
@@ -48,7 +48,7 @@ final readonly class DeleteUserSession
             ->delete();
     }
 
-    private function revokeSession(Request $request): void
+    private static function revokeSession(Request $request): void
     {
         if (config('session.driver') !== 'database') {
             return;

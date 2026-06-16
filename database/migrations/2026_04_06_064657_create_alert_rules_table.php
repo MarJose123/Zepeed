@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('alert_rules', function (Blueprint $table) {
+        Schema::create('alert_rules', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('provider_slug')->nullable(); // null = any provider

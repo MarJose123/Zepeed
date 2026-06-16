@@ -33,7 +33,7 @@ class RealtimeCredentialsCommand extends Command
 
         if ($alreadySet->isNotEmpty() && ! $this->option('force')) {
             $this->components->warn(
-                'Realtime credentials already set with values: '.$alreadySet->join(', ')
+                'Realtime credentials already set with values: ' . $alreadySet->join(', ')
             );
             $this->components->info('Use --force to overwrite existing credentials.');
 
@@ -42,7 +42,7 @@ class RealtimeCredentialsCommand extends Command
 
         $this->writeCredentials($env, $contents);
 
-        $this->components->info('Realtime credentials written to '.basename($env));
+        $this->components->info('Realtime credentials written to ' . basename($env));
 
         return self::SUCCESS;
     }
@@ -53,7 +53,7 @@ class RealtimeCredentialsCommand extends Command
     protected function hasValue(string $contents, string $key): bool
     {
         return (bool) preg_match(
-            '/^'.preg_quote($key, '/').'=(?!["\']?$).+$/m',
+            '/^' . preg_quote($key, '/') . '=(?!["\']?$).+$/m',
             $contents,
         );
     }
@@ -64,7 +64,7 @@ class RealtimeCredentialsCommand extends Command
     protected function keyExists(string $contents, string $key): bool
     {
         return (bool) preg_match(
-            '/^'.preg_quote($key, '/').'=/m',
+            '/^' . preg_quote($key, '/') . '=/m',
             $contents,
         );
     }
@@ -107,7 +107,7 @@ class RealtimeCredentialsCommand extends Command
             if ($this->keyExists($modified, $key)) {
                 // Key exists but has no value — replace it in place
                 $modified = preg_replace(
-                    '/^'.preg_quote($key, '/').'=.*$/m',
+                    '/^' . preg_quote($key, '/') . '=.*$/m',
                     $line,
                     (string) $modified,
                 );
@@ -129,8 +129,8 @@ class RealtimeCredentialsCommand extends Command
             File::append(
                 $env,
                 Str::endsWith($modified, PHP_EOL)
-                    ? PHP_EOL.$block.PHP_EOL
-                    : PHP_EOL.PHP_EOL.$block.PHP_EOL,
+                    ? PHP_EOL . $block . PHP_EOL
+                    : PHP_EOL . PHP_EOL . $block . PHP_EOL,
             );
         }
     }

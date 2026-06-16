@@ -49,7 +49,7 @@ class AlertRuleService
         }
 
         // Check event filter
-        if (! $this->matchesEvent($rule, $result)) {
+        if (! self::matchesEvent($rule, $result)) {
             return;
         }
 
@@ -69,19 +69,19 @@ class AlertRuleService
         }
 
         $results = $conditions->map(
-            fn ($condition) => $condition->evaluate($result)
+            static fn ($condition) => $condition->evaluate($result)
         );
 
         $passes = $rule->condition_operator === 'or'
             ? $results->contains(true)
-            : $results->every(fn ($r) => $r === true);
+            : $results->every(static fn ($r) => $r === true);
 
         if ($passes) {
             $this->fire($rule, $result);
         }
     }
 
-    private function matchesEvent(AlertRule $rule, SpeedResult $result): bool
+    private static function matchesEvent(AlertRule $rule, SpeedResult $result): bool
     {
         return match ($rule->event) {
             AlertRuleEvent::Any          => true,
@@ -93,7 +93,7 @@ class AlertRuleService
 
     private function fire(AlertRule $rule, SpeedResult $result): void
     {
-        $mergeData = $this->buildMergeData($result);
+        $mergeData = self::buildMergeData($result);
 
         /** @var Collection<int, AlertRuleAction> $actions */
         $actions = $rule->actions;
@@ -134,7 +134,7 @@ class AlertRuleService
             : Mail::mailer('zepeed_failover');
 
         $mailer
-            ->html($body, function (Message $message) use ($subject, $action) {
+            ->html($body, static function (Message $message) use ($subject, $action) {
                 /** @var string $fromAddress */
                 $fromAddress = $action->mailProvider->from_address
                     ?? config('mail.from.address');
@@ -158,7 +158,7 @@ class AlertRuleService
 
         $this->webhookService->dispatch(
             $action->webhook,
-            'speedtest.'.$result->status,
+            'speedtest.' . $result->status,
             [
                 'provider_slug'   => $result->provider_slug,
                 'status'          => $result->status,
@@ -178,7 +178,7 @@ class AlertRuleService
      *
      * @return array<string, mixed>
      */
-    private function buildMergeData(SpeedResult $result): array
+    private static function buildMergeData(SpeedResult $result): array
     {
         $providerName = $result->provider_slug->label();
         $tz = config('app.timezone');

@@ -28,13 +28,13 @@ final class UpdateGeneralSettings
             Setting::set($key, $value);
         }
 
-        $this->syncMaintenanceMode($was, $data->maintenance_enabled, $data);
+        self::syncMaintenanceMode($was, $data->maintenance_enabled, $data);
     }
 
     /**
      * Fire artisan down/up only when the toggle actually flips.
      */
-    private function syncMaintenanceMode(
+    private static function syncMaintenanceMode(
         bool $was,
         bool $is,
         GeneralSettingsData $data,
@@ -50,7 +50,7 @@ final class UpdateGeneralSettings
             // is never locked out after enabling maintenance mode.
             $secret = ($data->bypass_secret !== null && $data->bypass_secret !== '')
                 ? $data->bypass_secret
-                : $this->generateBypassSecret();
+                : self::generateBypassSecret();
 
             // Persist the (possibly auto-generated) secret so it is readable
             // by the controller for the post-save redirect.
@@ -106,7 +106,7 @@ final class UpdateGeneralSettings
     /**
      * Generate a cryptographically random bypass secret.
      */
-    private function generateBypassSecret(): string
+    private static function generateBypassSecret(): string
     {
         return bin2hex(random_bytes(12)); // 24-char hex string
     }
@@ -177,17 +177,17 @@ final class UpdateGeneralSettings
         $driver = config('database.default');
 
         $tables = match ($driver) {
-            'mysql', 'mariadb' => $this->mariadbTableSizes(),
-            default            => $this->fallbackTableSizes(),
+            'mysql', 'mariadb' => self::mariadbTableSizes(),
+            default            => self::fallbackTableSizes(),
         };
 
         $totalBytes = max(1, array_sum(array_column($tables, '_bytes')));
 
         return array_map(
-            fn (array $t): array => [
+            static fn (array $t): array => [
                 'name'         => $t['name'],
                 'size_mb'      => round($t['_bytes'] / 1_048_576, 3),
-                'size_display' => $this->formatBytes($t['_bytes']),
+                'size_display' => self::formatBytes($t['_bytes']),
                 'row_count'    => $t['row_count'],
                 // Flag tables that have allocated space but no rows — InnoDB
                 // always allocates at least one 16 KB page per table.
@@ -205,14 +205,14 @@ final class UpdateGeneralSettings
      * >= 1 KB  → "x.x KB"
      * otherwise → "< 1 KB"
      */
-    private function formatBytes(int $bytes): string
+    private static function formatBytes(int $bytes): string
     {
         if ($bytes >= 1_048_576) {
-            return round($bytes / 1_048_576, 1).' MB';
+            return round($bytes / 1_048_576, 1) . ' MB';
         }
 
         if ($bytes >= 1_024) {
-            return round($bytes / 1_024, 1).' KB';
+            return round($bytes / 1_024, 1) . ' KB';
         }
 
         return '< 1 KB';
@@ -227,7 +227,7 @@ final class UpdateGeneralSettings
      *
      * @return list<array{name:string,_bytes:int,row_count:int}>
      */
-    private function mariadbTableSizes(): array
+    private static function mariadbTableSizes(): array
     {
         $tracked = ['speed_results', 'webhook_deliveries', 'job_batches', 'failed_jobs'];
 
@@ -267,7 +267,7 @@ final class UpdateGeneralSettings
         }
 
         $trackedBytes = array_sum(array_column($result, '_bytes'));
-        $totalBytes = $this->mariadbTotalBytes($database, $driver);
+        $totalBytes = self::mariadbTotalBytes($database, $driver);
 
         $result[] = [
             'name'      => 'other tables',
@@ -283,7 +283,7 @@ final class UpdateGeneralSettings
      *
      * @return list<array{name:string,_bytes:int,row_count:int}>
      */
-    private function fallbackTableSizes(): array
+    private static function fallbackTableSizes(): array
     {
         $tracked = ['speed_results', 'webhook_deliveries', 'job_batches', 'failed_jobs'];
         $result = [];
@@ -369,7 +369,7 @@ final class UpdateGeneralSettings
     /**
      * MariaDB / MySQL total DB size in bytes.
      */
-    private function mariadbTotalBytes(string $database, string $driver): int
+    private static function mariadbTotalBytes(string $database, string $driver): int
     {
         /** @var object|null $row */
         $row = DB::connection($driver)->selectOne(
@@ -391,7 +391,7 @@ final class UpdateGeneralSettings
 
         return match ($driver) {
             'mysql', 'mariadb' => (int) round(
-                $this->mariadbTotalBytes(
+                self::mariadbTotalBytes(
                     (string) config("database.connections.{$driver}.database"),
                     $driver,
                 ) / 1_048_576,

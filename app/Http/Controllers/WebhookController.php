@@ -121,7 +121,7 @@ class WebhookController extends Controller
                     ->title('Test delivery succeeded')
                     ->message(
                         "\"{$webhook->name}\" responded with {$delivery->status_code} "
-                        ."in {$delivery->duration_ms}ms."
+                        . "in {$delivery->duration_ms}ms."
                     )
                     ->send();
             } else {
@@ -130,7 +130,7 @@ class WebhookController extends Controller
                     ->title('Test delivery failed')
                     ->message(
                         "\"{$webhook->name}\" returned {$delivery->status_code}: "
-                        ."{$delivery->status_text}."
+                        . "{$delivery->status_text}."
                     )
                     ->send();
             }

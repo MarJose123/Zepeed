@@ -126,7 +126,7 @@ class CloudflareSpeedService extends AbstractSpeedtestService
                 'network_name' => $parsed['network_name'] ?? null,
             ]),
             'cloudflare_last_result_at'          => $parsed['timestamp_utc'] ?? null,
-        ], fn (mixed $v): bool => $v !== null);
+        ], static fn (mixed $v): bool => $v !== null);
 
         $this->provider->update([
             'meta' => array_merge($existing, $diagnostics),

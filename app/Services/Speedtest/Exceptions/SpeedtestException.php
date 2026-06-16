@@ -46,7 +46,7 @@ class SpeedtestException extends RuntimeException
         return new self(
             server : $server,
             reason : SpeedtestFailureReason::InvalidJson,
-            message: "{$server->label()} returned unparseable output: ".substr($raw, 0, 200),
+            message: "{$server->label()} returned unparseable output: " . substr($raw, 0, 200),
         );
     }
 

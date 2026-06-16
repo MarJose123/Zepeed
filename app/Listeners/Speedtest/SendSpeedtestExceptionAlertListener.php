@@ -31,6 +31,6 @@ class SendSpeedtestExceptionAlertListener implements ShouldQueue
             exception: $event->exception,
         );
 
-        User::query()->each(fn (User $user) => $user->notify($notification));
+        User::query()->each(static fn (User $user) => $user->notify($notification));
     }
 }

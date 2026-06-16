@@ -11,5 +11,5 @@ Route::get('/', PublicDashboardController::class)
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
-require __DIR__.'/speedtest.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/speedtest.php';

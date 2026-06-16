@@ -28,13 +28,13 @@ final class PruneWebhookDeliveriesCommand extends Command
         $cutoff = now()->subDays($retentionDays);
         $extendedCutoff = now()->subDays(90);
 
-        $query = WebhookDelivery::query()->where(function (Builder $q) use ($cutoff, $extendedCutoff, $extendedFailures): void {
+        $query = WebhookDelivery::query()->where(static function (Builder $q) use ($cutoff, $extendedCutoff, $extendedFailures): void {
             if ($extendedFailures) {
                 // Failed deliveries use the 90-day extended window regardless.
-                $q->where(function (Builder $inner) use ($cutoff): void {
+                $q->where(static function (Builder $inner) use ($cutoff): void {
                     $inner->where('status', '!=', 'failed')
                         ->where('created_at', '<', $cutoff);
-                })->orWhere(function (Builder $inner) use ($extendedCutoff): void {
+                })->orWhere(static function (Builder $inner) use ($extendedCutoff): void {
                     $inner->where('status', 'failed')
                         ->where('created_at', '<', $extendedCutoff);
                 });
@@ -61,8 +61,8 @@ final class PruneWebhookDeliveriesCommand extends Command
 
         $deleted = 0;
 
-        DB::transaction(function () use ($query, &$deleted): void {
-            $query->chunkById(500, function ($chunk) use (&$deleted): void {
+        DB::transaction(static function () use ($query, &$deleted): void {
+            $query->chunkById(500, static function ($chunk) use (&$deleted): void {
                 $ids = $chunk->pluck('id')->all();
                 $deleted += WebhookDelivery::query()->whereIn('id', $ids)->delete();
             });

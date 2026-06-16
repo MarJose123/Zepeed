@@ -30,7 +30,7 @@ class MailProviderResource extends JsonResource
             'failure_count'      => $provider->failure_count,
             'is_primary'         => $provider->priority === 1,
             // Never expose raw config — only expose non-sensitive indicators
-            'config_summary'  => $this->buildConfigSummary($provider),
+            'config_summary'  => self::buildConfigSummary($provider),
             'created_at'      => $provider->created_at->toIso8601String(),
         ];
     }
@@ -40,7 +40,7 @@ class MailProviderResource extends JsonResource
      *
      * @return string
      */
-    private function buildConfigSummary(MailProvider $provider): string
+    private static function buildConfigSummary(MailProvider $provider): string
     {
         $config = $provider->config;
 

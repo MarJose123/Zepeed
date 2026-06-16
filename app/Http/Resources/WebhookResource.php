@@ -18,7 +18,7 @@ class WebhookResource extends JsonResource
             'id'                 => $webhook->id,
             'name'               => $webhook->name,
             'url'                => $webhook->url,
-            'url_preview'        => $this->buildUrlPreview($webhook->url),
+            'url_preview'        => self::buildUrlPreview($webhook->url),
             'method'             => $webhook->method,
             'has_secret'         => filled($webhook->secret),
             'headers'            => $webhook->headers ?? [],
@@ -36,14 +36,14 @@ class WebhookResource extends JsonResource
     /**
      * Truncate URL for display — show host + first path segment.
      */
-    private function buildUrlPreview(string $url): string
+    private static function buildUrlPreview(string $url): string
     {
         $parsed = parse_url($url);
         $host = $parsed['host'] ?? $url;
         $path = $parsed['path'] ?? '';
-        $short = rtrim($host.substr($path, 0, 20), '/');
+        $short = rtrim($host . substr($path, 0, 20), '/');
 
-        return strlen($url) > strlen($short) ? $short.'…' : $short;
+        return strlen($url) > strlen($short) ? $short . '…' : $short;
     }
 
     private function webhook(): Webhook

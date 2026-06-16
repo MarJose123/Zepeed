@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('webhook_deliveries', function (Blueprint $table) {
+        Schema::create('webhook_deliveries', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('webhook_id')->constrained()->cascadeOnDelete();
             $table->string('event')->nullable();                   // e.g. speedtest.failure

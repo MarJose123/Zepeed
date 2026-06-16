@@ -38,7 +38,7 @@ class SpeedtestServiceProvider extends ServiceProvider
         //   $result  = $service->run();
 
         $this->app->bind(
-            function ($app, array $parameters): SpeedtestServiceInterface {
+            static function ($app, array $parameters): SpeedtestServiceInterface {
                 /** @var Provider $provider */
                 $provider = $parameters['provider']
                     ?? throw new InvalidArgumentException(
@@ -61,8 +61,8 @@ class SpeedtestServiceProvider extends ServiceProvider
 
         $this->eventListeners();
 
-        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            $this->scheduleSpeedtestPruning($schedule);
+        $this->callAfterResolving(Schedule::class, static function (Schedule $schedule): void {
+            self::scheduleSpeedtestPruning($schedule);
         });
     }
 
@@ -98,7 +98,7 @@ class SpeedtestServiceProvider extends ServiceProvider
      * lives inside the command itself so the schedule entry is always safe
      * to register.
      */
-    private function scheduleSpeedtestPruning(Schedule $schedule): void
+    private static function scheduleSpeedtestPruning(Schedule $schedule): void
     {
         $schedule
             ->command(PruneSpeedResultsCommand::class)

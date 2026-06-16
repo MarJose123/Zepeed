@@ -67,7 +67,7 @@ class SpeedtestRunCommand extends Command
 
             if ($server === null) {
                 $this->components->error(
-                    "Invalid provider slug \"{$slug}\". Valid values: ".
+                    "Invalid provider slug \"{$slug}\". Valid values: " .
                     implode(', ', array_column(SpeedtestServer::cases(), 'value'))
                 );
 
@@ -95,7 +95,7 @@ class SpeedtestRunCommand extends Command
     {
         if (! $provider->is_runnable) {
             $this->components->warn(
-                "{$provider->slug->label()} is not runnable — skipping. ".
+                "{$provider->slug->label()} is not runnable — skipping. " .
                 ($provider->slug->requiresServerUrl() && empty($provider->server_url)
                     ? '(Server URL not configured)'
                     : '(Provider disabled)')
@@ -113,7 +113,7 @@ class SpeedtestRunCommand extends Command
     {
         if (! $provider->is_runnable) {
             $this->components->warn(
-                "{$provider->slug->label()} is not runnable — skipping. ".
+                "{$provider->slug->label()} is not runnable — skipping. " .
                 ($provider->slug->requiresServerUrl() && empty($provider->server_url)
                     ? '(Server URL not configured)'
                     : '(Provider disabled)')

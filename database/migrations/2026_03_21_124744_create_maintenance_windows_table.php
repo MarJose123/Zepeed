@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('maintenance_windows', function (Blueprint $table) {
+        Schema::create('maintenance_windows', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('label'); // Human-readable name e.g. "ISP maintenance" "Weekly backup"
             $table->string('type'); // App\Enums\MaintenanceWindowType: 'indefinite'|'one_time'|'recurring'
