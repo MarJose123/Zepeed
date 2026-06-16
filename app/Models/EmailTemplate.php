@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EmailTemplateType;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -9,14 +10,15 @@ use Illuminate\Support\Facades\Blade;
 use Override;
 
 /**
- * @property string          $id
- * @property string          $name
- * @property string          $slug
- * @property string          $subject
- * @property string          $body
- * @property bool            $is_system
- * @property CarbonImmutable $created_at
- * @property CarbonImmutable $updated_at
+ * @property string            $id
+ * @property string            $name
+ * @property string            $slug
+ * @property string            $subject
+ * @property string            $body
+ * @property bool              $is_system
+ * @property EmailTemplateType $template_type
+ * @property CarbonImmutable   $created_at
+ * @property CarbonImmutable   $updated_at
  */
 class EmailTemplate extends Model
 {
@@ -28,13 +30,15 @@ class EmailTemplate extends Model
         'subject',
         'body',
         'is_system',
+        'template_type',
     ];
 
     #[Override]
     protected function casts(): array
     {
         return [
-            'is_system' => 'boolean',
+            'is_system'     => 'boolean',
+            'template_type' => EmailTemplateType::class,
         ];
     }
 
@@ -77,47 +81,49 @@ class EmailTemplate extends Model
      */
     public function renderBody(array $data): string
     {
-        // Strip pill wrappers — extract the raw Blade tag from data-merge-field attribute.
-        // Handles both {{ }} and {!! !!} tags.
         $body = preg_replace_callback(
             '/<span[^>]+data-merge-field="([^"]+)"[^>]*>.*?<\/span>/s',
-            fn ($matches) => $matches[1],
+            static fn ($matches) => $matches[1],
             $this->body,
         ) ?? $this->body;
 
         return Blade::render($body, static::buildRenderData($data));
     }
 
-    /**
-     * Whether this template is referenced by any alert rules.
-     * Placeholder until AlertRule model is built.
-     */
     public function isUsedInRules(): bool
     {
         return AlertRuleAction::query()
             ->where('email_template_id', $this->id)
-            ->exists();
+            ->exists()
+            ||
+            PingAlertAction::query()
+                ->where('email_template_id', $this->id)
+                ->exists();
     }
 
-    /**
-     * @return array<string>
-     */
+    /** @return array<string> */
     public function usedInRuleNames(): array
     {
-        return AlertRuleAction::query()
+        $speedtestNames = AlertRuleAction::query()
             ->where('email_template_id', $this->id)
             ->with('rule')
             ->get()
-            ->pluck('rule.name')
+            ->pluck('rule.name');
+
+        $pingNames = PingAlertAction::query()
+            ->where('email_template_id', $this->id)
+            ->with('rule')
+            ->get()
+            ->pluck('rule.name');
+
+        return $speedtestNames
+            ->merge($pingNames)
             ->filter()
             ->unique()
             ->values()
             ->all();
     }
 
-    /**
-     * Find a system template by slug, falling back to the default alert.
-     */
     public static function findBySlug(string $slug): self
     {
         return static::query()

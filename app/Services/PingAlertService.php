@@ -100,23 +100,58 @@ class PingAlertService
         Log::info("PingAlertService: rule [{$rule->id}] fired for target [{$target->id}].");
     }
 
-    private function fireEmail(PingAlertAction $action, PingAlertRule $rule, PingTarget $target, PingResult $result): void
-    {
+    /**
+     * Build merge data for a ping alert email.
+     *
+     * @return array<string, mixed>
+     */
+    private static function buildMergeData(
+        PingAlertRule $rule,
+        PingTarget $target,
+        PingResult $result,
+    ): array {
+        $tz = config('app.timezone');
+
+        return [
+            // Target & result
+            'target_label'        => $target->label,
+            'target_host'         => $target->host,
+            'status'              => $result->status->value,
+            'packets_sent'        => $result->packets_sent,
+            'packets_received'    => $result->packets_received,
+            'packet_loss_percent' => $result->packet_loss_percent,
+
+            // Latency
+            'min_ms'    => $result->min_ms ?? '—',
+            'avg_ms'    => $result->avg_ms ?? '—',
+            'max_ms'    => $result->max_ms ?? '—',
+            'stddev_ms' => $result->stddev_ms ?? '—',
+
+            // Failure
+            'failure_reason' => $result->failure_reason ?? '',
+
+            // Alert context
+            'rule_name'    => $rule->name,
+            'triggered_at' => now()->format('d M Y H:i') . " {$tz}",
+
+            // Links
+            'dashboard_url' => url(route('dashboard')),
+        ];
+    }
+
+    private function fireEmail(
+        PingAlertAction $action,
+        PingAlertRule $rule,
+        PingTarget $target,
+        PingResult $result,
+    ): void {
         if (! $action->emailTemplate || ! $action->recipient_email) {
             return;
         }
 
-        $mergeData = [
-            'rule'         => $rule->name,
-            'target'       => $target->label,
-            'host'         => $target->host,
-            'status'       => $result->status->label(),
-            'avg_ms'       => $result->avg_ms,
-            'packet_loss'  => $result->packet_loss_percent,
-            'triggered_at' => now()->toIso8601String(),
-        ];
-
+        $mergeData = self::buildMergeData($rule, $target, $result);
         $template = $action->emailTemplate;
+
         $subject = $template->renderSubject($mergeData);
         $body = $template->renderBody($mergeData);
 

@@ -14,11 +14,17 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
-import type { EmailTemplate, MergeField } from "@/types/email-template";
+import type {
+    EmailTemplate,
+    MergeField,
+    TemplateTypeOption,
+} from "@/types/email-template";
 
 const props = defineProps<{
     templates: EmailTemplate[];
     merge_fields: MergeField[];
+    ping_merge_fields: MergeField[];
+    template_types: TemplateTypeOption[];
 }>();
 
 const breadcrumbs: TBreadcrumbItem[] = [
@@ -73,6 +79,10 @@ const lastUpdatedLabel = (tpl: EmailTemplate): string => {
     return `${Math.floor(hrs / 24)}d ago`;
 };
 
+const typeLabel = (tpl: EmailTemplate): string =>
+    props.template_types.find((t) => t.value === tpl.template_type)?.label ??
+    tpl.template_type;
+
 const bladeSnippet = `@if($failure_reason)\nFailure: {{ $failure_reason }}\n@endif`;
 const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
 </script>
@@ -81,7 +91,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
     <Head title="Email templates" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full min-h-0 flex-1">
-            <!-- ── Left: template list ── -->
+            <!-- Left: template list -->
             <div class="border-border flex w-md shrink-0 flex-col border-r">
                 <div
                     class="border-border flex items-center justify-between border-b px-3 py-3"
@@ -126,7 +136,6 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                         >
                             {{ template.name }}
                         </div>
-                        <!-- Use safeSubject() to strip Blade tags — avoids Vue compiler conflict -->
                         <div
                             class="mt-0.5 truncate text-xs"
                             :class="
@@ -137,7 +146,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                         >
                             {{ template.subject }}
                         </div>
-                        <div class="mt-1.5 flex items-center gap-1.5">
+                        <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
                             <Badge
                                 variant="outline"
                                 class="text-[9px]"
@@ -148,6 +157,18 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                                 "
                             >
                                 {{ template.is_system ? "system" : "custom" }}
+                            </Badge>
+                            <!-- Template type pill -->
+                            <Badge
+                                variant="outline"
+                                class="text-[9px]"
+                                :class="
+                                    template.template_type === 'ping'
+                                        ? 'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                                        : 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                "
+                            >
+                                {{ typeLabel(template) }}
                             </Badge>
                             <span class="text-muted-foreground text-[10px]">
                                 {{ lastUpdatedLabel(template) }}
@@ -170,13 +191,15 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                 </div>
             </div>
 
-            <!-- ── Right: editor ── -->
+            <!-- Right: editor -->
             <div class="flex flex-1 flex-col overflow-hidden">
                 <TemplateEditor
                     v-if="isNew || selectedTemplate"
                     :key="isNew ? 'new' : selectedId!"
                     :template="isNew ? null : selectedTemplate"
                     :merge-fields="merge_fields"
+                    :ping-merge-fields="ping_merge_fields"
+                    :template-types="template_types"
                     :is-new="isNew"
                     @saved="isNew = false"
                     @deleted="selectedId = templates[0]?.id ?? null"
@@ -196,7 +219,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
             </div>
         </div>
 
-        <!-- ── Help dialog ── -->
+        <!-- Help dialog — unchanged -->
         <Dialog v-model:open="showHelp">
             <DialogContent class="max-w-md">
                 <DialogHeader>
@@ -204,13 +227,11 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                         How email templates work
                     </DialogTitle>
                 </DialogHeader>
-
                 <div class="space-y-4">
                     <p class="text-muted-foreground text-xs leading-relaxed">
                         Templates are stored as strings and rendered at send
                         time — no extra packages required.
                     </p>
-
                     <div class="space-y-1.5">
                         <p class="text-xs font-medium">
                             Inserting merge fields
@@ -224,21 +245,12 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                                 >#</Kbd
                             >
                             anywhere in the subject or body to open the merge
-                            field picker. Use ↑↓ to navigate, Enter to insert,
-                            Esc to dismiss. You can also click any chip at the
-                            bottom of the editor.
+                            field picker. The fields shown match the template
+                            type (Speedtest or Ping result).
                         </p>
                     </div>
-
                     <div class="space-y-1.5">
                         <p class="text-xs font-medium">Blade directives</p>
-                        <p
-                            class="text-muted-foreground text-xs leading-relaxed"
-                        >
-                            Templates run through the full Blade compiler so all
-                            directives work:
-                        </p>
-                        <!-- Use v-text / pre to safely render Blade snippets without Vue parsing them -->
                         <pre
                             class="bg-muted rounded-lg p-3 font-mono text-[11px] leading-relaxed"
                             v-text="bladeSnippet"
@@ -248,34 +260,16 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             v-text="bladeSnippet2"
                         />
                     </div>
-
                     <div class="space-y-1.5">
-                        <p class="text-xs font-medium">
-                            System vs custom templates
-                        </p>
+                        <p class="text-xs font-medium">Template types</p>
                         <p
                             class="text-muted-foreground text-xs leading-relaxed"
                         >
-                            System templates ship with Zepeed and cannot be
-                            deleted — only edited. Custom templates can be
-                            freely removed. Alert rules reference templates by
-                            ID so deleting a used template will leave those
-                            rules without one.
-                        </p>
-                    </div>
-
-                    <div class="border-border rounded-lg border p-3">
-                        <p class="text-muted-foreground text-xs">
-                            For the full Blade reference visit
-
-                            <a
-                                href="https://laravel.com/docs/blade"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-primary underline underline-offset-2"
-                            >
-                                laravel.com/docs/blade
-                            </a>
+                            Choose <strong>Speedtest result</strong> for speed
+                            alert rules and <strong>Ping result</strong> for
+                            ping alert rules. The merge field picker
+                            automatically shows only the fields relevant to the
+                            selected type.
                         </p>
                     </div>
                 </div>

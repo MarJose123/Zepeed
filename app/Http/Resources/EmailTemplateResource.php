@@ -21,6 +21,7 @@ class EmailTemplateResource extends JsonResource
             'subject'            => $tpl->subject,
             'body'               => $tpl->body,
             'is_system'          => $tpl->is_system,
+            'template_type'      => $tpl->template_type->value,
             'is_used_in_rules'   => $tpl->isUsedInRules(),
             'used_in_rule_names' => $tpl->usedInRuleNames(),
             'updated_at'         => $tpl->updated_at->toIso8601String(),

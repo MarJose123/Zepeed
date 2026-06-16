@@ -9,11 +9,25 @@ import TiptapEditor from "@/components/email-template/TiptapEditor.vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { EmailTemplate, MergeField } from "@/types/email-template";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import type {
+    EmailTemplate,
+    EmailTemplateType,
+    MergeField,
+    TemplateTypeOption,
+} from "@/types/email-template";
 
 const props = defineProps<{
     template: EmailTemplate | null;
     mergeFields: MergeField[];
+    pingMergeFields: MergeField[];
+    templateTypes: TemplateTypeOption[];
     isNew: boolean;
 }>();
 
@@ -26,6 +40,8 @@ const form = useForm({
     name: props.template?.name ?? "",
     subject: props.template?.subject ?? "",
     body: props.template?.body ?? "",
+    template_type: (props.template?.template_type ??
+        "speedtest") as EmailTemplateType,
 });
 
 watch(
@@ -34,21 +50,24 @@ watch(
         form.name = tpl?.name ?? "";
         form.subject = tpl?.subject ?? "";
         form.body = tpl?.body ?? "";
+        form.template_type = tpl?.template_type ?? "speedtest";
     },
     { immediate: false },
+);
+
+// Active merge fields based on selected type
+const activeFields = computed<MergeField[]>(() =>
+    form.template_type === "ping" ? props.pingMergeFields : props.mergeFields,
 );
 
 const showPreview = ref(false);
 const showDeleteDialog = ref(false);
 
-// Subject field — still uses native input with # trigger via MergeFieldPicker
 const subjectRef = ref<HTMLInputElement | null>(null);
 const pickerZone = ref<"subject" | null>(null);
 const hashPos = ref(-1);
 const pickerTop = ref(0);
 const pickerLeft = ref(0);
-
-// Keep the old MergeFieldPicker only for subject since body is now Tiptap
 
 const closePicker = () => {
     pickerZone.value = null;
@@ -96,9 +115,7 @@ const save = () => {
     if (props.isNew) {
         form.post(route("speedtest.email-templates.store", {}, false), {
             preserveScroll: true,
-            onSuccess: () => {
-                emit("saved");
-            },
+            onSuccess: () => emit("saved"),
         });
     } else if (props.template) {
         form.patch(
@@ -109,9 +126,7 @@ const save = () => {
             ),
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    emit("saved");
-                },
+                onSuccess: () => emit("saved"),
             },
         );
     }
@@ -120,7 +135,6 @@ const save = () => {
 const confirmDelete = () => {
     showDeleteDialog.value = true;
 };
-
 const cancelDelete = () => {
     showDeleteDialog.value = false;
 };
@@ -186,9 +200,9 @@ const lastUpdatedLabel = computed(() => {
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <span v-if="form.isDirty" class="text-muted-foreground text-xs"
-                    >Unsaved changes</span
-                >
+                <span v-if="form.isDirty" class="text-muted-foreground text-xs">
+                    Unsaved changes
+                </span>
                 <Button
                     v-if="!isNew && template && !template.is_system"
                     variant="outline"
@@ -220,7 +234,7 @@ const lastUpdatedLabel = computed(() => {
 
         <!-- Editor body -->
         <div class="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-            <!-- Name + Subject -->
+            <!-- Row 1: Name + Template type picklist -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                     <Label class="text-xs">Template name</Label>
@@ -234,51 +248,106 @@ const lastUpdatedLabel = computed(() => {
                     </p>
                 </div>
 
-                <div class="relative space-y-1.5">
+                <div class="space-y-1.5">
                     <Label class="text-xs">
-                        Subject
+                        Template type
                         <span class="text-muted-foreground font-normal">
-                            — type
-                            <kbd
-                                class="border-border bg-muted rounded border px-1 font-mono text-[10px]"
-                                >#</kbd
-                            >
-                            to insert field
+                            — controls available merge fields
                         </span>
                     </Label>
-                    <input
-                        ref="subjectRef"
-                        v-model="form.subject"
-                        placeholder="⚡ Speedtest alert — {{ $provider_name }}"
-                        class="border-border bg-background focus:border-ring placeholder:text-muted-foreground h-9 w-full rounded-lg border px-3 font-mono text-xs outline-none transition-colors"
-                        @input="onSubjectInput"
-                    />
+                    <Select
+                        :model-value="form.template_type"
+                        :disabled="template?.is_system"
+                        @update:model-value="
+                            (v) =>
+                                v &&
+                                (form.template_type = v as EmailTemplateType)
+                        "
+                    >
+                        <SelectTrigger class="h-9 text-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="opt in templateTypes"
+                                :key="opt.value"
+                                :value="opt.value"
+                                class="text-xs"
+                            >
+                                {{ opt.label }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                     <p
-                        v-if="form.errors.subject"
+                        v-if="form.errors.template_type"
                         class="text-destructive text-xs"
                     >
-                        {{ form.errors.subject }}
+                        {{ form.errors.template_type }}
                     </p>
-
-                    <!-- Subject merge picker -->
-                    <MergeFieldPicker
-                        :fields="mergeFields"
-                        :visible="pickerZone === 'subject'"
-                        :top="pickerTop"
-                        :left="pickerLeft"
-                        @insert="insertField"
-                        @close="closePicker"
-                    />
+                    <p
+                        v-if="form.template_type === 'ping'"
+                        class="text-[11px] text-purple-600 dark:text-purple-400"
+                    >
+                        Merge fields are scoped to ping result data.
+                    </p>
+                    <p
+                        v-else
+                        class="text-[11px] text-amber-600 dark:text-amber-400"
+                    >
+                        Merge fields are scoped to speedtest result data.
+                    </p>
                 </div>
             </div>
 
-            <!-- Tiptap body editor -->
+            <!-- Row 2: Subject -->
+            <div class="relative space-y-1.5">
+                <Label class="text-xs">
+                    Subject
+                    <span class="text-muted-foreground font-normal">
+                        — type
+                        <kbd
+                            class="border-border bg-muted rounded border px-1 font-mono text-[10px]"
+                            >#</kbd
+                        >
+                        to insert field
+                    </span>
+                </Label>
+                <input
+                    ref="subjectRef"
+                    v-model="form.subject"
+                    :placeholder="
+                        form.template_type === 'ping'
+                            ? '🔔 Ping alert — {{ $target_label }}'
+                            : '⚡ Speedtest alert — {{ $provider_name }}'
+                    "
+                    class="border-border bg-background focus:border-ring placeholder:text-muted-foreground h-9 w-full rounded-lg border px-3 font-mono text-xs outline-none transition-colors"
+                    @input="onSubjectInput"
+                />
+                <p v-if="form.errors.subject" class="text-destructive text-xs">
+                    {{ form.errors.subject }}
+                </p>
+
+                <MergeFieldPicker
+                    :fields="activeFields"
+                    :visible="pickerZone === 'subject'"
+                    :top="pickerTop"
+                    :left="pickerLeft"
+                    @insert="insertField"
+                    @close="closePicker"
+                />
+            </div>
+
+            <!-- Row 3: Body -->
             <div class="flex flex-1 flex-col space-y-1.5">
                 <Label class="text-xs">Body</Label>
                 <TiptapEditor
                     v-model="form.body"
-                    :merge-fields="mergeFields"
-                    placeholder="Write your email body here… type # to insert a merge field"
+                    :merge-fields="activeFields"
+                    :placeholder="
+                        form.template_type === 'ping'
+                            ? 'Write your ping alert email here… type # to insert a merge field'
+                            : 'Write your email body here… type # to insert a merge field'
+                    "
                 />
                 <p v-if="form.errors.body" class="text-destructive text-xs">
                     {{ form.errors.body }}
@@ -286,7 +355,7 @@ const lastUpdatedLabel = computed(() => {
             </div>
         </div>
 
-        <!-- Delete confirmation -->
+        <!-- Delete confirmation — unchanged -->
         <Teleport to="body">
             <div
                 v-if="showDeleteDialog"
@@ -333,8 +402,9 @@ const lastUpdatedLabel = computed(() => {
                             variant="secondary"
                             size="sm"
                             @click="cancelDelete"
-                            >Keep template</Button
                         >
+                            Keep template
+                        </Button>
                         <Button
                             size="sm"
                             variant="destructive"
@@ -357,5 +427,6 @@ const lastUpdatedLabel = computed(() => {
         :template="isNew ? null : template"
         :subject="form.subject"
         :body="form.body"
+        :template-type="form.template_type"
     />
 </template>

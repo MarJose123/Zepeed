@@ -9,14 +9,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { EmailTemplate } from "@/types/email-template";
+import type { EmailTemplate, EmailTemplateType } from "@/types/email-template";
 
 const props = defineProps<{
     open: boolean;
     template: EmailTemplate | null;
-    /** Live subject/body from the editor — used when template is unsaved */
     subject: string;
     body: string;
+    templateType: EmailTemplateType;
 }>();
 
 const emit = defineEmits<{
@@ -70,6 +70,7 @@ watch(
                 const http = useHttp({
                     subject: props.subject,
                     body: props.body,
+                    template_type: props.templateType,
                 });
                 // Unsaved / new template — POST raw content
                 http.post(
