@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\QueueWorkerName;
+use App\Exceptions\ApiException;
 use App\Http\Middleware\HandleAppearanceMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventRequestsDuringMaintenanceMiddleware;
@@ -18,11 +19,13 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Request as RequestAlias;
 use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
@@ -32,6 +35,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->replaceInGroup('web', PreventRequestsDuringMaintenance::class, PreventRequestsDuringMaintenanceMiddleware::class);
+
+        $middleware->trustProxies(
+            at: '*',
+            headers: RequestAlias::HEADER_X_FORWARDED_FOR
+        );
 
         $middleware->web(append: [
             HandleAppearanceMiddleware::class,
@@ -80,7 +88,13 @@ return Application::configure(basePath: dirname(__DIR__))
             });
     })
     ->withExceptions(static function (Exceptions $exceptions): void {
-        //
+
+        $exceptions->renderable(static function (Throwable $throwable, Request $request) {
+            if ($request->is('api/*') && $request->wantsJson() || $request->expectsJson()) {
+                return app(ApiException::class)->renderApiException($throwable);
+            }
+        });
+
         $exceptions->respond(static function (Response $response, Throwable $exception, Request $request) {
             if (! app()->environment(['testing']) && in_array($response->getStatusCode(), [500, 503, 404, 403])) {
                 $retryAfter = $response->headers->get('retry-after');
