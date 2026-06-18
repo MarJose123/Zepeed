@@ -49,43 +49,51 @@ return Application::configure(basePath: dirname(__DIR__))
             ->appendToPriorityList(StartSession::class, HandleInertiaRequests::class);
     })
     ->withSchedule(static function (Schedule $schedule) {
-        // Load enabled providers that are fully configured
-        // withoutOverlapping() is handled at the Job level via uniqueId()
-        // so we don't need it here — avoids a cache dependency in bootstrap
-        ProviderSchedule::query()
-            ->enabled()
-            ->whereHas('provider', static fn ($q) => $q->enabled())
-            ->get()
-            ->each(static function (ProviderSchedule $providerSchedule) use ($schedule) {
-                if (! $providerSchedule->cron_expression) {
-                    return;
-                }
 
-                $schedule
-                    ->job(
-                        new RunSpeedtestJob($providerSchedule->provider),
-                        queue: QueueWorkerName::Speedtest->value,
-                    )
-                    ->cron($providerSchedule->cron_expression)
-                    ->name("speedtest:{$providerSchedule->provider_slug->value}:{$providerSchedule->id}")
-                    ->withoutOverlapping(expiresAt: 10);
-            });
+        try {
+            // Load enabled providers that are fully configured
+            // withoutOverlapping() is handled at the Job level via uniqueId()
+            // so we don't need it here — avoids a cache dependency in bootstrap
+            ProviderSchedule::query()
+                ->enabled()
+                ->whereHas('provider', static fn ($q) => $q->enabled())
+                ->get()
+                ->each(static function (ProviderSchedule $providerSchedule) use ($schedule) {
+                    if (! $providerSchedule->cron_expression) {
+                        return;
+                    }
 
-        // Network — Ping Targets (every minute)
-        PingTarget::query()
-            ->enabled()
-            ->get()
-            ->each(static function (PingTarget $target) use ($schedule): void {
-                $schedule
-                    ->job(
-                        new RunPingTestJob($target),
-                        queue: QueueWorkerName::Ping->value,
-                    )
-                    ->everyMinute()
-                    ->name("ping-target:{$target->id}")
-                    ->description(sprintf('Queuing %s(%s) for ping test', $target->label, $target->host))
-                    ->withoutOverlapping(expiresAt: 2);
-            });
+                    $schedule
+                        ->job(
+                            new RunSpeedtestJob($providerSchedule->provider),
+                            queue: QueueWorkerName::Speedtest->value,
+                        )
+                        ->cron($providerSchedule->cron_expression)
+                        ->name("speedtest:{$providerSchedule->provider_slug->value}:{$providerSchedule->id}")
+                        ->withoutOverlapping(expiresAt: 10);
+                });
+
+            // Network — Ping Targets (every minute)
+            PingTarget::query()
+                ->enabled()
+                ->get()
+                ->each(static function (PingTarget $target) use ($schedule): void {
+                    $schedule
+                        ->job(
+                            new RunPingTestJob($target),
+                            queue: QueueWorkerName::Ping->value,
+                        )
+                        ->everyMinute()
+                        ->name("ping-target:{$target->id}")
+                        ->description(sprintf('Queuing %s(%s) for ping test', $target->label, $target->host))
+                        ->withoutOverlapping(expiresAt: 2);
+                });
+        } catch (Throwable) {
+            // Silently skip schedule registration if database is unavailable.
+            // This allows composer install and other bootstrap operations to proceed
+            // before migrations have run or during CI environments.
+        }
+
     })
     ->withExceptions(static function (Exceptions $exceptions): void {
 
