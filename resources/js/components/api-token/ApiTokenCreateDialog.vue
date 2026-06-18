@@ -18,12 +18,11 @@ const open = ref(false);
 const form = useForm({
     name: "",
     expires_at: "",
-    password: "",
 });
 
 function close(): void {
     open.value = false;
-    setTimeout(() => form.reset(), 200);
+    form.reset();
 }
 
 function save(): void {
@@ -57,7 +56,7 @@ function save(): void {
                         class="text-xs"
                         @keyup.enter="save"
                     />
-                    <p v-if="form.errors.name" class="text-destructive text-xs">
+                    <p v-if="form.errors.name" class="text-xs text-destructive">
                         {{ form.errors.name }}
                     </p>
                 </div>
@@ -65,7 +64,7 @@ function save(): void {
                 <div class="space-y-1.5">
                     <Label class="text-xs">
                         Expires At
-                        <span class="text-muted-foreground font-normal"
+                        <span class="font-normal text-muted-foreground"
                             >(optional)</span
                         >
                     </Label>
@@ -76,26 +75,9 @@ function save(): void {
                     />
                     <p
                         v-if="form.errors.expires_at"
-                        class="text-destructive text-xs"
+                        class="text-xs text-destructive"
                     >
                         {{ form.errors.expires_at }}
-                    </p>
-                </div>
-
-                <div class="space-y-1.5">
-                    <Label class="text-xs">Confirm Password</Label>
-                    <Input
-                        v-model="form.password"
-                        type="password"
-                        placeholder="Enter your current password"
-                        class="text-xs"
-                        @keyup.enter="save"
-                    />
-                    <p
-                        v-if="form.errors.password"
-                        class="text-destructive text-xs"
-                    >
-                        {{ form.errors.password }}
                     </p>
                 </div>
             </div>

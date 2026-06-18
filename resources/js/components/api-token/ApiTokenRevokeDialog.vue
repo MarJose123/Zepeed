@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Form } from "@inertiajs/vue3";
-import { useTemplateRef } from "vue";
+import { useForm } from "@inertiajs/vue3";
+import { Loader2 } from "@lucide/vue";
+import { useTemplateRef, watch } from "vue";
 import {
     AlertDialog,
+    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,89 +18,93 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { InputPassword } from "@/components/ui/input-password";
 import type { ApiToken } from "@/types/api-token";
 
 const props = defineProps<{ token: ApiToken | null }>();
 const emit = defineEmits<{ close: [] }>();
 
 const passwordInput = useTemplateRef("passwordInput");
+
+const form = useForm({ password: "" });
+
+watch(
+    () => props.token,
+    (val) => {
+        if (!val) {
+            form.reset();
+            form.clearErrors();
+        }
+    },
+);
+
+function close(): void {
+    emit("close");
+}
+
+function confirm(): void {
+    if (!props.token) return;
+
+    form.delete(route("api-tokens.destroy", { token: props.token.id }), {
+        preserveScroll: true,
+        onSuccess: () => close(),
+        onError: () => passwordInput.value?.$el?.focus(),
+    });
+}
 </script>
 
 <template>
-    <AlertDialog
-        :open="!!props.token"
-        @update:open="(v) => !v && emit('close')"
-    >
+    <AlertDialog :open="!!props.token" @update:open="(v) => !v && close()">
         <AlertDialogContent>
-            <Form
-                method="delete"
-                :action="
-                    route('api-tokens.destroy', { token: props.token?.id })
-                "
-                reset-on-success
-                :options="{ preserveScroll: true }"
-                class="space-y-6"
-                @error="() => passwordInput?.$el?.focus()"
-                @success="emit('close')"
-                v-slot="{ errors, processing, reset, clearErrors }"
-            >
-                <AlertDialogHeader class="space-y-3">
-                    <AlertDialogTitle class="text-sm font-medium">
-                        Revoke "{{ props.token?.name }}"?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Any API requests using this token will immediately fail.
-                        Enter your password to confirm.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+            <AlertDialogHeader>
+                <AlertDialogTitle class="text-sm font-medium">
+                    Revoke "{{ props.token?.name }}"?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                    Any API requests using this token will immediately fail.
+                    Enter your password to confirm.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
 
-                <FieldGroup class="grid gap-2">
-                    <Field :data-invalid="errors.hasOwnProperty('password')">
-                        <FieldLabel for="revoke-password" class="sr-only">
-                            Password
-                        </FieldLabel>
-                        <Input
-                            ref="passwordInput"
-                            id="revoke-password"
-                            name="password"
-                            type="password"
-                            placeholder="Confirm your password"
-                            class="text-xs"
-                            @update:model-value="() => clearErrors('password')"
-                        />
-                        <FieldError v-if="errors.password">
-                            {{ errors.password }}
-                        </FieldError>
-                    </Field>
-                </FieldGroup>
+            <FieldGroup class="grid gap-2">
+                <Field :data-invalid="form.errors.hasOwnProperty('password')">
+                    <FieldLabel for="revoke-password" class="sr-only">
+                        Password
+                    </FieldLabel>
+                    <InputPassword
+                        ref="passwordInput"
+                        id="revoke-password"
+                        name="password"
+                        placeholder="Confirm your password"
+                        v-model="form.password"
+                        @update:model-value="form.clearErrors('password')"
+                        @keyup.enter="confirm"
+                    />
+                    <FieldError v-if="form.errors.password">
+                        {{ form.errors.password }}
+                    </FieldError>
+                </Field>
+            </FieldGroup>
 
-                <AlertDialogFooter class="gap-2">
-                    <AlertDialogCancel as-child>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            @click="
-                                () => {
-                                    clearErrors();
-                                    reset();
-                                    emit('close');
-                                }
-                            "
-                        >
-                            Cancel
-                        </Button>
-                    </AlertDialogCancel>
-                    <Button
-                        type="submit"
-                        variant="destructive"
-                        size="sm"
-                        :disabled="processing"
-                    >
-                        Revoke
+            <AlertDialogFooter class="gap-2">
+                <AlertDialogCancel as-child>
+                    <Button variant="secondary" size="sm" @click="close">
+                        Cancel
                     </Button>
-                </AlertDialogFooter>
-            </Form>
+                </AlertDialogCancel>
+                <Button
+                    variant="destructive"
+                    size="sm"
+                    :disabled="form.processing"
+                    @click="confirm"
+                >
+                    <Loader2
+                        v-if="form.processing"
+                        class="mr-1.5 h-3 w-3 animate-spin"
+                    />
+                    Revoke
+                </Button>
+            </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
 </template>

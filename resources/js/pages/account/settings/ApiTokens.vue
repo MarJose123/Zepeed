@@ -50,10 +50,10 @@ const breadcrumbItems: TBreadcrumbItem[] = [
                         </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-2">
+                        <ApiTokenCreateDialog />
                         <ApiTokenRevokeAllDialog
                             :disabled="tokens.length === 0"
                         />
-                        <ApiTokenCreateDialog />
                     </div>
                 </div>
 
