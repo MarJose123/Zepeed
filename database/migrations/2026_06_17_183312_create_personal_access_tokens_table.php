@@ -17,8 +17,10 @@ return new class extends Migration
             $table->text('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();
+            $table->string('last_used_ip', 45)->nullable();
+            $table->text('last_used_agent')->nullable();
             $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

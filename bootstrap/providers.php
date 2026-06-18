@@ -3,6 +3,7 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\EmailTemplateServiceProvider;
 use App\Providers\FortifyServiceProvider;
+use App\Providers\SanctumServiceProvider;
 use App\Providers\SpeedtestServiceProvider;
 
 return [
@@ -10,4 +11,5 @@ return [
     FortifyServiceProvider::class,
     SpeedtestServiceProvider::class,
     EmailTemplateServiceProvider::class,
+    SanctumServiceProvider::class,
 ];

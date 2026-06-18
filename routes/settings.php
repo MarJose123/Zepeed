@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\Settings\ApiTokenController;
 use App\Http\Controllers\Account\Settings\AppearanceController;
 use App\Http\Controllers\Account\Settings\PasswordController;
 use App\Http\Controllers\Account\Settings\ProfileController;
@@ -35,6 +36,20 @@ Route::middleware(['auth'])->group(static function () {
 
         Route::delete('settings/session', [SessionController::class, 'revokeSession'])
             ->name('user-sessions.revoke');
+
+        Route::prefix('settings/api-tokens')->group(static function () {
+            Route::get('/', [ApiTokenController::class, 'index'])
+                ->name('api-tokens.index');
+
+            Route::post('/', [ApiTokenController::class, 'store'])
+                ->name('api-tokens.store');
+
+            Route::delete('/{token}', [ApiTokenController::class, 'destroy'])
+                ->name('api-tokens.destroy');
+
+            Route::delete('/', [ApiTokenController::class, 'revokeAll'])
+                ->name('api-tokens.revoke-all');
+        });
 
     });
 
