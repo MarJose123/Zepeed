@@ -11,4 +11,4 @@ The following versions of this project are currently supported with security upd
 
 ## Reporting a Vulnerability
 
-Send an email to hypernate1@gmail.com
+Found a secuirty vulnerability? **Don't open an issue**, report it to  Send an email to [hypernate1@gmail.com](mailto:hypernate1@gmail.com)
