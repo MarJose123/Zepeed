@@ -50,7 +50,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => file_get_contents('../README.md', true),
+        'description' => "",
     ],
 
     'ui' => [
