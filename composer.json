@@ -24,6 +24,7 @@
         "laravel/fortify": "^1.33",
         "laravel/framework": "^13.0",
         "laravel/prompts": "^0.3.18",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "pusher/pusher-php-server": "^7.2",
         "resend/resend-php": "^1.1",
