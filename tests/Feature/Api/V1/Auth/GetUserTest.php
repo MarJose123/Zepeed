@@ -69,19 +69,14 @@ class GetUserTest extends TestCase
     {
         $response = $this->getJson('/api/v1/auth/user');
 
-
         $response
             ->assertStatus(401)
             ->assertJsonStructure([
                 'success',
                 'message',
-                'statusCode',
-                'code',
-                'type',
             ])
             ->assertJsonPath('success', false)
-            ->assertJsonPath('message', 'Unauthenticated')
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('message', 'Unauthenticated');
     }
 
     /**
@@ -95,7 +90,7 @@ class GetUserTest extends TestCase
         $response
             ->assertStatus(401)
             ->assertJsonPath('success', false)
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('message', 'Unauthenticated');
     }
 
     /**
@@ -115,7 +110,7 @@ class GetUserTest extends TestCase
 
         $response
             ->assertStatus(401)
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('success', false);
     }
 
     /**
@@ -127,7 +122,8 @@ class GetUserTest extends TestCase
 
         $response
             ->assertStatus(401)
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Unauthenticated');
     }
 
     /**

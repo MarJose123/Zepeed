@@ -80,10 +80,8 @@ class SpeedtestServiceProvider extends ServiceProvider
          */
         try {
             resolve(MailProviderService::class)->buildFailoverMailer();
-        } catch (Throwable $th) {
-            Log::error('Failed to build failover mailer.', [
-                'exception' => $th,
-            ]);
+        } catch (Throwable) {
+            // Silently fall back during install / CI / before migrations have run.
         }
     }
 

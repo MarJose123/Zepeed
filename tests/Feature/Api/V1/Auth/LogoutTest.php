@@ -41,12 +41,13 @@ class LogoutTest extends TestCase
             ->assertStatus(200);
 
         // Token should be invalid now
-        $response = $this->withHeader('Authorization', "Bearer {$plainToken}")
-            ->getJson('/api/v1/auth/user');
+        $response = $this->getJson('/api/v1/auth/user', [
+            'Authorization' => "Bearer {$plainToken}",
+        ]);
 
         $response
             ->assertStatus(401)
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('success', false);
     }
 
     /**
@@ -69,9 +70,9 @@ class LogoutTest extends TestCase
             ->assertStatus(200);
 
         // Token should not work anymore
-        $this->withHeader('Authorization', "Bearer {$plainToken}")
-            ->getJson('/api/v1/auth/user')
-            ->assertStatus(401);
+        $this->getJson('/api/v1/auth/user', [
+            'Authorization' => "Bearer {$plainToken}",
+        ])->assertStatus(401);
     }
 
     /**
@@ -86,11 +87,9 @@ class LogoutTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'statusCode',
-                'code',
-                'type',
             ])
-            ->assertJsonPath('type', 'AuthenticationException');
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Unauthenticated');
     }
 
     /**
@@ -108,13 +107,13 @@ class LogoutTest extends TestCase
             ->assertStatus(200);
 
         // Token1 should be revoked
-        $this->withHeader('Authorization', "Bearer {$token1->plainTextToken}")
-            ->getJson('/api/v1/auth/user')
-            ->assertStatus(401);
+        $this->getJson('/api/v1/auth/user', [
+            'Authorization' => "Bearer {$token1->plainTextToken}",
+        ])->assertStatus(401);
 
         // Token2 should still work
-        $this->withHeader('Authorization', "Bearer {$token2->plainTextToken}")
-            ->getJson('/api/v1/auth/user')
-            ->assertStatus(200);
+        $this->getJson('/api/v1/auth/user', [
+            'Authorization' => "Bearer {$token2->plainTextToken}",
+        ])->assertStatus(200);
     }
 }

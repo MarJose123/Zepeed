@@ -50,6 +50,8 @@ class AuthController extends Controller
             ->currentAccessToken()
             ->delete();
 
+        auth()->forgetUser();
+
         return response()->json([
             'message' => 'Logged out successfully',
         ], 200);
