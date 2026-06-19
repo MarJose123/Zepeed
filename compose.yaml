@@ -40,6 +40,7 @@ services:
     mariadb:
         container_name: Mariadb
         image: 'mariadb:11'
+        restart: unless-stopped
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
