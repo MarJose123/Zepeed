@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\Settings\ApiToken\StoreApiTokenRequest;
 use App\Models\PersonalAccessToken;
 use App\Services\InertiaNotification;
-use Exception;
+use hexydec\agentzero\agentzero as Agent;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,16 +47,23 @@ class ApiTokenController extends Controller implements HasMiddleware
             ->tokens()
             ->latest()
             ->get()
-            ->map(static fn (PersonalAccessToken $token) => [
-                'id'              => $token->id,
-                'name'            => $token->name,
-                'last_used_at'    => $token->last_used_at?->diffForHumans(),
-                'last_used_ip'    => $token->last_used_ip,
-                'last_used_agent' => $token->last_used_agent,
-                'expires_at'      => $token->expires_at?->toDateTimeString(),
-                'is_expired'      => $token->expires_at !== null && $token->expires_at->isPast(),
-                'created_at'      => $token->created_at->toDateTimeString(),
-            ]);
+            ->map(static function ($token): array {
+                $agent = $token->last_used_agent !== null
+                    ? Agent::parse($token->last_used_agent)
+                    : null;
+
+                return [
+                    'id'           => $token->id,
+                    'name'         => $token->name,
+                    'last_used_at' => $token->last_used_at?->diffForHumans(),
+                    'last_used_ip' => $token->last_used_ip,
+                    'browser'      => $agent?->browser ?? null,
+                    'platform'     => $agent?->platform ?? null,
+                    'expires_at'   => $token->expires_at?->toDateTimeString(),
+                    'is_expired'   => $token->expires_at !== null && $token->expires_at->isPast(),
+                    'created_at'   => $token->created_at->toDateTimeString(),
+                ];
+            });
 
         return Inertia::render('account/settings/ApiTokens', [
             'tokens' => $tokens,
@@ -67,8 +74,6 @@ class ApiTokenController extends Controller implements HasMiddleware
      * Create a new API token for the authenticated user.
      *
      * @param StoreApiTokenRequest $request
-     *
-     * @throws Exception
      *
      * @return RedirectResponse
      */
@@ -99,7 +104,6 @@ class ApiTokenController extends Controller implements HasMiddleware
      * @param Request             $request
      * @param PersonalAccessToken $token
      *
-     * @throws Exception
      * @throws ValidationException
      *
      * @return RedirectResponse
@@ -138,7 +142,6 @@ class ApiTokenController extends Controller implements HasMiddleware
      *
      * @param Request $request
      *
-     * @throws Exception
      * @throws ValidationException
      *
      * @return RedirectResponse

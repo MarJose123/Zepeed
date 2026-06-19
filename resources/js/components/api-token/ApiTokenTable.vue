@@ -10,6 +10,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { browserIcon, platformIcon } from "@/composables/useAgentIcons";
 import type { ApiToken } from "@/types/api-token";
 
 defineProps<{
@@ -28,7 +35,8 @@ const revokeTarget = ref<ApiToken | null>(null);
                     <TableHead>Created</TableHead>
                     <TableHead>Last Used</TableHead>
                     <TableHead>Last IP</TableHead>
-                    <TableHead>Last Agent</TableHead>
+                    <TableHead>Browser</TableHead>
+                    <TableHead>OS</TableHead>
                     <TableHead>Expires</TableHead>
                     <TableHead />
                 </TableRow>
@@ -47,11 +55,50 @@ const revokeTarget = ref<ApiToken | null>(null);
                     <TableCell class="text-sm text-muted-foreground">
                         {{ token.last_used_ip ?? "—" }}
                     </TableCell>
-                    <TableCell
-                        class="max-w-[180px] truncate text-sm text-muted-foreground"
-                    >
-                        {{ token.last_used_agent ?? "—" }}
+
+                    <!-- Browser icon -->
+                    <TableCell>
+                        <TooltipProvider v-if="token.browser">
+                            <Tooltip>
+                                <TooltipTrigger
+                                    class="flex items-center text-muted-foreground"
+                                >
+                                    <component
+                                        :is="browserIcon(token.browser)"
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p class="text-xs">{{ token.browser }}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <span v-else class="text-sm text-muted-foreground"
+                            >—</span
+                        >
                     </TableCell>
+
+                    <!-- OS / Platform icon -->
+                    <TableCell>
+                        <TooltipProvider v-if="token.platform">
+                            <Tooltip>
+                                <TooltipTrigger
+                                    class="flex items-center text-muted-foreground"
+                                >
+                                    <component
+                                        :is="platformIcon(token.platform)"
+                                        class="h-4 w-4"
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p class="text-xs">{{ token.platform }}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <span v-else class="text-sm text-muted-foreground"
+                            >—</span
+                        >
+                    </TableCell>
+
                     <TableCell>
                         <Badge
                             v-if="token.is_expired"
