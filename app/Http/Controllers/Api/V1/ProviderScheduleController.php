@@ -16,8 +16,7 @@ class ProviderScheduleController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $schedules = ProviderSchedule::query()
-            ->orderBy('created_at', 'desc')
+        $schedules = ProviderSchedule::query()->latest()
             ->get();
 
         return ProviderScheduleResource::collection($schedules);

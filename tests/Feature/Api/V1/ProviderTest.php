@@ -27,8 +27,7 @@ class ProviderTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -60,7 +59,7 @@ class ProviderTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertCount(3, $response['data']);
     }
 
@@ -78,7 +77,7 @@ class ProviderTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
 
-        $response->assertStatus(200);
+        $response->assertOk();
 
         $enabled = collect($response['data'])->where('enabled', true)->count();
         $disabled = collect($response['data'])->where('enabled', false)->count();
@@ -94,8 +93,7 @@ class ProviderTest extends TestCase
     {
         $response = $this->getJson('/api/v1/providers');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'Unauthenticated');
     }
@@ -108,6 +106,6 @@ class ProviderTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer invalid-token')
             ->getJson('/api/v1/providers');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

@@ -24,8 +24,7 @@ class MaintenanceWindowTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/maintenance/schedules');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -61,7 +60,7 @@ class MaintenanceWindowTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/maintenance/schedules');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertCount(5, $response['data']);
     }
 
@@ -79,7 +78,7 @@ class MaintenanceWindowTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/maintenance/schedules');
 
-        $response->assertStatus(200);
+        $response->assertOk();
 
         $active = collect($response['data'])->where('is_active', true)->count();
         $inactive = collect($response['data'])->where('is_active', false)->count();
@@ -95,6 +94,6 @@ class MaintenanceWindowTest extends TestCase
     {
         $response = $this->getJson('/api/v1/maintenance/schedules');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

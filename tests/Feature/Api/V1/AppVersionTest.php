@@ -21,8 +21,7 @@ class AppVersionTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/app/version');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     'name',
@@ -44,7 +43,7 @@ class AppVersionTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/app/version');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertNotNull($response['data']['version']);
         $this->assertNotNull($response['data']['build_date']);
         $this->assertNotNull($response['data']['environment']);
@@ -62,7 +61,7 @@ class AppVersionTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/app/version');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertEquals(config('app.version'), $response['data']['version']);
         $this->assertEquals(config('app.name'), $response['data']['name']);
         $this->assertEquals(config('app.env'), $response['data']['environment']);
@@ -75,7 +74,7 @@ class AppVersionTest extends TestCase
     {
         $response = $this->getJson('/api/v1/app/version');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 
     /**
@@ -86,6 +85,6 @@ class AppVersionTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer invalid-token')
             ->getJson('/api/v1/app/version');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

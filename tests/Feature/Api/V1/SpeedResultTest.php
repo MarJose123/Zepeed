@@ -24,8 +24,7 @@ class SpeedResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/speedtest/results');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -61,7 +60,7 @@ class SpeedResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/speedtest/results');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertCount(5, $response['data']);
     }
 
@@ -82,7 +81,7 @@ class SpeedResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/speedtest/results');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertEquals(150.57, $response['data'][0]['download']);
         $this->assertEquals(75.12, $response['data'][0]['upload']);
         $this->assertEquals(26.0, $response['data'][0]['ping']);
@@ -95,6 +94,6 @@ class SpeedResultTest extends TestCase
     {
         $response = $this->getJson('/api/v1/speedtest/results');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

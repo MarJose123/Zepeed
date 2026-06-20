@@ -26,8 +26,7 @@ class PingResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/pings');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -64,7 +63,7 @@ class PingResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/pings');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertCount(5, $response['data']);
     }
 
@@ -82,7 +81,7 @@ class PingResultTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/pings');
 
-        $response->assertStatus(200);
+        $response->assertOk();
         $this->assertNotNull($response['data'][0]['status']);
         $this->assertNotNull($response['data'][0]['status_label']);
     }
@@ -94,6 +93,6 @@ class PingResultTest extends TestCase
     {
         $response = $this->getJson('/api/v1/pings');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

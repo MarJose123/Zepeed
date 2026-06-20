@@ -17,7 +17,7 @@ class MaintenanceController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $windows = MaintenanceWindow::query()
-            ->orderBy('starts_at', 'desc')
+            ->latest('starts_at')
             ->get();
 
         return MaintenanceWindowResource::collection($windows);

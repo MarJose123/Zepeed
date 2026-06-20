@@ -17,7 +17,7 @@ class SpeedResultController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $results = SpeedResult::query()
-            ->orderBy('measured_at', 'desc')
+            ->latest('measured_at')
             ->limit(100)
             ->get();
 

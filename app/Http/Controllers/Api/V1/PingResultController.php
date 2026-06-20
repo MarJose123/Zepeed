@@ -18,7 +18,7 @@ class PingResultController extends Controller
     {
         $pings = PingResult::query()
             ->with('target')
-            ->orderBy('measured_at', 'desc')
+            ->latest('measured_at')
             ->limit(100)
             ->get();
 
