@@ -38,9 +38,11 @@ class ProviderFactory extends Factory
      */
     public function enabled(): static
     {
-        return $this->state(static fn (array $attributes) => [
-            'is_enabled' => true,
-        ]);
+        return $this->state(static function (array $attributes) {
+            return [
+                'is_enabled' => true,
+            ];
+        });
     }
 
     /**
@@ -48,9 +50,11 @@ class ProviderFactory extends Factory
      */
     public function disabled(): static
     {
-        return $this->state(static fn (array $attributes) => [
-            'is_enabled' => false,
-        ]);
+        return $this->state(static function (array $attributes) {
+            return [
+                'is_enabled' => false,
+            ];
+        });
     }
 
     /**
@@ -58,9 +62,11 @@ class ProviderFactory extends Factory
      */
     public function withSlug(SpeedtestServer $slug): static
     {
-        return $this->state(static fn (array $attributes) => [
-            'slug' => $slug,
-            'name' => $slug->label(),
-        ]);
+        return $this->state(static function (array $attributes) use ($slug) {
+            return [
+                'slug' => $slug,
+                'name' => $slug->label(),
+            ];
+        });
     }
 }
