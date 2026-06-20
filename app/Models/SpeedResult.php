@@ -5,8 +5,11 @@ namespace App\Models;
 use App\Enums\SpeedtestServer;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
+use Database\Factories\SpeedResultFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -35,9 +38,10 @@ use Override;
  * @property Carbon|null                 $created_at
  * @property Carbon|null                 $updated_at
  */
+#[UseFactory(SpeedResultFactory::class)]
 class SpeedResult extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'provider_slug',

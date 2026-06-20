@@ -5,8 +5,11 @@ namespace App\Models;
 use App\Enums\PingResultStatus;
 use App\Enums\PingStatus;
 use Carbon\CarbonImmutable;
+use Database\Factories\PingResultFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
@@ -28,9 +31,10 @@ use Override;
  * @property CarbonImmutable  $created_at
  * @property-read PingTarget   $target
  */
+#[UseFactory(PingResultFactory::class)]
 class PingResult extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     public $timestamps = false;
 
