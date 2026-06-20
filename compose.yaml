@@ -12,6 +12,9 @@ services:
                 LIBRESPEED_VERSION: '${LIBRESPEED_VERSION:-1.0.12}'
                 FAST_CLI_VERSION: '${FAST_CLI_VERSION:-0.3.5}'
                 CLOUDFLARE_SPEED_CLI_VERSION: '${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.5}'
+        image: zepeed-8.4/app:latest
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         environment:
             # Autorun
             AUTORUN_ENABLED: 'true'
