@@ -83,9 +83,9 @@ class SpeedResultTest extends TestCase
             ->getJson('/api/v1/speedtest/results');
 
         $response->assertStatus(200);
-        $this->assertEqual(150.57, $response['data'][0]['download']);
-        $this->assertEqual(75.12, $response['data'][0]['upload']);
-        $this->assertEqual(26.0, $response['data'][0]['ping']);
+        $this->assertEquals(150.57, $response['data'][0]['download']);
+        $this->assertEquals(75.12, $response['data'][0]['upload']);
+        $this->assertEquals(26.0, $response['data'][0]['ping']);
     }
 
     /**

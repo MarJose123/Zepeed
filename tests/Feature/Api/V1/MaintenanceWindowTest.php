@@ -84,8 +84,8 @@ class MaintenanceWindowTest extends TestCase
         $active = collect($response['data'])->where('is_active', true)->count();
         $inactive = collect($response['data'])->where('is_active', false)->count();
 
-        $this->assertEqual(1, $active);
-        $this->assertEqual(1, $inactive);
+        $this->assertEquals(1, $active);
+        $this->assertEquals(1, $inactive);
     }
 
     /**

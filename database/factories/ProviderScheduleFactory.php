@@ -19,7 +19,7 @@ class ProviderScheduleFactory extends Factory
     {
         return [
             'provider_slug'     => fake()->randomElement(SpeedtestServer::cases()),
-            'label'             => fake()->word(),
+            'label'             => fake()->words(3, true),
             'cron_expression'   => '0 * * * *',
             'is_enabled'        => fake()->boolean(80),
             'last_scheduled_at' => null,

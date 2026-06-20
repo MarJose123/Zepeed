@@ -18,7 +18,7 @@ class PingTargetFactory extends Factory
     public function definition(): array
     {
         return [
-            'label'             => fake()->word(),
+            'label'             => fake()->words(2, true),
             'host'              => fake()->ipv4(),
             'is_enabled'        => fake()->boolean(80),
             'packets'           => 4,
@@ -26,7 +26,7 @@ class PingTargetFactory extends Factory
             'status'            => fake()->randomElement(PingStatus::cases()),
             'last_avg_ms'       => fake()->randomFloat(2, 10, 100),
             'last_loss_percent' => fake()->randomFloat(2, 0, 50),
-            'last_tested_at'    => fake()->dateTimeThisMonth(),
+            'last_tested_at'    => fake()->optional()->dateTimeThisMonth(),
         ];
     }
 

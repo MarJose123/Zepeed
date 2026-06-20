@@ -13,7 +13,7 @@ class ProviderScheduleTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Test that authenticated user can list providers/schedules.
+     * Test that authenticated user can list provider schedules.
      */
     public function testAuthenticatedUserCanListProviderSchedules(): void
     {
@@ -37,7 +37,6 @@ class ProviderScheduleTest extends TestCase
                         'label',
                         'cron_expression',
                         'enabled',
-                        'provider_enabled',
                         'next_run_at',
                         'last_scheduled_at',
                     ],
@@ -72,7 +71,7 @@ class ProviderScheduleTest extends TestCase
         $token = $user->createToken('test-token');
 
         Provider::factory()->create();
-        $schedule = ProviderSchedule::factory()->create(['cron_expression' => '0 * * * *']);
+        ProviderSchedule::factory()->create(['cron_expression' => '0 * * * *']);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers/schedules');

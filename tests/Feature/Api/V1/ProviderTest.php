@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Enums\SpeedtestServer;
 use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,7 +20,9 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->count(3)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Netflix)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
@@ -50,13 +53,15 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->count(5)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Netflix)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
 
         $response->assertStatus(200);
-        $this->assertCount(5, $response['data']);
+        $this->assertCount(3, $response['data']);
     }
 
     /**
@@ -67,8 +72,8 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->create(['is_enabled' => true]);
-        Provider::factory()->create(['is_enabled' => false]);
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->disabled()->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');

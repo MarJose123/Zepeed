@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\SpeedtestServer;
+use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,25 +18,23 @@ class SpeedResultFactory extends Factory
      */
     public function definition(): array
     {
-        $status = fake()->randomElement(['success', 'failed', 'skipped']);
-
         return [
             'provider_slug'   => fake()->randomElement(SpeedtestServer::cases()),
-            'status'          => $status,
-            'download_mbps'   => $status === 'success' ? fake()->randomFloat(2, 50, 500) : null,
-            'upload_mbps'     => $status === 'success' ? fake()->randomFloat(2, 25, 250) : null,
-            'ping_ms'         => $status === 'success' ? fake()->randomFloat(2, 5, 100) : null,
-            'jitter_ms'       => $status === 'success' ? fake()->randomFloat(2, 0, 50) : null,
-            'packet_loss'     => $status === 'success' ? 0.0 : null,
-            'download_bytes'  => $status === 'success' ? fake()->numberBetween(1000000, 10000000) : null,
-            'upload_bytes'    => $status === 'success' ? fake()->numberBetween(500000, 5000000) : null,
-            'server_name'     => $status === 'success' ? fake()->city() : null,
-            'server_location' => $status === 'success' ? fake()->state() : null,
-            'isp'             => fake()->word(),
-            'share_url'       => $status === 'success' ? fake()->url() : null,
+            'status'          => 'success',
+            'download_mbps'   => fake()->randomFloat(2, 50, 500),
+            'upload_mbps'     => fake()->randomFloat(2, 25, 250),
+            'ping_ms'         => fake()->randomFloat(2, 5, 100),
+            'jitter_ms'       => fake()->randomFloat(2, 0, 50),
+            'packet_loss'     => 0.0,
+            'download_bytes'  => fake()->numberBetween(1000000, 10000000),
+            'upload_bytes'    => fake()->numberBetween(500000, 5000000),
+            'server_name'     => fake()->city(),
+            'server_location' => fake()->state(),
+            'isp'             => fake()->company(),
+            'share_url'       => fake()->url(),
             'client_ip'       => fake()->ipv4(),
-            'failure_reason'  => $status === 'failed' ? fake()->word() : null,
-            'failure_message' => $status === 'failed' ? fake()->sentence() : null,
+            'failure_reason'  => null,
+            'failure_message' => null,
             'raw_json'        => null,
             'measured_at'     => fake()->dateTimeThisMonth(),
         ];
@@ -53,8 +52,6 @@ class SpeedResultFactory extends Factory
             'ping_ms'         => fake()->randomFloat(2, 5, 50),
             'jitter_ms'       => fake()->randomFloat(2, 0, 20),
             'packet_loss'     => 0.0,
-            'download_bytes'  => fake()->numberBetween(5000000, 10000000),
-            'upload_bytes'    => fake()->numberBetween(2500000, 5000000),
             'server_name'     => fake()->city(),
             'server_location' => fake()->state(),
             'share_url'       => fake()->url(),
@@ -80,8 +77,8 @@ class SpeedResultFactory extends Factory
             'server_name'     => null,
             'server_location' => null,
             'share_url'       => null,
-            'failure_reason'  => 'Connection timeout',
-            'failure_message' => 'Unable to connect to speedtest server',
+            'failure_reason'  => fake()->randomElement(SpeedtestFailureReason::cases()),
+            'failure_message' => fake()->sentence(),
         ]);
     }
 

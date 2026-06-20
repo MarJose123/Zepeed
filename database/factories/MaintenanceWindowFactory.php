@@ -18,17 +18,15 @@ class MaintenanceWindowFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement(MaintenanceWindowType::cases());
-
         return [
             'label'            => fake()->sentence(3),
-            'type'             => $type,
+            'type'             => MaintenanceWindowType::Indefinite,
             'is_active'        => fake()->boolean(60),
             'providers'        => [fake()->randomElement(SpeedtestServer::cases())->value],
-            'starts_at'        => $type === MaintenanceWindowType::OneTime ? fake()->dateTimeThisMonth() : null,
-            'ends_at'          => $type === MaintenanceWindowType::OneTime ? fake()->dateTimeThisMonth() : null,
-            'cron_expression'  => $type === MaintenanceWindowType::Recurring ? '0 2 * * *' : null,
-            'duration_minutes' => $type === MaintenanceWindowType::Recurring ? 60 : null,
+            'starts_at'        => null,
+            'ends_at'          => null,
+            'cron_expression'  => null,
+            'duration_minutes' => null,
             'notes'            => fake()->optional()->sentence(),
         ];
     }

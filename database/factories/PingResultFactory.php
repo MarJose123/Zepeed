@@ -18,23 +18,22 @@ class PingResultFactory extends Factory
      */
     public function definition(): array
     {
-        $status = fake()->randomElement(PingResultStatus::cases());
         $minMs = fake()->randomFloat(2, 5, 50);
         $maxMs = fake()->randomFloat(2, $minMs + 10, 150);
         $avgMs = fake()->randomFloat(2, $minMs, $maxMs);
 
         return [
             'ping_target_id'      => PingTarget::factory(),
-            'status'              => $status,
+            'status'              => PingResultStatus::Success,
             'packets_sent'        => 4,
-            'packets_received'    => $status->value === 'success' ? 4 : fake()->numberBetween(0, 3),
-            'packet_loss_percent' => $status->value === 'success' ? 0.0 : fake()->randomFloat(2, 25, 100),
+            'packets_received'    => 4,
+            'packet_loss_percent' => 0.0,
             'min_ms'              => $minMs,
             'avg_ms'              => $avgMs,
             'max_ms'              => $maxMs,
             'stddev_ms'           => fake()->randomFloat(2, 1, 20),
             'raw_output'          => null,
-            'failure_reason'      => $status->value === 'failed' ? fake()->word() : null,
+            'failure_reason'      => null,
             'measured_at'         => fake()->dateTimeThisMonth(),
         ];
     }
