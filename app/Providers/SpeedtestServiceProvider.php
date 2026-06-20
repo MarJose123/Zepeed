@@ -19,7 +19,6 @@ use App\Services\Speedtest\LibrespeedService;
 use App\Services\Speedtest\OklaSpeedtestService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Override;
