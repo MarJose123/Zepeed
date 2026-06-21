@@ -1,0 +1,226 @@
+# =============================================================================
+#  Zepeed — Production Docker Compose
+#
+#  Pull the pre-built image from Docker Hub — no local build required.
+#  Designed for Proxmox (Docker in LXC/VM), CasaOS, and any homelab running
+#  Docker Engine 24+.
+#
+#  Quick start:
+#    1. Copy .env.prod.example → .env
+#    2. Fill in APP_KEY, APP_URL, DB passwords, and Pusher credentials
+#    3. docker compose -f compose.prod.yml up -d
+# =============================================================================
+
+name: zepeed
+
+services:
+
+  # ── Traefik — reverse proxy + automatic Let's Encrypt TLS ──────────────────
+  traefik:
+    container_name: zepeed-traefik
+    image: traefik:v3.3
+    restart: unless-stopped
+    command:
+      # API / dashboard (disabled in prod — enable only for debugging)
+      - "--api.dashboard=false"
+      # Docker provider — auto-discover containers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=zepeed-public"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP → HTTPS globally
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # Let's Encrypt via TLS challenge
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Logging
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-ERROR}"
+      - "--accesslog=false"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "zepeed-letsencrypt:/letsencrypt"
+    networks:
+      - zepeed-public
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ── Zepeed application ──────────────────────────────────────────────────────
+  app:
+    container_name: zepeed-app
+    image: marjose123/zepeed:${ZEPEED_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      # ── Laravel core ─────────────────────────────────────────────────────
+      APP_NAME: "${APP_NAME:-Zepeed}"
+      APP_ENV: "production"
+      APP_KEY: "${APP_KEY}"
+      APP_DEBUG: "false"
+      APP_URL: "${APP_URL}"
+      APP_TIMEZONE: "${APP_TIMEZONE:-UTC}"
+      # ── Database ─────────────────────────────────────────────────────────
+      DB_CONNECTION: "mariadb"
+      DB_HOST: "mariadb"
+      DB_PORT: "3306"
+      DB_DATABASE: "${DB_DATABASE:-zepeed}"
+      DB_USERNAME: "${DB_USERNAME:-zepeed}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      # ── Queue / Cache / Session (database driver — no Redis needed) ───────
+      QUEUE_CONNECTION: "database"
+      CACHE_STORE: "database"
+      SESSION_DRIVER: "database"
+      SESSION_LIFETIME: "${SESSION_LIFETIME:-120}"
+      # ── WebSockets (Soketi) ───────────────────────────────────────────────
+      BROADCAST_CONNECTION: "pusher"
+      PUSHER_APP_ID: "${PUSHER_APP_ID}"
+      PUSHER_APP_KEY: "${PUSHER_APP_KEY}"
+      PUSHER_APP_SECRET: "${PUSHER_APP_SECRET}"
+      PUSHER_APP_CLUSTER: "mt1"
+      PUSHER_HOST: "soketi"
+      PUSHER_PORT: "6001"
+      PUSHER_SCHEME: "http"
+      # Vite/frontend must resolve Soketi through the public URL
+      VITE_PUSHER_APP_KEY: "${PUSHER_APP_KEY}"
+      VITE_PUSHER_APP_CLUSTER: "mt1"
+      VITE_PUSHER_HOST: "${APP_DOMAIN}"
+      VITE_PUSHER_PORT: "443"
+      VITE_PUSHER_SCHEME: "https"
+      # ── Mail ─────────────────────────────────────────────────────────────
+      MAIL_MAILER: "${MAIL_MAILER:-log}"
+      MAIL_HOST: "${MAIL_HOST:-}"
+      MAIL_PORT: "${MAIL_PORT:-587}"
+      MAIL_USERNAME: "${MAIL_USERNAME:-}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
+      MAIL_ENCRYPTION: "${MAIL_ENCRYPTION:-tls}"
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hello@zepeed.local}"
+      MAIL_FROM_NAME: "${APP_NAME:-Zepeed}"
+      # ── serversideup/php autorun ──────────────────────────────────────────
+      AUTORUN_ENABLED: "true"
+      AUTORUN_LARAVEL_MIGRATION_DATABASE: "mariadb"
+      AUTORUN_LARAVEL_CONFIG_CACHE: "true"
+      AUTORUN_LARAVEL_EVENT_CACHE: "true"
+      AUTORUN_LARAVEL_OPTIMIZE: "true"
+      AUTORUN_LARAVEL_ROUTE_CACHE: "true"
+      AUTORUN_LARAVEL_VIEW_CACHE: "true"
+      AUTORUN_LARAVEL_MIGRATION_SEED: "false"
+    volumes:
+      - zepeed-storage:/var/www/html/storage/app
+      - zepeed-logs:/var/www/html/storage/logs
+    networks:
+      - zepeed-internal
+      - zepeed-public
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      soketi:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=zepeed-public"
+      # HTTPS router
+      - "traefik.http.routers.zepeed-app.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.zepeed-app.entrypoints=websecure"
+      - "traefik.http.routers.zepeed-app.tls=true"
+      - "traefik.http.routers.zepeed-app.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.zepeed-app.service=zepeed-app-svc"
+      - "traefik.http.services.zepeed-app-svc.loadbalancer.server.port=8080"
+      # Security headers middleware
+      - "traefik.http.middlewares.zepeed-secure-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.zepeed-secure-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.zepeed-secure-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.zepeed-secure-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.zepeed-secure-headers.headers.browserXssFilter=true"
+      - "traefik.http.routers.zepeed-app.middlewares=zepeed-secure-headers"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ── MariaDB 11 LTS ──────────────────────────────────────────────────────────
+  mariadb:
+    container_name: zepeed-mariadb
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MARIADB_DATABASE: "${DB_DATABASE:-zepeed}"
+      MARIADB_USER: "${DB_USERNAME:-zepeed}"
+      MARIADB_PASSWORD: "${DB_PASSWORD}"
+      MARIADB_EXTRA_FLAGS: "--innodb-buffer-pool-size=256M --innodb-log-file-size=64M --innodb-flush-method=O_DIRECT"
+    volumes:
+      - zepeed-mariadb:/var/lib/mysql
+    networks:
+      - zepeed-internal
+    # DB port is intentionally NOT exposed — accessed only via internal network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Soketi — WebSocket server ───────────────────────────────────────────────
+  soketi:
+    container_name: zepeed-soketi
+    image: quay.io/soketi/soketi:latest-16-alpine
+    restart: unless-stopped
+    environment:
+      SOKETI_DEFAULT_APP_ID: "${PUSHER_APP_ID}"
+      SOKETI_DEFAULT_APP_KEY: "${PUSHER_APP_KEY}"
+      SOKETI_DEFAULT_APP_SECRET: "${PUSHER_APP_SECRET}"
+      SOKETI_HOST: "0.0.0.0"
+      SOKETI_PORT: "6001"
+      SOKETI_DEBUG: "0"
+      SOKETI_METRICS_ENABLED: "true"
+      SOKETI_METRICS_SERVER_PORT: "9601"
+    networks:
+      - zepeed-internal
+      - zepeed-public
+    # Expose WebSocket port publicly via Traefik only — not raw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=zepeed-public"
+      # WSS router — WebSocket over TLS on /app path
+      - "traefik.http.routers.zepeed-soketi.rule=Host(`${APP_DOMAIN}`) && PathPrefix(`/app`)"
+      - "traefik.http.routers.zepeed-soketi.entrypoints=websecure"
+      - "traefik.http.routers.zepeed-soketi.tls=true"
+      - "traefik.http.routers.zepeed-soketi.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.zepeed-soketi.service=zepeed-soketi-svc"
+      - "traefik.http.services.zepeed-soketi-svc.loadbalancer.server.port=6001"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9601/usage"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  # Internal — DB and Soketi are unreachable from outside
+  zepeed-internal:
+    driver: bridge
+    internal: true
+  # Public — only app + traefik + soketi face the outside
+  zepeed-public:
+    driver: bridge
+
+volumes:
+  zepeed-mariadb:
+    driver: local
+  zepeed-storage:
+    driver: local
+  zepeed-logs:
+    driver: local
+  zepeed-letsencrypt:
+    driver: local
