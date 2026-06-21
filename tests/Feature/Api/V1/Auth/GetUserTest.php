@@ -21,8 +21,7 @@ class GetUserTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -53,8 +52,7 @@ class GetUserTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonPath('data.name', 'John Doe')
             ->assertJsonPath('data.email', 'john@example.com')
             ->assertJsonPath('data.appearance', 'light');
@@ -69,8 +67,7 @@ class GetUserTest extends TestCase
     {
         $response = $this->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonStructure([
                 'success',
                 'message',
@@ -87,8 +84,7 @@ class GetUserTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer invalid-token-here')
             ->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'Unauthenticated');
     }
@@ -108,8 +104,7 @@ class GetUserTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonPath('success', false);
     }
 
@@ -120,8 +115,7 @@ class GetUserTest extends TestCase
     {
         $response = $this->getJson('/api/v1/auth/user');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'Unauthenticated');
     }
@@ -134,6 +128,6 @@ class GetUserTest extends TestCase
         $response = $this->withHeader('Authorization', 'InvalidFormat invalid-token')
             ->getJson('/api/v1/auth/user');
 
-        $response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 }

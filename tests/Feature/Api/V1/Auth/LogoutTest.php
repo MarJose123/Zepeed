@@ -21,8 +21,7 @@ class LogoutTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->postJson('/api/v1/auth/logout');
 
-        $response
-            ->assertStatus(200)
+        $response->assertOk()
             ->assertJsonPath('message', 'Logged out successfully');
     }
 
@@ -37,16 +36,14 @@ class LogoutTest extends TestCase
 
         // Logout
         $this->withHeader('Authorization', "Bearer {$plainToken}")
-            ->postJson('/api/v1/auth/logout')
-            ->assertStatus(200);
+            ->postJson('/api/v1/auth/logout')->assertOk();
 
         // Token should be invalid now
         $response = $this->getJson('/api/v1/auth/user', [
             'Authorization' => "Bearer {$plainToken}",
         ]);
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonPath('success', false);
     }
 
@@ -61,18 +58,16 @@ class LogoutTest extends TestCase
 
         // Verify token works before logout
         $this->withHeader('Authorization', "Bearer {$plainToken}")
-            ->getJson('/api/v1/auth/user')
-            ->assertStatus(200);
+            ->getJson('/api/v1/auth/user')->assertOk();
 
         // Logout
         $this->withHeader('Authorization', "Bearer {$plainToken}")
-            ->postJson('/api/v1/auth/logout')
-            ->assertStatus(200);
+            ->postJson('/api/v1/auth/logout')->assertOk();
 
         // Token should not work anymore
         $this->getJson('/api/v1/auth/user', [
             'Authorization' => "Bearer {$plainToken}",
-        ])->assertStatus(401);
+        ])->assertUnauthorized();
     }
 
     /**
@@ -82,8 +77,7 @@ class LogoutTest extends TestCase
     {
         $response = $this->postJson('/api/v1/auth/logout');
 
-        $response
-            ->assertStatus(401)
+        $response->assertUnauthorized()
             ->assertJsonStructure([
                 'success',
                 'message',
@@ -103,17 +97,16 @@ class LogoutTest extends TestCase
 
         // Logout with token1
         $this->withHeader('Authorization', "Bearer {$token1->plainTextToken}")
-            ->postJson('/api/v1/auth/logout')
-            ->assertStatus(200);
+            ->postJson('/api/v1/auth/logout')->assertOk();
 
         // Token1 should be revoked
         $this->getJson('/api/v1/auth/user', [
             'Authorization' => "Bearer {$token1->plainTextToken}",
-        ])->assertStatus(401);
+        ])->assertUnauthorized();
 
         // Token2 should still work
         $this->getJson('/api/v1/auth/user', [
             'Authorization' => "Bearer {$token2->plainTextToken}",
-        ])->assertStatus(200);
+        ])->assertOk();
     }
 }

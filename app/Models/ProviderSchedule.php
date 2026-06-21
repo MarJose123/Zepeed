@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
+use Database\Factories\ProviderScheduleFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use InvalidArgumentException;
@@ -26,9 +29,10 @@ use Override;
  * @method static Builder<ProviderSchedule> enabled()
  * @method static Builder<ProviderSchedule> forProvider(SpeedtestServer $server)
  */
+#[UseFactory(ProviderScheduleFactory::class)]
 class ProviderSchedule extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'provider_slug',
