@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Enums\SpeedtestServer;
+use App\Models\SpeedResult;
 use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SpeedResult>
+ * @extends Factory<SpeedResult>
  */
 class SpeedResultFactory extends Factory
 {

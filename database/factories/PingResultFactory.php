@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Enums\PingResultStatus;
+use App\Models\PingResult;
 use App\Models\PingTarget;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PingResult>
+ * @extends Factory<PingResult>
  */
 class PingResultFactory extends Factory
 {

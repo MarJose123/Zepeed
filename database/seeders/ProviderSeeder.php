@@ -11,11 +11,11 @@ class ProviderSeeder extends Seeder
     public function run(): void
     {
         collect(SpeedtestServer::cases())->each(function (SpeedtestServer $server) {
-            $exists = Provider::where('slug', $server->slug())->exists();
+            $exists = Provider::query()->where('slug', $server->slug())->exists();
 
             if (! $exists) {
                 // First-time insert only — never run again for this slug
-                Provider::create([
+                Provider::query()->create([
                     'slug'             => $server->slug(),
                     'name'             => $server->label(),
                     'is_enabled'       => false,
@@ -29,7 +29,7 @@ class ProviderSeeder extends Seeder
                 $this->command->info("Provider created: {$server->label()}");
             } else {
                 // Already exists — only sync the label in case enum changed
-                Provider::where('slug', $server->slug())
+                Provider::query()->where('slug', $server->slug())
                     ->update(['name' => $server->label()]);
 
                 $this->command->line("Provider already exists, label synced: {$server->label()}");

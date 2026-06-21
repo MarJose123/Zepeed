@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Provider;
 use App\Enums\SpeedtestServer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Provider>
+ * @extends Factory<Provider>
  */
 class ProviderFactory extends Factory
 {
@@ -36,37 +37,31 @@ class ProviderFactory extends Factory
     /**
      * Indicate the provider is enabled.
      */
-    public function enabled(): static
+    public function enabled()
     {
-        return $this->state(static function (array $attributes) {
-            return [
-                'is_enabled' => true,
-            ];
-        });
+        return $this->state( fn(array $attributes) => [
+            'is_enabled' => true,
+        ]);
     }
 
     /**
      * Indicate the provider is disabled.
      */
-    public function disabled(): static
+    public function disabled()
     {
-        return $this->state(static function (array $attributes) {
-            return [
-                'is_enabled' => false,
-            ];
-        });
+        return $this->state(fn(array $attributes) => [
+            'is_enabled' => false,
+        ]);
     }
 
     /**
      * Set a specific provider slug and derive name from it.
      */
-    public function withSlug(SpeedtestServer $slug): static
+    public function withSlug(SpeedtestServer $slug)
     {
-        return $this->state(static function (array $attributes) use ($slug) {
-            return [
-                'slug' => $slug,
-                'name' => $slug->label(),
-            ];
-        });
+        return $this->state(fn(array $attributes) => [
+            'slug' => $slug,
+            'name' => $slug->label(),
+        ]);
     }
 }

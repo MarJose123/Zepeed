@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\SpeedtestServer;
+use App\Models\ProviderSchedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProviderSchedule>
+ * @extends Factory<ProviderSchedule>
  */
 class ProviderScheduleFactory extends Factory
 {

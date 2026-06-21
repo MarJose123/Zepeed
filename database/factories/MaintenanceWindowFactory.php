@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Enums\MaintenanceWindowType;
 use App\Enums\SpeedtestServer;
+use App\Models\MaintenanceWindow;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MaintenanceWindow>
+ * @extends Factory<MaintenanceWindow>
  */
 class MaintenanceWindowFactory extends Factory
 {
