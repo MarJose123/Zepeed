@@ -6,8 +6,11 @@ use App\Enums\MaintenanceWindowType;
 use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
+use Database\Factories\MaintenanceWindowFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
@@ -29,9 +32,10 @@ use Override;
  * @method static Builder<MaintenanceWindow> forProvider(SpeedtestServer $server)
  * @method static Builder<MaintenanceWindow> ofType(MaintenanceWindowType $type)
  */
+#[UseFactory(MaintenanceWindowFactory::class)]
 class MaintenanceWindow extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'label',

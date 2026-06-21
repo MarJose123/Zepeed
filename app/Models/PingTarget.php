@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Enums\PingStatus;
 use Carbon\CarbonImmutable;
+use Database\Factories\PingTargetFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
@@ -26,9 +29,10 @@ use Override;
  * @property-read HasMany<PingResult, self>    $results
  * @property-read HasMany<PingAlertRule, self> $alertRules
  */
+#[UseFactory(PingTargetFactory::class)]
 class PingTarget extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'label',
