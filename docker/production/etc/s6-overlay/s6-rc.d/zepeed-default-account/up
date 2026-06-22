@@ -1,0 +1,1 @@
+/var/www/html/artisan app:create-user-account --default

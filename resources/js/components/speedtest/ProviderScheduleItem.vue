@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
+import { Trash2, Edit2 } from "@lucide/vue";
 import cronstrue from "cronstrue";
-import { Trash2, Edit2 } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import EditScheduleModal from "@/components/speedtest/EditScheduleModal.vue";
 import {

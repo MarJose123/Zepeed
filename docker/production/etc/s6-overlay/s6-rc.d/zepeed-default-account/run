@@ -1,0 +1,5 @@
+#!/command/with-contenv sh
+# Runs once after S6 brings up the base services.
+# Creates the default admin account if it does not already exist.
+# Idempotent — safe on every container restart.
+exec php /var/www/html/artisan app:create-user-account --default
