@@ -4,7 +4,7 @@ services:
         container_name: App
         build:
             context: .
-            dockerfile: docker/dev/Dockerfile
+            dockerfile: docker/development/Dockerfile
             args:
                 TIMEZONE: '${APP_TIMEZONE:-UTC}'
                 HEALTHCHECK_PATH: '/up'
