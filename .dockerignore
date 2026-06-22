@@ -14,10 +14,12 @@ node_modules/
 vendor/
 public/build/
 public/hot/
-bun.lock
-bun.lockb
-composer.lock
 package-lock.json
+
+# Lock files are REQUIRED by the production build stage:
+#   composer install uses composer.lock for reproducible installs
+#   bun install --frozen-lockfile requires bun.lock
+# Do NOT add composer.lock, bun.lock, or bun.lockb here.
 
 # Laravel specific exclusions
 storage/*.log
@@ -32,4 +34,3 @@ database/database.sqlite
 # System files
 .DS_Store
 Thumbs.db
-

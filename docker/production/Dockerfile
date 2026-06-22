@@ -105,8 +105,7 @@ ENV AUTORUN_ENABLED="true" \
 ENV HEALTHCHECK_PATH="/up"
 
 ENV DEFAULT_ADMIN_NAME="Zepeed Admin" \
-    DEFAULT_ADMIN_EMAIL="admin@zepeed.local" \
-    DEFAULT_ADMIN_PASSWORD="zepeed_admin"
+    DEFAULT_ADMIN_EMAIL="admin@zepeed.local"
 
 USER root
 
