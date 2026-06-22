@@ -68,45 +68,45 @@ RUN bun run build
 # =============================================================================
 FROM serversideup/php:8.4-fpm-nginx-alpine AS production
 
+ARG TIMEZONE=UTC
+ARG VERSION=dev
+ARG BUILD_DATE
+
 LABEL org.opencontainers.image.title="Zepeed" \
       org.opencontainers.image.description="Speed test aggregator and network monitor" \
       org.opencontainers.image.url="https://github.com/marjose123/zepeed" \
       org.opencontainers.image.source="https://github.com/marjose123/zepeed" \
       org.opencontainers.image.vendor="MarJose Darang" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.version="${VERSION:-dev}" \
+      org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.created="${BUILD_DATE}"
 
-ARG TIMEZONE=UTC
-ARG VERSION=dev
-ARG BUILD_DATE
-
 ENV TZ=${TIMEZONE} \
-    PHP_DATE_TIMEZONE=${TIMEZONE} \
-    # PHP tuning
-    PHP_POST_MAX_SIZE="100M" \
+    PHP_DATE_TIMEZONE=${TIMEZONE}
+
+ENV PHP_POST_MAX_SIZE="100M" \
     PHP_UPLOAD_MAX_FILE_SIZE="100M" \
     PHP_OPCACHE_ENABLE="1" \
     PHP_OPCACHE_MEMORY_CONSUMPTION="128" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
-    PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
-    # Nginx tuning
-    NGINX_FASTCGI_BUFFERS="128 4k" \
-    NGINX_FASTCGI_BUFFER_SIZE="32k" \
-    # serversideup/php autorun
-    AUTORUN_ENABLED="true" \
+    PHP_OPCACHE_VALIDATE_TIMESTAMPS="0"
+
+ENV NGINX_FASTCGI_BUFFERS="128 4k" \
+    NGINX_FASTCGI_BUFFER_SIZE="32k"
+
+ENV AUTORUN_ENABLED="true" \
     AUTORUN_LARAVEL_CONFIG_CACHE="true" \
     AUTORUN_LARAVEL_EVENT_CACHE="true" \
     AUTORUN_LARAVEL_OPTIMIZE="true" \
     AUTORUN_LARAVEL_ROUTE_CACHE="true" \
     AUTORUN_LARAVEL_VIEW_CACHE="true" \
-    AUTORUN_LARAVEL_MIGRATION_SEED="false" \
-    # Health check
-    HEALTHCHECK_PATH="/up" \
-    # Default account
-     DEFAULT_ADMIN_NAME="Zepeed Admin" \
-     DEFAULT_ADMIN_EMAIL="admin@zepeed.local" \
-     DEFAULT_ADMIN_PASSWORD="zepeed_admin" \
+    AUTORUN_LARAVEL_MIGRATION_SEED="false"
+
+ENV HEALTHCHECK_PATH="/up"
+
+ENV DEFAULT_ADMIN_NAME="Zepeed Admin" \
+    DEFAULT_ADMIN_EMAIL="admin@zepeed.local" \
+    DEFAULT_ADMIN_PASSWORD="zepeed_admin"
 
 USER root
 
@@ -118,20 +118,16 @@ RUN apk add --no-cache \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 
-# ── Speedtest CLI binaries ────────────────────────────────────────────────────
 COPY --from=cli-builder /usr/local/bin/speedtest            /usr/local/bin/speedtest
 COPY --from=cli-builder /usr/local/bin/librespeed-cli       /usr/local/bin/librespeed-cli
 COPY --from=cli-builder /usr/local/bin/fast-cli             /usr/local/bin/fast-cli
 COPY --from=cli-builder /usr/local/bin/cloudflare-speed-cli /usr/local/bin/cloudflare-speed-cli
 
-# ── S6 Overlay service definitions ───────────────────────────────────────────
 COPY docker/production/etc/s6-overlay /etc/s6-overlay
 RUN find /etc/s6-overlay/s6-rc.d -name "run" -o -name "finish" | xargs chmod 755
 
-# ── Application source (compiled by builder stage) ────────────────────────────
 COPY --from=builder --chown=www-data:www-data /var/www/html /var/www/html
 
-# Ensure writable runtime directories exist with correct ownership
 RUN mkdir -p \
         /var/www/html/storage/app/public \
         /var/www/html/storage/framework/cache/data \
