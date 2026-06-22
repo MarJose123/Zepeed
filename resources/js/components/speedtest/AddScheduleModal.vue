@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
+import { X } from "@lucide/vue";
 import cronstrue from "cronstrue";
-import { X } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

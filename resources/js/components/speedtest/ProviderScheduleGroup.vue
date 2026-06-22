@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, Clock } from "lucide-vue-next";
+import { ChevronDown, Clock } from "@lucide/vue";
 import { ref } from "vue";
 import AddScheduleModal from "@/components/speedtest/AddScheduleModal.vue";
 import ProviderScheduleItem from "@/components/speedtest/ProviderScheduleItem.vue";
