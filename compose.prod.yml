@@ -95,15 +95,6 @@ services:
       VITE_PUSHER_HOST: "${APP_DOMAIN}"
       VITE_PUSHER_PORT: "443"
       VITE_PUSHER_SCHEME: "https"
-      # ── Mail ─────────────────────────────────────────────────────────────
-      MAIL_MAILER: "${MAIL_MAILER:-log}"
-      MAIL_HOST: "${MAIL_HOST:-}"
-      MAIL_PORT: "${MAIL_PORT:-587}"
-      MAIL_USERNAME: "${MAIL_USERNAME:-}"
-      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
-      MAIL_ENCRYPTION: "${MAIL_ENCRYPTION:-tls}"
-      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hello@zepeed.local}"
-      MAIL_FROM_NAME: "${APP_NAME:-Zepeed}"
       # ── serversideup/php autorun ──────────────────────────────────────────
       AUTORUN_ENABLED: "true"
       AUTORUN_LARAVEL_MIGRATION_DATABASE: "mariadb"

@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
-
 use Illuminate\Support\Facades\Validator;
 
 use function Laravel\Prompts\password;
@@ -13,40 +12,36 @@ use function Laravel\Prompts\text;
 class CreateUserAccountCommand extends Command
 {
     protected $signature = 'app:create-user-account
-                            {--default : Create the default admin account from environment variables (non-interactive)}';
+                            {--default : Create the default admin account from config/zepeed.php (non-interactive)}';
 
     protected $description = 'Create a new user account.';
 
     /**
-     * Handle the command.
+     * Handle the command — dispatches to interactive or default path.
      */
     public function handle(): int
     {
-        if ($this->option('default')) {
-            return $this->createDefaultAccount();
-        }
-
-        return $this->createInteractiveAccount();
+        return $this->option('default')
+            ? $this->createDefaultAccount()
+            : $this->createInteractiveAccount();
     }
 
     /**
-     * Create the default admin account from environment variables.
-     * Skips silently if the email already exists (idempotent — safe on every boot).
+     * Create the default admin account from config/zepeed.php.
+     *
+     * Reads DEFAULT_ADMIN_* env vars via the config layer.
+     * Idempotent — exits successfully if the email already exists.
      */
     private function createDefaultAccount(): int
     {
-        $name = (string) config('zepeed.DEFAULT_ADMIN_NAME', 'Zepeed Admin');
-        $email = (string) config('zepeed.DEFAULT_ADMIN_EMAIL', 'admin@zepeed.local');
-        $password = (string) config('zepeed.DEFAULT_ADMIN_PASSWORD', 'zepeed_admin');
+        /** @var array{name: string, email: string, password: string} $cfg */
+        $cfg = config('zepeed.default_admin');
 
-        $validator = Validator::make(
-            ['name' => $name, 'email' => $email, 'password' => $password],
-            [
-                'name'     => ['required', 'string', 'max:255'],
-                'email'    => ['required', 'email'],
-                'password' => ['required', 'string', 'min:8'],
-            ]
-        );
+        $validator = Validator::make($cfg, [
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email:rfc'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
 
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $error) {
@@ -56,22 +51,18 @@ class CreateUserAccountCommand extends Command
             return self::FAILURE;
         }
 
-        if (User::query()->where('email', $email)->exists()) {
-            $this->info("[default-account] Account '{$email}' already exists — skipping.");
+        if (User::query()->where('email', $cfg['email'])->exists()) {
+            $this->info("[default-account] Account '{$cfg['email']}' already exists — skipping.");
 
             return self::SUCCESS;
         }
 
         /** @var User $user */
-        $user = User::query()->create([
-            'name'     => $name,
-            'email'    => $email,
-            'password' => $password,
-        ]);
+        $user = User::query()->create($cfg);
         $user->email_verified_at = now();
         $user->save();
 
-        $this->info("[default-account] Default admin account created: {$email}");
+        $this->info("[default-account] Default admin account created: {$cfg['email']}");
 
         return self::SUCCESS;
     }
@@ -100,7 +91,9 @@ class CreateUserAccountCommand extends Command
         password(
             label: 'Confirm your password',
             required: true,
-            validate: static fn (string $value) => $value === $password ? null : 'Passwords do not match.',
+            validate: static fn (string $value) => $value === $password
+                ? null
+                : 'Passwords do not match.',
         );
 
         /** @var User $user */
