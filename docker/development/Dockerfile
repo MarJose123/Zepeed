@@ -65,7 +65,7 @@ COPY --from=cli-builder /usr/local/bin/fast-cli             /usr/local/bin/fast-
 COPY --from=cli-builder /usr/local/bin/cloudflare-speed-cli /usr/local/bin/cloudflare-speed-cli
 
 # ── S6 Overlay service definitions ───────────────────────────────────────────
-COPY docker/etc/s6-overlay /etc/s6-overlay
+COPY docker/development/etc/s6-overlay /etc/s6-overlay
 RUN find /etc/s6-overlay/s6-rc.d -name "run" -o -name "finish" | xargs chmod 755
 
 USER www-data
