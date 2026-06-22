@@ -113,6 +113,10 @@ services:
       AUTORUN_LARAVEL_ROUTE_CACHE: "true"
       AUTORUN_LARAVEL_VIEW_CACHE: "true"
       AUTORUN_LARAVEL_MIGRATION_SEED: "false"
+      # ── Default admin account (created on first boot, skipped if exists) ───
+      DEFAULT_ADMIN_NAME: "${DEFAULT_ADMIN_NAME:-Zepeed Admin}"
+      DEFAULT_ADMIN_EMAIL: "${DEFAULT_ADMIN_EMAIL:-admin@zepeed.local}"
+      DEFAULT_ADMIN_PASSWORD: "${DEFAULT_ADMIN_PASSWORD:-zepeed_admin}"
     volumes:
       - zepeed-storage:/var/www/html/storage/app
       - zepeed-logs:/var/www/html/storage/logs

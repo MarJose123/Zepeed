@@ -102,7 +102,11 @@ ENV TZ=${TIMEZONE} \
     AUTORUN_LARAVEL_VIEW_CACHE="true" \
     AUTORUN_LARAVEL_MIGRATION_SEED="false" \
     # Health check
-    HEALTHCHECK_PATH="/up"
+    HEALTHCHECK_PATH="/up" \
+    # Default account
+     DEFAULT_ADMIN_NAME="Zepeed Admin" \
+     DEFAULT_ADMIN_EMAIL="admin@zepeed.local" \
+     DEFAULT_ADMIN_PASSWORD="zepeed_admin" \
 
 USER root
 
@@ -121,7 +125,7 @@ COPY --from=cli-builder /usr/local/bin/fast-cli             /usr/local/bin/fast-
 COPY --from=cli-builder /usr/local/bin/cloudflare-speed-cli /usr/local/bin/cloudflare-speed-cli
 
 # ── S6 Overlay service definitions ───────────────────────────────────────────
-COPY docker/etc/s6-overlay /etc/s6-overlay
+COPY docker/production/etc/s6-overlay /etc/s6-overlay
 RUN find /etc/s6-overlay/s6-rc.d -name "run" -o -name "finish" | xargs chmod 755
 
 # ── Application source (compiled by builder stage) ────────────────────────────
