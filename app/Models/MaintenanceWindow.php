@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Lacodix\LaravelModelFilter\Filters\BooleanFilter;
+use Lacodix\LaravelModelFilter\Filters\DateFilter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -35,7 +39,11 @@ use Override;
 #[UseFactory(MaintenanceWindowFactory::class)]
 class MaintenanceWindow extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSortable;
+
+    protected array $sortable = [
+        'starts_at' => 'desc',
+    ];
 
     protected $fillable = [
         'label',
@@ -48,6 +56,31 @@ class MaintenanceWindow extends Model
         'duration_minutes',
         'notes',
     ];
+
+    /**
+     * Define filters for MaintenanceWindow model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            DateFilter::forModel(static::class)
+                ->make('starts_at')
+                ->setTitle('Starts From')
+                ->setQueryName('starts_at_from')
+                ->setComponent('date'),
+            DateFilter::forModel(static::class)
+                ->make('starts_at')
+                ->setTitle('Starts To')
+                ->setQueryName('starts_at_to')
+                ->setComponent('date'),
+            BooleanFilter::forModel(static::class)
+                ->make('is_active')
+                ->setQueryName('is_active')
+                ->setTitle('Active'),
+        ];
+    }
 
     #[Override]
     protected function casts(): array

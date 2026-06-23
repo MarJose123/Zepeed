@@ -16,35 +16,28 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class MaintenanceController extends Controller
 {
     /**
-     * List all maintenance windows.
+     * List maintenance schedules with pagination, filtering, and sorting.
      *
-     * Retrieves all scheduled maintenance windows in reverse chronological order
-     * (most recent first). Includes window start/end times, description, and
-     * whether it affects all monitoring or specific providers. Useful for
-     * clients to understand when the system expects reduced availability.
-     *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "title": "Network Maintenance",
-     *       "description": "ISP maintenance window",
-     *       "starts_at": "2024-01-20T02:00:00Z",
-     *       "ends_at": "2024-01-20T04:00:00Z",
-     *       "is_global": true,
-     *       "created_at": "2024-01-15T12:00:00Z"
-     *     }
-     *   ]
-     * }
-     *
-     * @return AnonymousResourceCollection
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam starts_at_from string Filter by start date (Y-m-d format).
+     * @queryParam starts_at_to string Filter by end date (Y-m-d format).
+     * @queryParam is_active boolean Filter by active status (0 or 1).
+     * @queryParam sort array Sort by field: ?sort[starts_at]=desc.
      */
     public function index(): AnonymousResourceCollection
     {
-        $windows = MaintenanceWindow::query()
-            ->latest('starts_at')
-            ->get();
+        $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
-        return MaintenanceWindowResource::collection($windows);
+        $windows = MaintenanceWindow::query()
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return MaintenanceWindowResource::collection($windows)->additional([
+            'success' => filled($windows),
+            'code'    => 200,
+        ]);
     }
 }

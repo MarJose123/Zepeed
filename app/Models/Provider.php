@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Lacodix\LaravelModelFilter\Filters\BooleanFilter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -40,13 +43,13 @@ use Override;
  */
 class Provider extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSortable;
 
-    #[Override]
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
+    protected array $sortable = [
+        'name' => 'asc',
+        'created_at',
+        'is_enabled',
+    ];
 
     protected $fillable = [
         'slug',
@@ -60,6 +63,27 @@ class Provider extends Model
         'last_run_at',
         'last_run_status',
     ];
+
+    #[Override]
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
+     * Define filters for Provider model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            BooleanFilter::forModel(static::class)
+                ->make('is_enabled')
+                ->setQueryName('enabled')
+                ->setTitle('Enabled'),
+        ];
+    }
 
     #[Override]
     protected function casts(): array

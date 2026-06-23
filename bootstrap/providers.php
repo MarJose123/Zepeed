@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\ApiServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\SanctumServiceProvider;
@@ -12,4 +13,5 @@ return [
     SpeedtestServiceProvider::class,
     SanctumServiceProvider::class,
     ScrambleServiceProvider::class,
+    ApiServiceProvider::class,
 ];

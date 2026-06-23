@@ -17,37 +17,26 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class ProviderController extends Controller
 {
     /**
-     * List all configured providers.
+     * List all configured providers with pagination, filtering, and sorting.
      *
-     * Retrieves all speedtest providers available in the system, including their
-     * enabled/disabled status, names, and configuration. Providers are returned
-     * in alphabetical order by name.
-     *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "name": "Ookla",
-     *       "enabled": true,
-     *       "created_at": "2024-01-01T12:00:00Z"
-     *     },
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440001",
-     *       "name": "LibreSpeed",
-     *       "enabled": true,
-     *       "created_at": "2024-01-02T12:00:00Z"
-     *     }
-     *   ]
-     * }
-     *
-     * @return AnonymousResourceCollection
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam enabled boolean Filter by enabled status (0 or 1).
+     * @queryParam sort array Sort by field: ?sort[name]=asc or ?sort[created_at]=desc.
      */
     public function index(): AnonymousResourceCollection
     {
-        $providers = Provider::query()
-            ->orderBy('name')
-            ->get();
+        $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
-        return ProviderResource::collection($providers);
+        $providers = Provider::query()
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return ProviderResource::collection($providers)->additional([
+            'success' => filled($providers),
+            'code'    => 200,
+        ]);
     }
 }

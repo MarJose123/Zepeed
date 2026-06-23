@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PingResultStatus;
 use App\Enums\PingStatus;
+use App\Models\Filters\PingTargetIdFilter;
 use Carbon\CarbonImmutable;
 use Database\Factories\PingResultFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -12,6 +13,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Lacodix\LaravelModelFilter\Enums\FilterMode;
+use Lacodix\LaravelModelFilter\Filters\DateFilter;
+use Lacodix\LaravelModelFilter\Filters\EnumFilter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSearchable;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -34,9 +41,16 @@ use Override;
 #[UseFactory(PingResultFactory::class)]
 class PingResult extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSearchable, IsSortable;
 
     public $timestamps = false;
+
+    protected array $sortable = [
+        'measured_at' => 'desc',
+        'latency_ms',
+        'packet_loss',
+        'avg_ms',
+    ];
 
     protected $fillable = [
         'ping_target_id',
@@ -53,6 +67,36 @@ class PingResult extends Model
         'measured_at',
         'created_at',
     ];
+
+    /**
+     * Define filters for PingResult model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            PingTargetIdFilter::class,
+            EnumFilter::forModel(static::class)
+                ->make('status')
+                ->setTitle('Status')
+                ->setQueryName('status')
+                ->setEnum(PingResultStatus::class)
+                ->setMode(FilterMode::EQUAL),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured From')
+                ->setQueryName('measured_at_from')
+                ->setMode(FilterMode::GREATER_OR_EQUAL)
+                ->setComponent('date'),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured To')
+                ->setQueryName('measured_at_to')
+                ->setMode(FilterMode::LOWER_OR_EQUAL)
+                ->setComponent('date'),
+        ];
+    }
 
     #[Override]
     protected function casts(): array

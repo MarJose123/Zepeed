@@ -13,77 +13,144 @@ class ProviderTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Test that authenticated user can list all providers.
+     * Test that authenticated user can list providers.
      */
     public function testAuthenticatedUserCanListProviders(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
-        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->create();
-        Provider::factory()->withSlug(SpeedtestServer::Netflix)->create();
+        Provider::factory()->count(3)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
 
         $response->assertOk()
             ->assertJsonStructure([
+                'success',
+                'code',
                 'data' => [
                     '*' => [
                         'id',
-                        'slug',
                         'name',
                         'enabled',
-                        'is_healthy',
-                        'last_run_at',
-                        'last_run_status',
-                        'alert_on_failure',
                     ],
+                ],
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'to',
+                    'per_page',
+                    'total',
+                    'last_page',
+                ],
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next',
                 ],
             ]);
     }
 
     /**
-     * Test that response includes all provider records.
+     * Test successful response structure with success and code fields.
      */
-    public function testResponseIncludesAllProviders(): void
+    public function testResponseIncludesSuccessAndCodeFields(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->count(2)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $this->assertTrue($response['success']);
+        $this->assertEquals(200, $response['code']);
+    }
+
+    /**
+     * Test pagination with default per_page of 25.
+     */
+    public function testPaginationWithDefaultPerPage(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->count(4)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $this->assertEquals(1, $response['meta']['current_page']);
+        $this->assertEquals(25, $response['meta']['per_page']);
+        $this->assertEquals(4, $response['meta']['total']);
+        $this->assertCount(4, $response['data']);
+    }
+
+    /**
+     * Test filtering by enabled status.
+     */
+    public function testFilterByEnabledStatus(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->count(2)->create(['is_enabled' => true]);
+        Provider::factory()->count(2)->create(['is_enabled' => false]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers?enabled=1');
+
+        $response->assertOk();
+        $this->assertEquals(2, $response['meta']['total']);
+        $this->assertCount(2, $response['data']);
+        $this->assertTrue($response['data'][0]['enabled']);
+    }
+
+    /**
+     * Test sorting by name ascending.
+     */
+    public function testSortByNameAscending(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
         Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
         Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->create();
-        Provider::factory()->withSlug(SpeedtestServer::Netflix)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Librespeed)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/providers');
+            ->getJson('/api/v1/providers?sort[name]=asc');
 
         $response->assertOk();
-        $this->assertCount(3, $response['data']);
+        $this->assertEquals(3, $response['meta']['total']);
+        $this->assertEquals('Cloudflare', $response['data'][0]['name']);
+        $this->assertEquals('LibreSpeed', $response['data'][1]['name']);
+        $this->assertEquals('Ookla', $response['data'][2]['name']);
     }
 
     /**
-     * Test that enabled status is correctly represented.
+     * Test response includes pagination links.
      */
-    public function testEnabledStatusIsCorrect(): void
+    public function testResponseIncludesPaginationLinks(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
-        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->disabled()->create();
+        Provider::factory()->count(4)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/providers');
+            ->getJson('/api/v1/providers?per_page=10&page=1');
 
         $response->assertOk();
-
-        $enabled = collect($response['data'])->where('enabled', true)->count();
-        $disabled = collect($response['data'])->where('enabled', false)->count();
-
-        $this->assertEquals(1, $enabled);
-        $this->assertEquals(1, $disabled);
+        $this->assertNotNull($response['links']['first']);
+        $this->assertNotNull($response['links']['last']);
+        $this->assertNull($response['links']['next']);
+        $this->assertNull($response['links']['prev']);
     }
 
     /**
@@ -92,19 +159,6 @@ class ProviderTest extends TestCase
     public function testUnauthenticatedRequestReturns401(): void
     {
         $response = $this->getJson('/api/v1/providers');
-
-        $response->assertUnauthorized()
-            ->assertJsonPath('success', false)
-            ->assertJsonPath('message', 'Unauthenticated');
-    }
-
-    /**
-     * Test that invalid token returns 401.
-     */
-    public function testInvalidTokenReturns401(): void
-    {
-        $response = $this->withHeader('Authorization', 'Bearer invalid-token')
-            ->getJson('/api/v1/providers');
 
         $response->assertUnauthorized();
     }

@@ -37,7 +37,7 @@ class MaintenanceWindowFactory extends Factory
      */
     public function active(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => true,
         ]);
     }
@@ -47,7 +47,7 @@ class MaintenanceWindowFactory extends Factory
      */
     public function inactive(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => false,
         ]);
     }
@@ -57,7 +57,7 @@ class MaintenanceWindowFactory extends Factory
      */
     public function oneTime(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type'             => MaintenanceWindowType::OneTime,
             'starts_at'        => fake()->dateTimeThisMonth(),
             'ends_at'          => fake()->dateTimeThisMonth(),
@@ -71,7 +71,7 @@ class MaintenanceWindowFactory extends Factory
      */
     public function recurring(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type'             => MaintenanceWindowType::Recurring,
             'cron_expression'  => '0 2 * * *',
             'duration_minutes' => 60,
@@ -85,7 +85,7 @@ class MaintenanceWindowFactory extends Factory
      */
     public function indefinite(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type'             => MaintenanceWindowType::Indefinite,
             'starts_at'        => null,
             'ends_at'          => null,

@@ -8,40 +8,33 @@ use App\Models\ProviderSchedule;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
- * Provider Schedule Management Endpoints
+ * Provider Schedule Endpoints
  *
- * Manages speedtest execution schedules for each provider.
- * Schedules define when and how often each provider runs speedtests.
+ * Provides access to speedtest execution schedules configured for each provider.
  */
 class ProviderScheduleController extends Controller
 {
     /**
-     * List all provider schedules.·
+     * List provider schedules with pagination, filtering, and sorting.
      *
-     * Retrieves all speedtest schedules across all providers. Returns schedules
-     * in reverse chronological order (most recently created first).
-     * Each schedule includes the cron expression, enabled status, and which
-     * provider it is associated with.
-     *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "provider_id": "550e8400-e29b-41d4-a716-446655440010",
-     *       "cron": "0 ·/6 · · ·",
-     *       "enabled": true,
-     *       "created_at": "2024-01-15T10:30:00Z"
-     *     }
-     *   ]
-     * }
-     *
-     * @return AnonymousResourceCollection
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam enabled boolean Filter by enabled status (0 or 1).
+     * @queryParam sort array Sort by field: ?sort[created_at]=desc.
      */
     public function index(): AnonymousResourceCollection
     {
-        $schedules = ProviderSchedule::query()->latest()
-            ->get();
+        $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
-        return ProviderScheduleResource::collection($schedules);
+        $schedules = ProviderSchedule::query()
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return ProviderScheduleResource::collection($schedules)->additional([
+            'success' => filled($schedules),
+            'code'    => 200,
+        ]);
     }
 }
