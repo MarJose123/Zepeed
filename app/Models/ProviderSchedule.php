@@ -58,7 +58,8 @@ class ProviderSchedule extends Model
     {
         return [
             BooleanFilter::forModel(static::class)
-                ->make('enabled')
+                ->make('is_enabled')
+                ->setQueryName('enabled')
                 ->setTitle('Enabled'),
         ];
     }

@@ -76,8 +76,9 @@ class MaintenanceWindow extends Model
                 ->setQueryName('starts_at_to')
                 ->setComponent('date'),
             BooleanFilter::forModel(static::class)
-                ->make('is_global')
-                ->setTitle('Global'),
+                ->make('is_active')
+                ->setQueryName('is_active')
+                ->setTitle('Active'),
         ];
     }
 

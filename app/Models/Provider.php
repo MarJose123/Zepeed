@@ -48,6 +48,7 @@ class Provider extends Model
     protected array $sortable = [
         'name' => 'asc',
         'created_at',
+        'is_enabled',
     ];
 
     protected $fillable = [
@@ -78,7 +79,8 @@ class Provider extends Model
     {
         return [
             BooleanFilter::forModel(static::class)
-                ->make('enabled')
+                ->make('is_enabled')
+                ->setQueryName('enabled')
                 ->setTitle('Enabled'),
         ];
     }

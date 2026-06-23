@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Lacodix\LaravelModelFilter\Enums\FilterMode;
 use Lacodix\LaravelModelFilter\Filters\DateFilter;
 use Lacodix\LaravelModelFilter\Filters\EnumFilter;
 use Lacodix\LaravelModelFilter\Traits\HasFilters;
@@ -93,16 +94,19 @@ class SpeedResult extends Model
             EnumFilter::forModel(static::class)
                 ->make('provider_slug')
                 ->setTitle('Provider')
+                ->setQueryName('provider_slug')
                 ->setEnum(SpeedtestServer::class),
             DateFilter::forModel(static::class)
                 ->make('measured_at')
                 ->setTitle('Measured From')
                 ->setQueryName('measured_at_from')
+                ->setMode(FilterMode::GREATER_OR_EQUAL)
                 ->setComponent('date'),
             DateFilter::forModel(static::class)
                 ->make('measured_at')
                 ->setTitle('Measured To')
                 ->setQueryName('measured_at_to')
+                ->setMode(FilterMode::LOWER_OR_EQUAL)
                 ->setComponent('date'),
         ];
     }

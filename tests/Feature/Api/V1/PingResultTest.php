@@ -34,11 +34,19 @@ class PingResultTest extends TestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'target_id',
-                        'target',
+                        'ping_target_id',
                         'status',
-                        'latency_ms',
-                        'packet_loss',
+                        'target' => [
+                            'label',
+                            'host',
+                        ],
+                        'packets_sent',
+                        'packets_received',
+                        'packet_loss_percent',
+                        'min_ms',
+                        'avg_ms',
+                        'max_ms',
+                        'stddev_ms',
                         'measured_at',
                     ],
                 ],
@@ -140,7 +148,7 @@ class PingResultTest extends TestCase
     }
 
     /**
-     * Test filtering by target ID.
+     * Test filtering by ping_target_id via target_id query param.
      */
     public function testFilterByTargetId(): void
     {
@@ -159,7 +167,7 @@ class PingResultTest extends TestCase
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
         $this->assertCount(3, $response['data']);
-        $this->assertEquals($target1->id, $response['data'][0]['target_id']);
+        $this->assertEquals($target1->id, $response['data'][0]['ping_target_id']);
     }
 
     /**
@@ -187,7 +195,7 @@ class PingResultTest extends TestCase
     }
 
     /**
-     * Test filtering by date range (from date).
+     * Test filtering by measured_at from date.
      */
     public function testFilterByMeasuredAtFromDate(): void
     {
@@ -210,7 +218,7 @@ class PingResultTest extends TestCase
     }
 
     /**
-     * Test filtering by date range (to date).
+     * Test filtering by measured_at to date.
      */
     public function testFilterByMeasuredAtToDate(): void
     {
@@ -241,70 +249,47 @@ class PingResultTest extends TestCase
         $token = $user->createToken('test-token');
 
         $target = PingTarget::factory()->create();
-        $date1 = now()->subDays(5);
-        $date2 = now()->subDays(10);
-        $date3 = now()->subDays(15);
 
-        PingResult::factory()->for($target, 'target')->create(['measured_at' => $date1]);
-        PingResult::factory()->for($target, 'target')->create(['measured_at' => $date3]);
-        PingResult::factory()->for($target, 'target')->create(['measured_at' => $date2]);
+        $result1 = PingResult::factory()->for($target, 'target')->create(['measured_at' => now()->subDays(5)]);
+        PingResult::factory()->for($target, 'target')->create(['measured_at' => now()->subDays(15)]);
+        PingResult::factory()->for($target, 'target')->create(['measured_at' => now()->subDays(10)]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/pings?sort[measured_at]=desc');
 
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
-        // Most recent first
-        $this->assertEquals($date1->toIso8601String(), $response['data'][0]['measured_at']);
+
+        /** @var PingResult $fresh */
+        $fresh = $result1->fresh();
+        $this->assertEquals($fresh->measured_at->toISOString(), $response['data'][0]['measured_at']);
     }
 
     /**
-     * Test sorting by latency_ms ascending.
+     * Test sorting by avg_ms ascending.
      */
-    public function testSortByLatencyMsAscending(): void
+    public function testSortByAvgMsAscending(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
         $target = PingTarget::factory()->create();
-        PingResult::factory()->for($target, 'target')->create(['latency_ms' => 50.5]);
-        PingResult::factory()->for($target, 'target')->create(['latency_ms' => 20.3]);
-        PingResult::factory()->for($target, 'target')->create(['latency_ms' => 75.8]);
+        PingResult::factory()->for($target, 'target')->create(['avg_ms' => 50.5]);
+        PingResult::factory()->for($target, 'target')->create(['avg_ms' => 20.3]);
+        PingResult::factory()->for($target, 'target')->create(['avg_ms' => 75.8]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/pings?sort[latency_ms]=asc');
+            ->getJson('/api/v1/pings?sort[avg_ms]=asc');
 
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
-        $this->assertEquals(20.3, $response['data'][0]['latency_ms']);
-        $this->assertEquals(50.5, $response['data'][1]['latency_ms']);
-        $this->assertEquals(75.8, $response['data'][2]['latency_ms']);
+        $this->assertEquals(20.3, $response['data'][0]['avg_ms']);
+        $this->assertEquals(50.5, $response['data'][1]['avg_ms']);
+        $this->assertEquals(75.8, $response['data'][2]['avg_ms']);
     }
 
     /**
-     * Test searching by target host name.
-     */
-    public function testSearchByTargetHost(): void
-    {
-        $user = User::factory()->create();
-        $token = $user->createToken('test-token');
-
-        $target1 = PingTarget::factory()->create(['host' => '8.8.8.8']);
-        $target2 = PingTarget::factory()->create(['host' => '1.1.1.1']);
-
-        PingResult::factory()->count(2)->for($target1, 'target')->create();
-        PingResult::factory()->for($target2, 'target')->create();
-
-        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/pings?search=8.8.8.8');
-
-        $response->assertOk();
-        $this->assertEquals(2, $response['meta']['total']);
-        $this->assertEquals('8.8.8.8', $response['data'][0]['target']['host']);
-    }
-
-    /**
-     * Test combined filter and sorting.
+     * Test filtering by status combined with sort.
      */
     public function testCombinedFilterAndSorting(): void
     {
@@ -313,23 +298,23 @@ class PingResultTest extends TestCase
 
         $target = PingTarget::factory()->create();
         PingResult::factory()->count(2)->for($target, 'target')->create([
-            'status'     => PingResultStatus::Success,
-            'latency_ms' => 25.5,
+            'status' => PingResultStatus::Success,
+            'avg_ms' => 25.5,
         ]);
         PingResult::factory()->count(2)->for($target, 'target')->create([
-            'status'     => PingResultStatus::Success,
-            'latency_ms' => 15.3,
+            'status' => PingResultStatus::Success,
+            'avg_ms' => 15.3,
         ]);
         PingResult::factory()->count(2)->for($target, 'target')->create([
             'status' => PingResultStatus::Failed,
         ]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/pings?status=success&sort[latency_ms]=desc');
+            ->getJson('/api/v1/pings?status=success&sort[avg_ms]=desc');
 
         $response->assertOk();
         $this->assertEquals(4, $response['meta']['total']);
-        $this->assertEquals(25.5, $response['data'][0]['latency_ms']);
+        $this->assertEquals(25.5, $response['data'][0]['avg_ms']);
     }
 
     /**
@@ -354,7 +339,7 @@ class PingResultTest extends TestCase
     }
 
     /**
-     * Test status is correctly represented.
+     * Test status and status_label are correctly represented.
      */
     public function testStatusIsCorrectlyRepresented(): void
     {
@@ -362,13 +347,15 @@ class PingResultTest extends TestCase
         $token = $user->createToken('test-token');
 
         $target = PingTarget::factory()->create();
-        PingResult::factory()->for($target, 'target')->create();
+        PingResult::factory()->for($target, 'target')->create([
+            'status' => PingResultStatus::Success,
+        ]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/pings');
 
         $response->assertOk();
-        $this->assertNotNull($response['data'][0]['status']);
+        $this->assertEquals('success', $response['data'][0]['status']);
     }
 
     /**

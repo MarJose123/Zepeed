@@ -31,8 +31,8 @@ class ProviderScheduleTest extends TestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'provider_id',
-                        'enabled',
+                        'provider_slug',
+                        'is_enabled',
                         'created_at',
                     ],
                 ],
@@ -79,8 +79,8 @@ class ProviderScheduleTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        ProviderSchedule::factory()->count(3)->create(['enabled' => true]);
-        ProviderSchedule::factory()->count(2)->create(['enabled' => false]);
+        ProviderSchedule::factory()->count(3)->create(['is_enabled' => true]);
+        ProviderSchedule::factory()->count(2)->create(['is_enabled' => false]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers/schedules?enabled=0');
@@ -88,7 +88,7 @@ class ProviderScheduleTest extends TestCase
         $response->assertOk();
         $this->assertEquals(2, $response['meta']['total']);
         $this->assertCount(2, $response['data']);
-        $this->assertFalse($response['data'][0]['enabled']);
+        $this->assertFalse($response['data'][0]['is_enabled']);
     }
 
     /**

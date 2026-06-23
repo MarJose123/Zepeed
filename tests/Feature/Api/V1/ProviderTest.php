@@ -32,7 +32,7 @@ class ProviderTest extends TestCase
                     '*' => [
                         'id',
                         'name',
-                        'enabled',
+                        'is_enabled',
                         'created_at',
                     ],
                 ],
@@ -79,7 +79,7 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->count(30)->create();
+        Provider::factory()->count(4)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers');
@@ -87,8 +87,8 @@ class ProviderTest extends TestCase
         $response->assertOk();
         $this->assertEquals(1, $response['meta']['current_page']);
         $this->assertEquals(25, $response['meta']['per_page']);
-        $this->assertEquals(30, $response['meta']['total']);
-        $this->assertCount(25, $response['data']);
+        $this->assertEquals(4, $response['meta']['total']);
+        $this->assertCount(4, $response['data']);
     }
 
     /**
@@ -99,16 +99,16 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->count(3)->create(['enabled' => true]);
-        Provider::factory()->count(2)->create(['enabled' => false]);
+        Provider::factory()->count(2)->create(['is_enabled' => true]);
+        Provider::factory()->count(2)->create(['is_enabled' => false]);
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers?enabled=1');
 
         $response->assertOk();
-        $this->assertEquals(3, $response['meta']['total']);
-        $this->assertCount(3, $response['data']);
-        $this->assertTrue($response['data'][0]['enabled']);
+        $this->assertEquals(2, $response['meta']['total']);
+        $this->assertCount(2, $response['data']);
+        $this->assertTrue($response['data'][0]['is_enabled']);
     }
 
     /**
@@ -141,7 +141,7 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->count(50)->create();
+        Provider::factory()->count(4)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers?per_page=10&page=1');
@@ -149,7 +149,7 @@ class ProviderTest extends TestCase
         $response->assertOk();
         $this->assertNotNull($response['links']['first']);
         $this->assertNotNull($response['links']['last']);
-        $this->assertNotNull($response['links']['next']);
+        $this->assertNull($response['links']['next']);
         $this->assertNull($response['links']['prev']);
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PingResultStatus;
 use App\Enums\PingStatus;
+use App\Models\Filters\PingTargetIdFilter;
 use Carbon\CarbonImmutable;
 use Database\Factories\PingResultFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -12,9 +13,9 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Lacodix\LaravelModelFilter\Enums\FilterMode;
 use Lacodix\LaravelModelFilter\Filters\DateFilter;
 use Lacodix\LaravelModelFilter\Filters\EnumFilter;
-use Lacodix\LaravelModelFilter\Filters\Filter;
 use Lacodix\LaravelModelFilter\Traits\HasFilters;
 use Lacodix\LaravelModelFilter\Traits\IsSearchable;
 use Lacodix\LaravelModelFilter\Traits\IsSortable;
@@ -48,6 +49,7 @@ class PingResult extends Model
         'measured_at' => 'desc',
         'latency_ms',
         'packet_loss',
+        'avg_ms',
     ];
 
     protected array $searchable = [
@@ -79,23 +81,24 @@ class PingResult extends Model
     public function filters(): array
     {
         return [
-            Filter::make()
-                ->setQueryName('target_id')
-                ->setTitle('Target')
-                ->apply(static fn (Builder $query, mixed $value): Builder => $query->where('target_id', $value)),
+            PingTargetIdFilter::class,
             EnumFilter::forModel(static::class)
                 ->make('status')
                 ->setTitle('Status')
-                ->setEnum(PingResultStatus::class),
+                ->setQueryName('status')
+                ->setEnum(PingResultStatus::class)
+                ->setMode(FilterMode::EQUAL),
             DateFilter::forModel(static::class)
                 ->make('measured_at')
                 ->setTitle('Measured From')
                 ->setQueryName('measured_at_from')
+                ->setMode(FilterMode::GREATER_OR_EQUAL)
                 ->setComponent('date'),
             DateFilter::forModel(static::class)
                 ->make('measured_at')
                 ->setTitle('Measured To')
                 ->setQueryName('measured_at_to')
+                ->setMode(FilterMode::LOWER_OR_EQUAL)
                 ->setComponent('date'),
         ];
     }
