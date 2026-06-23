@@ -1,4 +1,19 @@
-# Zepeed
+<h1 align="center">Zepeed</h1>
+
+<p align="center"><strong>A self-hosted internet speed tracker for monitoring ISP performance.</strong></p>
+
+<div align="center">
+
+![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License)
+![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release)
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=main&style=flat-square&label=API%20Test)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=main&style=flat-square&label=PHPStan)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=main&style=flat-square&label=Code%20Style)
+
+
+
+</div>
 
 Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Inertia.js, and Vue 3. It allows you to schedule and run speedtests using multiple providers like Speedtest Ookla, LibreSpeed, and Fast.com, providing a unified dashboard for monitoring your network performance.
 
