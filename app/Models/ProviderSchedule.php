@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use InvalidArgumentException;
+use Lacodix\LaravelModelFilter\Filters\BooleanFilter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -32,7 +35,11 @@ use Override;
 #[UseFactory(ProviderScheduleFactory::class)]
 class ProviderSchedule extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSortable;
+
+    protected array $sortable = [
+        'created_at' => 'desc',
+    ];
 
     protected $fillable = [
         'provider_slug',
@@ -41,6 +48,20 @@ class ProviderSchedule extends Model
         'is_enabled',
         'last_scheduled_at',
     ];
+
+    /**
+     * Define filters for ProviderSchedule model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            BooleanFilter::forModel(static::class)
+                ->make('enabled')
+                ->setTitle('Enabled'),
+        ];
+    }
 
     #[Override]
     protected function casts(): array

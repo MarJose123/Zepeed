@@ -10,7 +10,6 @@ use App\Events\Speedtest\SpeedtestExceptionEvent;
 use App\Listeners\Speedtest\BroadcastDashboardRefreshListener;
 use App\Listeners\Speedtest\SendSpeedtestExceptionAlertListener;
 use App\Models\Provider;
-use App\Models\Setting;
 use App\Services\MailProviderService;
 use App\Services\Speedtest\CloudflareSpeedService;
 use App\Services\Speedtest\Contracts\SpeedtestServiceInterface;

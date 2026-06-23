@@ -12,6 +12,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Lacodix\LaravelModelFilter\Filters\DateFilter;
+use Lacodix\LaravelModelFilter\Filters\EnumFilter;
+use Lacodix\LaravelModelFilter\Filters\Filter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSearchable;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -34,9 +40,20 @@ use Override;
 #[UseFactory(PingResultFactory::class)]
 class PingResult extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSearchable, IsSortable;
 
     public $timestamps = false;
+
+    protected array $sortable = [
+        'measured_at' => 'desc',
+        'latency_ms',
+        'packet_loss',
+    ];
+
+    protected array $searchable = [
+        'target.host',
+        'target.name',
+    ];
 
     protected $fillable = [
         'ping_target_id',
@@ -53,6 +70,35 @@ class PingResult extends Model
         'measured_at',
         'created_at',
     ];
+
+    /**
+     * Define filters for PingResult model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            Filter::make()
+                ->setQueryName('target_id')
+                ->setTitle('Target')
+                ->apply(static fn (Builder $query, mixed $value): Builder => $query->where('target_id', $value)),
+            EnumFilter::forModel(static::class)
+                ->make('status')
+                ->setTitle('Status')
+                ->setEnum(PingResultStatus::class),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured From')
+                ->setQueryName('measured_at_from')
+                ->setComponent('date'),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured To')
+                ->setQueryName('measured_at_to')
+                ->setComponent('date'),
+        ];
+    }
 
     #[Override]
     protected function casts(): array

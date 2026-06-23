@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\SpeedResultResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\SpeedResult;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Speedtest Results Endpoints
@@ -16,38 +16,33 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class SpeedResultController extends Controller
 {
     /**
-     * List recent speedtest results.
+     * List speedtest results with pagination, filtering, sorting, and search.
      *
-     * Retrieves the most recent speedtest measurements across all providers.
-     * Returns up to 100 most recent results in reverse chronological order
-     * (most recent first). Includes download/upload speeds, latency, jitter,
-     * packet loss, provider details, and measurement timestamp.
+     * Retrieves speedtest measurements with support for pagination, filtering by provider
+     * and date range, sorting by various metrics, and full-text search.
      *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "provider_id": "550e8400-e29b-41d4-a716-446655440010",
-     *       "provider_name": "Ookla",
-     *       "download_mbps": 250.5,
-     *       "upload_mbps": 50.2,
-     *       "latency_ms": 15.3,
-     *       "jitter_ms": 2.1,
-     *       "packet_loss_percent": 0.0,
-     *       "measured_at": "2024-01-15T10:30:00Z"
-     *     }
-     *   ]
-     * }
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam provider_slug string Filter by provider (ookla, librespeed, netflix, cloudflare).
+     * @queryParam measured_at_from string Filter by start date (Y-m-d format).
+     * @queryParam measured_at_to string Filter by end date (Y-m-d format).
+     * @queryParam sort array Sort by field: ?sort[measured_at]=desc or ?sort[download_mbps]=asc.
+     * @queryParam search string Full-text search across server_name, server_location, isp.
      *
-     * @return AnonymousResourceCollection
+     * @return JsonResponse
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): JsonResponse
     {
-        $results = SpeedResult::query()
-            ->latest('measured_at')
-            ->limit(100)
-            ->get();
+        $perPage = min((int) request()->query('per_page', 25), 100);
+        $perPage = max($perPage, 1);
 
-        return SpeedResultResource::collection($results);
+        $results = SpeedResult::query()
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->searchByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return ApiResponse::paginated($results);
     }
 }

@@ -3,48 +3,43 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\MaintenanceWindowResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\MaintenanceWindow;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Maintenance Window Endpoints
  *
- * Provides information about scheduled maintenance windows.
- * Maintenance windows suppress alerts during planned downtime periods.
+ * Provides access to scheduled maintenance windows.
  */
 class MaintenanceController extends Controller
 {
     /**
-     * List all maintenance windows.
+     * List maintenance schedules with pagination, filtering, and sorting.
      *
-     * Retrieves all scheduled maintenance windows in reverse chronological order
-     * (most recent first). Includes window start/end times, description, and
-     * whether it affects all monitoring or specific providers. Useful for
-     * clients to understand when the system expects reduced availability.
+     * Retrieves all scheduled maintenance windows with support for pagination,
+     * filtering by date range and global status, and sorting.
      *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "title": "Network Maintenance",
-     *       "description": "ISP maintenance window",
-     *       "starts_at": "2024-01-20T02:00:00Z",
-     *       "ends_at": "2024-01-20T04:00:00Z",
-     *       "is_global": true,
-     *       "created_at": "2024-01-15T12:00:00Z"
-     *     }
-     *   ]
-     * }
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam starts_at_from string Filter by start date (Y-m-d format).
+     * @queryParam starts_at_to string Filter by end date (Y-m-d format).
+     * @queryParam is_global boolean Filter by global status (0 or 1).
+     * @queryParam sort array Sort by field: ?sort[starts_at]=desc.
      *
-     * @return AnonymousResourceCollection
+     * @return JsonResponse
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): JsonResponse
     {
-        $windows = MaintenanceWindow::query()
-            ->latest('starts_at')
-            ->get();
+        $perPage = min((int) request()->query('per_page', 25), 100);
+        $perPage = max($perPage, 1);
 
-        return MaintenanceWindowResource::collection($windows);
+        $windows = MaintenanceWindow::query()
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return ApiResponse::paginated($windows);
     }
 }

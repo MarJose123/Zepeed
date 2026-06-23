@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Lacodix\LaravelModelFilter\Filters\DateFilter;
+use Lacodix\LaravelModelFilter\Filters\EnumFilter;
+use Lacodix\LaravelModelFilter\Traits\HasFilters;
+use Lacodix\LaravelModelFilter\Traits\IsSearchable;
+use Lacodix\LaravelModelFilter\Traits\IsSortable;
 use Override;
 
 /**
@@ -41,7 +46,20 @@ use Override;
 #[UseFactory(SpeedResultFactory::class)]
 class SpeedResult extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasFilters, HasUuids, IsSearchable, IsSortable;
+
+    protected array $sortable = [
+        'measured_at' => 'desc',
+        'download_mbps',
+        'upload_mbps',
+        'ping_ms',
+    ];
+
+    protected array $searchable = [
+        'server_name',
+        'server_location',
+        'isp',
+    ];
 
     protected $fillable = [
         'provider_slug',
@@ -63,6 +81,31 @@ class SpeedResult extends Model
         'raw_json',
         'measured_at',
     ];
+
+    /**
+     * Define filters for SpeedResult model.
+     *
+     * @return array
+     */
+    public function filters(): array
+    {
+        return [
+            EnumFilter::forModel(static::class)
+                ->make('provider_slug')
+                ->setTitle('Provider')
+                ->setEnum(SpeedtestServer::class),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured From')
+                ->setQueryName('measured_at_from')
+                ->setComponent('date'),
+            DateFilter::forModel(static::class)
+                ->make('measured_at')
+                ->setTitle('Measured To')
+                ->setQueryName('measured_at_to')
+                ->setComponent('date'),
+        ];
+    }
 
     protected function scopeSuccessful(Builder $query): void
     {

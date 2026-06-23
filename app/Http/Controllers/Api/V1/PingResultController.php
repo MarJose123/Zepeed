@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\PingResultResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\PingResult;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Ping Monitoring Endpoints
@@ -16,41 +16,35 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class PingResultController extends Controller
 {
     /**
-     * List recent ping monitoring results.
+     * List ping results with pagination, filtering, sorting, and search.
      *
-     * Retrieves the most recent ping measurements to all configured targets.
-     * Returns up to 100 most recent results in reverse chronological order.
-     * Each result includes the target host, latency, packet loss percentage,
-     * response status, and measurement timestamp. Includes related target information.
+     * Retrieves ping measurements with support for pagination, filtering by target
+     * and status, date range filtering, sorting, and full-text search.
      *
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "id": "550e8400-e29b-41d4-a716-446655440000",
-     *       "target_id": "550e8400-e29b-41d4-a716-446655440020",
-     *       "target": {
-     *         "id": "550e8400-e29b-41d4-a716-446655440020",
-     *         "host": "8.8.8.8",
-     *         "name": "Google DNS"
-     *       },
-     *       "latency_ms": 12.5,
-     *       "packet_loss_percent": 0.0,
-     *       "status": "success",
-     *       "measured_at": "2024-01-15T10:30:00Z"
-     *     }
-     *   ]
-     * }
+     * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
+     * @queryParam page int Default: 1. Current page number.
+     * @queryParam target_id string Filter by target UUID.
+     * @queryParam status string Filter by status (success, failed).
+     * @queryParam measured_at_from string Filter by start date (Y-m-d format).
+     * @queryParam measured_at_to string Filter by end date (Y-m-d format).
+     * @queryParam sort array Sort by field: ?sort[measured_at]=desc or ?sort[latency_ms]=asc.
+     * @queryParam search string Full-text search across target host and name.
      *
-     * @return AnonymousResourceCollection
+     * @return JsonResponse
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): JsonResponse
     {
+        $perPage = min((int) request()->query('per_page', 25), 100);
+        $perPage = max($perPage, 1);
+
         $pings = PingResult::query()
             ->with('target')
-            ->latest('measured_at')
-            ->limit(100)
-            ->get();
+            ->filterByQueryString()
+            ->sortByQueryString()
+            ->searchByQueryString()
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return PingResultResource::collection($pings);
+        return ApiResponse::paginated($pings);
     }
 }
