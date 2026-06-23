@@ -8,12 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Override;
 
 class ApiServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
+    #[Override]
     public function register(): void {}
 
     /**
