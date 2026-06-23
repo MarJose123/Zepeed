@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\OpenApi\ApiErrorResponsesTransformer;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -22,12 +23,12 @@ class ScrambleServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Scramble::configure()
-            ->withDocumentTransformers(static function (OpenApi $openApi): void {
-                $openApi->secure(
-                    SecurityScheme::http('bearer', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9....')
-                        ->as('bearer')
-                );
+            ->withDocumentTransformers(static function (OpenApi $document): void {
+                $document->secure(SecurityScheme::http('bearer'));
             })
+            ->withOperationTransformers([
+                ApiErrorResponsesTransformer::class,
+            ])
             ->expose(document: '/docs/openapi.json');
     }
 }
