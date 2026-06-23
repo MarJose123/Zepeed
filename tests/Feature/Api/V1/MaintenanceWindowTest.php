@@ -203,7 +203,7 @@ class MaintenanceWindowTest extends TestCase
 
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
-        $this->assertEquals($window1->fresh()->starts_at->toISOString(), $response['data'][0]['starts_at']);
+        $this->assertEquals($window1->fresh()->starts_at->toIso8601String(), $response['data'][0]['starts_at']);
     }
 
     /**

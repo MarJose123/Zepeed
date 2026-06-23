@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\AppVersionResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Application Information Endpoints
@@ -18,18 +19,9 @@ class AppController extends Controller
      * Retrieves current application version, build date, environment, and name.
      * Useful for clients to verify compatibility and display app information.
      *
-     * @response 200 {
-     *   "data": {
-     *     "version": "1.0.0",
-     *     "build_date": "2024-01-15T10:30:00Z",
-     *     "environment": "production",
-     *     "name": "Zepeed"
-     *   }
-     * }
-     *
-     * @return AppVersionResource
+     * @queryParam none No query parameters accepted.
      */
-    public function show(): AppVersionResource
+    public function show(): JsonResource
     {
         $data = (object) [
             'version'     => config('app.version'),
@@ -38,6 +30,9 @@ class AppController extends Controller
             'name'        => config('app.name'),
         ];
 
-        return AppVersionResource::make($data);
+        return AppVersionResource::make($data)->additional([
+            'success' => true,
+            'code'    => 200,
+        ]);
     }
 }

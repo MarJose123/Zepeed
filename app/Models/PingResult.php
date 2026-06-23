@@ -52,11 +52,6 @@ class PingResult extends Model
         'avg_ms',
     ];
 
-    protected array $searchable = [
-        'target.host',
-        'target.name',
-    ];
-
     protected $fillable = [
         'ping_target_id',
         'status',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Enums\SpeedtestServer;
 use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,8 +33,7 @@ class ProviderTest extends TestCase
                     '*' => [
                         'id',
                         'name',
-                        'is_enabled',
-                        'created_at',
+                        'enabled',
                     ],
                 ],
                 'meta' => [
@@ -108,7 +108,7 @@ class ProviderTest extends TestCase
         $response->assertOk();
         $this->assertEquals(2, $response['meta']['total']);
         $this->assertCount(2, $response['data']);
-        $this->assertTrue($response['data'][0]['is_enabled']);
+        $this->assertTrue($response['data'][0]['enabled']);
     }
 
     /**
@@ -119,9 +119,9 @@ class ProviderTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
 
-        Provider::factory()->create(['name' => 'Ookla']);
-        Provider::factory()->create(['name' => 'Cloudflare']);
-        Provider::factory()->create(['name' => 'LibreSpeed']);
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->create();
+        Provider::factory()->withSlug(SpeedtestServer::Librespeed)->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/providers?sort[name]=asc');

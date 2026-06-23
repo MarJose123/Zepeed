@@ -34,10 +34,10 @@ class SpeedResultTest extends TestCase
                         'id',
                         'provider_slug',
                         'status',
-                        'download_mbps',
-                        'upload_mbps',
-                        'ping_ms',
-                        'jitter_ms',
+                        'download',
+                        'upload',
+                        'ping',
+                        'jitter',
                         'packet_loss',
                         'server_name',
                         'server_location',
@@ -268,7 +268,7 @@ class SpeedResultTest extends TestCase
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
         // Most recent first
-        $this->assertEquals($date1->setMicrosecond(0)->toISOString(), $response['data'][0]['measured_at']);
+        $this->assertEquals($date1->toIso8601String(), $response['data'][0]['measured_at']);
     }
 
     /**
@@ -288,9 +288,9 @@ class SpeedResultTest extends TestCase
 
         $response->assertOk();
         $this->assertEquals(3, $response['meta']['total']);
-        $this->assertEquals(50, $response['data'][0]['download_mbps']);
-        $this->assertEquals(100, $response['data'][1]['download_mbps']);
-        $this->assertEquals(150, $response['data'][2]['download_mbps']);
+        $this->assertEquals(50, $response['data'][0]['download']);
+        $this->assertEquals(100, $response['data'][1]['download']);
+        $this->assertEquals(150, $response['data'][2]['download']);
     }
 
     /**
@@ -336,7 +336,7 @@ class SpeedResultTest extends TestCase
 
         $response->assertOk();
         $this->assertEquals(4, $response['meta']['total']);
-        $this->assertEquals(150, $response['data'][0]['download_mbps']);
+        $this->assertEquals(150, $response['data'][0]['download']);
     }
 
     /**
@@ -377,9 +377,9 @@ class SpeedResultTest extends TestCase
             ->getJson('/api/v1/speedtest/results');
 
         $response->assertOk();
-        $this->assertEquals(150.57, $response['data'][0]['download_mbps']);
-        $this->assertEquals(75.12, $response['data'][0]['upload_mbps']);
-        $this->assertEquals(26.0, $response['data'][0]['ping_ms']);
+        $this->assertEquals(150.57, $response['data'][0]['download']);
+        $this->assertEquals(75.12, $response['data'][0]['upload']);
+        $this->assertEquals(26.0, $response['data'][0]['ping']);
     }
 
     /**

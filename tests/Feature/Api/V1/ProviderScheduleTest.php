@@ -32,8 +32,7 @@ class ProviderScheduleTest extends TestCase
                     '*' => [
                         'id',
                         'provider_slug',
-                        'is_enabled',
-                        'created_at',
+                        'enabled',
                     ],
                 ],
                 'meta' => [
@@ -88,7 +87,7 @@ class ProviderScheduleTest extends TestCase
         $response->assertOk();
         $this->assertEquals(2, $response['meta']['total']);
         $this->assertCount(2, $response['data']);
-        $this->assertFalse($response['data'][0]['is_enabled']);
+        $this->assertFalse($response['data'][0]['enabled']);
     }
 
     /**

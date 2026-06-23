@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Responses\ApiResponse;
+use App\Http\Resources\Api\MaintenanceWindowResource;
 use App\Models\MaintenanceWindow;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * Maintenance Window Endpoints
@@ -18,22 +18,16 @@ class MaintenanceController extends Controller
     /**
      * List maintenance schedules with pagination, filtering, and sorting.
      *
-     * Retrieves all scheduled maintenance windows with support for pagination,
-     * filtering by date range and active status, and sorting.
-     *
      * @queryParam per_page int Default: 25. Max: 100. Minimum: 1.
      * @queryParam page int Default: 1. Current page number.
      * @queryParam starts_at_from string Filter by start date (Y-m-d format).
      * @queryParam starts_at_to string Filter by end date (Y-m-d format).
      * @queryParam is_active boolean Filter by active status (0 or 1).
      * @queryParam sort array Sort by field: ?sort[starts_at]=desc.
-     *
-     * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        $perPage = min((int) request()->query('per_page', 25), 100);
-        $perPage = max($perPage, 1);
+        $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
         $windows = MaintenanceWindow::query()
             ->filterByQueryString()
@@ -41,6 +35,9 @@ class MaintenanceController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return ApiResponse::paginated($windows);
+        return MaintenanceWindowResource::collection($windows)->additional([
+            'success' => filled($windows),
+            'code'    => 200,
+        ]);
     }
 }

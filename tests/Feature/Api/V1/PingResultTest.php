@@ -36,10 +36,8 @@ class PingResultTest extends TestCase
                         'id',
                         'ping_target_id',
                         'status',
-                        'target' => [
-                            'label',
-                            'host',
-                        ],
+                        'target_label',
+                        'target_host',
                         'packets_sent',
                         'packets_received',
                         'packet_loss_percent',
@@ -262,7 +260,7 @@ class PingResultTest extends TestCase
 
         /** @var PingResult $fresh */
         $fresh = $result1->fresh();
-        $this->assertEquals($fresh->measured_at->toISOString(), $response['data'][0]['measured_at']);
+        $this->assertEquals($fresh->measured_at->toIso8601String(), $response['data'][0]['measured_at']);
     }
 
     /**
