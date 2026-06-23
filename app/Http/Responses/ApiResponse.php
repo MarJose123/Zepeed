@@ -35,6 +35,9 @@ class ApiResponse
 
     /**
      * Return a successful non-paginated response.
+     *
+     * @param mixed|null $data
+     * @param int $code
      */
     public static function success(mixed $data = null, int $code = 200): JsonResponse
     {

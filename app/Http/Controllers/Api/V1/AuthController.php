@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -40,15 +41,8 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        return response()->json([
-            'data' => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'appearance' => $user->appearance,
-                'created_at' => $user->created_at?->toIso8601String(),
-            ],
-        ], 200);
+        return ApiResponse::success($user);
+
     }
 
     /**
