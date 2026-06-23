@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 1.2.0 - 2026-06-23
+
+### What's Changed
+
+* feat(docker): production Dockerfile, compose, default admin seeding, and Docker Hub CI by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/39
+* refactor(api): Enhance controller documentation by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/40
+* feat(api): paginated list endpoints with filtering, sorting and rate limiting by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/41
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v1.1.0...v1.2.0
+
 ## Release 1.1.0 - 2026-06-21
 
 ### What's Changed
