@@ -7,9 +7,10 @@
 
 <div align="center">
 
-![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License)
+![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image)
 ![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release)
 
+![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=main&style=flat-square&label=API%20Test)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=main&style=flat-square&label=PHPStan)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=main&style=flat-square&label=Code%20Style)
