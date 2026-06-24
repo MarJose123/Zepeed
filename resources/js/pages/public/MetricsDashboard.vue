@@ -10,7 +10,6 @@ import type {
     LatencySeriesPoint,
     MetricsGranularity,
     MetricsRange,
-    MetricsRefreshPayload,
     SpeedSeriesPoint,
 } from "@/types/public";
 
@@ -32,13 +31,18 @@ function navigate(range: MetricsRange, from?: string, to?: string): void {
     );
 }
 
-useMetricsDashboardRefresh((_: MetricsRefreshPayload) => {
+useMetricsDashboardRefresh(() => {
     router.reload();
 });
 
 const SPEED_SERIES = [
-    { key: "download", label: "Download", color: "var(--chart-1)", unit: "Mbps" },
-    { key: "upload",   label: "Upload",   color: "var(--chart-2)", unit: "Mbps" },
+    {
+        key: "download",
+        label: "Download",
+        color: "var(--chart-1)",
+        unit: "Mbps",
+    },
+    { key: "upload", label: "Upload", color: "var(--chart-2)", unit: "Mbps" },
 ];
 
 const PING_SERIES = [
@@ -46,14 +50,34 @@ const PING_SERIES = [
 ];
 
 const LATENCY_SERIES = [
-    { key: "download_latency", label: "Download Latency", color: "var(--chart-1)", unit: "ms" },
-    { key: "upload_latency",   label: "Upload Latency",   color: "var(--chart-2)", unit: "ms" },
+    {
+        key: "download_latency",
+        label: "Download Latency",
+        color: "var(--chart-1)",
+        unit: "ms",
+    },
+    {
+        key: "upload_latency",
+        label: "Upload Latency",
+        color: "var(--chart-2)",
+        unit: "ms",
+    },
 ];
 
 const JITTER_SERIES = [
-    { key: "download_jitter", label: "Download Jitter", color: "var(--chart-1)", unit: "ms" },
-    { key: "upload_jitter",   label: "Upload Jitter",   color: "var(--chart-2)", unit: "ms" },
-    { key: "ping_jitter",     label: "Ping Jitter",     color: "#a78bfa",        unit: "ms" },
+    {
+        key: "download_jitter",
+        label: "Download Jitter",
+        color: "var(--chart-1)",
+        unit: "ms",
+    },
+    {
+        key: "upload_jitter",
+        label: "Upload Jitter",
+        color: "var(--chart-2)",
+        unit: "ms",
+    },
+    { key: "ping_jitter", label: "Ping Jitter", color: "#a78bfa", unit: "ms" },
 ];
 </script>
 
@@ -61,7 +85,6 @@ const JITTER_SERIES = [
     <Head title="Metrics Dashboard" />
     <PublicLayout>
         <div class="flex flex-1 flex-col gap-4 pt-0">
-
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -82,7 +105,9 @@ const JITTER_SERIES = [
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <TrendingDown class="text-muted-foreground size-3.5" />
-                    <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
                         Speed
                     </p>
                 </div>
@@ -98,7 +123,9 @@ const JITTER_SERIES = [
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <Activity class="text-muted-foreground size-3.5" />
-                    <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
                         Ping
                     </p>
                 </div>
@@ -114,7 +141,9 @@ const JITTER_SERIES = [
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <Timer class="text-muted-foreground size-3.5" />
-                    <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
                         Latency (IQM)
                     </p>
                 </div>
@@ -130,7 +159,9 @@ const JITTER_SERIES = [
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <Activity class="text-muted-foreground size-3.5" />
-                    <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
                         Jitter
                     </p>
                 </div>
@@ -141,7 +172,6 @@ const JITTER_SERIES = [
                     :series="JITTER_SERIES"
                 />
             </section>
-
         </div>
     </PublicLayout>
 </template>
