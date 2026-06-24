@@ -33,6 +33,7 @@ USER root
 
 # Install Bun + build tools
 RUN apk add --no-cache curl bash unzip git nodejs npm \
+    && install-php-extensions intl \
     && curl -fsSL https://bun.sh/install | bash \
     && ln -sf /root/.bun/bin/bun /usr/local/bin/bun
 
@@ -114,6 +115,7 @@ RUN apk add --no-cache \
         tzdata \
         bash \
         iputils \
+    && install-php-extensions intl \
     && cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
     && echo "${TIMEZONE}" > /etc/timezone
 
