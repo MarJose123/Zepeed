@@ -73,6 +73,7 @@ export type MetricsRange = "1d" | "7d" | "30d" | "custom";
 export type MetricsGranularity = "hourly" | "daily" | "weekly";
 
 export interface SpeedSeriesPoint {
+    [key: string]: number | string;
     label: string;
     download: number;
     upload: number;
@@ -80,6 +81,7 @@ export interface SpeedSeriesPoint {
 }
 
 export interface LatencySeriesPoint {
+    [key: string]: number | string;
     label: string;
     ping: number;
     download_latency: number;
@@ -87,6 +89,7 @@ export interface LatencySeriesPoint {
 }
 
 export interface JitterSeriesPoint {
+    [key: string]: number | string;
     label: string;
     download_jitter: number;
     upload_jitter: number;
@@ -99,23 +102,6 @@ export interface MetricStat {
     p95: number;
     maximum: number;
     minimum: number;
-}
-
-export interface SpeedStats {
-    download: MetricStat;
-    upload: MetricStat;
-}
-
-export interface LatencyStats {
-    ping: MetricStat;
-    download_latency: MetricStat;
-    upload_latency: MetricStat;
-}
-
-export interface JitterStats {
-    download_jitter: MetricStat;
-    upload_jitter: MetricStat;
-    ping_jitter: MetricStat;
 }
 
 export interface MetricsRefreshPayload {

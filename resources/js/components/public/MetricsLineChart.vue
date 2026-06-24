@@ -46,7 +46,7 @@ function toggleSeries(dataKey: string): void {
     hiddenKeys.value = new Set(hiddenKeys.value);
 }
 
-function formatTick(value: number): string {
+function formatYTick(value: number): string {
     return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
 }
 </script>
@@ -67,27 +67,19 @@ function formatTick(value: number): string {
                 >
                     <CartesianGrid
                         stroke-dasharray="3 3"
-                        class="stroke-border/40"
+                        stroke="var(--border)"
+                        :stroke-opacity="0.5"
                         :vertical="false"
                     />
                     <XAxis
                         data-key="label"
-                        :tick="{
-                            fontSize: 11,
-                            fill: 'var(--muted-foreground)',
-                        }"
                         :tick-line="false"
                         :axis-line="false"
-                        :interval="'preserveStartEnd'"
                     />
                     <YAxis
-                        :tick="{
-                            fontSize: 11,
-                            fill: 'var(--muted-foreground)',
-                        }"
                         :tick-line="false"
                         :axis-line="false"
-                        :tick-formatter="formatTick"
+                        :tick-formatter="formatYTick"
                         :width="40"
                     />
                     <Tooltip>
@@ -135,14 +127,14 @@ function formatTick(value: number): string {
                             </div>
                         </template>
                     </Tooltip>
-                    <Legend :onClick="(e) => toggleSeries(String(e.dataKey))">
+                    <Legend>
                         <template #content="{ payload }">
                             <div
                                 class="flex items-center justify-center gap-4 pt-2"
                             >
                                 <button
                                     v-for="entry in payload"
-                                    :key="String(entry.dataKey)"
+                                    :key="String(entry.value)"
                                     type="button"
                                     class="flex items-center gap-1.5 transition-opacity"
                                     :class="{
