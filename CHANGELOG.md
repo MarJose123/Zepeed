@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 1.2.1 - 2026-06-24
+
+### What's Changed
+
+* fix(docker): install ext-intl in builder and production stages for lacodix/laravel-model-filter v4 by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/42
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v1.2.0...v1.2.1
+
 ## Release 1.2.0 - 2026-06-23
 
 ### What's Changed
