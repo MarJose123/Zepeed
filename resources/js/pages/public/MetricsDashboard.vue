@@ -42,12 +42,13 @@ function toggleSeries(dataKey: string): void {
     } else {
         hiddenKeys.value.add(dataKey);
     }
-
     hiddenKeys.value = new Set(hiddenKeys.value);
 }
 
-function formatTick(value: number): string {
-    return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
+function formatYTick(value: number): string {
+    return value >= 1000
+        ? `${(value / 1000).toFixed(1)}k`
+        : String(value);
 }
 </script>
 
@@ -65,29 +66,22 @@ function formatTick(value: number): string {
                     :data="points"
                     :margin="{ top: 4, right: 16, bottom: 0, left: 0 }"
                 >
+                    <!-- stroke + strokeOpacity are SVG attrs on the grid element -->
                     <CartesianGrid
                         stroke-dasharray="3 3"
-                        class="stroke-border/40"
+                        stroke="var(--border)"
+                        :stroke-opacity="0.5"
                         :vertical="false"
                     />
                     <XAxis
                         data-key="label"
-                        :tick="{
-                            fontSize: 11,
-                            fill: 'var(--muted-foreground)',
-                        }"
                         :tick-line="false"
                         :axis-line="false"
-                        :interval="'preserveStartEnd'"
                     />
                     <YAxis
-                        :tick="{
-                            fontSize: 11,
-                            fill: 'var(--muted-foreground)',
-                        }"
                         :tick-line="false"
                         :axis-line="false"
-                        :tick-formatter="formatTick"
+                        :tick-formatter="formatYTick"
                         :width="40"
                     />
                     <Tooltip>
@@ -107,13 +101,9 @@ function formatTick(value: number): string {
                                     >
                                         <span
                                             class="size-2 rounded-full shrink-0"
-                                            :style="{
-                                                backgroundColor: entry.color,
-                                            }"
+                                            :style="{ backgroundColor: entry.color }"
                                         />
-                                        <span
-                                            class="text-xs text-muted-foreground"
-                                        >
+                                        <span class="text-xs text-muted-foreground">
                                             {{ entry.name }}:
                                         </span>
                                         <span class="text-xs font-medium">
@@ -124,9 +114,7 @@ function formatTick(value: number): string {
                                             }}
                                             {{
                                                 series.find(
-                                                    (s) =>
-                                                        s.key ===
-                                                        String(entry.dataKey),
+                                                    (s) => s.key === String(entry.dataKey),
                                                 )?.unit ?? ""
                                             }}
                                         </span>
@@ -135,14 +123,13 @@ function formatTick(value: number): string {
                             </div>
                         </template>
                     </Tooltip>
-                    <Legend :onClick="(e) => toggleSeries(String(e.dataKey))">
+                    <!-- onClick removed — clicks are handled exclusively in the slot -->
+                    <Legend>
                         <template #content="{ payload }">
-                            <div
-                                class="flex items-center justify-center gap-4 pt-2"
-                            >
+                            <div class="flex items-center justify-center gap-4 pt-2">
                                 <button
                                     v-for="entry in payload"
-                                    :key="String(entry.dataKey)"
+                                    :key="String(entry.value)"
                                     type="button"
                                     class="flex items-center gap-1.5 transition-opacity"
                                     :class="{
@@ -154,13 +141,9 @@ function formatTick(value: number): string {
                                 >
                                     <span
                                         class="size-2.5 rounded-full shrink-0"
-                                        :style="{
-                                            backgroundColor: entry.color,
-                                        }"
+                                        :style="{ backgroundColor: entry.color }"
                                     />
-                                    <span
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <span class="text-[11px] text-muted-foreground">
                                         {{ entry.value }}
                                     </span>
                                 </button>

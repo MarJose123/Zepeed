@@ -13,26 +13,19 @@ class PublicMetricsDashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $range = (string) $request->query('range', '1d');
-        $from = $request->query('from');
-        $to = $request->query('to');
+        $from  = $request->query('from');
+        $to    = $request->query('to');
 
         [$start, $end, $granularity] = $this->resolveRange($range, $from, $to);
-
-        $speedSeries = $this->fetchSpeedSeries($start, $end, $granularity);
-        $latencySeries = $this->fetchLatencySeries($start, $end, $granularity);
-        $jitterSeries = $this->fetchJitterSeries($start, $end, $granularity);
 
         return Inertia::render('public/MetricsDashboard', [
             'range'         => $range,
             'from'          => $start->toDateString(),
             'to'            => $end->toDateString(),
             'granularity'   => $granularity,
-            'speedSeries'   => $speedSeries,
-            'latencySeries' => $latencySeries,
-            'jitterSeries'  => $jitterSeries,
-            'speedStats'    => $this->calcStats($speedSeries, ['download', 'upload']),
-            'latencyStats'  => $this->calcStats($latencySeries, ['ping', 'download_latency', 'upload_latency']),
-            'jitterStats'   => $this->calcStats($jitterSeries, ['download_jitter', 'upload_jitter', 'ping_jitter']),
+            'speedSeries'   => $this->fetchSpeedSeries($start, $end, $granularity),
+            'latencySeries' => $this->fetchLatencySeries($start, $end, $granularity),
+            'jitterSeries'  => $this->fetchJitterSeries($start, $end, $granularity),
         ]);
     }
 
@@ -45,8 +38,8 @@ class PublicMetricsDashboardController extends Controller
     {
         if ($range === 'custom' && $from && $to) {
             $start = CarbonImmutable::parse((string) $from)->startOfDay();
-            $end = CarbonImmutable::parse((string) $to)->endOfDay();
-            $days = (int) $start->diffInDays($end);
+            $end   = CarbonImmutable::parse((string) $to)->endOfDay();
+            $days  = (int) $start->diffInDays($end);
 
             $granularity = match (true) {
                 $days <= 2  => 'hourly',
@@ -120,8 +113,8 @@ class PublicMetricsDashboardController extends Controller
             ->select([
                 DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
                 DB::raw('ROUND(AVG(ping_ms), 2) as ping'),
-                DB::raw('ROUND(AVG(ping_ms * 0.9 + IFNULL(jitter_ms,0) * 0.1), 2) as download_latency'),
-                DB::raw('ROUND(AVG(ping_ms * 0.8 + IFNULL(jitter_ms,0) * 0.2), 2) as upload_latency'),
+                DB::raw('ROUND(AVG(ping_ms * 0.9 + IFNULL(jitter_ms, 0) * 0.1), 2) as download_latency'),
+                DB::raw('ROUND(AVG(ping_ms * 0.8 + IFNULL(jitter_ms, 0) * 0.2), 2) as upload_latency'),
             ])
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
@@ -167,47 +160,5 @@ class PublicMetricsDashboardController extends Controller
             ])
             ->values()
             ->all();
-    }
-
-    /**
-     * Compute latest, average, P95, maximum, minimum across all data points
-     * in the fetched series for each requested metric key.
-     *
-     * @param array<int, array<string, mixed>> $series
-     * @param string[]                         $keys
-     *
-     * @return array<string, array{latest: float, average: float, p95: float, maximum: float, minimum: float}>
-     */
-    private function calcStats(array $series, array $keys): array
-    {
-        $stats = [];
-
-        foreach ($keys as $key) {
-            $values = array_values(array_filter(
-                array_column($series, $key),
-                static fn (mixed $v): bool => is_numeric($v) && (float) $v > 0.0,
-            ));
-
-            if ($values === []) {
-                $stats[$key] = ['latest' => 0.0, 'average' => 0.0, 'p95' => 0.0, 'maximum' => 0.0, 'minimum' => 0.0];
-
-                continue;
-            }
-
-            sort($values);
-            $count = count($values);
-            $p95idx = max(0, (int) ceil(0.95 * $count) - 1);
-            $last = end($series);
-
-            $stats[$key] = [
-                'latest'  => round((float) ($last[$key] ?? 0), 2),
-                'average' => round((float) (array_sum($values) / $count), 2),
-                'p95'     => round((float) $values[$p95idx], 2),
-                'maximum' => round((float) max($values), 2),
-                'minimum' => round((float) min($values), 2),
-            ];
-        }
-
-        return $stats;
     }
 }
