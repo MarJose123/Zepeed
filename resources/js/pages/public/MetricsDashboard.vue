@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from "@inertiajs/vue3";
-import { Activity, Gauge, Timer, TrendingDown, TrendingUp } from "@lucide/vue";
+import { Activity, Gauge, Network, Timer, Zap } from "@lucide/vue";
 import { computed } from "vue";
 import MetricsLineChart from "@/components/public/MetricsLineChart.vue";
 import MetricsRangePicker from "@/components/public/MetricsRangePicker.vue";
@@ -10,6 +10,7 @@ import type {
     MetricsGranularity,
     MetricsRange,
     MetricsSeriesPoint,
+    PingTargetInfo,
     ProviderInfo,
 } from "@/types/public";
 
@@ -19,11 +20,12 @@ const props = defineProps<{
     to: string;
     granularity: MetricsGranularity;
     providers: ProviderInfo[];
-    downloadSeries: MetricsSeriesPoint[];
-    uploadSeries: MetricsSeriesPoint[];
+    pingTargets: PingTargetInfo[];
+    speedSeries: MetricsSeriesPoint[];
     pingSeries: MetricsSeriesPoint[];
     latencySeries: MetricsSeriesPoint[];
     jitterSeries: MetricsSeriesPoint[];
+    networkPingSeries: MetricsSeriesPoint[];
 }>();
 
 const PROVIDER_COLORS: Record<string, string> = {
@@ -33,21 +35,58 @@ const PROVIDER_COLORS: Record<string, string> = {
     cloudflare: "var(--chart-4)",
 };
 
-const speedSeriesConfig = computed(() =>
-    props.providers.map((p) => ({
-        key: p.slug,
-        label: p.label,
-        color: PROVIDER_COLORS[p.slug] ?? "var(--chart-5)",
-        unit: "Mbps",
-    })),
-);
+const CHART_COLORS = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+];
 
+/** Download (solid) + Upload (dashed) per provider — one combined speed chart. */
+const speedSeriesConfig = computed(() => {
+    const configs = [];
+
+    for (const p of props.providers) {
+        const color = PROVIDER_COLORS[p.slug] ?? "var(--chart-5)";
+        configs.push({
+            key: `${p.slug}_dl`,
+            label: `${p.label} ↓`,
+            color,
+            unit: "Mbps",
+            dashed: false,
+        });
+        configs.push({
+            key: `${p.slug}_ul`,
+            label: `${p.label} ↑`,
+            color,
+            unit: "Mbps",
+            dashed: true,
+        });
+    }
+
+    return configs;
+});
+
+/** Ping / Latency IQM / Jitter — one line per provider. */
 const msSeriesConfig = computed(() =>
     props.providers.map((p) => ({
         key: p.slug,
         label: p.label,
         color: PROVIDER_COLORS[p.slug] ?? "var(--chart-5)",
         unit: "ms",
+        dashed: false as const,
+    })),
+);
+
+/** Network ping — one line per ping target. */
+const networkPingSeriesConfig = computed(() =>
+    props.pingTargets.map((t, i) => ({
+        key: t.id,
+        label: t.label,
+        color: CHART_COLORS[i % CHART_COLORS.length] ?? "var(--chart-1)",
+        unit: "ms",
+        dashed: false as const,
     })),
 );
 
@@ -84,43 +123,25 @@ useMetricsDashboardRefresh(() => {
                 />
             </div>
 
-            <!-- Download Speed -->
+            <!-- Speed (Download ↓ + Upload ↑ per provider, one chart) -->
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
-                    <TrendingDown class="text-muted-foreground size-3.5" />
+                    <Zap class="text-muted-foreground size-3.5" />
                     <p
                         class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
                     >
-                        Download Speed
+                        Speed
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Download Speed per Provider"
-                    description="Mbps by provider across the selected range"
-                    :points="downloadSeries"
+                    title="Download & Upload Speed per Provider"
+                    description="Solid line = download ↓ · Dashed line = upload ↑ · Mbps"
+                    :points="speedSeries"
                     :series="speedSeriesConfig"
                 />
             </section>
 
-            <!-- Upload Speed -->
-            <section class="flex flex-col gap-2">
-                <div class="flex items-center gap-1.5">
-                    <TrendingUp class="text-muted-foreground size-3.5" />
-                    <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
-                    >
-                        Upload Speed
-                    </p>
-                </div>
-                <MetricsLineChart
-                    title="Upload Speed per Provider"
-                    description="Mbps by provider across the selected range"
-                    :points="uploadSeries"
-                    :series="speedSeriesConfig"
-                />
-            </section>
-
-            <!-- Ping -->
+            <!-- Speedtest Ping -->
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <Activity class="text-muted-foreground size-3.5" />
@@ -131,8 +152,8 @@ useMetricsDashboardRefresh(() => {
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Ping per Provider"
-                    description="Round-trip latency (ms) by provider across the selected range"
+                    title="Speedtest Ping per Provider"
+                    description="Round-trip latency (ms) reported by each speedtest provider"
                     :points="pingSeries"
                     :series="msSeriesConfig"
                 />
@@ -150,7 +171,7 @@ useMetricsDashboardRefresh(() => {
                 </div>
                 <MetricsLineChart
                     title="Latency (IQM) per Provider"
-                    description="Ping + jitter composite latency (ms) by provider"
+                    description="Composite latency — ping + jitter (ms) per provider"
                     :points="latencySeries"
                     :series="msSeriesConfig"
                 />
@@ -168,9 +189,27 @@ useMetricsDashboardRefresh(() => {
                 </div>
                 <MetricsLineChart
                     title="Jitter per Provider"
-                    description="Jitter (ms) by provider — providers without jitter data are omitted"
+                    description="Jitter (ms) per provider — providers without jitter data are omitted"
                     :points="jitterSeries"
                     :series="msSeriesConfig"
+                />
+            </section>
+
+            <!-- Network Ping (ping_results) -->
+            <section v-if="pingTargets.length > 0" class="flex flex-col gap-2">
+                <div class="flex items-center gap-1.5">
+                    <Network class="text-muted-foreground size-3.5" />
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
+                        Network Ping
+                    </p>
+                </div>
+                <MetricsLineChart
+                    title="Network Ping per Target"
+                    description="Average round-trip latency (ms) to each configured ping target"
+                    :points="networkPingSeries"
+                    :series="networkPingSeriesConfig"
                 />
             </section>
         </div>

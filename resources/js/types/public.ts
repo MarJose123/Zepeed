@@ -72,17 +72,35 @@ export type MetricsRange = "1d" | "7d" | "30d" | "custom";
 
 export type MetricsGranularity = "hourly" | "daily" | "weekly";
 
-/**
- * A provider that has results in the selected range.
- */
+/** Speedtest provider active in the selected range. */
 export interface ProviderInfo {
     slug: string;
     label: string;
 }
 
+/** Ping target active in the selected range. */
+export interface PingTargetInfo {
+    id: string;
+    label: string;
+}
+
 /**
- * One time-bucket row returned by the controller's pivotMetric().
- * Beyond `label`, every key is a provider slug mapped to its metric value.
+ * Chart series configuration passed to MetricsLineChart.
+ * Exported so both the page and the component share one definition.
+ */
+export interface SeriesConfig {
+    key: string;
+    label: string;
+    color: string;
+    unit: string;
+    /** Render as dashed line — used for upload series on the combined speed chart. */
+    dashed?: boolean;
+}
+
+/**
+ * One time-bucket row from the controller's pivot queries.
+ * `label` is the bucket string; every other key is a provider slug or target ID
+ * mapped to its metric value (null = no data for that entity in this bucket).
  */
 export interface MetricsSeriesPoint {
     [key: string]: number | string | null;

@@ -21,18 +21,21 @@ class PublicMetricsDashboardController extends Controller
 
         $providers = $this->fetchActiveProviders($start, $end);
         $slugs = array_column($providers, 'slug');
+        $pingTargets = $this->fetchActivePingTargets($start, $end);
+        $targetIds = array_column($pingTargets, 'id');
 
         return Inertia::render('public/MetricsDashboard', [
-            'range'          => $range,
-            'from'           => $start->toDateString(),
-            'to'             => $end->toDateString(),
-            'granularity'    => $granularity,
-            'providers'      => $providers,
-            'downloadSeries' => $this->pivotMetric($start, $end, $granularity, 'download_mbps', $slugs),
-            'uploadSeries'   => $this->pivotMetric($start, $end, $granularity, 'upload_mbps', $slugs),
-            'pingSeries'     => $this->pivotMetric($start, $end, $granularity, 'ping_ms', $slugs),
-            'latencySeries'  => $this->pivotMetric($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
-            'jitterSeries'   => $this->pivotMetric($start, $end, $granularity, 'jitter_ms', $slugs),
+            'range'             => $range,
+            'from'              => $start->toDateString(),
+            'to'                => $end->toDateString(),
+            'granularity'       => $granularity,
+            'providers'         => $providers,
+            'pingTargets'       => $pingTargets,
+            'speedSeries'       => $this->fetchSpeedSeries($start, $end, $granularity, $slugs),
+            'pingSeries'        => $this->pivotMetric($start, $end, $granularity, 'ping_ms', $slugs),
+            'latencySeries'     => $this->pivotMetric($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
+            'jitterSeries'      => $this->pivotMetric($start, $end, $granularity, 'jitter_ms', $slugs),
+            'networkPingSeries' => $this->fetchNetworkPingSeries($start, $end, $granularity, $targetIds),
         ]);
     }
 
@@ -46,13 +49,11 @@ class PublicMetricsDashboardController extends Controller
             $end = CarbonImmutable::parse((string) $to)->endOfDay();
             $days = (int) $start->diffInDays($end);
 
-            $granularity = match (true) {
+            return [$start, $end, match (true) {
                 $days <= 2  => 'hourly',
                 $days <= 31 => 'daily',
                 default     => 'weekly',
-            };
-
-            return [$start, $end, $granularity];
+            }];
         }
 
         return match ($range) {
@@ -72,7 +73,7 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * Return providers that have at least one successful result in the range.
+     * Providers that have at least one successful result in the range.
      *
      * @return array<int, array{slug: string, label: string}>
      */
@@ -90,7 +91,6 @@ class PublicMetricsDashboardController extends Controller
 
         foreach ($slugs as $slug) {
             $server = SpeedtestServer::tryFrom((string) $slug);
-
             if ($server !== null) {
                 $providers[] = ['slug' => $server->value, 'label' => $server->label()];
             }
@@ -100,10 +100,59 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * Pivot a single aggregated metric by provider into flat time-bucket rows.
-     * Each returned row: { label: bucket, <provider_slug>: float|null, ... }
+     * Download + upload pivoted by provider in one series.
+     * Keys: "{slug}_dl" for download, "{slug}_ul" for upload.
      *
-     * NOTE: $metric is an internal SQL expression — never user-supplied.
+     * @param string[] $providerSlugs
+     *
+     * @return array<int, array<string, float|string|null>>
+     */
+    private function fetchSpeedSeries(
+        CarbonImmutable $start,
+        CarbonImmutable $end,
+        string $granularity,
+        array $providerSlugs,
+    ): array {
+        if ($providerSlugs === []) {
+            return [];
+        }
+
+        $fmt = $this->bucketFormat($granularity);
+        $rows = DB::table('speed_results')
+            ->select([
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
+                'provider_slug',
+                DB::raw('ROUND(AVG(download_mbps), 2) as dl'),
+                DB::raw('ROUND(AVG(upload_mbps), 2) as ul'),
+            ])
+            ->where('status', 'success')
+            ->whereBetween('measured_at', [$start, $end])
+            ->whereIn('provider_slug', $providerSlugs)
+            ->groupBy('bucket', 'provider_slug')
+            ->orderBy('bucket')
+            ->get();
+
+        /** @var array<string, array<string, float|string|null>> $buckets */
+        $buckets = [];
+
+        foreach ($rows as $row) {
+            $bucket = (string) $row->bucket;
+            $slug = (string) $row->provider_slug;
+
+            if (! isset($buckets[$bucket])) {
+                $buckets[$bucket] = ['label' => $bucket];
+            }
+
+            $buckets[$bucket]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
+            $buckets[$bucket]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
+        }
+
+        return array_values($buckets);
+    }
+
+    /**
+     * Generic single-metric pivot by provider slug.
+     * NOTE: $metric is a trusted internal SQL expression — never user-supplied.
      *
      * @param string[] $providerSlugs
      *
@@ -145,6 +194,81 @@ class PublicMetricsDashboardController extends Controller
             }
 
             $buckets[$bucket][(string) $row->provider_slug] = $row->value !== null
+                ? (float) $row->value
+                : null;
+        }
+
+        return array_values($buckets);
+    }
+
+    /**
+     * Enabled ping targets that have results in the range.
+     *
+     * @return array<int, array{id: string, label: string}>
+     */
+    private function fetchActivePingTargets(CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        return DB::table('ping_targets')
+            ->select(['ping_targets.id', 'ping_targets.label'])
+            ->join('ping_results', 'ping_results.ping_target_id', '=', 'ping_targets.id')
+            ->where('ping_targets.is_enabled', true)
+            ->whereIn('ping_results.status', ['success', 'partial'])
+            ->whereNotNull('ping_results.avg_ms')
+            ->whereBetween('ping_results.measured_at', [$start, $end])
+            ->distinct()
+            ->orderBy('ping_targets.label')
+            ->get()
+            ->map(static fn (object $row): array => [
+                'id'    => (string) $row->id,
+                'label' => (string) $row->label,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * avg_ms from ping_results pivoted by ping_target_id.
+     *
+     * @param string[] $targetIds
+     *
+     * @return array<int, array<string, float|string|null>>
+     */
+    private function fetchNetworkPingSeries(
+        CarbonImmutable $start,
+        CarbonImmutable $end,
+        string $granularity,
+        array $targetIds,
+    ): array {
+        if ($targetIds === []) {
+            return [];
+        }
+
+        $fmt = $this->bucketFormat($granularity);
+        $rows = DB::table('ping_results')
+            ->select([
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
+                'ping_target_id',
+                DB::raw('ROUND(AVG(avg_ms), 2) as value'),
+            ])
+            ->whereIn('status', ['success', 'partial'])
+            ->whereNotNull('avg_ms')
+            ->whereBetween('measured_at', [$start, $end])
+            ->whereIn('ping_target_id', $targetIds)
+            ->groupBy('bucket', 'ping_target_id')
+            ->orderBy('bucket')
+            ->get();
+
+        /** @var array<string, array<string, float|string|null>> $buckets */
+        $buckets = [];
+
+        foreach ($rows as $row) {
+            $bucket = (string) $row->bucket;
+
+            if (! isset($buckets[$bucket])) {
+                $buckets[$bucket] = ['label' => $bucket];
+            }
+
+            $buckets[$bucket][(string) $row->ping_target_id] = $row->value !== null
                 ? (float) $row->value
                 : null;
         }
