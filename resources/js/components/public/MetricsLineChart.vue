@@ -157,13 +157,13 @@ const latestPoints = computed(() =>
                     <Legend>
                         <template #content="{ payload }">
                             <div
-                                class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 pt-2"
+                                class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-2"
                             >
                                 <button
                                     v-for="entry in payload"
                                     :key="String(entry.value)"
                                     type="button"
-                                    class="flex items-center gap-1.5 transition-opacity"
+                                    class="flex items-center gap-1 transition-opacity"
                                     :class="{
                                         'opacity-35': hiddenKeys.has(
                                             String(entry.dataKey),
@@ -179,18 +179,18 @@ const latestPoints = computed(() =>
                                                     String(entry.dataKey),
                                             )?.dashed
                                         "
-                                        class="inline-block h-0 w-5 shrink-0 border-t-2 border-dashed"
+                                        class="inline-block h-0 w-4 shrink-0 border-t-2 border-dashed"
                                         :style="{ borderColor: entry.color }"
                                     />
                                     <span
                                         v-else
-                                        class="size-2.5 rounded-full shrink-0"
+                                        class="size-2 rounded-full shrink-0"
                                         :style="{
                                             backgroundColor: entry.color,
                                         }"
                                     />
                                     <span
-                                        class="text-[11px] text-muted-foreground"
+                                        class="text-[10px] text-muted-foreground"
                                     >
                                         {{ entry.value }}
                                     </span>

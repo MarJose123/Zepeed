@@ -29,18 +29,21 @@ const props = defineProps<{
 }>();
 
 const PROVIDER_COLORS: Record<string, string> = {
-    ookla: "var(--chart-1)",
-    librespeed: "var(--chart-2)",
-    netflix: "var(--chart-3)",
-    cloudflare: "var(--chart-4)",
+    ookla: "#3b82f6", // blue-500    — clearly blue
+    librespeed: "#22c55e", // green-500   — clearly green
+    netflix: "#ef4444", // red-500     — clearly red
+    cloudflare: "#f97316", // orange-500  — clearly orange
 };
 
 const CHART_COLORS = [
-    "var(--chart-1)",
-    "var(--chart-2)",
-    "var(--chart-3)",
-    "var(--chart-4)",
-    "var(--chart-5)",
+    "#3b82f6", // blue
+    "#22c55e", // green
+    "#f97316", // orange
+    "#a855f7", // purple
+    "#14b8a6", // teal
+    "#ef4444", // red
+    "#f59e0b", // amber
+    "#ec4899", // pink
 ];
 
 /** Download (solid) + Upload (dashed) per provider — one combined speed chart. */
