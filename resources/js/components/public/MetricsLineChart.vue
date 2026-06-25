@@ -4,12 +4,13 @@ import {
     Legend,
     Line,
     LineChart,
+    ReferenceDot,
     ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis,
 } from "vccs";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
     Card,
     CardContent,
@@ -17,18 +18,12 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import type { SeriesConfig } from "@/types/public";
 
-interface SeriesConfig {
-    key: string;
-    label: string;
-    color: string;
-    unit: string;
-}
-
-// null = no data for that provider in this bucket (connectNulls handles it)
+// null = provider had no result at this timestamp; connectNulls bridges the gap
 type DataPoint = Record<string, number | string | null>;
 
-defineProps<{
+const props = defineProps<{
     title: string;
     description: string;
     points: DataPoint[];
@@ -50,30 +45,53 @@ function toggleSeries(dataKey: string): void {
 function formatYTick(value: number): string {
     return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
 }
+
+/**
+ * Latest non-null data point per series — used to place a highlighted
+ * ReferenceDot with a custom #shape slot at the most recent result.
+ */
+const latestPoints = computed(() =>
+    props.series.flatMap((s) => {
+        for (let i = props.points.length - 1; i >= 0; i--) {
+            const val = props.points[i]?.[s.key];
+
+            if (typeof val === "number") {
+                return [
+                    {
+                        seriesKey: s.key,
+                        label: String(props.points[i]?.label ?? ""),
+                        value: val,
+                        color: s.color,
+                    },
+                ];
+            }
+        }
+
+        return [];
+    }),
+);
 </script>
 
 <template>
     <Card class="overflow-hidden p-0">
         <CardHeader class="border-border border-b px-4 py-3">
             <CardTitle class="text-sm font-medium">{{ title }}</CardTitle>
-            <CardDescription class="text-[11px]">
-                {{ description }}
-            </CardDescription>
+            <CardDescription class="text-[11px]">{{
+                description
+            }}</CardDescription>
         </CardHeader>
         <CardContent class="px-2 pb-3 pt-4">
             <ResponsiveContainer width="100%" :height="260">
                 <LineChart
                     :data="points"
-                    :margin="{ top: 4, right: 16, bottom: 0, left: 0 }"
+                    :margin="{ top: 8, right: 16, bottom: 0, left: 0 }"
                 >
-                    <!-- Use SVG stroke attr, not Tailwind class — CartesianGrid renders SVG -->
                     <CartesianGrid
                         stroke-dasharray="3 3"
                         stroke="var(--border)"
                         :stroke-opacity="0.5"
                         :vertical="false"
                     />
-                    <!-- tick + interval props removed — not in vccs API -->
                     <XAxis
                         data-key="label"
                         :tick-line="false"
@@ -85,6 +103,7 @@ function formatYTick(value: number): string {
                         :tick-formatter="formatYTick"
                         :width="40"
                     />
+
                     <Tooltip>
                         <template #content="{ active, payload, label }">
                             <div
@@ -134,11 +153,11 @@ function formatYTick(value: number): string {
                             </div>
                         </template>
                     </Tooltip>
-                    <!-- onClick removed from Legend — clicks owned by slot buttons only -->
+
                     <Legend>
                         <template #content="{ payload }">
                             <div
-                                class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-2"
+                                class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 pt-2"
                             >
                                 <button
                                     v-for="entry in payload"
@@ -153,6 +172,18 @@ function formatYTick(value: number): string {
                                     @click="toggleSeries(String(entry.dataKey))"
                                 >
                                     <span
+                                        v-if="
+                                            series.find(
+                                                (s) =>
+                                                    s.key ===
+                                                    String(entry.dataKey),
+                                            )?.dashed
+                                        "
+                                        class="inline-block h-0 w-5 shrink-0 border-t-2 border-dashed"
+                                        :style="{ borderColor: entry.color }"
+                                    />
+                                    <span
+                                        v-else
                                         class="size-2.5 rounded-full shrink-0"
                                         :style="{
                                             backgroundColor: entry.color,
@@ -167,6 +198,8 @@ function formatYTick(value: number): string {
                             </div>
                         </template>
                     </Legend>
+
+                    <!-- Multi-Line Chart: one <Line> per series -->
                     <Line
                         v-for="s in series"
                         :key="s.key"
@@ -175,11 +208,52 @@ function formatYTick(value: number): string {
                         type="monotone"
                         :stroke="s.color"
                         :stroke-width="2"
-                        :dot="false"
-                        :active-dot="{ r: 4, strokeWidth: 0 }"
+                        :stroke-dasharray="s.dashed ? '5 5' : undefined"
+                        :dot="{
+                            r: 3,
+                            fill: s.color,
+                            stroke: 'var(--card)',
+                            strokeWidth: 2,
+                        }"
+                        :active-dot="false"
                         :connect-nulls="true"
                         :hide="hiddenKeys.has(s.key)"
                     />
+
+                    <!-- ReferenceDot with #shape slot: highlights the latest result per series -->
+                    <ReferenceDot
+                        v-for="dot in latestPoints"
+                        :key="dot.seriesKey"
+                        :x="dot.label"
+                        :y="dot.value"
+                        :r="7"
+                        :fill="dot.color"
+                        :stroke="dot.color"
+                        if-overflow="visible"
+                    >
+                        <template #shape="{ cx, cy, r }">
+                            <g>
+                                <!-- Outer glow ring -->
+                                <circle
+                                    :cx="cx"
+                                    :cy="cy"
+                                    :r="r"
+                                    :fill="dot.color"
+                                    fill-opacity="0.18"
+                                    stroke="none"
+                                />
+                                <!-- Inner filled dot -->
+                                <circle
+                                    :cx="cx"
+                                    :cy="cy"
+                                    :r="r * 0.52"
+                                    :fill="dot.color"
+                                    stroke="var(--card)"
+                                    stroke-width="2"
+                                />
+                            </g>
+                        </template>
+                    </ReferenceDot>
                 </LineChart>
             </ResponsiveContainer>
         </CardContent>

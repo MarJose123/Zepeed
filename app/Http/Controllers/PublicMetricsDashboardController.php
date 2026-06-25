@@ -32,9 +32,9 @@ class PublicMetricsDashboardController extends Controller
             'providers'         => $providers,
             'pingTargets'       => $pingTargets,
             'speedSeries'       => $this->fetchSpeedSeries($start, $end, $granularity, $slugs),
-            'pingSeries'        => $this->pivotMetric($start, $end, $granularity, 'ping_ms', $slugs),
-            'latencySeries'     => $this->pivotMetric($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
-            'jitterSeries'      => $this->pivotMetric($start, $end, $granularity, 'jitter_ms', $slugs),
+            'pingSeries'        => $this->pivotRaw($start, $end, $granularity, 'ping_ms', $slugs),
+            'latencySeries'     => $this->pivotRaw($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
+            'jitterSeries'      => $this->pivotRaw($start, $end, $granularity, 'jitter_ms', $slugs),
             'networkPingSeries' => $this->fetchNetworkPingSeries($start, $end, $granularity, $targetIds),
         ]);
     }
@@ -63,18 +63,19 @@ class PublicMetricsDashboardController extends Controller
         };
     }
 
-    private function bucketFormat(string $granularity): string
+    /**
+     * Human-readable label format — used on the XAxis display only.
+     * Hourly range shows time; longer ranges include the date.
+     */
+    private function labelFormat(string $granularity): string
     {
         return match ($granularity) {
-            'daily'  => '%Y-%m-%d',
-            'weekly' => '%Y-%u',
-            default  => '%Y-%m-%d %H:00',
+            'daily', 'weekly' => '%m/%d %H:%i',
+            default           => '%H:%i',
         };
     }
 
     /**
-     * Providers that have at least one successful result in the range.
-     *
      * @return array<int, array{slug: string, label: string}>
      */
     private function fetchActiveProviders(CarbonImmutable $start, CarbonImmutable $end): array
@@ -100,8 +101,8 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * Download + upload pivoted by provider in one series.
-     * Keys: "{slug}_dl" for download, "{slug}_ul" for upload.
+     * Download + upload per individual result, pivoted by provider.
+     * Keys: "{slug}_dl" and "{slug}_ul". No averaging.
      *
      * @param string[] $providerSlugs
      *
@@ -117,48 +118,50 @@ class PublicMetricsDashboardController extends Controller
             return [];
         }
 
-        $fmt = $this->bucketFormat($granularity);
+        $fmt = $this->labelFormat($granularity);
         $rows = DB::table('speed_results')
             ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
+                DB::raw('measured_at'),
                 'provider_slug',
-                DB::raw('ROUND(AVG(download_mbps), 2) as dl'),
-                DB::raw('ROUND(AVG(upload_mbps), 2) as ul'),
+                DB::raw('ROUND(download_mbps, 2) as dl'),
+                DB::raw('ROUND(upload_mbps, 2) as ul'),
             ])
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('provider_slug', $providerSlugs)
-            ->groupBy('bucket', 'provider_slug')
-            ->orderBy('bucket')
+            ->oldest('measured_at')
             ->get();
 
         /** @var array<string, array<string, float|string|null>> $buckets */
         $buckets = [];
 
         foreach ($rows as $row) {
-            $bucket = (string) $row->bucket;
+            $key = (string) $row->measured_at;
             $slug = (string) $row->provider_slug;
 
-            if (! isset($buckets[$bucket])) {
-                $buckets[$bucket] = ['label' => $bucket];
+            if (! isset($buckets[$key])) {
+                $buckets[$key] = ['label' => (string) $row->label];
             }
 
-            $buckets[$bucket]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
-            $buckets[$bucket]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
+            $buckets[$key]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
+            $buckets[$key]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
         }
 
         return array_values($buckets);
     }
 
     /**
-     * Generic single-metric pivot by provider slug.
-     * NOTE: $metric is a trusted internal SQL expression — never user-supplied.
+     * Individual results for a single metric expression, pivoted by provider.
+     * No averaging — every row in speed_results becomes a data point.
+     *
+     * NOTE: $metric is a trusted internal SQL expression, never user-supplied.
      *
      * @param string[] $providerSlugs
      *
      * @return array<int, array<string, float|string|null>>
      */
-    private function pivotMetric(
+    private function pivotRaw(
         CarbonImmutable $start,
         CarbonImmutable $end,
         string $granularity,
@@ -169,31 +172,31 @@ class PublicMetricsDashboardController extends Controller
             return [];
         }
 
-        $fmt = $this->bucketFormat($granularity);
+        $fmt = $this->labelFormat($granularity);
         $rows = DB::table('speed_results')
             ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
+                DB::raw('measured_at'),
                 'provider_slug',
-                DB::raw("ROUND(AVG({$metric}), 2) as value"),
+                DB::raw("ROUND({$metric}, 2) as value"),
             ])
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('provider_slug', $providerSlugs)
-            ->groupBy('bucket', 'provider_slug')
-            ->orderBy('bucket')
+            ->oldest('measured_at')
             ->get();
 
         /** @var array<string, array<string, float|string|null>> $buckets */
         $buckets = [];
 
         foreach ($rows as $row) {
-            $bucket = (string) $row->bucket;
+            $key = (string) $row->measured_at;
 
-            if (! isset($buckets[$bucket])) {
-                $buckets[$bucket] = ['label' => $bucket];
+            if (! isset($buckets[$key])) {
+                $buckets[$key] = ['label' => (string) $row->label];
             }
 
-            $buckets[$bucket][(string) $row->provider_slug] = $row->value !== null
+            $buckets[$key][(string) $row->provider_slug] = $row->value !== null
                 ? (float) $row->value
                 : null;
         }
@@ -202,8 +205,6 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * Enabled ping targets that have results in the range.
-     *
      * @return array<int, array{id: string, label: string}>
      */
     private function fetchActivePingTargets(CarbonImmutable $start, CarbonImmutable $end): array
@@ -227,7 +228,7 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * avg_ms from ping_results pivoted by ping_target_id.
+     * Individual ping_results rows pivoted by ping_target_id. No averaging.
      *
      * @param string[] $targetIds
      *
@@ -243,32 +244,32 @@ class PublicMetricsDashboardController extends Controller
             return [];
         }
 
-        $fmt = $this->bucketFormat($granularity);
+        $fmt = $this->labelFormat($granularity);
         $rows = DB::table('ping_results')
             ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
+                DB::raw('measured_at'),
                 'ping_target_id',
-                DB::raw('ROUND(AVG(avg_ms), 2) as value'),
+                DB::raw('ROUND(avg_ms, 2) as value'),
             ])
             ->whereIn('status', ['success', 'partial'])
             ->whereNotNull('avg_ms')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('ping_target_id', $targetIds)
-            ->groupBy('bucket', 'ping_target_id')
-            ->orderBy('bucket')
+            ->oldest('measured_at')
             ->get();
 
         /** @var array<string, array<string, float|string|null>> $buckets */
         $buckets = [];
 
         foreach ($rows as $row) {
-            $bucket = (string) $row->bucket;
+            $key = (string) $row->measured_at;
 
-            if (! isset($buckets[$bucket])) {
-                $buckets[$bucket] = ['label' => $bucket];
+            if (! isset($buckets[$key])) {
+                $buckets[$key] = ['label' => (string) $row->label];
             }
 
-            $buckets[$bucket][(string) $row->ping_target_id] = $row->value !== null
+            $buckets[$key][(string) $row->ping_target_id] = $row->value !== null
                 ? (float) $row->value
                 : null;
         }
