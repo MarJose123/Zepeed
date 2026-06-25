@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,33 +14,37 @@ class PublicMetricsDashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $range = (string) $request->query('range', '1d');
-        $from  = $request->query('from');
-        $to    = $request->query('to');
+        $from = $request->query('from');
+        $to = $request->query('to');
 
         [$start, $end, $granularity] = $this->resolveRange($range, $from, $to);
 
+        $providers = $this->fetchActiveProviders($start, $end);
+        $slugs = array_column($providers, 'slug');
+
         return Inertia::render('public/MetricsDashboard', [
-            'range'         => $range,
-            'from'          => $start->toDateString(),
-            'to'            => $end->toDateString(),
-            'granularity'   => $granularity,
-            'speedSeries'   => $this->fetchSpeedSeries($start, $end, $granularity),
-            'latencySeries' => $this->fetchLatencySeries($start, $end, $granularity),
-            'jitterSeries'  => $this->fetchJitterSeries($start, $end, $granularity),
+            'range'          => $range,
+            'from'           => $start->toDateString(),
+            'to'             => $end->toDateString(),
+            'granularity'    => $granularity,
+            'providers'      => $providers,
+            'downloadSeries' => $this->pivotMetric($start, $end, $granularity, 'download_mbps', $slugs),
+            'uploadSeries'   => $this->pivotMetric($start, $end, $granularity, 'upload_mbps', $slugs),
+            'pingSeries'     => $this->pivotMetric($start, $end, $granularity, 'ping_ms', $slugs),
+            'latencySeries'  => $this->pivotMetric($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
+            'jitterSeries'   => $this->pivotMetric($start, $end, $granularity, 'jitter_ms', $slugs),
         ]);
     }
 
     /**
-     * Resolve start/end window and bucket granularity from query params.
-     *
      * @return array{CarbonImmutable, CarbonImmutable, string}
      */
     private function resolveRange(string $range, mixed $from, mixed $to): array
     {
         if ($range === 'custom' && $from && $to) {
             $start = CarbonImmutable::parse((string) $from)->startOfDay();
-            $end   = CarbonImmutable::parse((string) $to)->endOfDay();
-            $days  = (int) $start->diffInDays($end);
+            $end = CarbonImmutable::parse((string) $to)->endOfDay();
+            $days = (int) $start->diffInDays($end);
 
             $granularity = match (true) {
                 $days <= 2  => 'hourly',
@@ -57,9 +62,6 @@ class PublicMetricsDashboardController extends Controller
         };
     }
 
-    /**
-     * Return the MariaDB DATE_FORMAT pattern for the given granularity.
-     */
     private function bucketFormat(string $granularity): string
     {
         return match ($granularity) {
@@ -70,95 +72,83 @@ class PublicMetricsDashboardController extends Controller
     }
 
     /**
-     * Fetch bucketed download / upload / ping speed series.
+     * Return providers that have at least one successful result in the range.
      *
-     * @return array<int, array{label: string, download: float, upload: float, ping: float}>
+     * @return array<int, array{slug: string, label: string}>
      */
-    private function fetchSpeedSeries(CarbonImmutable $start, CarbonImmutable $end, string $granularity): array
+    private function fetchActiveProviders(CarbonImmutable $start, CarbonImmutable $end): array
     {
-        $fmt = $this->bucketFormat($granularity);
-
-        return DB::table('speed_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
-                DB::raw('ROUND(AVG(download_mbps), 2) as download'),
-                DB::raw('ROUND(AVG(upload_mbps), 2) as upload'),
-                DB::raw('ROUND(AVG(ping_ms), 2) as ping'),
-            ])
+        $slugs = DB::table('speed_results')
+            ->select('provider_slug')
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
-            ->groupBy('bucket')
-            ->orderBy('bucket')
-            ->get()
-            ->map(static fn (object $row): array => [
-                'label'    => (string) $row->bucket,
-                'download' => (float) $row->download,
-                'upload'   => (float) $row->upload,
-                'ping'     => (float) $row->ping,
-            ])
-            ->values()
+            ->distinct()
+            ->pluck('provider_slug')
             ->all();
+
+        $providers = [];
+
+        foreach ($slugs as $slug) {
+            $server = SpeedtestServer::tryFrom((string) $slug);
+
+            if ($server !== null) {
+                $providers[] = ['slug' => $server->value, 'label' => $server->label()];
+            }
+        }
+
+        return $providers;
     }
 
     /**
-     * Fetch bucketed latency (ping, download IQM, upload IQM) series.
+     * Pivot a single aggregated metric by provider into flat time-bucket rows.
+     * Each returned row: { label: bucket, <provider_slug>: float|null, ... }
      *
-     * @return array<int, array{label: string, ping: float, download_latency: float, upload_latency: float}>
+     * NOTE: $metric is an internal SQL expression — never user-supplied.
+     *
+     * @param string[] $providerSlugs
+     *
+     * @return array<int, array<string, float|string|null>>
      */
-    private function fetchLatencySeries(CarbonImmutable $start, CarbonImmutable $end, string $granularity): array
-    {
-        $fmt = $this->bucketFormat($granularity);
+    private function pivotMetric(
+        CarbonImmutable $start,
+        CarbonImmutable $end,
+        string $granularity,
+        string $metric,
+        array $providerSlugs,
+    ): array {
+        if ($providerSlugs === []) {
+            return [];
+        }
 
-        return DB::table('speed_results')
+        $fmt = $this->bucketFormat($granularity);
+        $rows = DB::table('speed_results')
             ->select([
                 DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
-                DB::raw('ROUND(AVG(ping_ms), 2) as ping'),
-                DB::raw('ROUND(AVG(ping_ms * 0.9 + IFNULL(jitter_ms, 0) * 0.1), 2) as download_latency'),
-                DB::raw('ROUND(AVG(ping_ms * 0.8 + IFNULL(jitter_ms, 0) * 0.2), 2) as upload_latency'),
+                'provider_slug',
+                DB::raw("ROUND(AVG({$metric}), 2) as value"),
             ])
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
-            ->groupBy('bucket')
+            ->whereIn('provider_slug', $providerSlugs)
+            ->groupBy('bucket', 'provider_slug')
             ->orderBy('bucket')
-            ->get()
-            ->map(static fn (object $row): array => [
-                'label'            => (string) $row->bucket,
-                'ping'             => (float) $row->ping,
-                'download_latency' => (float) $row->download_latency,
-                'upload_latency'   => (float) $row->upload_latency,
-            ])
-            ->values()
-            ->all();
-    }
+            ->get();
 
-    /**
-     * Fetch bucketed download / upload / ping jitter series.
-     *
-     * @return array<int, array{label: string, download_jitter: float, upload_jitter: float, ping_jitter: float}>
-     */
-    private function fetchJitterSeries(CarbonImmutable $start, CarbonImmutable $end, string $granularity): array
-    {
-        $fmt = $this->bucketFormat($granularity);
+        /** @var array<string, array<string, float|string|null>> $buckets */
+        $buckets = [];
 
-        return DB::table('speed_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as bucket"),
-                DB::raw('ROUND(AVG(IFNULL(jitter_ms, 0)), 2) as download_jitter'),
-                DB::raw('ROUND(AVG(IFNULL(jitter_ms, 0) * 0.85), 2) as upload_jitter'),
-                DB::raw('ROUND(AVG(IFNULL(jitter_ms, 0) * 0.15), 2) as ping_jitter'),
-            ])
-            ->where('status', 'success')
-            ->whereBetween('measured_at', [$start, $end])
-            ->groupBy('bucket')
-            ->orderBy('bucket')
-            ->get()
-            ->map(static fn (object $row): array => [
-                'label'           => (string) $row->bucket,
-                'download_jitter' => (float) $row->download_jitter,
-                'upload_jitter'   => (float) $row->upload_jitter,
-                'ping_jitter'     => (float) $row->ping_jitter,
-            ])
-            ->values()
-            ->all();
+        foreach ($rows as $row) {
+            $bucket = (string) $row->bucket;
+
+            if (! isset($buckets[$bucket])) {
+                $buckets[$bucket] = ['label' => $bucket];
+            }
+
+            $buckets[$bucket][(string) $row->provider_slug] = $row->value !== null
+                ? (float) $row->value
+                : null;
+        }
+
+        return array_values($buckets);
     }
 }

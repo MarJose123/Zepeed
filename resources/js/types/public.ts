@@ -72,36 +72,21 @@ export type MetricsRange = "1d" | "7d" | "30d" | "custom";
 
 export type MetricsGranularity = "hourly" | "daily" | "weekly";
 
-export interface SpeedSeriesPoint {
-    [key: string]: number | string;
+/**
+ * A provider that has results in the selected range.
+ */
+export interface ProviderInfo {
+    slug: string;
     label: string;
-    download: number;
-    upload: number;
-    ping: number;
 }
 
-export interface LatencySeriesPoint {
-    [key: string]: number | string;
+/**
+ * One time-bucket row returned by the controller's pivotMetric().
+ * Beyond `label`, every key is a provider slug mapped to its metric value.
+ */
+export interface MetricsSeriesPoint {
+    [key: string]: number | string | null;
     label: string;
-    ping: number;
-    download_latency: number;
-    upload_latency: number;
-}
-
-export interface JitterSeriesPoint {
-    [key: string]: number | string;
-    label: string;
-    download_jitter: number;
-    upload_jitter: number;
-    ping_jitter: number;
-}
-
-export interface MetricStat {
-    latest: number;
-    average: number;
-    p95: number;
-    maximum: number;
-    minimum: number;
 }
 
 export interface MetricsRefreshPayload {

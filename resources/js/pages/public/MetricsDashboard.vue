@@ -1,27 +1,55 @@
 <script setup lang="ts">
 import { Head, router } from "@inertiajs/vue3";
-import { Activity, Gauge, Timer, TrendingDown } from "@lucide/vue";
+import { Activity, Gauge, Timer, TrendingDown, TrendingUp } from "@lucide/vue";
+import { computed } from "vue";
 import MetricsLineChart from "@/components/public/MetricsLineChart.vue";
 import MetricsRangePicker from "@/components/public/MetricsRangePicker.vue";
 import { useMetricsDashboardRefresh } from "@/composables/useMetricsDashboardRefresh";
 import PublicLayout from "@/layouts/PublicLayout.vue";
 import type {
-    JitterSeriesPoint,
-    LatencySeriesPoint,
     MetricsGranularity,
     MetricsRange,
-    SpeedSeriesPoint,
+    MetricsSeriesPoint,
+    ProviderInfo,
 } from "@/types/public";
 
-defineProps<{
+const props = defineProps<{
     range: MetricsRange;
     from: string;
     to: string;
     granularity: MetricsGranularity;
-    speedSeries: SpeedSeriesPoint[];
-    latencySeries: LatencySeriesPoint[];
-    jitterSeries: JitterSeriesPoint[];
+    providers: ProviderInfo[];
+    downloadSeries: MetricsSeriesPoint[];
+    uploadSeries: MetricsSeriesPoint[];
+    pingSeries: MetricsSeriesPoint[];
+    latencySeries: MetricsSeriesPoint[];
+    jitterSeries: MetricsSeriesPoint[];
 }>();
+
+const PROVIDER_COLORS: Record<string, string> = {
+    ookla: "var(--chart-1)",
+    librespeed: "var(--chart-2)",
+    netflix: "var(--chart-3)",
+    cloudflare: "var(--chart-4)",
+};
+
+const speedSeriesConfig = computed(() =>
+    props.providers.map((p) => ({
+        key: p.slug,
+        label: p.label,
+        color: PROVIDER_COLORS[p.slug] ?? "var(--chart-5)",
+        unit: "Mbps",
+    })),
+);
+
+const msSeriesConfig = computed(() =>
+    props.providers.map((p) => ({
+        key: p.slug,
+        label: p.label,
+        color: PROVIDER_COLORS[p.slug] ?? "var(--chart-5)",
+        unit: "ms",
+    })),
+);
 
 function navigate(range: MetricsRange, from?: string, to?: string): void {
     router.get(
@@ -34,51 +62,6 @@ function navigate(range: MetricsRange, from?: string, to?: string): void {
 useMetricsDashboardRefresh(() => {
     router.reload();
 });
-
-const SPEED_SERIES = [
-    {
-        key: "download",
-        label: "Download",
-        color: "var(--chart-1)",
-        unit: "Mbps",
-    },
-    { key: "upload", label: "Upload", color: "var(--chart-2)", unit: "Mbps" },
-];
-
-const PING_SERIES = [
-    { key: "ping", label: "Ping", color: "#a78bfa", unit: "ms" },
-];
-
-const LATENCY_SERIES = [
-    {
-        key: "download_latency",
-        label: "Download Latency",
-        color: "var(--chart-1)",
-        unit: "ms",
-    },
-    {
-        key: "upload_latency",
-        label: "Upload Latency",
-        color: "var(--chart-2)",
-        unit: "ms",
-    },
-];
-
-const JITTER_SERIES = [
-    {
-        key: "download_jitter",
-        label: "Download Jitter",
-        color: "var(--chart-1)",
-        unit: "ms",
-    },
-    {
-        key: "upload_jitter",
-        label: "Upload Jitter",
-        color: "var(--chart-2)",
-        unit: "ms",
-    },
-    { key: "ping_jitter", label: "Ping Jitter", color: "#a78bfa", unit: "ms" },
-];
 </script>
 
 <template>
@@ -101,21 +84,39 @@ const JITTER_SERIES = [
                 />
             </div>
 
-            <!-- Speed -->
+            <!-- Download Speed -->
             <section class="flex flex-col gap-2">
                 <div class="flex items-center gap-1.5">
                     <TrendingDown class="text-muted-foreground size-3.5" />
                     <p
                         class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
                     >
-                        Speed
+                        Download Speed
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Download & Upload Speed"
-                    description="Average Mbps across all providers"
-                    :points="speedSeries"
-                    :series="SPEED_SERIES"
+                    title="Download Speed per Provider"
+                    description="Mbps by provider across the selected range"
+                    :points="downloadSeries"
+                    :series="speedSeriesConfig"
+                />
+            </section>
+
+            <!-- Upload Speed -->
+            <section class="flex flex-col gap-2">
+                <div class="flex items-center gap-1.5">
+                    <TrendingUp class="text-muted-foreground size-3.5" />
+                    <p
+                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    >
+                        Upload Speed
+                    </p>
+                </div>
+                <MetricsLineChart
+                    title="Upload Speed per Provider"
+                    description="Mbps by provider across the selected range"
+                    :points="uploadSeries"
+                    :series="speedSeriesConfig"
                 />
             </section>
 
@@ -130,10 +131,10 @@ const JITTER_SERIES = [
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Ping Latency"
-                    description="Average round-trip latency (ms) across all providers"
-                    :points="latencySeries"
-                    :series="PING_SERIES"
+                    title="Ping per Provider"
+                    description="Round-trip latency (ms) by provider across the selected range"
+                    :points="pingSeries"
+                    :series="msSeriesConfig"
                 />
             </section>
 
@@ -148,10 +149,10 @@ const JITTER_SERIES = [
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Download & Upload Latency (IQM)"
-                    description="Inter-quartile mean latency by direction"
+                    title="Latency (IQM) per Provider"
+                    description="Ping + jitter composite latency (ms) by provider"
                     :points="latencySeries"
-                    :series="LATENCY_SERIES"
+                    :series="msSeriesConfig"
                 />
             </section>
 
@@ -166,10 +167,10 @@ const JITTER_SERIES = [
                     </p>
                 </div>
                 <MetricsLineChart
-                    title="Download, Upload & Ping Jitter"
-                    description="Average jitter (ms) across all providers"
+                    title="Jitter per Provider"
+                    description="Jitter (ms) by provider — providers without jitter data are omitted"
                     :points="jitterSeries"
-                    :series="JITTER_SERIES"
+                    :series="msSeriesConfig"
                 />
             </section>
         </div>

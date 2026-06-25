@@ -25,7 +25,8 @@ interface SeriesConfig {
     unit: string;
 }
 
-type DataPoint = Record<string, number | string>;
+// null = no data for that provider in this bucket (connectNulls handles it)
+type DataPoint = Record<string, number | string | null>;
 
 defineProps<{
     title: string;
@@ -65,12 +66,14 @@ function formatYTick(value: number): string {
                     :data="points"
                     :margin="{ top: 4, right: 16, bottom: 0, left: 0 }"
                 >
+                    <!-- Use SVG stroke attr, not Tailwind class — CartesianGrid renders SVG -->
                     <CartesianGrid
                         stroke-dasharray="3 3"
                         stroke="var(--border)"
                         :stroke-opacity="0.5"
                         :vertical="false"
                     />
+                    <!-- tick + interval props removed — not in vccs API -->
                     <XAxis
                         data-key="label"
                         :tick-line="false"
@@ -112,14 +115,18 @@ function formatYTick(value: number): string {
                                             {{
                                                 typeof entry.value === "number"
                                                     ? entry.value.toFixed(2)
-                                                    : entry.value
+                                                    : (entry.value ?? "—")
                                             }}
                                             {{
-                                                series.find(
-                                                    (s) =>
-                                                        s.key ===
-                                                        String(entry.dataKey),
-                                                )?.unit ?? ""
+                                                typeof entry.value === "number"
+                                                    ? (series.find(
+                                                          (s) =>
+                                                              s.key ===
+                                                              String(
+                                                                  entry.dataKey,
+                                                              ),
+                                                      )?.unit ?? "")
+                                                    : ""
                                             }}
                                         </span>
                                     </div>
@@ -127,10 +134,11 @@ function formatYTick(value: number): string {
                             </div>
                         </template>
                     </Tooltip>
+                    <!-- onClick removed from Legend — clicks owned by slot buttons only -->
                     <Legend>
                         <template #content="{ payload }">
                             <div
-                                class="flex items-center justify-center gap-4 pt-2"
+                                class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-2"
                             >
                                 <button
                                     v-for="entry in payload"
