@@ -55,7 +55,7 @@ function applyCustom(): void {
             <Button
                 v-for="preset in PRESETS"
                 :key="preset.value"
-                :variant="range === preset.value ? 'secondary' : 'ghost'"
+                :variant="range === preset.value ? 'default' : 'ghost'"
                 size="sm"
                 class="h-7 px-2.5"
                 @click="selectPreset(preset.value)"
@@ -67,7 +67,7 @@ function applyCustom(): void {
         <Popover v-model:open="open">
             <PopoverTrigger as-child>
                 <Button
-                    :variant="range === 'custom' ? 'secondary' : 'outline'"
+                    :variant="range === 'custom' ? 'default' : 'outline'"
                     size="sm"
                     class="h-8 gap-1.5"
                 >
