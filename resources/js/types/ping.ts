@@ -140,3 +140,9 @@ export const PING_LOOKBACK_OPTIONS = [
     { value: 60, label: "1 hour" },
     { value: 120, label: "2 hours" },
 ] as const;
+
+export interface PingSeriesConfig {
+    key: string;
+    label: string;
+    color: string;
+}

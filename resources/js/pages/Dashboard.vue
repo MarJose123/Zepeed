@@ -1,22 +1,38 @@
 <script setup lang="ts">
 import { Head, router, usePage } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import DashboardRangePicker from "@/components/dashboard/DashboardRangePicker.vue";
+import DashboardSpeedChart from "@/components/dashboard/DashboardSpeedChart.vue";
 import ProviderCard from "@/components/dashboard/ProviderCard.vue";
 import RecentPingResultsTable from "@/components/dashboard/RecentPingResultsTable.vue";
-import SpeedChart from "@/components/dashboard/SpeedChart.vue";
 import { useDashboardRefresh } from "@/composables/useDashboardRefresh";
 import { usePingResultsChannel } from "@/composables/usePingResultsChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type {
-    ChartData,
+    DashboardChartRange,
+    DashboardProviderInfo,
+    DashboardSeriesConfig,
+    DashboardSeriesPoint,
     ProviderCard as IProviderCard,
     RecentPingResult,
 } from "@/types/dashboard";
 
+const PROVIDER_COLORS: Record<string, string> = {
+    ookla: "#3b82f6",
+    librespeed: "#22c55e",
+    netflix: "#ef4444",
+    cloudflare: "#f97316",
+};
+
 const props = defineProps<{
     providerCards: IProviderCard[];
-    chartData: ChartData;
+    chartSeries: DashboardSeriesPoint[];
+    chartAverages: Record<string, number>;
+    chartProviders: DashboardProviderInfo[];
+    range: DashboardChartRange;
+    from: string;
+    to: string;
     recentPingResults: RecentPingResult[];
 }>();
 
@@ -26,26 +42,63 @@ const breadcrumbs: TBreadcrumbItem[] = [
 
 const page = usePage<{
     providerCards: IProviderCard[];
-    chartData: ChartData;
+    chartSeries: DashboardSeriesPoint[];
+    chartAverages: Record<string, number>;
+    chartProviders: DashboardProviderInfo[];
     recentPingResults: RecentPingResult[];
 }>();
 
 const providerCards = ref<IProviderCard[]>(props.providerCards);
-const chartData = ref<ChartData>(props.chartData);
+const chartSeries = ref<DashboardSeriesPoint[]>(props.chartSeries);
+const chartAverages = ref<Record<string, number>>(props.chartAverages);
+const chartProviders = ref<DashboardProviderInfo[]>(props.chartProviders);
 const recentPingResults = ref<RecentPingResult[]>(props.recentPingResults);
 
-// Reload speed data on speedtest completion
+const downloadSeries = computed<DashboardSeriesConfig[]>(() =>
+    chartProviders.value.map((p) => ({
+        key: `${p.slug}_dl`,
+        label: p.label,
+        color: PROVIDER_COLORS[p.slug] ?? "var(--chart-1)",
+        unit: "Mbps",
+        dashed: false,
+    })),
+);
+
+const uploadSeries = computed<DashboardSeriesConfig[]>(() =>
+    chartProviders.value.map((p) => ({
+        key: `${p.slug}_ul`,
+        label: p.label,
+        color: PROVIDER_COLORS[p.slug] ?? "var(--chart-1)",
+        unit: "Mbps",
+        dashed: false,
+    })),
+);
+
+function navigate(r: DashboardChartRange, from?: string, to?: string): void {
+    router.get(
+        route("dashboard"),
+        r === "custom" ? { range: r, from, to } : { range: r },
+        { preserveScroll: true },
+    );
+}
+
 useDashboardRefresh(() => {
     router.reload({
-        only: ["providerCards", "chartData"],
+        only: [
+            "providerCards",
+            "chartSeries",
+            "chartAverages",
+            "chartProviders",
+        ],
         onSuccess: () => {
             providerCards.value = page.props.providerCards;
-            chartData.value = page.props.chartData;
+            chartSeries.value = page.props.chartSeries;
+            chartAverages.value = page.props.chartAverages;
+            chartProviders.value = page.props.chartProviders;
         },
     });
 });
 
-// Reload ping table on ping completion
 usePingResultsChannel({
     onCompleted() {
         router.reload({
@@ -62,7 +115,7 @@ usePingResultsChannel({
     <Head title="Dashboard" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div class="flex flex-col gap-1 py-5">
+            <div class="py-5">
                 <h1 class="text-xl font-bold tracking-tight">Dashboard</h1>
                 <p class="mt-1 text-sm text-muted-foreground">
                     Real-time overview of your internet speed across all
@@ -78,16 +131,29 @@ usePingResultsChannel({
                 />
             </div>
 
-            <SpeedChart
-                title="Download speed comparison"
-                metric="download"
-                :chart-data="chartData"
+            <div class="flex items-center justify-end">
+                <DashboardRangePicker
+                    :range="range"
+                    :from="from"
+                    :to="to"
+                    @change="navigate"
+                />
+            </div>
+
+            <DashboardSpeedChart
+                title="Download speed"
+                description="Download throughput (Mbps) per provider — dashed line marks the period average"
+                :series="downloadSeries"
+                :points="chartSeries"
+                :averages="chartAverages"
             />
 
-            <SpeedChart
-                title="Upload speed comparison"
-                metric="upload"
-                :chart-data="chartData"
+            <DashboardSpeedChart
+                title="Upload speed"
+                description="Upload throughput (Mbps) per provider — dashed line marks the period average"
+                :series="uploadSeries"
+                :points="chartSeries"
+                :averages="chartAverages"
             />
 
             <div>

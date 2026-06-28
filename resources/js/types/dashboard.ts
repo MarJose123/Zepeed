@@ -24,22 +24,6 @@ export interface ProviderCard {
     sparkline: SparklinePoint[];
 }
 
-export interface ChartDataset {
-    download: number[];
-    upload: number[];
-}
-
-export interface ChartRangeData {
-    labels: string[];
-    datasets: Record<string, ChartDataset>;
-}
-
-export interface ChartData {
-    "24h": ChartRangeData;
-    "7d": ChartRangeData;
-    "30d": ChartRangeData;
-}
-
 export interface DashboardRefreshPayload {
     provider_slug: string;
 }
@@ -52,4 +36,33 @@ export interface RecentPingResult {
     avg_ms: number | null;
     packet_loss_percent: number;
     measured_at: string;
+}
+
+// ── Dashboard chart types ─────────────────────────────────────────────────────
+
+/** Range preset or custom date window. */
+export type DashboardChartRange = "1d" | "7d" | "30d" | "custom";
+
+/** Provider that has data in the current range window. */
+export interface DashboardProviderInfo {
+    slug: string;
+    label: string;
+}
+
+/**
+ * One result row, pivoted by provider.
+ * `label` drives the XAxis tick; remaining keys follow "{slug}_dl" / "{slug}_ul".
+ */
+export interface DashboardSeriesPoint {
+    [key: string]: number | string | null;
+    label: string;
+}
+
+/** Configuration for a single chart line. */
+export interface DashboardSeriesConfig {
+    key: string;
+    label: string;
+    color: string;
+    unit: string;
+    dashed?: boolean;
 }
