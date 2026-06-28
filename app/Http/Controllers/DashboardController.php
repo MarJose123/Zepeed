@@ -8,27 +8,178 @@ use App\Models\Provider;
 use App\Models\ProviderSchedule;
 use App\Models\SpeedResult;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $range = (string) $request->query('range', '1d');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        [$start, $end] = $this->resolveRange($range, $from, $to);
+
         $providers = Provider::query()->get();
+        $chartProviders = $this->fetchActiveChartProviders($start, $end);
+        $slugs = array_column($chartProviders, 'slug');
 
         return Inertia::render('Dashboard', [
-            'providerCards'      => $this->buildProviderCards($providers),
-            'chartData'          => $this->buildChartData(),
-            'recentPingResults'  => self::buildRecentPingResults(),
+            'providerCards'     => $this->buildProviderCards($providers),
+            'chartSeries'       => $this->fetchSpeedSeries($start, $end, $slugs),
+            'chartAverages'     => $this->buildChartAverages($start, $end, $slugs),
+            'chartProviders'    => $chartProviders,
+            'range'             => $range,
+            'from'              => $start->toDateString(),
+            'to'                => $end->toDateString(),
+            'recentPingResults' => self::buildRecentPingResults(),
         ]);
     }
 
     /**
-     * Build the 10 most recent ping results across all enabled targets.
+     * @return array{CarbonImmutable, CarbonImmutable}
+     */
+    private function resolveRange(string $range, mixed $from, mixed $to): array
+    {
+        if ($range === 'custom' && $from && $to) {
+            return [
+                CarbonImmutable::parse((string) $from)->startOfDay(),
+                CarbonImmutable::parse((string) $to)->endOfDay(),
+            ];
+        }
+
+        return match ($range) {
+            '7d'    => [CarbonImmutable::now()->subDays(7),  CarbonImmutable::now()],
+            '30d'   => [CarbonImmutable::now()->subDays(30), CarbonImmutable::now()],
+            default => [CarbonImmutable::now()->subDay(),    CarbonImmutable::now()],
+        };
+    }
+
+    /**
+     * XAxis label format — time only for ≤2-day ranges, date for wider ranges.
+     */
+    private function labelFormat(CarbonImmutable $start, CarbonImmutable $end): string
+    {
+        $days = (int) $start->diffInDays($end);
+
+        if ($days <= 2) {
+            return '%H:%i';
+        }
+
+        if ($start->year !== $end->year || $days > 365) {
+            return '%m/%Y';
+        }
+
+        return '%m/%d';
+    }
+
+    /**
+     * Providers that have at least one successful result in the date window.
      *
+     * @return array<int, array{slug: string, label: string}>
+     */
+    private function fetchActiveChartProviders(CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        $slugs = DB::table('speed_results')
+            ->select('provider_slug')
+            ->where('status', 'success')
+            ->whereBetween('measured_at', [$start, $end])
+            ->distinct()
+            ->pluck('provider_slug')
+            ->all();
+
+        $providers = [];
+
+        foreach ($slugs as $slug) {
+            $server = SpeedtestServer::tryFrom((string) $slug);
+
+            if ($server !== null) {
+                $providers[] = ['slug' => $server->value, 'label' => $server->label()];
+            }
+        }
+
+        return $providers;
+    }
+
+    /**
+     * Pivoted speed series: each successful result becomes a row.
+     * Keys: "{slug}_dl", "{slug}_ul", plus "label" for the XAxis tick.
+     *
+     * @param string[] $slugs
+     *
+     * @return array<int, array<string, float|string|null>>
+     */
+    private function fetchSpeedSeries(CarbonImmutable $start, CarbonImmutable $end, array $slugs): array
+    {
+        if ($slugs === []) {
+            return [];
+        }
+
+        $fmt = $this->labelFormat($start, $end);
+        $rows = DB::table('speed_results')
+            ->select([
+                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
+                DB::raw('measured_at'),
+                'provider_slug',
+                DB::raw('ROUND(download_mbps, 2) as dl'),
+                DB::raw('ROUND(upload_mbps, 2) as ul'),
+            ])
+            ->where('status', 'success')
+            ->whereBetween('measured_at', [$start, $end])
+            ->whereIn('provider_slug', $slugs)
+            ->oldest('measured_at')
+            ->get();
+
+        /** @var array<string, array<string, float|string|null>> $buckets */
+        $buckets = [];
+
+        foreach ($rows as $row) {
+            $key = (string) $row->measured_at;
+            $slug = (string) $row->provider_slug;
+
+            if (! isset($buckets[$key])) {
+                $buckets[$key] = ['label' => (string) $row->label];
+            }
+
+            $buckets[$key]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
+            $buckets[$key]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
+        }
+
+        return array_values($buckets);
+    }
+
+    /**
+     * Per-series average for the reference line: "{slug}_dl" and "{slug}_ul" keys.
+     *
+     * @param string[] $slugs
+     *
+     * @return array<string, float>
+     */
+    private function buildChartAverages(CarbonImmutable $start, CarbonImmutable $end, array $slugs): array
+    {
+        $averages = [];
+
+        foreach ($slugs as $slug) {
+            $row = DB::table('speed_results')
+                ->where('status', 'success')
+                ->where('provider_slug', $slug)
+                ->whereBetween('measured_at', [$start, $end])
+                ->selectRaw('ROUND(AVG(download_mbps), 2) as avg_dl, ROUND(AVG(upload_mbps), 2) as avg_ul')
+                ->first();
+
+            $averages["{$slug}_dl"] = $row !== null ? (float) ($row->avg_dl ?? 0) : 0.0;
+            $averages["{$slug}_ul"] = $row !== null ? (float) ($row->avg_ul ?? 0) : 0.0;
+        }
+
+        return $averages;
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private static function buildRecentPingResults(): array
@@ -113,96 +264,5 @@ class DashboardController extends Controller
             })
             ->values()
             ->all();
-    }
-
-    /**
-     * @return array<string, array<string, mixed>>
-     */
-    private function buildChartData(): array
-    {
-        return [
-            '24h' => $this->buildRangeData(hours: 24, groupFormat: 'Y-m-d H:i', labelFormat: 'H:i'),
-            '7d'  => $this->buildRangeData(hours: 168, groupFormat: 'Y-m-d', labelFormat: 'D d'),
-            '30d' => $this->buildRangeData(hours: 720, groupFormat: 'Y-m-d', labelFormat: 'M d'),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function buildRangeData(int $hours, string $groupFormat, string $labelFormat): array
-    {
-        $since = now()->subHours($hours);
-
-        /** @var Collection<int, SpeedResult> $results */
-        $results = SpeedResult::query()
-            ->successful()
-            ->where('measured_at', '>=', $since)
-            ->oldest('measured_at')
-            ->get();
-
-        $grouped = [];
-
-        foreach (SpeedtestServer::cases() as $server) {
-            /** @var Collection<int, SpeedResult> $providerResults */
-            $providerResults = $results->filter(
-                static fn (SpeedResult $r) => $r->provider_slug === $server
-            );
-
-            $grouped[$server->value] = $providerResults
-                ->groupBy(static function (SpeedResult $r) use ($groupFormat): string {
-                    /** @var Carbon $measuredAt */
-                    $measuredAt = $r->measured_at;
-
-                    return $measuredAt->format($groupFormat);
-                })
-                ->map(static function (Collection $group): array {
-                    /** @var Collection<int, SpeedResult> $group */
-                    return [
-                        'download_mbps' => round(
-                            $group->avg(static fn (SpeedResult $r) => (float) $r->download_mbps) ?? 0,
-                            2
-                        ),
-                        'upload_mbps' => round(
-                            $group->avg(static fn (SpeedResult $r) => (float) $r->upload_mbps) ?? 0,
-                            2
-                        ),
-                    ];
-                })
-                ->all();
-        }
-
-        $rawKeys = collect($grouped)
-            ->flatMap(static fn (array $data) => array_keys($data))
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
-
-        $labels = array_map(static function (string $key) use ($groupFormat, $labelFormat): string {
-            $date = Date::createFromFormat($groupFormat, $key);
-
-            return $date ? $date->format($labelFormat) : $key;
-        }, $rawKeys);
-
-        $datasets = [];
-        foreach (SpeedtestServer::cases() as $server) {
-            $providerData = $grouped[$server->value];
-            $datasets[$server->value] = [
-                'download' => array_map(
-                    static fn (string $key) => $providerData[$key]['download_mbps'] ?? 0,
-                    $rawKeys
-                ),
-                'upload' => array_map(
-                    static fn (string $key) => $providerData[$key]['upload_mbps'] ?? 0,
-                    $rawKeys
-                ),
-            ];
-        }
-
-        return [
-            'labels'   => array_values($labels),
-            'datasets' => $datasets,
-        ];
     }
 }
