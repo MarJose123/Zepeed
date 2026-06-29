@@ -3,7 +3,6 @@
 namespace App\Services\Prometheus;
 
 use App\Models\MaintenanceWindow;
-use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Prometheus\CollectorRegistry;
 
@@ -58,14 +57,20 @@ class SystemMetricsBuilderService
 
     /**
      * Group 7 — Maintenance window state.
+     *
+     * The speedtest global pause is a MaintenanceWindow row with
+     * type = Indefinite and providers = ['all']. isCurrentlyActive()
+     * returns true for it, so it is already captured by the query below.
+     *
+     * Setting::get('maintenance_enabled') is the web-level 503 mode and
+     * is unrelated to speedtest pausing — it must not be used here.
      */
     private function registerMaintenance(CollectorRegistry $registry): void
     {
         $windows = MaintenanceWindow::query()->where('is_active', true)->get();
-        $globalPause = (bool) Setting::get('maintenance_enabled', false);
-        $anyActive = $globalPause || $windows->contains(fn (MaintenanceWindow $w) => $w->isCurrentlyActive());
+        $anyActive = $windows->contains(fn (MaintenanceWindow $w) => $w->isCurrentlyActive());
 
-        $active = $registry->registerGauge('zepeed', 'maintenance_active', '1 if global pause is on or any window is currently active', []);
+        $active = $registry->registerGauge('zepeed', 'maintenance_active', '1 if any speedtest maintenance window is currently active', []);
         $wTotal = $registry->registerGauge('zepeed', 'maintenance_windows_total', 'Count of maintenance_windows rows with is_active=1', []);
 
         $active->set($anyActive ? 1.0 : 0.0, []);

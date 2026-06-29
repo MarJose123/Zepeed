@@ -29,13 +29,20 @@ class PrometheusController extends Controller
     }
 
     /**
-     * Persist Prometheus configuration and flush the metrics cache.
+     * Persist Prometheus configuration and invalidate the metrics cache.
+     *
+     * The old config is read first and its cache key is flushed before the
+     * DB write. After the update the new config resolves to a different key
+     * and populates fresh on the next scrape, eliminating the stale-cache
+     * race window that existed when flush fired after the DB write.
      */
     public function update(UpdatePrometheusRequest $request): RedirectResponse
     {
-        Prometheus::config()->update($request->validated());
+        $config = Prometheus::config();
 
-        $this->exporter->flush();
+        $this->exporter->flush($config);
+
+        $config->update($request->validated());
 
         InertiaNotification::make()
             ->success()
@@ -46,11 +53,11 @@ class PrometheusController extends Controller
     }
 
     /**
-     * Flush the cached metrics output immediately.
+     * Flush the cached metrics output for the current config immediately.
      */
     public function flushCache(): RedirectResponse
     {
-        $this->exporter->flush();
+        $this->exporter->flush(Prometheus::config());
 
         InertiaNotification::make()
             ->success()
@@ -63,12 +70,13 @@ class PrometheusController extends Controller
     /**
      * Serve the Prometheus text exposition scrape endpoint.
      *
-     * Access controlled by PrometheusAccessMiddleware — this action
-     * only runs when the integration is enabled and the caller's IP is allowed.
+     * Access is controlled by PrometheusAccessMiddleware — this action
+     * only runs when the integration is enabled and the caller's IP passes.
      */
     public function metrics(): HttpResponse
     {
-        $output = $this->exporter->build(Prometheus::config());
+        $config = Prometheus::config();
+        $output = $this->exporter->build($config);
 
         return response($output, 200, ['Content-Type' => RenderTextFormat::MIME_TYPE]);
     }

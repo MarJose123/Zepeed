@@ -31,10 +31,13 @@ const emit = defineEmits<{
     "update:providers": [value: string[]];
 }>();
 
-function toggleProvider(slug: string, checked: boolean) {
+function toggleProvider(slug: string, checked: boolean | "indeterminate") {
+    if (checked === "indeterminate") return;
+
     const next = checked
         ? [...props.config.providers, slug]
         : props.config.providers.filter((p) => p !== slug);
+
     emit("update:providers", next);
 }
 
@@ -68,7 +71,7 @@ function flush() {
                         type="number"
                         min="10"
                         max="3600"
-                        :value="config.cache_ttl"
+                        :model-value="config.cache_ttl"
                         class="w-28 text-sm"
                         @input="
                             emit(
@@ -95,8 +98,10 @@ function flush() {
                 <div class="flex items-start gap-3">
                     <Checkbox
                         id="include-speed"
-                        :checked="config.include_speed"
-                        @update:checked="emit('update:include_speed', $event)"
+                        :model-value="config.include_speed"
+                        @update:modelValue="
+                            emit('update:include_speed', $event === true)
+                        "
                     />
                     <div>
                         <Label
@@ -127,10 +132,10 @@ function flush() {
                         >
                             <Checkbox
                                 :id="`provider-${provider.slug}`"
-                                :checked="
+                                :model-value="
                                     config.providers.includes(provider.slug)
                                 "
-                                @update:checked="
+                                @update:model-value="
                                     toggleProvider(provider.slug, $event)
                                 "
                             />
@@ -149,8 +154,10 @@ function flush() {
             <div class="flex items-start gap-3">
                 <Checkbox
                     id="include-ping"
-                    :checked="config.include_ping"
-                    @update:checked="emit('update:include_ping', $event)"
+                    :model-value="config.include_ping"
+                    @update:model-value="
+                        emit('update:include_ping', $event === true)
+                    "
                 />
                 <div>
                     <Label
@@ -170,8 +177,10 @@ function flush() {
             <div class="flex items-start gap-3">
                 <Checkbox
                     id="include-system"
-                    :checked="config.include_system"
-                    @update:checked="emit('update:include_system', $event)"
+                    :model-value="config.include_system"
+                    @update:model-value="
+                        emit('update:include_system', $event === true)
+                    "
                 />
                 <div>
                     <Label
