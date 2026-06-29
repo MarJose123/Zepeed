@@ -8,6 +8,7 @@ use App\Http\Controllers\MaintenanceWindowController;
 use App\Http\Controllers\PingAlertRuleController;
 use App\Http\Controllers\PingResultController;
 use App\Http\Controllers\PingTargetController;
+use App\Http\Controllers\PrometheusController;
 use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\ProviderScheduleController;
 use App\Http\Controllers\ScheduleController;
@@ -147,6 +148,12 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::get('/{webhook}/deliveries', [WebhookController::class, 'deliveries'])->name('deliveries');
                 Route::get('/{webhook}/deliveries/json', [WebhookController::class, 'deliveriesJson'])->name('deliveries.json');
             });
+
+        Route::prefix('prometheus/')->name('prometheus.')->group(static function () {
+            Route::get('/', [PrometheusController::class, 'index'])->name('index');
+            Route::post('/', [PrometheusController::class, 'update'])->name('update');
+            Route::post('flush', [PrometheusController::class, 'flushCache'])->name('cache.flush');
+        });
 
     });
 

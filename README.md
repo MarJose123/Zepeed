@@ -35,6 +35,7 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Ine
 - **Real-time Notifications**: Get notified of run successes or failures via Inertia notifications.
 - **Modern Stack**: Built with Laravel 12, Vue 3, shadcn/vue, and Tailwind CSS v4.
 - **Webhooks**: Integrate with your favorite services for real-time notifications.
+- **Prometheus Integration**: Expose a `/metrics` scrape endpoint for monitoring with Prometheus and Grafana.
 - **Email Services**: Send speedtest results via SMTP, Mailgun, Postmark, AWS SES, and more.
 - **Ping Test**: Check the latency of your internet connection.
 
