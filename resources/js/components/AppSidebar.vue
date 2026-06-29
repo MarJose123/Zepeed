@@ -108,6 +108,10 @@ const navigation: TSidebarNavigationItems = [
                         title: "Mailer",
                         href: route("speedtest.integration.smtp.index"),
                     },
+                    {
+                        title: "Prometheus",
+                        href: route("speedtest.integration.prometheus.index"),
+                    },
                 ],
             },
             {
