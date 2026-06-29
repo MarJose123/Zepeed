@@ -11,6 +11,7 @@ Route::middleware(['auth:users-api', 'throttle:api-resources'])->prefix('app')->
 
 /**
  * Healthcheck
+ *
  * @unauthenticated
-*/
+ */
 Route::get('/healthcheck', fn () => response()->json(['status' => 'ok']));
