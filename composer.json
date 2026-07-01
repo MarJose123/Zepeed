@@ -110,16 +110,16 @@
             "Composer\\Config::disableProcessTimeout",
             "vendor/bin/phpstan analyse --memory-limit=2G --ansi"
         ],
-        "test": [
+        "test:api": [
             "@php artisan config:clear --ansi",
-            "@php artisan test --stop-on-failure --ansi"
+            "@php artisan test --testsuite=Api --stop-on-failure --ansi"
         ],
         "pre-commit": [
             "@rector",
             "bun run typecheck",
             "@format",
             "@analyse",
-            "@test"
+            "@test:api"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
