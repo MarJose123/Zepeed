@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('label'); // Human-readable name e.g. "ISP maintenance" "Weekly backup"
             $table->string('type'); // App\Enums\MaintenanceWindowType: 'indefinite'|'one_time'|'recurring'
             $table->boolean('is_active')->default(true); // Master switch — false = window exists but is disabled
-            $table->json('providers')->default('["all"]');
+            $table->json('providers');
             // ^ JSON array of provider slugs this window applies to.
             //   Special value ["all"] means every provider is suppressed.
             //   e.g. ["librespeed"] or ["speedtest","fastcom"]
