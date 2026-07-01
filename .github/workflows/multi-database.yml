@@ -60,10 +60,12 @@ jobs:
         ports:
           - 3306:3306
         env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: zepeed_test
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: zepeed_test
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
