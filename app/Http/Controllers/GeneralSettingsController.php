@@ -32,13 +32,9 @@ final class GeneralSettingsController extends Controller
     {
         return Inertia::render('settings/GeneralSettings', [
             'settings'              => Setting::generalSettings(),
-            'stats'                 => $this->updateAction->stats(),
-            'scheduler_jobs'        => $this->updateAction->schedulerJobs(),
-            'storage_tables'        => $this->updateAction->storageTables(),
             'downtime_logs'         => $this->updateAction->downtimeLogs(
                 page: max(1, (int) $request->query('downtime_page', 1)),
             ),
-            'retention_projections' => $this->updateAction->retentionProjections(),
             'timezones'             => DateTimeZone::listIdentifiers(),
         ]);
     }
