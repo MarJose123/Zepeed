@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Concerns\TranslatesDateFormat;
 use App\Enums\SpeedtestServer;
 use App\Models\PingResult;
 use App\Models\Provider;
@@ -18,8 +17,6 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    use TranslatesDateFormat;
-
     public function index(Request $request): Response
     {
         $range = (string) $request->query('range', '1d');
@@ -71,14 +68,14 @@ class DashboardController extends Controller
         $days = (int) $start->diffInDays($end);
 
         if ($days <= 2) {
-            return '%H:%i';
+            return 'H:i';
         }
 
         if ($start->year !== $end->year || $days > 365) {
-            return '%m/%Y';
+            return 'm/Y';
         }
 
-        return '%m/%d';
+        return 'm/d';
     }
 
     /**
@@ -143,7 +140,7 @@ class DashboardController extends Controller
             $slug = (string) $row->provider_slug;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
+                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
             }
 
             $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;

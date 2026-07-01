@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Concerns\TranslatesDateFormat;
 use App\Enums\SpeedtestServer;
 use App\Models\PingResult;
 use App\Models\PingTarget;
@@ -17,8 +16,6 @@ use Inertia\Response;
 
 class PublicMetricsDashboardController extends Controller
 {
-    use TranslatesDateFormat;
-
     public function __invoke(Request $request): Response
     {
         $range = (string) $request->query('range', '1d');
@@ -78,8 +75,8 @@ class PublicMetricsDashboardController extends Controller
     private function labelFormat(string $granularity): string
     {
         return match ($granularity) {
-            'daily', 'weekly' => '%m/%d %H:%i',
-            default           => '%H:%i',
+            'daily', 'weekly' => 'm/d H:i',
+            default           => 'H:i',
         };
     }
 
@@ -146,7 +143,7 @@ class PublicMetricsDashboardController extends Controller
             $slug = (string) $row->provider_slug;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
+                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
             }
 
             $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;
@@ -191,7 +188,7 @@ class PublicMetricsDashboardController extends Controller
             $key = (string) $row->measured_at;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
+                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
             }
 
             $value = $valueResolver($row);
@@ -262,7 +259,7 @@ class PublicMetricsDashboardController extends Controller
             $key = (string) $row->measured_at;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
+                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
             }
 
             $buckets[$key][(string) $row->ping_target_id] = $row->avg_ms !== null

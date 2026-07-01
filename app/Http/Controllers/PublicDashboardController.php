@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Concerns\TranslatesDateFormat;
 use App\Models\AlertRule;
 use App\Models\PingResult;
 use App\Models\Provider;
@@ -13,8 +12,6 @@ use Inertia\Response;
 
 class PublicDashboardController extends Controller
 {
-    use TranslatesDateFormat;
-
     public function __invoke(): Response
     {
         $stats = [
@@ -36,7 +33,7 @@ class PublicDashboardController extends Controller
             ->where('measured_at', '>=', now()->subHours(24))
             ->toBase()
             ->get(['measured_at', 'download_mbps', 'upload_mbps', 'ping_ms'])
-            ->groupBy(fn (object $row): string => $this->formatDate(Date::parse($row->measured_at), '%Y-%m-%d %H:00:00'))
+            ->groupBy(fn (object $row): string => Date::parse($row->measured_at)->format('Y-m-d H:00:00'))
             ->sortKeys()
             ->map(static fn (object $rows, string $bucket): array => [
                 'label'    => $bucket,

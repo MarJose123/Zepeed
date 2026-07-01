@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Concerns\TranslatesDateFormat;
 use App\Http\Requests\PingResultIndexRequest;
 use App\Http\Resources\PingResultResource;
 use App\Http\Resources\PingTargetResource;
@@ -15,8 +14,6 @@ use Inertia\Response;
 
 class PingResultController extends Controller
 {
-    use TranslatesDateFormat;
-
     public function index(PingResultIndexRequest $request): Response
     {
         $validated = $request->validated();
@@ -97,8 +94,8 @@ class PingResultController extends Controller
         };
 
         $format = match ($range) {
-            '7d', '30d' => '%Y-%m-%d %H:00:00',
-            default     => '%Y-%m-%d %H:%i:00',
+            '7d', '30d' => 'Y-m-d H:00:00',
+            default     => 'Y-m-d H:i:00',
         };
 
         $activeTargets = $filterTargetId
@@ -119,11 +116,11 @@ class PingResultController extends Controller
         /** @var array<string, array<string, mixed>> $bucketMap */
         $bucketMap = [];
 
-        $grouped = $rows->groupBy(fn (object $row): string => $row->ping_target_id . '|' . $this->formatDate(Date::parse($row->measured_at), $format));
+        $grouped = $rows->groupBy(fn (object $row): string => $row->ping_target_id . '|' . Date::parse($row->measured_at)->format($format));
 
         foreach ($grouped as $group) {
             $first = $group->first();
-            $bucket = $this->formatDate(Date::parse($first->measured_at), $format);
+            $bucket = Date::parse($first->measured_at)->format($format);
             $targetId = (string) $first->ping_target_id;
 
             $bucketMap[$bucket] ??= [];
