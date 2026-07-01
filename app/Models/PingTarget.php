@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Override;
 
 /**
@@ -28,6 +29,7 @@ use Override;
  * @property CarbonImmutable      $updated_at
  * @property-read HasMany<PingResult, self>    $results
  * @property-read HasMany<PingAlertRule, self> $alertRules
+ * @property-read PingResult|null              $latestResult
  */
 #[UseFactory(PingTargetFactory::class)]
 class PingTarget extends Model
@@ -64,6 +66,14 @@ class PingTarget extends Model
     public function results(): HasMany
     {
         return $this->hasMany(PingResult::class)->latest('measured_at');
+    }
+
+    /**
+     * @return HasOne<PingResult, $this>
+     */
+    public function latestResult(): HasOne
+    {
+        return $this->hasOne(PingResult::class, 'ping_target_id')->latestOfMany('measured_at');
     }
 
     /** @return HasMany<PingAlertRule, $this> */

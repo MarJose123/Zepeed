@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -68,14 +68,14 @@ class DashboardController extends Controller
         $days = (int) $start->diffInDays($end);
 
         if ($days <= 2) {
-            return '%H:%i';
+            return 'H:i';
         }
 
         if ($start->year !== $end->year || $days > 365) {
-            return '%m/%Y';
+            return 'm/Y';
         }
 
-        return '%m/%d';
+        return 'm/d';
     }
 
     /**
@@ -85,10 +85,11 @@ class DashboardController extends Controller
      */
     private function fetchActiveChartProviders(CarbonImmutable $start, CarbonImmutable $end): array
     {
-        $slugs = DB::table('speed_results')
-            ->select('provider_slug')
+        $slugs = SpeedResult::query()
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
+            ->toBase()
+            ->select('provider_slug')
             ->distinct()
             ->pluck('provider_slug')
             ->all();
@@ -121,17 +122,13 @@ class DashboardController extends Controller
         }
 
         $fmt = $this->labelFormat($start, $end);
-        $rows = DB::table('speed_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
-                DB::raw('measured_at'),
-                'provider_slug',
-                DB::raw('ROUND(download_mbps, 2) as dl'),
-                DB::raw('ROUND(upload_mbps, 2) as ul'),
-            ])
+
+        $rows = SpeedResult::query()
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('provider_slug', $slugs)
+            ->toBase()
+            ->select(['measured_at', 'provider_slug', 'download_mbps', 'upload_mbps'])
             ->oldest('measured_at')
             ->get();
 
@@ -143,11 +140,11 @@ class DashboardController extends Controller
             $slug = (string) $row->provider_slug;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => (string) $row->label];
+                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
             }
 
-            $buckets[$key]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
-            $buckets[$key]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
+            $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;
+            $buckets[$key]["{$slug}_ul"] = $row->upload_mbps !== null ? round((float) $row->upload_mbps, 2) : null;
         }
 
         return array_values($buckets);
@@ -165,15 +162,15 @@ class DashboardController extends Controller
         $averages = [];
 
         foreach ($slugs as $slug) {
-            $row = DB::table('speed_results')
+            $rows = SpeedResult::query()
                 ->where('status', 'success')
                 ->where('provider_slug', $slug)
                 ->whereBetween('measured_at', [$start, $end])
-                ->selectRaw('ROUND(AVG(download_mbps), 2) as avg_dl, ROUND(AVG(upload_mbps), 2) as avg_ul')
-                ->first();
+                ->toBase()
+                ->get(['download_mbps', 'upload_mbps']);
 
-            $averages["{$slug}_dl"] = $row !== null ? (float) ($row->avg_dl ?? 0) : 0.0;
-            $averages["{$slug}_ul"] = $row !== null ? (float) ($row->avg_ul ?? 0) : 0.0;
+            $averages["{$slug}_dl"] = round((float) $rows->avg('download_mbps'), 2);
+            $averages["{$slug}_ul"] = round((float) $rows->avg('upload_mbps'), 2);
         }
 
         return $averages;

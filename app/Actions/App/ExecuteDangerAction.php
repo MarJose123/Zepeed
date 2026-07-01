@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Actions\App;
 
+use App\Models\SpeedResult;
+use App\Models\WebhookDelivery;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 
 final class ExecuteDangerAction
@@ -41,7 +42,7 @@ final class ExecuteDangerAction
      */
     private static function clearResults(): void
     {
-        DB::table('speed_results')->truncate();
+        SpeedResult::query()->truncate();
     }
 
     /**
@@ -49,40 +50,54 @@ final class ExecuteDangerAction
      */
     private static function clearLog(): void
     {
-        DB::table('webhook_deliveries')->truncate();
+        WebhookDelivery::query()->truncate();
     }
 
     /**
      * Remove all configuration data while preserving speed results and users.
+     *
+     * NOTE: table names here are intentionally a fixed list rather than
+     * model classes — some (e.g. 'schedules') don't map 1:1 to a model's
+     * default table name, and changing that mapping is outside the scope
+     * of this refactor. truncate() itself has no database-specific syntax,
+     * so this loop is already fully portable across MySQL/MariaDB/Postgres.
      */
     private function resetConfig(): void
     {
         DB::transaction(static function (): void {
+            Schema::disableForeignKeyConstraints();
+
             foreach (['providers', 'alert_rules', 'mail_providers', 'webhooks', 'email_templates', 'schedules', 'maintenance_windows', 'settings'] as $table) {
                 DB::table($table)->truncate();
             }
+
+            Schema::enableForeignKeyConstraints();
         });
     }
 
     /**
      * Factory reset: truncate every table except users, then re-seed.
+     *
+     * Schema::getTables() replaces the previous `SHOW TABLES` raw query,
+     * which only worked on MySQL/MariaDB — getTables() is implemented
+     * natively for MySQL, MariaDB, PostgreSQL, and SQLite.
      */
     private function factoryReset(): void
     {
         $protected = ['users', 'password_reset_tokens', 'sessions'];
 
         DB::transaction(static function () use ($protected): void {
-            $tables = DB::select('SHOW TABLES');
-            $dbKey = 'Tables_in_' . config('database.connections.' . config('database.default') . '.database');
+            Schema::disableForeignKeyConstraints();
 
-            foreach ($tables as $row) {
-                $table = (array) $row;
-                $name = $table[$dbKey] ?? '';
+            foreach (Schema::getTables() as $table) {
+                $name = $table['name'] ?? '';
 
                 if ($name !== '' && ! in_array($name, $protected, true)) {
                     DB::table($name)->truncate();
                 }
             }
+
+            Schema::enableForeignKeyConstraints();
         });
 
         Artisan::call('db:seed', ['--force' => true]);

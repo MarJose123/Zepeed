@@ -2,8 +2,11 @@
 
 namespace App\Services\Prometheus;
 
+use App\Models\AlertRule;
 use App\Models\MaintenanceWindow;
-use Illuminate\Support\Facades\DB;
+use App\Models\PingAlertRule;
+use App\Models\Webhook;
+use App\Models\WebhookDelivery;
 use Prometheus\CollectorRegistry;
 
 class SystemMetricsBuilderService
@@ -25,14 +28,12 @@ class SystemMetricsBuilderService
      */
     private function registerAlertRules(CollectorRegistry $registry): void
     {
-        $speedRules = DB::table('alert_rules')
-            ->select(['name', 'provider_slug', 'event', 'is_active', 'last_triggered_at'])
-            ->get();
+        $speedRules = AlertRule::query()
+            ->get(['name', 'provider_slug', 'event', 'is_active', 'last_triggered_at']);
 
-        $pingRules = DB::table('ping_alert_rules as ar')
-            ->join('ping_targets as pt', 'pt.id', '=', 'ar.ping_target_id')
-            ->select(['ar.name', 'pt.label as target_label', 'ar.is_active', 'ar.last_triggered_at'])
-            ->get();
+        $pingRules = PingAlertRule::query()
+            ->with('target:id,label')
+            ->get(['id', 'name', 'ping_target_id', 'is_active', 'last_triggered_at']);
 
         $srActive = $registry->registerGauge('zepeed', 'alert_rule_active', '1 if the speedtest alert rule is active', ['name', 'event', 'provider']);
         $srTs = $registry->registerGauge('zepeed', 'alert_rule_last_triggered_timestamp', 'Unix epoch of last trigger, 0 if never fired', ['name', 'provider']);
@@ -41,17 +42,18 @@ class SystemMetricsBuilderService
 
         foreach ($speedRules as $rule) {
             $provider = $rule->provider_slug ?? 'any';
-            $firedTs = $rule->last_triggered_at ? (float) (strtotime((string) $rule->last_triggered_at) ?: 0) : 0.0;
+            $firedTs = $rule->last_triggered_at?->getTimestamp() ?? 0;
 
-            $srActive->set($rule->is_active ? 1.0 : 0.0, [(string) $rule->name, (string) $rule->event, (string) $provider]);
-            $srTs->set($firedTs, [(string) $rule->name, (string) $provider]);
+            $srActive->set($rule->is_active ? 1.0 : 0.0, [(string) $rule->name, (string) $rule->event->value, (string) $provider]);
+            $srTs->set((float) $firedTs, [(string) $rule->name, (string) $provider]);
         }
 
         foreach ($pingRules as $rule) {
-            $firedTs = $rule->last_triggered_at ? (float) (strtotime((string) $rule->last_triggered_at) ?: 0) : 0.0;
+            $firedTs = $rule->last_triggered_at?->getTimestamp() ?? 0;
+            $targetLabel = $rule->target->label;
 
-            $prActive->set($rule->is_active ? 1.0 : 0.0, [(string) $rule->name, (string) $rule->target_label]);
-            $prTs->set($firedTs, [(string) $rule->name, (string) $rule->target_label]);
+            $prActive->set($rule->is_active ? 1.0 : 0.0, [(string) $rule->name, (string) $targetLabel]);
+            $prTs->set((float) $firedTs, [(string) $rule->name, (string) $targetLabel]);
         }
     }
 
@@ -82,7 +84,7 @@ class SystemMetricsBuilderService
      */
     private function registerWebhooks(CollectorRegistry $registry): void
     {
-        $webhooks = DB::table('webhooks')->select(['name', 'is_active', 'last_fired_at'])->get();
+        $webhooks = Webhook::query()->get(['name', 'is_active', 'last_fired_at']);
 
         $whActive = $registry->registerGauge('zepeed', 'webhook_active', '1 if the webhook is active', ['name']);
         $whTs = $registry->registerGauge('zepeed', 'webhook_last_fired_timestamp', 'Unix epoch of last dispatch, 0 if never', ['name']);
@@ -92,32 +94,32 @@ class SystemMetricsBuilderService
 
         foreach ($webhooks as $wh) {
             $whActive->set((bool) $wh->is_active ? 1.0 : 0.0, [(string) $wh->name]);
-            $whTs->set($wh->last_fired_at ? (float) (strtotime((string) $wh->last_fired_at) ?: 0) : 0.0, [(string) $wh->name]);
+            $whTs->set($wh->last_fired_at?->getTimestamp() ?? 0.0, [(string) $wh->name]);
         }
 
-        $deliveryRows = DB::select(
-            'SELECT w.name, wd.success,
-                    COUNT(*) AS cnt,
-                    AVG(CASE WHEN wd.success = 1 THEN wd.duration_ms ELSE NULL END) AS avg_dur
-             FROM webhook_deliveries wd
-             JOIN webhooks w ON w.id = wd.webhook_id
-             WHERE wd.created_at >= NOW() - INTERVAL 24 HOUR
-             GROUP BY wd.webhook_id, w.name, wd.success',
-        );
+        $deliveries = WebhookDelivery::query()
+            ->with('webhook:id,name')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->get(['id', 'webhook_id', 'success', 'duration_ms']);
 
         /** @var array<string, array<string, int|float>> $byWebhook */
         $byWebhook = [];
 
-        foreach ($deliveryRows as $row) {
-            $name = (string) $row->name;
-            $result = (bool) $row->success ? 'success' : 'failed';
-            $cnt = (int) $row->cnt;
+        foreach ($deliveries->groupBy(static fn (WebhookDelivery $d) => $d->webhook_id . '|' . ($d->success ? '1' : '0')) as $key => $group) {
+            [, $successFlag] = explode('|', (string) $key, 2);
+            $name = (string) $group->first()->webhook->name;
+            $cnt = $group->count();
+            $result = $successFlag === '1' ? 'success' : 'failed';
 
             $byWebhook[$name][$result] = $cnt;
             $whTotal->set((float) $cnt, [$name, $result]);
 
-            if ((bool) $row->success && $row->avg_dur !== null) {
-                $whDur->set(round((float) $row->avg_dur, 2), [$name]);
+            if ($successFlag === '1') {
+                $avgDur = $group->avg('duration_ms');
+
+                if ($avgDur !== null) {
+                    $whDur->set(round((float) $avgDur, 2), [$name]);
+                }
             }
         }
 

@@ -46,7 +46,7 @@ class SpeedResultFactory extends Factory
      */
     public function success(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'          => 'success',
             'download_mbps'   => fake()->randomFloat(2, 100, 500),
             'upload_mbps'     => fake()->randomFloat(2, 50, 250),
@@ -66,7 +66,7 @@ class SpeedResultFactory extends Factory
      */
     public function failed(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'          => 'failed',
             'download_mbps'   => null,
             'upload_mbps'     => null,
@@ -88,7 +88,7 @@ class SpeedResultFactory extends Factory
      */
     public function skipped(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'          => 'skipped',
             'download_mbps'   => null,
             'upload_mbps'     => null,

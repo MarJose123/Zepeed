@@ -2,7 +2,9 @@
 
 namespace App\Services\Prometheus;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Provider;
+use App\Models\SpeedResult;
+use Illuminate\Support\Facades\Date;
 use Prometheus\CollectorRegistry;
 
 class SpeedMetricsBuilderService
@@ -32,22 +34,15 @@ class SpeedMetricsBuilderService
      */
     private function registerSpeedLatest(CollectorRegistry $registry, array $providers): void
     {
-        $ph = implode(',', array_fill(0, count($providers), '?'));
-        $rows = DB::select(
-            "SELECT sr.provider_slug, sr.download_mbps, sr.upload_mbps,
-                    sr.ping_ms, sr.jitter_ms, sr.packet_loss,
-                    UNIX_TIMESTAMP(sr.measured_at) AS measured_ts
-             FROM speed_results sr
-             INNER JOIN (
-                 SELECT provider_slug, MAX(measured_at) AS max_at
-                 FROM speed_results
-                 WHERE status = 'success' AND provider_slug IN ({$ph})
-                 GROUP BY provider_slug
-             ) latest ON sr.provider_slug = latest.provider_slug
-                     AND sr.measured_at   = latest.max_at
-             WHERE sr.status = 'success'",
-            $providers,
-        );
+        $rows = SpeedResult::query()
+            ->where('status', 'success')
+            ->whereIn('provider_slug', $providers)
+            ->toBase()
+            ->select(['provider_slug', 'download_mbps', 'upload_mbps', 'ping_ms', 'jitter_ms', 'packet_loss', 'measured_at'])
+            ->latest('measured_at')
+            ->get()
+            ->groupBy('provider_slug')
+            ->map(static fn ($group) => $group->first());
 
         $dl = $registry->registerGauge('zepeed', 'speedtest_download_mbps', 'Latest download speed in Mbps', ['provider']);
         $ul = $registry->registerGauge('zepeed', 'speedtest_upload_mbps', 'Latest upload speed in Mbps', ['provider']);
@@ -61,7 +56,7 @@ class SpeedMetricsBuilderService
             $dl->set((float) $row->download_mbps, $lbl);
             $ul->set((float) $row->upload_mbps, $lbl);
             $ping->set((float) $row->ping_ms, $lbl);
-            $ts->set((float) $row->measured_ts, $lbl);
+            $ts->set((float) Date::parse($row->measured_at)->getTimestamp(), $lbl);
 
             if ($row->jitter_ms !== null) {
                 $jit->set((float) $row->jitter_ms, $lbl);
@@ -80,15 +75,12 @@ class SpeedMetricsBuilderService
      */
     private function registerSpeedHealth(CollectorRegistry $registry, array $providers): void
     {
-        $ph = implode(',', array_fill(0, count($providers), '?'));
-        $rows = DB::select(
-            "SELECT provider_slug, status, COUNT(*) AS cnt
-             FROM speed_results
-             WHERE measured_at >= NOW() - INTERVAL 24 HOUR
-               AND provider_slug IN ({$ph})
-             GROUP BY provider_slug, status",
-            $providers,
-        );
+        $rows = SpeedResult::query()
+            ->where('measured_at', '>=', now()->subHours(24))
+            ->whereIn('provider_slug', $providers)
+            ->toBase()
+            ->select(['provider_slug', 'status'])
+            ->get();
 
         $total = $registry->registerGauge('zepeed', 'speedtest_results_total', 'Result count in the last 24 hours by status', ['provider', 'status']);
         $rate = $registry->registerGauge('zepeed', 'speedtest_success_rate_percent', 'Success % in the last 24 hours', ['provider']);
@@ -96,13 +88,12 @@ class SpeedMetricsBuilderService
         /** @var array<string, array<string, int>> $byProvider */
         $byProvider = [];
 
-        foreach ($rows as $row) {
-            $slug = (string) $row->provider_slug;
-            $status = (string) $row->status;
-            $cnt = (int) $row->cnt;
-
-            $byProvider[$slug][$status] = $cnt;
-            $total->set((float) $cnt, [$slug, $status]);
+        foreach ($rows->groupBy('provider_slug') as $slug => $providerRows) {
+            foreach ($providerRows->groupBy('status') as $status => $statusRows) {
+                $cnt = $statusRows->count();
+                $byProvider[(string) $slug][(string) $status] = $cnt;
+                $total->set((float) $cnt, [(string) $slug, (string) $status]);
+            }
         }
 
         foreach ($byProvider as $slug => $counts) {
@@ -120,13 +111,11 @@ class SpeedMetricsBuilderService
      */
     private function registerProviderState(CollectorRegistry $registry, array $providers): void
     {
-        $ph = implode(',', array_fill(0, count($providers), '?'));
-        $rows = DB::select(
-            "SELECT slug, is_enabled, last_run_status,
-                    UNIX_TIMESTAMP(last_run_at) AS run_ts
-             FROM providers WHERE slug IN ({$ph})",
-            $providers,
-        );
+        $rows = Provider::query()
+            ->whereIn('slug', $providers)
+            ->toBase()
+            ->select(['slug', 'is_enabled', 'last_run_status', 'last_run_at'])
+            ->get();
 
         $enabled = $registry->registerGauge('zepeed', 'provider_enabled', '1 if the provider is enabled', ['provider']);
         $up = $registry->registerGauge('zepeed', 'provider_up', '1 if enabled AND last run was successful', ['provider']);
@@ -139,7 +128,7 @@ class SpeedMetricsBuilderService
 
             $enabled->set($isEnabled ? 1.0 : 0.0, $lbl);
             $up->set($isUp ? 1.0 : 0.0, $lbl);
-            $runTs->set($row->run_ts !== null ? (float) $row->run_ts : 0.0, $lbl);
+            $runTs->set($row->last_run_at !== null ? (float) Date::parse($row->last_run_at)->getTimestamp() : 0.0, $lbl);
         }
     }
 
@@ -150,45 +139,35 @@ class SpeedMetricsBuilderService
      */
     private function registerFailureDetails(CollectorRegistry $registry, array $providers): void
     {
-        $ph = implode(',', array_fill(0, count($providers), '?'));
-
-        $reasonRows = DB::select(
-            "SELECT provider_slug,
-                    COALESCE(failure_reason, 'unknown') AS reason,
-                    COUNT(*) AS cnt
-             FROM speed_results
-             WHERE status = 'failed'
-               AND measured_at >= NOW() - INTERVAL 24 HOUR
-               AND provider_slug IN ({$ph})
-             GROUP BY provider_slug, failure_reason",
-            $providers,
-        );
+        $reasonRows = SpeedResult::query()
+            ->where('status', 'failed')
+            ->where('measured_at', '>=', now()->subHours(24))
+            ->whereIn('provider_slug', $providers)
+            ->toBase()
+            ->select(['provider_slug', 'failure_reason'])
+            ->get();
 
         $byReason = $registry->registerGauge(
-            'zepeed', 'speedtest_failures_by_reason_total',
+            'zepeed',
+            'speedtest_failures_by_reason_total',
             'Failed result count in the last 24 hours by reason',
             ['provider', 'reason'],
         );
 
-        foreach ($reasonRows as $row) {
-            $byReason->set((float) $row->cnt, [(string) $row->provider_slug, (string) $row->reason]);
+        foreach ($reasonRows->groupBy(static fn ($r) => $r->provider_slug . '|' . ($r->failure_reason ?? 'unknown')) as $key => $group) {
+            [$slug, $reason] = explode('|', (string) $key, 2);
+            $byReason->set((float) $group->count(), [$slug, $reason]);
         }
 
-        $lastRows = DB::select(
-            "SELECT sr.provider_slug,
-                    COALESCE(sr.failure_reason, 'unknown') AS reason,
-                    UNIX_TIMESTAMP(sr.measured_at) AS measured_ts
-             FROM speed_results sr
-             INNER JOIN (
-                 SELECT provider_slug, MAX(measured_at) AS max_at
-                 FROM speed_results
-                 WHERE status = 'failed' AND provider_slug IN ({$ph})
-                 GROUP BY provider_slug
-             ) latest ON sr.provider_slug = latest.provider_slug
-                     AND sr.measured_at   = latest.max_at
-             WHERE sr.status = 'failed'",
-            $providers,
-        );
+        $lastRows = SpeedResult::query()
+            ->where('status', 'failed')
+            ->whereIn('provider_slug', $providers)
+            ->toBase()
+            ->select(['provider_slug', 'failure_reason', 'measured_at'])
+            ->latest('measured_at')
+            ->get()
+            ->groupBy('provider_slug')
+            ->map(static fn ($group) => $group->first());
 
         $lastTs = $registry->registerGauge('zepeed', 'speedtest_last_failure_timestamp', 'Unix epoch of most recent failure, 0 if none', ['provider']);
         $lastInfo = $registry->registerGauge('zepeed', 'speedtest_last_failure_info', 'Info gauge carrying the reason of the most recent failure', ['provider', 'reason']);
@@ -198,8 +177,8 @@ class SpeedMetricsBuilderService
         }
 
         foreach ($lastRows as $row) {
-            $lastTs->set((float) $row->measured_ts, [(string) $row->provider_slug]);
-            $lastInfo->set(1.0, [(string) $row->provider_slug, (string) $row->reason]);
+            $lastTs->set((float) Date::parse($row->measured_at)->getTimestamp(), [(string) $row->provider_slug]);
+            $lastInfo->set(1.0, [(string) $row->provider_slug, (string) ($row->failure_reason ?? 'unknown')]);
         }
     }
 }

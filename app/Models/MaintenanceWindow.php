@@ -45,6 +45,10 @@ class MaintenanceWindow extends Model
         'starts_at' => 'desc',
     ];
 
+    protected $attributes = [
+        'providers' => '["all"]',
+    ];
+
     protected $fillable = [
         'label',
         'type',

@@ -63,11 +63,7 @@ export interface TGeneralSettings {
 
 export interface TGeneralSettingsPageProps {
     settings: TGeneralSettings;
-    stats: TGeneralStats;
-    scheduler_jobs: TSchedulerJob[];
-    storage_tables: TStorageTable[];
     downtime_logs: TDowntimeLogPaginator;
-    retention_projections: TRetentionProjection[];
     timezones: string[];
 }
 

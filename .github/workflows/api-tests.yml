@@ -29,4 +29,4 @@ jobs:
         php artisan key:generate
 
     - name: Run API Tests
-      run: php artisan test
+      run: php artisan test --testsuite=Api
