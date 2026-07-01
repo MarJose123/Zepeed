@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\TranslatesDateFormat;
 use App\Enums\SpeedtestServer;
+use App\Models\PingResult;
+use App\Models\PingTarget;
+use App\Models\SpeedResult;
 use Carbon\CarbonImmutable;
+use Closure;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PublicMetricsDashboardController extends Controller
 {
+    use TranslatesDateFormat;
+
     public function __invoke(Request $request): Response
     {
         $range = (string) $request->query('range', '1d');
@@ -32,9 +40,9 @@ class PublicMetricsDashboardController extends Controller
             'providers'         => $providers,
             'pingTargets'       => $pingTargets,
             'speedSeries'       => $this->fetchSpeedSeries($start, $end, $granularity, $slugs),
-            'pingSeries'        => $this->pivotRaw($start, $end, $granularity, 'ping_ms', $slugs),
-            'latencySeries'     => $this->pivotRaw($start, $end, $granularity, 'ping_ms + IFNULL(jitter_ms, 0)', $slugs),
-            'jitterSeries'      => $this->pivotRaw($start, $end, $granularity, 'jitter_ms', $slugs),
+            'pingSeries'        => $this->pivotMetric($start, $end, $granularity, static fn (object $row): ?float => $row->ping_ms !== null ? (float) $row->ping_ms : null, $slugs),
+            'latencySeries'     => $this->pivotMetric($start, $end, $granularity, static fn (object $row): ?float => $row->ping_ms !== null ? (float) $row->ping_ms + (float) ($row->jitter_ms ?? 0) : null, $slugs),
+            'jitterSeries'      => $this->pivotMetric($start, $end, $granularity, static fn (object $row): ?float => $row->jitter_ms !== null ? (float) $row->jitter_ms : null, $slugs),
             'networkPingSeries' => $this->fetchNetworkPingSeries($start, $end, $granularity, $targetIds),
         ]);
     }
@@ -80,10 +88,11 @@ class PublicMetricsDashboardController extends Controller
      */
     private function fetchActiveProviders(CarbonImmutable $start, CarbonImmutable $end): array
     {
-        $slugs = DB::table('speed_results')
-            ->select('provider_slug')
+        $slugs = SpeedResult::query()
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
+            ->toBase()
+            ->select('provider_slug')
             ->distinct()
             ->pluck('provider_slug')
             ->all();
@@ -119,17 +128,13 @@ class PublicMetricsDashboardController extends Controller
         }
 
         $fmt = $this->labelFormat($granularity);
-        $rows = DB::table('speed_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
-                DB::raw('measured_at'),
-                'provider_slug',
-                DB::raw('ROUND(download_mbps, 2) as dl'),
-                DB::raw('ROUND(upload_mbps, 2) as ul'),
-            ])
+
+        $rows = SpeedResult::query()
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('provider_slug', $providerSlugs)
+            ->toBase()
+            ->select(['measured_at', 'provider_slug', 'download_mbps', 'upload_mbps'])
             ->oldest('measured_at')
             ->get();
 
@@ -141,31 +146,27 @@ class PublicMetricsDashboardController extends Controller
             $slug = (string) $row->provider_slug;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => (string) $row->label];
+                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
             }
 
-            $buckets[$key]["{$slug}_dl"] = $row->dl !== null ? (float) $row->dl : null;
-            $buckets[$key]["{$slug}_ul"] = $row->ul !== null ? (float) $row->ul : null;
+            $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;
+            $buckets[$key]["{$slug}_ul"] = $row->upload_mbps !== null ? round((float) $row->upload_mbps, 2) : null;
         }
 
         return array_values($buckets);
     }
 
     /**
-     * Individual results for a single metric expression, pivoted by provider.
-     * No averaging — every row in speed_results becomes a data point.
-     *
-     * NOTE: $metric is a trusted internal SQL expression, never user-supplied.
-     *
-     * @param string[] $providerSlugs
+     * @param string[]                      $providerSlugs
+     * @param Closure(object): (float|null) $valueResolver
      *
      * @return array<int, array<string, float|string|null>>
      */
-    private function pivotRaw(
+    private function pivotMetric(
         CarbonImmutable $start,
         CarbonImmutable $end,
         string $granularity,
-        string $metric,
+        Closure $valueResolver,
         array $providerSlugs,
     ): array {
         if ($providerSlugs === []) {
@@ -173,16 +174,13 @@ class PublicMetricsDashboardController extends Controller
         }
 
         $fmt = $this->labelFormat($granularity);
-        $rows = DB::table('speed_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
-                DB::raw('measured_at'),
-                'provider_slug',
-                DB::raw("ROUND({$metric}, 2) as value"),
-            ])
+
+        $rows = SpeedResult::query()
             ->where('status', 'success')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('provider_slug', $providerSlugs)
+            ->toBase()
+            ->select(['measured_at', 'provider_slug', 'ping_ms', 'jitter_ms'])
             ->oldest('measured_at')
             ->get();
 
@@ -193,12 +191,11 @@ class PublicMetricsDashboardController extends Controller
             $key = (string) $row->measured_at;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => (string) $row->label];
+                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
             }
 
-            $buckets[$key][(string) $row->provider_slug] = $row->value !== null
-                ? (float) $row->value
-                : null;
+            $value = $valueResolver($row);
+            $buckets[$key][(string) $row->provider_slug] = $value !== null ? round($value, 2) : null;
         }
 
         return array_values($buckets);
@@ -209,15 +206,17 @@ class PublicMetricsDashboardController extends Controller
      */
     private function fetchActivePingTargets(CarbonImmutable $start, CarbonImmutable $end): array
     {
-        return DB::table('ping_targets')
-            ->select(['ping_targets.id', 'ping_targets.label'])
-            ->join('ping_results', 'ping_results.ping_target_id', '=', 'ping_targets.id')
+        return PingTarget::query()
             ->where('ping_targets.is_enabled', true)
-            ->whereIn('ping_results.status', ['success', 'partial'])
-            ->whereNotNull('ping_results.avg_ms')
-            ->whereBetween('ping_results.measured_at', [$start, $end])
+            ->whereHas('results', static function (Builder $q) use ($start, $end): void {
+                $q->whereIn('status', ['success', 'partial'])
+                    ->whereNotNull('avg_ms')
+                    ->whereBetween('measured_at', [$start, $end]);
+            })
+            ->orderBy('label')
+            ->toBase()
+            ->select(['ping_targets.id', 'ping_targets.label'])
             ->distinct()
-            ->orderBy('ping_targets.label')
             ->get()
             ->map(static fn (object $row): array => [
                 'id'    => (string) $row->id,
@@ -245,17 +244,14 @@ class PublicMetricsDashboardController extends Controller
         }
 
         $fmt = $this->labelFormat($granularity);
-        $rows = DB::table('ping_results')
-            ->select([
-                DB::raw("DATE_FORMAT(measured_at, '{$fmt}') as label"),
-                DB::raw('measured_at'),
-                'ping_target_id',
-                DB::raw('ROUND(avg_ms, 2) as value'),
-            ])
+
+        $rows = PingResult::query()
             ->whereIn('status', ['success', 'partial'])
             ->whereNotNull('avg_ms')
             ->whereBetween('measured_at', [$start, $end])
             ->whereIn('ping_target_id', $targetIds)
+            ->toBase()
+            ->select(['measured_at', 'ping_target_id', 'avg_ms'])
             ->oldest('measured_at')
             ->get();
 
@@ -266,11 +262,11 @@ class PublicMetricsDashboardController extends Controller
             $key = (string) $row->measured_at;
 
             if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => (string) $row->label];
+                $buckets[$key] = ['label' => $this->formatDate(Date::parse($row->measured_at), $fmt)];
             }
 
-            $buckets[$key][(string) $row->ping_target_id] = $row->value !== null
-                ? (float) $row->value
+            $buckets[$key][(string) $row->ping_target_id] = $row->avg_ms !== null
+                ? round((float) $row->avg_ms, 2)
                 : null;
         }
 

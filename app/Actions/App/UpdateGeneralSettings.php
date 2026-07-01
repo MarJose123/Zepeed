@@ -5,7 +5,10 @@ namespace App\Actions\App;
 use App\Data\GeneralSettingsData;
 use App\Models\DowntimeLog;
 use App\Models\Setting;
+use App\Models\SpeedResult;
+use App\Models\WebhookDelivery;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
@@ -15,6 +18,12 @@ use Illuminate\Support\Str;
 
 final class UpdateGeneralSettings
 {
+    /** @var array<string, class-string<Model>> */
+    private const array TABLE_MODEL_MAP = [
+        'speed_results'      => SpeedResult::class,
+        'webhook_deliveries' => WebhookDelivery::class,
+    ];
+
     /**
      * Persist all general settings and apply side-effects.
      *
@@ -127,8 +136,8 @@ final class UpdateGeneralSettings
     public function stats(): array
     {
         return [
-            'total_results'         => DB::table('speed_results')->count(),
-            'results_this_week'     => DB::table('speed_results')
+            'total_results'         => SpeedResult::query()->count(),
+            'results_this_week'     => SpeedResult::query()
                 ->where('created_at', '>=', now()->subWeek())
                 ->count(),
             'db_size_mb'            => $this->totalDbSizeMb(),
@@ -260,9 +269,7 @@ final class UpdateGeneralSettings
             $result[] = [
                 'name'      => $table,
                 '_bytes'    => $byteMap[$table] ?? 0,
-                'row_count' => Schema::hasTable($table)
-                    ? (int) DB::table($table)->count()
-                    : 0,
+                'row_count' => self::tableRowCount($table),
             ];
         }
 
@@ -292,9 +299,7 @@ final class UpdateGeneralSettings
             $result[] = [
                 'name'      => $table,
                 '_bytes'    => 0,
-                'row_count' => Schema::hasTable($table)
-                    ? (int) DB::table($table)->count()
-                    : 0,
+                'row_count' => self::tableRowCount($table),
             ];
         }
 
@@ -314,13 +319,13 @@ final class UpdateGeneralSettings
         return [
             [
                 'table'        => 'speed_results',
-                'current_rows' => (int) DB::table('speed_results')->count(),
+                'current_rows' => SpeedResult::query()->count(),
                 'max_rows'     => $resultDays * 536,
                 'window_days'  => $resultDays,
             ],
             [
                 'table'        => 'webhook_deliveries',
-                'current_rows' => (int) DB::table('webhook_deliveries')->count(),
+                'current_rows' => WebhookDelivery::query()->count(),
                 'max_rows'     => $webhookDays * 400,
                 'window_days'  => $webhookDays,
             ],
@@ -396,13 +401,6 @@ final class UpdateGeneralSettings
                     $driver,
                 ) / 1_048_576,
             ),
-            'sqlite' => (static function (): int {
-                $path = database_path('database.sqlite');
-
-                return file_exists($path)
-                    ? (int) round(filesize($path) / 1_048_576)
-                    : 0;
-            })(),
             'pgsql' => (static function (): int {
                 /** @var object|null $row */
                 $row = DB::selectOne(
@@ -414,5 +412,18 @@ final class UpdateGeneralSettings
             })(),
             default => 0,
         };
+    }
+
+    private static function tableRowCount(string $table): int
+    {
+        if (! Schema::hasTable($table)) {
+            return 0;
+        }
+
+        $model = self::TABLE_MODEL_MAP[$table] ?? null;
+
+        return $model !== null
+            ? (int) $model::query()->count()
+            : (int) DB::table($table)->count();
     }
 }

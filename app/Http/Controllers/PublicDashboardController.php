@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\TranslatesDateFormat;
 use App\Models\AlertRule;
 use App\Models\PingResult;
 use App\Models\Provider;
 use App\Models\SpeedResult;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PublicDashboardController extends Controller
 {
+    use TranslatesDateFormat;
+
     public function __invoke(): Response
     {
         $stats = [
@@ -29,28 +32,24 @@ class PublicDashboardController extends Controller
         ];
 
         /** @var array<int, array{label: string, download: float, upload: float, ping: float}> $trend */
-        $trend = DB::table('speed_results')
-            ->select([
-                DB::raw('DATE_FORMAT(measured_at, "%Y-%m-%d %H:00:00") as hour_bucket'),
-                DB::raw('ROUND(AVG(download_mbps), 1) as download'),
-                DB::raw('ROUND(AVG(upload_mbps), 1) as upload'),
-                DB::raw('ROUND(AVG(ping_ms), 1) as ping'),
-            ])
+        $trend = SpeedResult::query()
             ->where('measured_at', '>=', now()->subHours(24))
-            ->groupBy('hour_bucket')
-            ->orderBy('hour_bucket')
-            ->get()
-            ->map(static fn (object $row): array => [
-                'label'    => (string) $row->hour_bucket,
-                'download' => (float) $row->download,
-                'upload'   => (float) $row->upload,
-                'ping'     => (float) $row->ping,
+            ->toBase()
+            ->get(['measured_at', 'download_mbps', 'upload_mbps', 'ping_ms'])
+            ->groupBy(fn (object $row): string => $this->formatDate(Date::parse($row->measured_at), '%Y-%m-%d %H:00:00'))
+            ->sortKeys()
+            ->map(static fn (object $rows, string $bucket): array => [
+                'label'    => $bucket,
+                'download' => round((float) $rows->avg('download_mbps'), 1),
+                'upload'   => round((float) $rows->avg('upload_mbps'), 1),
+                'ping'     => round((float) $rows->avg('ping_ms'), 1),
             ])
             ->values()
             ->all();
 
         /** @var array<int, array{id: string, provider_name: string, download_mbps: float|null, upload_mbps: float|null, ping_ms: float|null, jitter_ms: float|null, measured_at: string}> $recentResults */
-        $recentResults = DB::table('speed_results')
+        $recentResults = SpeedResult::query()
+            ->toBase()
             ->select([
                 'speed_results.id',
                 'speed_results.download_mbps',
@@ -58,7 +57,8 @@ class PublicDashboardController extends Controller
                 'speed_results.ping_ms',
                 'speed_results.jitter_ms',
                 'speed_results.measured_at',
-                DB::raw('COALESCE(providers.name, speed_results.provider_slug) as provider_name'),
+                'speed_results.provider_slug',
+                'providers.name as provider_display_name',
             ])
             ->leftJoin('providers', 'providers.slug', '=', 'speed_results.provider_slug')
             ->latest('speed_results.measured_at')
@@ -66,7 +66,7 @@ class PublicDashboardController extends Controller
             ->get()
             ->map(static fn (object $row): array => [
                 'id'            => (string) $row->id,
-                'provider_name' => (string) $row->provider_name,
+                'provider_name' => (string) ($row->provider_display_name ?? $row->provider_slug),
                 'download_mbps' => $row->download_mbps !== null ? (float) $row->download_mbps : null,
                 'upload_mbps'   => $row->upload_mbps !== null ? (float) $row->upload_mbps : null,
                 'ping_ms'       => $row->ping_ms !== null ? (float) $row->ping_ms : null,

@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\TranslatesDateFormat;
 use App\Http\Requests\PingResultIndexRequest;
 use App\Http\Resources\PingResultResource;
 use App\Http\Resources\PingTargetResource;
 use App\Models\PingResult;
 use App\Models\PingTarget;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PingResultController extends Controller
 {
+    use TranslatesDateFormat;
+
     public function index(PingResultIndexRequest $request): Response
     {
         $validated = $request->validated();
@@ -106,33 +109,27 @@ class PingResultController extends Controller
             return [];
         }
 
-        /** @var array<int, object{ping_target_id: string, bucket: string, avg_ms: string|null, packet_loss: string|null}> $rows */
-        $rows = DB::table('ping_results')
-            ->selectRaw('ping_target_id')
-            ->selectRaw("DATE_FORMAT(measured_at, '{$format}') as bucket")
-            ->selectRaw('AVG(avg_ms) as avg_ms')
-            ->selectRaw('AVG(packet_loss_percent) as packet_loss')
+        $rows = PingResult::query()
             ->where('measured_at', '>=', now()->subHours($hours))
             ->whereIn('ping_target_id', $activeTargets->pluck('id')->all())
-            ->groupByRaw("ping_target_id, DATE_FORMAT(measured_at, '{$format}')")
-            ->orderBy('bucket')
-            ->get()
-            ->all();
+            ->toBase()
+            ->select(['ping_target_id', 'measured_at', 'avg_ms', 'packet_loss_percent'])
+            ->get();
 
-        // Collect all unique buckets and build a lookup: bucket → targetId → values
+        /** @var array<string, array<string, mixed>> $bucketMap */
         $bucketMap = [];
 
-        foreach ($rows as $row) {
-            $bucket = (string) $row->bucket;
-            $targetId = (string) $row->ping_target_id;
+        $grouped = $rows->groupBy(fn (object $row): string => $row->ping_target_id . '|' . $this->formatDate(Date::parse($row->measured_at), $format));
 
-            if (! isset($bucketMap[$bucket])) {
-                $bucketMap[$bucket] = [];
-            }
+        foreach ($grouped as $group) {
+            $first = $group->first();
+            $bucket = $this->formatDate(Date::parse($first->measured_at), $format);
+            $targetId = (string) $first->ping_target_id;
 
+            $bucketMap[$bucket] ??= [];
             $bucketMap[$bucket][$targetId] = [
-                'avg_ms' => $row->avg_ms !== null ? round((float) $row->avg_ms, 2) : null,
-                'loss'   => $row->packet_loss !== null ? round((float) $row->packet_loss, 2) : null,
+                'avg_ms' => ($avg = $group->avg('avg_ms')) !== null ? round((float) $avg, 2) : null,
+                'loss'   => ($loss = $group->avg('packet_loss_percent')) !== null ? round((float) $loss, 2) : null,
             ];
         }
 
