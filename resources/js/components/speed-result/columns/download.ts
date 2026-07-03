@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/vue-table";
 import { h } from "vue";
 import { Badge } from "@/components/ui/badge";
+import { providerIcon } from "@/composables/useProviderIcon";
 import type { TSpeedResult } from "@/types/speed-result";
 
 const ACCENT = "oklch(0.52 0.17 155)";
@@ -48,9 +49,14 @@ export const downloadColumns: ColumnDef<TSpeedResult>[] = [
         accessorKey: "provider_name",
         header: "Provider",
         cell: ({ row }) =>
-            h(Badge, { variant: "outline", class: "text-xs" }, () =>
-                row.getValue("provider_name"),
-            ),
+            h("div", { class: "flex items-center gap-1.5" }, [
+                h(providerIcon(row.original.provider_slug), {
+                    class: "size-3.5 shrink-0 text-muted-foreground",
+                }),
+                h(Badge, { variant: "outline", class: "text-xs" }, () =>
+                    row.getValue("provider_name"),
+                ),
+            ]),
     },
     {
         accessorKey: "download",

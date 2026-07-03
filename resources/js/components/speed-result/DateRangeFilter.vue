@@ -140,20 +140,20 @@ function clear(): void {
             </Button>
         </PopoverTrigger>
 
-        <PopoverContent class="w-85 p-0" align="start">
+        <PopoverContent class="w-150 p-0" align="start">
             <Tabs v-model="mode" class="w-full gap-0">
                 <TabsList
                     class="h-auto w-full rounded-none border-b bg-transparent p-0"
                 >
                     <TabsTrigger
                         value="single"
-                        class="flex-1 rounded-none py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
+                        class="flex-1 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent py-2 text-muted-foreground shadow-none transition-colors hover:bg-transparent hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:bg-transparent"
                     >
                         Single day
                     </TabsTrigger>
                     <TabsTrigger
                         value="range"
-                        class="flex-1 rounded-none py-2 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
+                        class="flex-1 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent py-2 text-muted-foreground shadow-none transition-colors hover:bg-transparent hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:bg-transparent"
                     >
                         Range
                     </TabsTrigger>
@@ -170,7 +170,11 @@ function clear(): void {
                             :active-key="activePresetKey"
                             @select="selectPreset"
                         />
-                        <RangeCalendar v-model="range as any" class="p-0" />
+                        <RangeCalendar
+                            v-model="range as any"
+                            :number-of-months="2"
+                            class="p-0"
+                        />
                     </TabsContent>
 
                     <div class="flex justify-end gap-2 border-t pt-2">

@@ -33,6 +33,13 @@ watch(provider, (value) => {
         { preserveScroll: true, preserveState: true, replace: true },
     );
 });
+
+watch(
+    () => props.filters.provider,
+    (value) => {
+        provider.value = value ?? "all";
+    },
+);
 </script>
 
 <template>

@@ -66,7 +66,7 @@ final class SpeedResultController extends Controller
     {
         $validated = $request->validated();
 
-        $perPage = (int) ($validated['per_page'] ?? 25);
+        $perPage = (int) ($validated['per_page'] ?? 10);
         $provider = $validated['provider'] ?? null;
         $sort = $validated['sort'] ?? null;
         $direction = $validated['direction'] ?? 'desc';

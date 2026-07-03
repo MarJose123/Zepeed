@@ -45,13 +45,11 @@ const perPage = computed<string>({
 </script>
 
 <template>
-    <div
-        class="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3"
-    >
+    <div class="grid grid-cols-3 items-center gap-3 border-t px-4 py-3">
         <div class="flex items-center gap-2">
             <p class="text-[11px] text-muted-foreground">Rows per page</p>
             <Select v-model="perPage">
-                <SelectTrigger size="sm" class="h-7 w-[70px] text-xs">
+                <SelectTrigger size="sm" class="h-7 w-17.5 text-xs">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -63,23 +61,19 @@ const perPage = computed<string>({
             </Select>
         </div>
 
-        <div class="flex items-center gap-4">
-            <p class="text-[11px] text-muted-foreground">
-                Showing
-                <span class="font-medium text-foreground">{{
-                    meta.from ?? 0
-                }}</span>
-                –
-                <span class="font-medium text-foreground">{{
-                    meta.to ?? 0
-                }}</span>
-                of
-                <span class="font-medium text-foreground">{{
-                    meta.total
-                }}</span>
-                results
-            </p>
+        <p class="justify-self-center text-[11px] text-muted-foreground">
+            Showing
+            <span class="font-medium text-foreground">{{
+                meta.from ?? 0
+            }}</span>
+            –
+            <span class="font-medium text-foreground">{{ meta.to ?? 0 }}</span>
+            of
+            <span class="font-medium text-foreground">{{ meta.total }}</span>
+            results
+        </p>
 
+        <div class="justify-self-end">
             <Pagination
                 v-model:page="currentPage"
                 :total="meta.total"

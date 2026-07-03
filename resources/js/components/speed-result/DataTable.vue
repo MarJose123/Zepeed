@@ -89,10 +89,7 @@ function toggleSort(sortKey: TSpeedResultSortKey): void {
 
 <template>
     <div>
-        <div
-            v-if="$slots.toolbar"
-            class="flex items-center justify-end gap-2 py-4"
-        >
+        <div v-if="$slots.toolbar" class="flex items-center gap-2 py-4">
             <slot name="toolbar" />
         </div>
 
