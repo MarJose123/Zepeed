@@ -23,6 +23,11 @@ export const downloadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
+        meta: {
+            sortable: true,
+            sortKey: "measured_at",
+            sortLabel: "Timestamp",
+        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -55,7 +60,13 @@ export const downloadColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "↓ Download",
             ),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "text-right",
+            cellClass: "text-right",
+            sortable: true,
+            sortKey: "download_mbps",
+            sortLabel: "Download",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number>("download") ?? 0;
             const cls = metricClass(v);

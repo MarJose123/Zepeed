@@ -6,20 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class SpeedResultIndexRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            'provider' => ['nullable', 'string', 'exists:speed_results,provider_slug'],
-            'month'    => ['nullable', 'string', 'regex:/^\d{4}-\d{2}$/'],
-            'per_page' => ['nullable', 'integer', 'in:10,25,50,100'],
+            'provider'   => ['nullable', 'string', 'exists:speed_results,provider_slug'],
+            'per_page'   => ['nullable', 'integer', 'in:10,25,50,100'],
+            'sort'       => ['nullable', 'string', 'in:measured_at,download_mbps,upload_mbps,ping_ms,jitter_ms'],
+            'direction'  => ['nullable', 'string', 'in:asc,desc'],
+            'date'       => ['nullable', 'date_format:Y-m-d', 'prohibits:date_from,date_to'],
+            'date_from'  => ['nullable', 'date_format:Y-m-d', 'prohibits:date'],
+            'date_to'    => ['nullable', 'date_format:Y-m-d', 'prohibits:date', 'after_or_equal:date_from'],
         ];
     }
 }

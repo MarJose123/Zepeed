@@ -2,6 +2,7 @@
 import { Head } from "@inertiajs/vue3";
 import { latencyColumns } from "@/components/speed-result/columns/latency";
 import DataTable from "@/components/speed-result/DataTable.vue";
+import DateRangeFilter from "@/components/speed-result/DateRangeFilter.vue";
 import ResultsFilter from "@/components/speed-result/ResultsFilter.vue";
 import ResultsStatCards from "@/components/speed-result/ResultsStatCards.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -22,6 +23,7 @@ defineProps<{
 }>();
 
 const ACCENT = "oklch(0.48 0.22 305)";
+const ROUTE_NAME = "speedtest.results.latency";
 </script>
 
 <template>
@@ -29,11 +31,8 @@ const ACCENT = "oklch(0.48 0.22 305)";
 
     <AppLayout
         :breadcrumbs="[
-            {
-                title: 'Speedtest Result',
-                href: '#',
-            },
-            { title: 'Ping Latency', href: route('speedtest.results.latency') },
+            { title: 'Speedtest Result', href: '#' },
+            { title: 'Ping Latency', href: route(ROUTE_NAME) },
         ]"
     >
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -55,13 +54,22 @@ const ACCENT = "oklch(0.48 0.22 305)";
                 :accent-var="ACCENT"
             />
 
-            <DataTable :columns="latencyColumns" :results="results">
+            <DataTable
+                :columns="latencyColumns"
+                :results="results"
+                :filters="filters"
+                :route-name="ROUTE_NAME"
+            >
                 <template #toolbar>
                     <ResultsFilter
                         :providers="providers"
+                        :filters="filters"
+                        :route-name="ROUTE_NAME"
+                    />
+                    <DateRangeFilter
                         :months="months"
                         :filters="filters"
-                        route-name="speedtest.results.ping"
+                        :route-name="ROUTE_NAME"
                     />
                 </template>
             </DataTable>

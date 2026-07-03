@@ -23,6 +23,11 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
+        meta: {
+            sortable: true,
+            sortKey: "measured_at",
+            sortLabel: "Timestamp",
+        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -55,7 +60,13 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "◎ Ping",
             ),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "text-right",
+            cellClass: "text-right",
+            sortable: true,
+            sortKey: "ping_ms",
+            sortLabel: "Ping",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number>("ping") ?? 0;
             const cls = metricClass(v);
@@ -81,7 +92,13 @@ export const latencyColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "jitter",
         header: () => h("div", { class: "text-right" }, "Jitter"),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "text-right",
+            cellClass: "text-right",
+            sortable: true,
+            sortKey: "jitter_ms",
+            sortLabel: "Jitter",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number | null>("jitter");
 

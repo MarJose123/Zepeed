@@ -23,6 +23,11 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
+        meta: {
+            sortable: true,
+            sortKey: "measured_at",
+            sortLabel: "Timestamp",
+        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -55,7 +60,13 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "↑ Upload",
             ),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "text-right",
+            cellClass: "text-right",
+            sortable: true,
+            sortKey: "upload_mbps",
+            sortLabel: "Upload",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number>("upload") ?? 0;
             const cls = metricClass(v);

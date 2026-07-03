@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { Card, CardContent } from "@/components/ui/card";
+import {
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    Gauge,
+    ShieldAlert,
+    TrendingDown,
+    TrendingUp,
+} from "@lucide/vue";
+import { computed } from "vue";
+import StatCard from "@/components/speed-result/StatCard.vue";
 import type { TSpeedResultStats } from "@/types/speed-result";
 
 const props = defineProps<{
@@ -8,105 +17,85 @@ const props = defineProps<{
     accentVar: string;
 }>();
 
-const unit = props.metric === "ping" ? "ms" : "Mbps";
+const unit = computed(() => (props.metric === "ping" ? "ms" : "Mbps"));
+const metricLabel = computed(() => {
+    if (props.metric === "download") return "Download";
+
+    if (props.metric === "upload") return "Upload";
+
+    return "Ping";
+});
+
+const primaryIcon = computed(() => {
+    if (props.metric === "download") return ArrowDownToLine;
+
+    if (props.metric === "upload") return ArrowUpFromLine;
+
+    return Gauge;
+});
+
+const isPing = computed(() => props.metric === "ping");
+const bestValue = computed(() =>
+    isPing.value ? props.stats.best : props.stats.peak,
+);
+const worstValue = computed(() =>
+    isPing.value ? props.stats.worst : props.stats.lowest,
+);
+
+const cards = computed(() => [
+    {
+        label: `Average ${metricLabel.value}`,
+        value: props.stats.average,
+        unit: unit.value,
+        subLabel: `across ${props.stats.total} tests`,
+        icon: primaryIcon.value,
+        tone: "accent" as const,
+    },
+    {
+        label: isPing.value
+            ? "Best (lowest) Ping"
+            : `Peak ${metricLabel.value}`,
+        value: bestValue.value,
+        unit: unit.value,
+        subLabel: "best recorded value",
+        icon: isPing.value ? TrendingDown : TrendingUp,
+        tone: "success" as const,
+    },
+    {
+        label: isPing.value
+            ? "Worst (highest) Ping"
+            : `Lowest ${metricLabel.value}`,
+        value: worstValue.value,
+        unit: unit.value,
+        subLabel: isPing.value
+            ? "highest recorded value"
+            : "lowest recorded value",
+        icon: isPing.value ? TrendingUp : TrendingDown,
+        tone: "destructive" as const,
+    },
+    {
+        label: props.stats.threshold_label,
+        value: props.stats.threshold_count,
+        unit: "tests",
+        subLabel: `${props.stats.threshold_pct}% of total tests`,
+        icon: ShieldAlert,
+        tone: "warning" as const,
+    },
+]);
 </script>
 
 <template>
-    <div class="grid grid-cols-4 gap-4">
-        <Card class="border-l-[3px]" :style="`border-left-color:${accentVar}`">
-            <CardContent class="p-4">
-                <p
-                    class="text-xs text-muted-foreground mb-1 flex items-center gap-1.5"
-                >
-                    <span
-                        class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                        :style="`background:${accentVar}`"
-                    />
-                    Average
-                </p>
-                <p
-                    class="text-2xl font-bold tracking-tight"
-                    :style="`color:${accentVar}`"
-                >
-                    {{ stats.average ?? "—"
-                    }}<span
-                        class="text-xs font-normal text-muted-foreground ml-1"
-                        >{{ unit }}</span
-                    >
-                </p>
-                <p class="text-[11px] text-muted-foreground mt-1">
-                    across {{ stats.total }} tests
-                </p>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardContent class="p-4">
-                <p
-                    class="text-xs text-muted-foreground mb-1 flex items-center gap-1.5"
-                >
-                    <span
-                        class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                        :style="`background:${accentVar}`"
-                    />
-                    {{ metric === "ping" ? "Best (lowest)" : "Peak" }}
-                </p>
-                <p
-                    class="text-2xl font-bold tracking-tight"
-                    :style="`color:${accentVar}`"
-                >
-                    {{ (metric === "ping" ? stats.best : stats.peak) ?? "—"
-                    }}<span
-                        class="text-xs font-normal text-muted-foreground ml-1"
-                        >{{ unit }}</span
-                    >
-                </p>
-                <p class="text-[11px] text-muted-foreground mt-1">&nbsp;</p>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardContent class="p-4">
-                <p
-                    class="text-xs text-muted-foreground mb-1 flex items-center gap-1.5"
-                >
-                    <span
-                        class="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-destructive"
-                    />
-                    {{ metric === "ping" ? "Worst (highest)" : "Lowest" }}
-                </p>
-                <p class="text-2xl font-bold tracking-tight text-destructive">
-                    {{ (metric === "ping" ? stats.worst : stats.lowest) ?? "—"
-                    }}<span
-                        class="text-xs font-normal text-muted-foreground ml-1"
-                        >{{ unit }}</span
-                    >
-                </p>
-                <p class="text-[11px] text-muted-foreground mt-1">&nbsp;</p>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardContent class="p-4">
-                <p
-                    class="text-xs text-muted-foreground mb-1 flex items-center gap-1.5"
-                >
-                    <span
-                        class="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-amber-500"
-                    />
-                    {{ stats.threshold_label }}
-                </p>
-                <p class="text-2xl font-bold tracking-tight text-amber-500">
-                    {{ stats.threshold_count
-                    }}<span
-                        class="text-xs font-normal text-muted-foreground ml-1"
-                        >tests</span
-                    >
-                </p>
-                <p class="text-[11px] text-muted-foreground mt-1">
-                    {{ stats.threshold_pct }}% of total
-                </p>
-            </CardContent>
-        </Card>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+            v-for="card in cards"
+            :key="card.label"
+            :label="card.label"
+            :value="card.value"
+            :unit="card.unit"
+            :sub-label="card.subLabel"
+            :icon="card.icon"
+            :tone="card.tone"
+            :accent-var="accentVar"
+        />
     </div>
 </template>

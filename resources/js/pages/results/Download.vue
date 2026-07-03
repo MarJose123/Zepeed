@@ -2,6 +2,7 @@
 import { Head } from "@inertiajs/vue3";
 import { downloadColumns } from "@/components/speed-result/columns/download";
 import DataTable from "@/components/speed-result/DataTable.vue";
+import DateRangeFilter from "@/components/speed-result/DateRangeFilter.vue";
 import ResultsFilter from "@/components/speed-result/ResultsFilter.vue";
 import ResultsStatCards from "@/components/speed-result/ResultsStatCards.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -22,6 +23,7 @@ defineProps<{
 }>();
 
 const ACCENT = "oklch(0.52 0.17 155)";
+const ROUTE_NAME = "speedtest.results.download";
 </script>
 
 <template>
@@ -30,10 +32,7 @@ const ACCENT = "oklch(0.52 0.17 155)";
     <AppLayout
         :breadcrumbs="[
             { title: 'Speedtest Result', href: '#' },
-            {
-                title: 'Download Results',
-                href: route('speedtest.results.download'),
-            },
+            { title: 'Download Results', href: route(ROUTE_NAME) },
         ]"
     >
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -55,13 +54,22 @@ const ACCENT = "oklch(0.52 0.17 155)";
                 :accent-var="ACCENT"
             />
 
-            <DataTable :columns="downloadColumns" :results="results">
+            <DataTable
+                :columns="downloadColumns"
+                :results="results"
+                :filters="filters"
+                :route-name="ROUTE_NAME"
+            >
                 <template #toolbar>
                     <ResultsFilter
                         :providers="providers"
+                        :filters="filters"
+                        :route-name="ROUTE_NAME"
+                    />
+                    <DateRangeFilter
                         :months="months"
                         :filters="filters"
-                        route-name="speedtest.results.download"
+                        :route-name="ROUTE_NAME"
                     />
                 </template>
             </DataTable>
