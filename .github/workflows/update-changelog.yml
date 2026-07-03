@@ -61,7 +61,7 @@ jobs:
           release-notes: ${{ steps.release.outputs.body }}
 
       - name: Commit updated CHANGELOG
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@v7.1.0
         with:
           branch: ${{ env.BRANCH_NAME }}
           commit_message: "chore: update changelog for ${{ steps.release.outputs.version }}"
