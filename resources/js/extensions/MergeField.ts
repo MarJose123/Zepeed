@@ -1,8 +1,14 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { PluginKey } from "@tiptap/pm/state";
 import Suggestion from "@tiptap/suggestion";
+import type { SuggestionOptions } from "@tiptap/suggestion";
 
-export const MergeField = Node.create({
+export interface MergeFieldOptions {
+    HTMLAttributes: Record<string, unknown>;
+    suggestion: Omit<SuggestionOptions, "editor">;
+}
+
+export const MergeField = Node.create<MergeFieldOptions>({
     name: "mergeField",
     group: "inline",
     inline: true,
