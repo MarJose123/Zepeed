@@ -31,10 +31,21 @@ export interface TSpeedResultStats {
     total: number;
 }
 
+export type TSpeedResultSortKey =
+    | "measured_at"
+    | "download_mbps"
+    | "upload_mbps"
+    | "ping_ms"
+    | "jitter_ms";
+
 export interface TSpeedResultFilters {
     provider: string | null;
-    month: string | null;
     per_page: number;
+    sort: TSpeedResultSortKey | null;
+    direction: "asc" | "desc" | null;
+    date: string | null;
+    date_from: string | null;
+    date_to: string | null;
 }
 
 export interface TProviderOption {

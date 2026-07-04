@@ -1,14 +1,19 @@
 <script setup lang="ts" generic="TData, TValue">
-import { Link } from "@inertiajs/vue3";
-import type { ColumnDef, SortingState } from "@tanstack/vue-table";
+import { router } from "@inertiajs/vue3";
+import { Inbox } from "@lucide/vue";
+import type { ColumnDef } from "@tanstack/vue-table";
+import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
+import { onMounted, onUnmounted, ref } from "vue";
+import ResultsPagination from "@/components/speed-result/ResultsPagination.vue";
+import SortableTableHead from "@/components/speed-result/SortableTableHead.vue";
 import {
-    FlexRender,
-    getCoreRowModel,
-    getSortedRowModel,
-    useVueTable,
-} from "@tanstack/vue-table";
-import { ref } from "vue";
-import { Button } from "@/components/ui/button";
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
 import {
     Table,
     TableBody,
@@ -17,15 +22,36 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { valueUpdater } from "@/components/ui/table/utils";
 import type { TPagedResource } from "@/types";
+import type {
+    TSpeedResultFilters,
+    TSpeedResultSortKey,
+} from "@/types/speed-result";
 
 const props = defineProps<{
     columns: ColumnDef<TData, TValue>[];
     results: TPagedResource<TData>;
+    filters: TSpeedResultFilters;
+    routeName: string;
 }>();
 
-const sorting = ref<SortingState>([]);
+const isNavigating = ref(false);
+let stopStart: (() => void) | undefined;
+let stopFinish: (() => void) | undefined;
+
+onMounted(() => {
+    stopStart = router.on("start", () => {
+        isNavigating.value = true;
+    });
+    stopFinish = router.on("finish", () => {
+        isNavigating.value = false;
+    });
+});
+
+onUnmounted(() => {
+    stopStart?.();
+    stopFinish?.();
+});
 
 const table = useVueTable({
     get data() {
@@ -35,25 +61,53 @@ const table = useVueTable({
         return props.columns;
     },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-    state: {
-        get sorting() {
-            return sorting.value;
-        },
-    },
+    manualSorting: true,
 });
+
+function toggleSort(sortKey: TSpeedResultSortKey): void {
+    let nextSort: TSpeedResultSortKey | null = sortKey;
+    let nextDirection: "asc" | "desc" | null = "asc";
+
+    if (props.filters.sort === sortKey) {
+        nextDirection = props.filters.direction === "asc" ? "desc" : null;
+        nextSort = nextDirection === null ? null : sortKey;
+    }
+
+    router.get(
+        route(props.routeName),
+        {
+            ...props.filters,
+            sort: nextSort ?? undefined,
+            direction: nextDirection ?? undefined,
+            page: undefined,
+        },
+        { preserveScroll: true, preserveState: true, replace: true },
+    );
+}
 </script>
 
 <template>
     <div>
-        <div v-if="$slots.toolbar" class="flex items-center justify-end py-4">
+        <div v-if="$slots.toolbar" class="flex items-center gap-2 py-4">
             <slot name="toolbar" />
         </div>
 
-        <div class="rounded-md border">
-            <Table>
+        <div class="relative rounded-md border">
+            <div
+                v-if="isNavigating"
+                class="absolute right-4 top-3 z-10 flex items-center gap-2 text-xs text-muted-foreground"
+            >
+                <Spinner class="size-3.5" /> Updating…
+            </div>
+
+            <Table
+                :class="
+                    isNavigating
+                        ? 'pointer-events-none opacity-50 transition-opacity'
+                        : 'transition-opacity'
+                "
+            >
                 <TableHeader>
                     <TableRow
                         v-for="headerGroup in table.getHeaderGroups()"
@@ -64,8 +118,28 @@ const table = useVueTable({
                             :key="header.id"
                             :class="header.column.columnDef.meta?.headerClass"
                         >
+                            <SortableTableHead
+                                v-if="header.column.columnDef.meta?.sortable"
+                                :label="
+                                    header.column.columnDef.meta.sortLabel ??
+                                    String(header.column.columnDef.header)
+                                "
+                                :sort-key="
+                                    header.column.columnDef.meta.sortKey!
+                                "
+                                :current-sort="filters.sort"
+                                :current-direction="filters.direction"
+                                :align="
+                                    header.column.columnDef.meta.headerClass?.includes(
+                                        'text-right',
+                                    )
+                                        ? 'right'
+                                        : 'left'
+                                "
+                                @toggle="toggleSort"
+                            />
                             <FlexRender
-                                v-if="!header.isPlaceholder"
+                                v-else-if="!header.isPlaceholder"
                                 :render="header.column.columnDef.header"
                                 :props="header.getContext()"
                             />
@@ -78,9 +152,6 @@ const table = useVueTable({
                         <TableRow
                             v-for="row in table.getRowModel().rows"
                             :key="row.id"
-                            :data-state="
-                                row.getIsSelected() ? 'selected' : undefined
-                            "
                         >
                             <TableCell
                                 v-for="cell in row.getVisibleCells()"
@@ -96,63 +167,29 @@ const table = useVueTable({
                     </template>
 
                     <TableRow v-else>
-                        <TableCell
-                            :colspan="columns.length"
-                            class="h-24 text-center"
-                        >
-                            No results found for the selected filters.
+                        <TableCell :colspan="columns.length" class="h-64 p-0">
+                            <Empty class="border-none">
+                                <EmptyHeader>
+                                    <EmptyMedia variant="icon"
+                                        ><Inbox class="size-6"
+                                    /></EmptyMedia>
+                                    <EmptyTitle>No results found</EmptyTitle>
+                                    <EmptyDescription>
+                                        Try adjusting the provider or date
+                                        filters to see more results.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
                         </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
-        </div>
 
-        <div class="flex items-center justify-between py-4">
-            <p class="text-sm text-muted-foreground">
-                Showing
-                <span class="font-medium text-foreground">{{
-                    results.meta.from ?? 0
-                }}</span>
-                –
-                <span class="font-medium text-foreground">{{
-                    results.meta.to ?? 0
-                }}</span>
-                of
-                <span class="font-medium text-foreground">{{
-                    results.meta.total
-                }}</span>
-                results
-            </p>
-            <div class="flex gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :disabled="!results.links.prev"
-                >
-                    <Link
-                        v-if="results.links.prev"
-                        :href="results.links.prev"
-                        preserve-scroll
-                    >
-                        Previous
-                    </Link>
-                    <span v-else>Previous</span>
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    :disabled="!results.links.next"
-                >
-                    <Link
-                        v-if="results.links.next"
-                        :href="results.links.next"
-                        preserve-scroll
-                    >
-                        Next
-                    </Link>
-                    <span v-else>Next</span>
-                </Button>
-            </div>
+            <ResultsPagination
+                :meta="results.meta"
+                :filters="filters"
+                :route-name="routeName"
+            />
         </div>
     </div>
 </template>

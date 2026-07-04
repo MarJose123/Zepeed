@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/vue-table";
 import { h } from "vue";
 import { Badge } from "@/components/ui/badge";
+import { providerIcon } from "@/composables/useProviderIcon";
 import type { TSpeedResult } from "@/types/speed-result";
 
 const ACCENT = "oklch(0.48 0.19 260)";
@@ -23,6 +24,11 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
     {
         accessorKey: "measured_at",
         header: "Timestamp",
+        meta: {
+            sortable: true,
+            sortKey: "measured_at",
+            sortLabel: "Timestamp",
+        },
         cell: ({ row }) =>
             h(
                 "span",
@@ -43,9 +49,14 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
         accessorKey: "provider_name",
         header: "Provider",
         cell: ({ row }) =>
-            h(Badge, { variant: "outline", class: "text-xs" }, () =>
-                row.getValue("provider_name"),
-            ),
+            h("div", { class: "flex items-center gap-1.5" }, [
+                h(providerIcon(row.original.provider_slug), {
+                    class: "size-3.5 shrink-0 text-muted-foreground",
+                }),
+                h(Badge, { variant: "outline", class: "text-xs" }, () =>
+                    row.getValue("provider_name"),
+                ),
+            ]),
     },
     {
         accessorKey: "upload",
@@ -55,7 +66,13 @@ export const uploadColumns: ColumnDef<TSpeedResult>[] = [
                 { class: "text-right", style: `color:${ACCENT}` },
                 "↑ Upload",
             ),
-        meta: { headerClass: "text-right", cellClass: "text-right" },
+        meta: {
+            headerClass: "text-right",
+            cellClass: "text-right",
+            sortable: true,
+            sortKey: "upload_mbps",
+            sortLabel: "Upload",
+        },
         cell: ({ row }) => {
             const v = row.getValue<number>("upload") ?? 0;
             const cls = metricClass(v);

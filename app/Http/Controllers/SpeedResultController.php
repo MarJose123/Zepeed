@@ -12,6 +12,14 @@ use Inertia\Response;
 
 final class SpeedResultController extends Controller
 {
+    /**
+     * Columns permitted for sorting, prefixed against the base table to
+     * avoid ambiguity with the joined `providers` table.
+     *
+     * @var list<string>
+     */
+    private const array SORTABLE_COLUMNS = ['measured_at', 'download_mbps', 'upload_mbps', 'ping_ms', 'jitter_ms'];
+
     public function download(SpeedResultIndexRequest $request): Response
     {
         [$results, $providers, $months, $filters, $stats] = $this->resolve($request, 'download');
@@ -58,23 +66,32 @@ final class SpeedResultController extends Controller
     {
         $validated = $request->validated();
 
-        $perPage = (int) ($validated['per_page'] ?? 25);
+        $perPage = (int) ($validated['per_page'] ?? 10);
         $provider = $validated['provider'] ?? null;
-        $month = $validated['month'] ?? null;
+        $sort = $validated['sort'] ?? null;
+        $direction = $validated['direction'] ?? 'desc';
+        $date = $validated['date'] ?? null;
+        $dateFrom = $validated['date_from'] ?? null;
+        $dateTo = $validated['date_to'] ?? null;
 
         $baseQuery = SpeedResult::query()
             ->select('speed_results.*', 'providers.name as provider_name')
             ->leftJoin('providers', 'providers.slug', '=', 'speed_results.provider_slug')
             ->where('speed_results.status', 'success')
             ->when($provider, static fn ($q) => $q->where('speed_results.provider_slug', $provider))
-            ->when($month, static function ($q) use ($month): void {
-                [$year, $mon] = explode('-', (string) $month);
-                $q->whereYear('speed_results.measured_at', $year)
-                    ->whereMonth('speed_results.measured_at', $mon);
-            });
+            ->when($date, static fn ($q) => $q->whereDate('speed_results.measured_at', $date))
+            ->when($dateFrom && $dateTo, static fn ($q) => $q->whereBetween('speed_results.measured_at', [
+                "{$dateFrom} 00:00:00", "{$dateTo} 23:59:59",
+            ]))
+            ->when($dateFrom && ! $dateTo, static fn ($q) => $q->where('speed_results.measured_at', '>=', "{$dateFrom} 00:00:00"))
+            ->when($dateTo && ! $dateFrom, static fn ($q) => $q->where('speed_results.measured_at', '<=', "{$dateTo} 23:59:59"));
 
         $results = (clone $baseQuery)
-            ->latest('measured_at')
+            ->when(
+                $sort !== null && in_array($sort, self::SORTABLE_COLUMNS, true),
+                static fn ($q) => $q->orderBy("speed_results.{$sort}", $direction),
+                static fn ($q) => $q->latest('speed_results.measured_at'),
+            )
             ->paginate($perPage)
             ->withQueryString();
 
@@ -93,9 +110,13 @@ final class SpeedResultController extends Controller
         $stats = self::buildStats((clone $baseQuery)->get(), $metric);
 
         $filters = [
-            'provider' => $provider,
-            'month'    => $month,
-            'per_page' => $perPage,
+            'provider'  => $provider,
+            'per_page'  => $perPage,
+            'sort'      => $sort,
+            'direction' => $sort !== null ? $direction : null,
+            'date'      => $date,
+            'date_from' => $dateFrom,
+            'date_to'   => $dateTo,
         ];
 
         return [SpeedResultResource::collection($results), $providers, $months, $filters, $stats];
