@@ -140,7 +140,7 @@ function clear(): void {
             </Button>
         </PopoverTrigger>
 
-        <PopoverContent class="w-150 p-0" align="start">
+        <PopoverContent class="w-125 p-0" align="start">
             <Tabs v-model="mode" class="w-full gap-0">
                 <TabsList
                     class="h-auto w-full rounded-none border-b bg-transparent p-0"
