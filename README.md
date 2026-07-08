@@ -90,17 +90,7 @@ Zepeed exposes an MCP (Model Context Protocol) server at `/mcp/zepeed` that AI t
 
 ### 1. Generate an API Token
 
-First, create a Sanctum token for your MCP client:
-
-```bash
-php artisan tinker --execute '
-$user = App\Models\User::factory()->create();
-$token = $user->createToken("mcp")->plainTextToken;
-echo $token;
-'
-```
-
-Copy the token — you'll need it to configure your AI client below.
+Log in to the Zepeed web UI and navigate to **Settings → API Tokens** (or the token management page). Create a new token with a descriptive name like `"mcp"` and copy the generated token — you'll need it to configure your AI client below.
 
 ### 2. Connect Your AI Client
 
