@@ -114,12 +114,17 @@
             "@php artisan config:clear --ansi",
             "@php artisan test --testsuite=Api --stop-on-failure --ansi"
         ],
+        "test:mcp": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Mcp --stop-on-failure --ansi"
+        ],
         "pre-commit": [
             "@rector",
             "bun run typecheck",
             "@format",
             "@analyse",
-            "@test:api"
+            "@test:api",
+            "@test:mcp"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -148,7 +153,8 @@
         "rector": "Fixing the code according to the Rector Rules",
         "rector:check": "Showing the suggested changes from Rector",
         "analyse": "Analyse the code with PHPStan code analysis",
-        "pre-commit": "Run the pre-commit hooks"
+        "pre-commit": "Run the pre-commit hooks",
+        "test:mcp": "Run the MCP server tests"
     },
     "extra": {
         "laravel": {
