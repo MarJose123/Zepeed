@@ -20,6 +20,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+.junie
+boost.json
+AGENTS.md
 Homestead.json
 Homestead.yaml
 Thumbs.db

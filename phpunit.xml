@@ -14,6 +14,9 @@
         <testsuite name="Api">
             <directory>tests/Feature/Api</directory>
         </testsuite>
+        <testsuite name="Mcp">
+            <directory>tests/Feature/Mcp</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
