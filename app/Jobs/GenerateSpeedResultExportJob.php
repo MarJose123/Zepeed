@@ -9,6 +9,9 @@ use App\Events\Export\ExportCompletedEvent;
 use App\Events\Export\ExportFailedEvent;
 use App\Models\ExportRequest;
 use App\Models\SpeedResult;
+use App\Models\User;
+use App\Notifications\Export\ExportCompletedNotification;
+use App\Notifications\Export\ExportFailedNotification;
 use App\Services\Export\CsvWriterService;
 use App\Services\Export\JsonWriterService;
 use App\Services\Export\XlsxWriterService;
@@ -75,7 +78,12 @@ class GenerateSpeedResultExportJob implements ShouldQueue
                 'expires_at' => now()->addDays(7),
             ]);
 
-            event(new ExportCompletedEvent($this->exportRequest->refresh()));
+            $refreshed = $this->exportRequest->refresh();
+
+            User::query()->find($refreshed->user_id)
+                ?->notify(new ExportCompletedNotification($refreshed));
+
+            event(new ExportCompletedEvent($refreshed));
 
         } catch (Throwable $e) {
             $this->exportRequest->update([
@@ -83,7 +91,12 @@ class GenerateSpeedResultExportJob implements ShouldQueue
                 'failure_message' => $e->getMessage(),
             ]);
 
-            event(new ExportFailedEvent($this->exportRequest->refresh()));
+            $refreshed = $this->exportRequest->refresh();
+
+            User::query()->find($refreshed->user_id)
+                ?->notify(new ExportFailedNotification($refreshed));
+
+            event(new ExportFailedEvent($refreshed));
 
             Log::error('GenerateSpeedResultExportJob failed.', [
                 'export_id' => $this->exportRequest->id,

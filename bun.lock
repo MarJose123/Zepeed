@@ -7,7 +7,7 @@
         "@floating-ui/vue": "2.0.0",
         "@inertiajs/vite": "3.5.0",
         "@inertiajs/vue3": "3.5.0",
-        "@lucide/vue": "1.21.0",
+        "@lucide/vue": "1.23.0",
         "@tanstack/vue-table": "8.21.3",
         "@tiptap/extension-mention": "3.27.1",
         "@tiptap/extension-placeholder": "3.27.1",
@@ -199,7 +199,7 @@
 
     "@laravel/echo-vue": ["@laravel/echo-vue@2.3.7", "", { "peerDependencies": { "pusher-js": "*", "socket.io-client": "*", "vue": "^3.0.0" }, "optionalPeers": ["pusher-js", "socket.io-client"] }, "sha512-52lOuge5JdGKjGs1bgzrgbubh6mGATTB2kpQsf4TVXXQez0xF3joPcSoyFv9YAqcn8wxwxUdm2dStTsqfL0r2A=="],
 
-    "@lucide/vue": ["@lucide/vue@1.21.0", "", { "peerDependencies": { "vue": ">=3.0.1" } }, "sha512-eoFn3tppjKAc12ZqdnRSMFdtwQ1ZMRQFb6SV1Eub6Y8kU28ccnqKeSFdnur9hMg8gIbosU2Y3WFJr/J/xS/IlQ=="],
+    "@lucide/vue": ["@lucide/vue@1.23.0", "", { "peerDependencies": { "vue": ">=3.0.1" } }, "sha512-9SIYeY5K+R1iv8F8JUKMGSL7Pck/86BJ8djtZz/lnYsoHtKFUj1H2z6+PvKnC/8blZ8tqTDeDXAoTKobuX80hg=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.6", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1" } }, "sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg=="],
 

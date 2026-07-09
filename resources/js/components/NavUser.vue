@@ -1,16 +1,16 @@
+<!-- resources/js/components/NavUser.vue -->
 <script setup lang="ts">
 import { Link, router, usePage } from "@inertiajs/vue3";
 import {
     Bell,
     ChevronsUpDown,
-    CreditCard,
     LogOut,
-    Settings,
     Moon,
+    Settings,
 } from "@lucide/vue";
-
 import { computed } from "vue";
 import DisplayModeToggle from "@/components/DisplayModeToggle.vue";
+import NotificationSheet from "@/components/notifications/NotificationSheet.vue";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,15 +28,26 @@ import {
 } from "@/components/ui/sidebar";
 import UserInfo from "@/components/UserInfo.vue";
 import { useAppearance } from "@/composables/useAppearance";
+import { useNotificationSheet } from "@/composables/useNotificationSheet";
+import type { Auth, TUserNotification } from "@/types";
 
 const { isMobile, state } = useSidebar();
 const { updateAppearance } = useAppearance();
-const user = computed(() => usePage().props.auth.user);
+const { open: openSheet } = useNotificationSheet();
 
-const handleLogout = () => {
+const page = usePage<{ auth: Auth; notifications?: TUserNotification[] }>();
+const user = computed(() => page.props.auth.user);
+const unreadCount = computed(() => user.value.unread_count ?? 0);
+const notifications = computed(() => page.props.notifications ?? []);
+
+function handleLogout(): void {
     updateAppearance("light");
     router.flushAll();
-};
+}
+
+function openNotifications(): void {
+    openSheet.value = true;
+}
 </script>
 
 <template>
@@ -48,10 +59,20 @@ const handleLogout = () => {
                         size="lg"
                         class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                     >
-                        <UserInfo :user="user" />
+                        <div class="relative">
+                            <UserInfo :user="user" />
+                            <!-- Unread badge -->
+                            <span
+                                v-if="unreadCount > 0"
+                                class="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
+                            >
+                                {{ unreadCount > 9 ? "9+" : unreadCount }}
+                            </span>
+                        </div>
                         <ChevronsUpDown class="ml-auto size-4" />
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent
                     class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                     :side="
@@ -71,7 +92,9 @@ const handleLogout = () => {
                             <UserInfo :user="user" />
                         </div>
                     </DropdownMenuLabel>
+
                     <DropdownMenuSeparator />
+
                     <DropdownMenuGroup>
                         <DropdownMenuItem
                             class="flex items-center justify-between"
@@ -86,14 +109,20 @@ const handleLogout = () => {
                     </DropdownMenuGroup>
 
                     <DropdownMenuSeparator />
+
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                            <CreditCard />
-                            Billing
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Bell />
-                            Notifications
+                        <DropdownMenuItem
+                            class="cursor-pointer"
+                            @select="openNotifications"
+                        >
+                            <Bell class="size-4" />
+                            <span>Notifications</span>
+                            <span
+                                v-if="unreadCount > 0"
+                                class="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
+                            >
+                                {{ unreadCount > 9 ? "9+" : unreadCount }}
+                            </span>
                         </DropdownMenuItem>
                         <DropdownMenuItem as-child>
                             <Link
@@ -107,14 +136,16 @@ const handleLogout = () => {
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
+
                     <DropdownMenuSeparator />
+
                     <DropdownMenuItem :as-child="true">
                         <Link
                             class="block w-full cursor-pointer"
                             :href="route('logout')"
-                            @click="handleLogout"
                             as="button"
                             method="post"
+                            @click="handleLogout"
                         >
                             <LogOut />
                             Log out
@@ -124,4 +155,10 @@ const handleLogout = () => {
             </DropdownMenu>
         </SidebarMenuItem>
     </SidebarMenu>
+
+    <!-- Sheet lives here, outside the dropdown, controlled by useNotificationSheet -->
+    <NotificationSheet
+        :notifications="notifications"
+        :unread-count="unreadCount"
+    />
 </template>
