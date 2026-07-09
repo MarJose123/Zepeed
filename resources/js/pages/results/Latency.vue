@@ -32,11 +32,11 @@ const exportOpen = ref(false);
 </script>
 
 <template>
-    <Head title="Download Results" />
+    <Head title="Latency Results" />
     <AppLayout
         :breadcrumbs="[
             { title: 'Speedtest Result', href: '#' },
-            { title: 'Download Results', href: route(ROUTE_NAME) },
+            { title: 'Latency Results', href: route(ROUTE_NAME) },
         ]"
     >
         <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -92,6 +92,8 @@ const exportOpen = ref(false);
     <ExportDialog
         v-model:open="exportOpen"
         :filters="filters"
+        :months="months"
+        :providers="providers"
         :route-name="ROUTE_NAME"
         module-label="Download Results"
     />

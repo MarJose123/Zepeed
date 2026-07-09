@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
-import { uploadColumns } from "@/components/speed-result/columns/upload";
+import { FileDown } from "@lucide/vue";
+import { ref } from "vue";
+import { downloadColumns } from "@/components/speed-result/columns/download";
 import DataTable from "@/components/speed-result/DataTable.vue";
 import DateRangeFilter from "@/components/speed-result/DateRangeFilter.vue";
+import ExportDialog from "@/components/speed-result/ExportDialog.vue";
 import ResultsFilter from "@/components/speed-result/ResultsFilter.vue";
 import ResultsStatCards from "@/components/speed-result/ResultsStatCards.vue";
+import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TPagedResource } from "@/types";
 import type {
@@ -24,11 +28,11 @@ defineProps<{
 
 const ACCENT = "oklch(0.48 0.19 260)";
 const ROUTE_NAME = "speedtest.results.upload";
+const exportOpen = ref(false);
 </script>
 
 <template>
     <Head title="Upload Results" />
-
     <AppLayout
         :breadcrumbs="[
             { title: 'Speedtest Result', href: '#' },
@@ -39,23 +43,32 @@ const ROUTE_NAME = "speedtest.results.upload";
             <div class="flex items-start justify-between">
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">
-                        Upload Results
+                        Download Results
                     </h1>
-                    <p class="text-sm text-muted-foreground mt-1">
-                        Historical upload speed measurements across all
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        Historical download speed measurements across all
                         providers.
                     </p>
                 </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    class="gap-1.5"
+                    @click="exportOpen = true"
+                >
+                    <FileDown class="size-3.5" />
+                    Export
+                </Button>
             </div>
 
             <ResultsStatCards
                 :stats="stats"
-                metric="upload"
+                metric="download"
                 :accent-var="ACCENT"
             />
 
             <DataTable
-                :columns="uploadColumns"
+                :columns="downloadColumns"
                 :results="results"
                 :filters="filters"
                 :route-name="ROUTE_NAME"
@@ -75,4 +88,13 @@ const ROUTE_NAME = "speedtest.results.upload";
             </DataTable>
         </div>
     </AppLayout>
+
+    <ExportDialog
+        v-model:open="exportOpen"
+        :filters="filters"
+        :months="months"
+        :providers="providers"
+        :route-name="ROUTE_NAME"
+        module-label="Upload Results"
+    />
 </template>

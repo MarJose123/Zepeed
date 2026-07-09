@@ -1,13 +1,6 @@
-<!-- resources/js/components/NavUser.vue -->
 <script setup lang="ts">
 import { Link, router, usePage } from "@inertiajs/vue3";
-import {
-    Bell,
-    ChevronsUpDown,
-    LogOut,
-    Moon,
-    Settings,
-} from "@lucide/vue";
+import { Bell, ChevronsUpDown, LogOut, Moon, Settings } from "@lucide/vue";
 import { computed } from "vue";
 import DisplayModeToggle from "@/components/DisplayModeToggle.vue";
 import NotificationSheet from "@/components/notifications/NotificationSheet.vue";
@@ -29,7 +22,8 @@ import {
 import UserInfo from "@/components/UserInfo.vue";
 import { useAppearance } from "@/composables/useAppearance";
 import { useNotificationSheet } from "@/composables/useNotificationSheet";
-import type { Auth, TUserNotification } from "@/types";
+import type { Auth } from "@/types";
+import type { TUserNotification } from "@/types/notification";
 
 const { isMobile, state } = useSidebar();
 const { updateAppearance } = useAppearance();
@@ -55,22 +49,23 @@ function openNotifications(): void {
         <SidebarMenuItem>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <SidebarMenuButton
-                        size="lg"
-                        class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                    >
-                        <div class="relative">
+                    <!-- Wrapper gives us the relative context for the badge dot -->
+                    <div class="relative w-full">
+                        <SidebarMenuButton
+                            size="lg"
+                            class="w-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        >
                             <UserInfo :user="user" />
-                            <!-- Unread badge -->
-                            <span
-                                v-if="unreadCount > 0"
-                                class="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
-                            >
-                                {{ unreadCount > 9 ? "9+" : unreadCount }}
-                            </span>
-                        </div>
-                        <ChevronsUpDown class="ml-auto size-4" />
-                    </SidebarMenuButton>
+                            <ChevronsUpDown class="ml-auto size-4" />
+                        </SidebarMenuButton>
+                        <!-- Badge overlaid on the button corner, not inside UserInfo -->
+                        <span
+                            v-if="unreadCount > 0"
+                            class="pointer-events-none absolute top-1 left-6 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-sidebar"
+                        >
+                            {{ unreadCount > 9 ? "9+" : unreadCount }}
+                        </span>
+                    </div>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
@@ -156,7 +151,6 @@ function openNotifications(): void {
         </SidebarMenuItem>
     </SidebarMenu>
 
-    <!-- Sheet lives here, outside the dropdown, controlled by useNotificationSheet -->
     <NotificationSheet
         :notifications="notifications"
         :unread-count="unreadCount"

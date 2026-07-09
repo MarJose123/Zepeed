@@ -65,7 +65,7 @@ final class ExportController extends Controller
 
     public function download(Request $request, ExportRequest $exportRequest): StreamedResponse
     {
-        Gate::allowIf($request->user()?->id === $exportRequest->user_id);
+        Gate::allowIf((int) $request->user()?->id === (int) $exportRequest->user_id);
 
         abort_if($exportRequest->status !== ExportStatus::Completed, 404, 'Export not ready.');
         abort_if($exportRequest->file_path === null, 404, 'Export file missing.');
