@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\EmailTemplateController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GeneralSettingsController;
 use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
@@ -22,6 +23,10 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
         Route::get('download', [SpeedResultController::class, 'download'])->name('download');
         Route::get('upload', [SpeedResultController::class, 'upload'])->name('upload');
         Route::get('latency', [SpeedResultController::class, 'ping'])->name('latency');
+        // export
+        Route::post('download/export', [ExportController::class, 'storeSpeedDownload'])->name('download.export');
+        Route::post('upload/export', [ExportController::class, 'storeSpeedUpload'])->name('upload.export');
+        Route::post('latency/export', [ExportController::class, 'storeSpeedLatency'])->name('latency.export');
     });
 
     // Settings Menu
@@ -170,6 +175,9 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         Route::prefix('ping-results/')->name('ping-results.')->group(static function () {
             Route::get('/', [PingResultController::class, 'index'])->name('index');
+            // export
+            Route::post('export', [ExportController::class, 'storePingResult'])
+                ->name('ping-results.export');
         });
 
         Route::prefix('ping-alerts/')->name('ping-alerts.')->group(static function () {

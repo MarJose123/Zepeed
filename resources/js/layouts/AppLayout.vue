@@ -2,6 +2,7 @@
 import { usePage, router } from "@inertiajs/vue3";
 import { onMounted, onUnmounted, ref } from "vue";
 import { Toaster } from "vue-sonner";
+import { useExportChannel } from "@/composables/useExportChannel";
 import { useNotification } from "@/composables/useNotification";
 import { useSpeedtestTestChannel } from "@/composables/useSpeedtestTestChannel";
 import AppSidebarLayout from "@/layouts/app/AppSidebarLayout.vue";
@@ -69,6 +70,8 @@ onUnmounted(() => {
         flashEventListener.value();
     }
 });
+
+useExportChannel();
 </script>
 
 <template>

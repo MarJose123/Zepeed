@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PrometheusController;
 use App\Http\Controllers\PublicDashboardController;
 use App\Http\Controllers\PublicMetricsDashboardController;
@@ -20,6 +21,10 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 
 Route::get('/metrics', [PrometheusController::class, 'metrics'])
     ->middleware(PrometheusAccessMiddleware::class);
+
+Route::get('exports/{exportRequest}/download', [ExportController::class, 'download'])
+    ->middleware(['auth', 'verified'])
+    ->name('exports.download');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/speedtest.php';
