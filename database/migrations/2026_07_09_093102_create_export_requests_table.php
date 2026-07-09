@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('export_requests', static function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->enum('module', ['speed_download', 'speed_upload', 'speed_latency', 'ping_result']);
             $table->enum('format', ['csv', 'xlsx', 'json']);
             $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
