@@ -23,4 +23,4 @@ Broadcast::channel('dashboard', static function ($user): array|false {
 Broadcast::channel('ping.results', static fn ($user) => auth()->check());
 
 // export
-Broadcast::channel('exports.{userId}', static fn ($user, string $userId): bool => $user->id === $userId);
+Broadcast::channel('exports.{userId}', static fn ($user, string $userId): bool => auth()->check() && (int) $user->id === (int) $userId);
