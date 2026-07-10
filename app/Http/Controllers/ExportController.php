@@ -40,16 +40,18 @@ final class ExportController extends Controller
         /** @var User $user */
         $user = $request->user();
 
+        $filters = [
+            'target'    => $validated['target'] === '__all__' ? null : ($validated['target'] ?? null),
+            'date_from' => $validated['date_from'],
+            'date_to'   => $validated['date_to'],
+        ];
+
         $export = ExportRequest::query()->create([
             'user_id' => $user->id,
             'module'  => ExportModule::PingResult,
             'format'  => $validated['format'],
             'status'  => ExportStatus::Pending,
-            'filters' => [
-                'target'    => $validated['target'] ?? null,
-                'date_from' => $validated['date_from'],
-                'date_to'   => $validated['date_to'],
-            ],
+            'filters' => $filters,
         ]);
 
         dispatch(new GeneratePingResultExportJob($export));
@@ -96,16 +98,18 @@ final class ExportController extends Controller
         /** @var User $user */
         $user = $request->user();
 
+        $filters = [
+            'provider'  => $validated['provider'] === '__all__' ? null : ($validated['provider'] ?? null),
+            'date_from' => $validated['date_from'],
+            'date_to'   => $validated['date_to'],
+        ];
+
         $export = ExportRequest::query()->create([
             'user_id' => $user->id,
             'module'  => $module,
             'format'  => $validated['format'],
             'status'  => ExportStatus::Pending,
-            'filters' => [
-                'provider'  => $validated['provider'] ?? null,
-                'date_from' => $validated['date_from'],
-                'date_to'   => $validated['date_to'],
-            ],
+            'filters' => $filters,
         ]);
 
         dispatch(new GenerateSpeedResultExportJob($export));

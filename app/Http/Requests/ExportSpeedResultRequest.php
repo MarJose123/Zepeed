@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ExportFormat;
+use App\Models\Provider;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Override;
@@ -16,7 +17,11 @@ class ExportSpeedResultRequest extends FormRequest
     {
         return [
             'format'    => ['required', Rule::enum(ExportFormat::class)],
-            'provider'  => ['nullable', 'string', 'exists:providers,slug'],
+            'provider'  => [
+                'nullable',
+                'string',
+                Rule::in(['__all__', ...Provider::pluck('slug')->toArray()]),
+            ],
             'date_from' => ['required', 'date_format:Y-m-d'],
             'date_to'   => ['required', 'date_format:Y-m-d', 'after_or_equal:date_from'],
         ];
