@@ -101,7 +101,7 @@ jobs:
       # ── Docker meta — generates image tags + OCI labels automatically ─────
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: marjose123/zepeed
           flavor: |
