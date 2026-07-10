@@ -9,6 +9,7 @@ import {
 } from "@lucide/vue";
 import type { DateRange } from "reka-ui";
 import { ref, computed } from "vue";
+import DatePresetList from "@/components/speed-result/DatePresetList.vue";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -31,6 +32,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import type { TDatePreset } from "@/composables/useDateRangePresets";
+import { useDateRangePresets } from "@/composables/useDateRangePresets";
 import { formatDisplayDate, fromCalendarDate } from "@/lib/date";
 import type { ExportFormat } from "@/types/export";
 import type { PingTarget } from "@/types/ping";
@@ -46,7 +49,7 @@ const dateRange = ref<DateRange | undefined>();
 
 const form = useForm({
     format: "csv" as ExportFormat,
-    target: null as string | null,
+    target: "__all__" as string,
     date_from: null as string | null,
     date_to: null as string | null,
 });
@@ -67,6 +70,9 @@ const formats: {
     { value: "json", label: "JSON", icon: FileJson, hint: "Machine-readable" },
 ];
 
+const { presets, match } = useDateRangePresets(computed(() => []));
+const activePresetKey = computed(() => match(form.date_from, form.date_to));
+
 const triggerLabel = computed(() => {
     if (form.date_from && form.date_to) {
         return `${formatDisplayDate(form.date_from)} – ${formatDisplayDate(form.date_to)}`;
@@ -83,6 +89,12 @@ function onRangeSelect(range: DateRange | undefined): void {
         form.date_to = fromCalendarDate(range.end as any);
         calOpen.value = false;
     }
+}
+
+function selectPreset(preset: TDatePreset): void {
+    form.date_from = preset.from;
+    form.date_to = preset.to;
+    calOpen.value = false;
 }
 
 function submit(): void {
@@ -102,8 +114,7 @@ function submit(): void {
             <DialogHeader>
                 <DialogTitle>Export Ping Results</DialogTitle>
                 <DialogDescription>
-                    Choose a date range and format. This won't affect the 24h /
-                    7d / 30d view on the page.
+                    Choose a date range and format.
                 </DialogDescription>
             </DialogHeader>
 
@@ -152,13 +163,24 @@ function submit(): void {
                                 {{ triggerLabel }}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent class="w-auto p-3" align="start">
-                            <RangeCalendar
-                                v-model="dateRange as any"
-                                :number-of-months="1"
-                                class="p-0"
-                                @update:model-value="onRangeSelect"
-                            />
+                        <PopoverContent
+                            class="w-65 p-3"
+                            align="start"
+                            @close-auto-focus.prevent
+                        >
+                            <div class="flex flex-col gap-3">
+                                <DatePresetList
+                                    :presets="presets"
+                                    :active-key="activePresetKey"
+                                    @select="selectPreset"
+                                />
+                                <RangeCalendar
+                                    v-model="dateRange as any"
+                                    :number-of-months="1"
+                                    class="p-0"
+                                    @update:model-value="onRangeSelect"
+                                />
+                            </div>
                         </PopoverContent>
                     </Popover>
                     <p
@@ -177,7 +199,7 @@ function submit(): void {
                             <SelectValue placeholder="All targets" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">All targets</SelectItem>
+                            <SelectItem value="__all__">All targets</SelectItem>
                             <SelectItem
                                 v-for="t in targets"
                                 :key="t.id"

@@ -92,7 +92,6 @@ const exportOpen = ref(false);
     <ExportDialog
         v-model:open="exportOpen"
         :filters="filters"
-        :months="months"
         :providers="providers"
         :route-name="ROUTE_NAME"
         module-label="Upload Results"

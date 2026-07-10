@@ -48,7 +48,6 @@ import type {
 
 const props = defineProps<{
     filters: TSpeedResultFilters;
-    months: string[];
     providers: TProviderOption[];
     routeName: string;
     moduleLabel: string;
@@ -96,7 +95,7 @@ const formats: {
     { value: "json", label: "JSON", icon: FileJson, hint: "Machine-readable" },
 ];
 
-const { presets, match } = useDateRangePresets(computed(() => props.months));
+const { presets, match } = useDateRangePresets(computed(() => []));
 const activePresetKey = computed(() => match(form.date_from, form.date_to));
 const hasDateRange = computed(() => Boolean(form.date_from && form.date_to));
 
@@ -207,7 +206,7 @@ function submit(): void {
                                 />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent class="w-fit p-3" align="start">
+                        <PopoverContent class="w-65 p-3" align="start">
                             <div class="flex flex-col gap-3">
                                 <DatePresetList
                                     :presets="presets"
@@ -217,7 +216,7 @@ function submit(): void {
                                 <RangeCalendar
                                     v-model="range as any"
                                     :number-of-months="1"
-                                    class="p-0 w-sm"
+                                    class="p-0"
                                     @update:model-value="onRangeChange"
                                 />
                             </div>
@@ -239,7 +238,9 @@ function submit(): void {
                             <SelectValue placeholder="All providers" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="__all__">All providers</SelectItem>
+                            <SelectItem value="__all__"
+                                >All providers</SelectItem
+                            >
                             <SelectItem
                                 v-for="p in providers"
                                 :key="p.slug"
@@ -257,14 +258,19 @@ function submit(): void {
                 >
                     <Download class="mt-0.5 size-3.5 shrink-0 text-primary" />
                     <span
-                        >Large ranges are processed as a background job. You'll get a toast with a download link — files are kept for 7 days.</span
+                        >Large ranges are processed as a background job. You'll
+                        get a toast with a download link — files are kept for 7
+                        days.</span
                     >
                 </div>
             </div>
 
             <DialogFooter>
                 <DialogClose as-child>
-                    <Button variant="outline" size="sm" @click.prevent="open = false"
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click.prevent="open = false"
                         >Cancel</Button
                     >
                 </DialogClose>
