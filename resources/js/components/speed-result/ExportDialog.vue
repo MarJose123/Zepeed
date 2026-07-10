@@ -14,6 +14,7 @@ import DatePresetList from "@/components/speed-result/DatePresetList.vue";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -74,7 +75,7 @@ const range = ref<DateRange | undefined>(
 
 const form = useForm({
     format: "csv" as ExportFormat,
-    provider: props.filters.provider ?? (null as string | null),
+    provider: props.filters.provider ?? "__all__",
     date_from: props.filters.date_from ?? (null as string | null),
     date_to: props.filters.date_to ?? (null as string | null),
 });
@@ -147,17 +148,17 @@ function submit(): void {
 
 <template>
     <Dialog v-model:open="open">
-        <DialogContent class="sm:max-w-[440px]">
+        <DialogContent class="sm:max-w-110">
             <DialogHeader>
                 <DialogTitle>Export {{ moduleLabel }}</DialogTitle>
                 <DialogDescription>
-                    Generates a file in the background and notifies you here
-                    when it's ready to download.
+                    Choose a date range and format. This won't affect the
+                    current table view.
                 </DialogDescription>
             </DialogHeader>
 
             <div class="flex flex-col gap-4">
-                <!-- Format cards -->
+                <!-- Format -->
                 <div class="flex flex-col gap-2">
                     <span class="text-sm font-medium">Format</span>
                     <div class="grid grid-cols-3 gap-2">
@@ -168,7 +169,7 @@ function submit(): void {
                             class="flex flex-col items-center gap-1.5 rounded-md border px-2 py-2.5 transition-colors"
                             :class="
                                 form.format === f.value
-                                    ? 'border-primary bg-primary/10 text-primary'
+                                    ? 'border-primary bg-primary/8 text-primary'
                                     : 'border-border text-muted-foreground hover:border-primary/50'
                             "
                             @click="form.format = f.value"
@@ -182,7 +183,7 @@ function submit(): void {
                     </div>
                 </div>
 
-                <!-- Date range picker -->
+                <!-- Date range -->
                 <div class="flex flex-col gap-2">
                     <span class="text-sm font-medium">Date range</span>
                     <Popover v-model:open="calOpen">
@@ -192,12 +193,12 @@ function submit(): void {
                                 size="sm"
                                 class="h-9 w-full justify-start gap-2 text-sm font-normal"
                                 :class="
-                                    hasDateRange
-                                        ? 'border-primary text-primary'
-                                        : 'text-muted-foreground'
+                                    !form.date_from
+                                        ? 'text-muted-foreground'
+                                        : ''
                                 "
                             >
-                                <CalendarRange class="size-3.5 shrink-0" />
+                                <CalendarRange class="size-3.5" />
                                 {{ triggerLabel }}
                                 <X
                                     v-if="hasDateRange"
@@ -206,8 +207,8 @@ function submit(): void {
                                 />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent class="z-80 w-auto p-0" align="start">
-                            <div class="flex flex-col gap-3 p-3">
+                        <PopoverContent class="w-fit p-3" align="start">
+                            <div class="flex flex-col gap-3">
                                 <DatePresetList
                                     :presets="presets"
                                     :active-key="activePresetKey"
@@ -216,7 +217,7 @@ function submit(): void {
                                 <RangeCalendar
                                     v-model="range as any"
                                     :number-of-months="1"
-                                    class="p-0"
+                                    class="p-0 w-sm"
                                     @update:model-value="onRangeChange"
                                 />
                             </div>
@@ -237,8 +238,8 @@ function submit(): void {
                         <SelectTrigger class="h-9 text-sm">
                             <SelectValue placeholder="All providers" />
                         </SelectTrigger>
-                        <SelectContent class="z-80">
-                            <SelectItem value="">All providers</SelectItem>
+                        <SelectContent>
+                            <SelectItem value="__all__">All providers</SelectItem>
                             <SelectItem
                                 v-for="p in providers"
                                 :key="p.slug"
@@ -250,25 +251,28 @@ function submit(): void {
                     </Select>
                 </div>
 
-                <!-- Info note -->
+                <!-- Info -->
                 <div
                     class="flex gap-2 rounded-md bg-muted px-3 py-2.5 text-[11px] text-muted-foreground"
                 >
                     <Download class="mt-0.5 size-3.5 shrink-0 text-primary" />
                     <span
-                        >Large ranges run as a background job. Files are kept
-                        for 7 days.</span
+                        >Large ranges are processed as a background job. You'll get a toast with a download link — files are kept for 7 days.</span
                     >
                 </div>
             </div>
 
             <DialogFooter>
-                <Button variant="outline" size="sm" @click="open = false"
-                    >Cancel</Button
-                >
+                <DialogClose as-child>
+                    <Button variant="outline" size="sm" @click.prevent="open = false"
+                        >Cancel</Button
+                    >
+                </DialogClose>
                 <Button
                     size="sm"
-                    :disabled="form.processing || !hasDateRange"
+                    :disabled="
+                        form.processing || !form.date_from || !form.date_to
+                    "
                     @click="submit"
                 >
                     <Download class="size-3.5" />
