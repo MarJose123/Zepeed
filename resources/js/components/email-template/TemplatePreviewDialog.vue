@@ -152,8 +152,7 @@ function openLinks(e: MouseEvent) {
                 </p>
                 <pre
                     class="text-destructive/80 mt-1 whitespace-pre-wrap font-mono text-[11px] leading-relaxed"
-                    >{{ error }}</pre
-                >
+                    >{{ error }}</pre>
             </div>
 
             <!-- Preview content -->

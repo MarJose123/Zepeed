@@ -75,8 +75,7 @@ function getTwoFactorCodeError(
     errors: Record<string, unknown>,
 ): string | undefined {
     const err = errors.confirmTwoFactorAuthentication as
-        | { code?: string }
-        | undefined;
+        { code?: string } | undefined;
 
     return err?.code;
 }

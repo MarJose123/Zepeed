@@ -1,10 +1,7 @@
 export type PingStatus = "pending" | "ok" | "warn" | "failed";
 export type PingResultStatus = "success" | "partial" | "failed";
 export type PingAlertMetric =
-    | "latency_avg"
-    | "latency_max"
-    | "packet_loss"
-    | "consecutive_failures";
+    "latency_avg" | "latency_max" | "packet_loss" | "consecutive_failures";
 export type PingAlertOperator =
     | "is_above"
     | "is_below"

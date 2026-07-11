@@ -19,10 +19,7 @@ const statusVariant = computed(
             warning: "secondary",
             neutral: "outline",
         })[props.provider.status_badge] as
-            | "default"
-            | "destructive"
-            | "secondary"
-            | "outline",
+            "default" | "destructive" | "secondary" | "outline",
 );
 
 const statusLabel = computed(

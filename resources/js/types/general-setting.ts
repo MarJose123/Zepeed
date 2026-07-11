@@ -70,10 +70,7 @@ export interface TGeneralSettingsPageProps {
 export type TRetryAfterUnit = "seconds" | "minutes";
 
 export type TDangerAction =
-    | "clear_results"
-    | "clear_log"
-    | "reset_config"
-    | "factory_reset";
+    "clear_results" | "clear_log" | "reset_config" | "factory_reset";
 
 export interface TDangerActionConfig {
     key: TDangerAction;

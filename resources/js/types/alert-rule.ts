@@ -1,8 +1,5 @@
 export type AlertRuleEvent =
-    | "run_completes"
-    | "run_fails"
-    | "run_skipped"
-    | "any";
+    "run_completes" | "run_fails" | "run_skipped" | "any";
 
 export type AlertRuleMetric =
     | "status"

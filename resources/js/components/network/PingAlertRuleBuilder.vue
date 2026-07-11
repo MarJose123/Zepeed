@@ -224,8 +224,7 @@ const submit = () => {
                                 (v) =>
                                     v &&
                                     (form.condition_operator = v as
-                                        | 'and'
-                                        | 'or')
+                                        'and' | 'or')
                             "
                         >
                             <SelectTrigger

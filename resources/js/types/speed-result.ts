@@ -32,11 +32,7 @@ export interface TSpeedResultStats {
 }
 
 export type TSpeedResultSortKey =
-    | "measured_at"
-    | "download_mbps"
-    | "upload_mbps"
-    | "ping_ms"
-    | "jitter_ms";
+    "measured_at" | "download_mbps" | "upload_mbps" | "ping_ms" | "jitter_ms";
 
 export interface TSpeedResultFilters {
     provider: string | null;

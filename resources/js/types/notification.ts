@@ -1,6 +1,5 @@
 export type NotificationType =
-    | "ExportCompletedNotification"
-    | "ExportFailedNotification";
+    "ExportCompletedNotification" | "ExportFailedNotification";
 
 export interface ExportCompletedData {
     export_id: string;
@@ -27,11 +26,7 @@ export interface TUserNotification {
 }
 
 export type TNotification =
-    | "success"
-    | "error"
-    | "warning"
-    | "info"
-    | (string & {});
+    "success" | "error" | "warning" | "info" | (string & {});
 
 export interface INotification {
     type: TNotification;

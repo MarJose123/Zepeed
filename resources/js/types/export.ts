@@ -1,9 +1,6 @@
 export type ExportFormat = "csv" | "xlsx" | "json";
 export type ExportModule =
-    | "speed_download"
-    | "speed_upload"
-    | "speed_latency"
-    | "ping_result";
+    "speed_download" | "speed_upload" | "speed_latency" | "ping_result";
 export type ExportStatus = "pending" | "processing" | "completed" | "failed";
 
 export interface TExportRequest {

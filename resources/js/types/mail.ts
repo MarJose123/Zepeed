@@ -1,10 +1,5 @@
 export type MailDriver =
-    | "smtp"
-    | "resend"
-    | "mailgun"
-    | "postmark"
-    | "ses"
-    | "sendmail";
+    "smtp" | "resend" | "mailgun" | "postmark" | "ses" | "sendmail";
 
 export interface MailProvider {
     id: string;

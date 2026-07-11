@@ -35,8 +35,7 @@ const singleDate = ref<DateValue | undefined>(
 );
 const range = ref<DateRange | undefined>(
     buildRange(props.filters.date_from, props.filters.date_to) as
-        | DateRange
-        | undefined,
+        DateRange | undefined,
 );
 
 function buildRange(
@@ -74,8 +73,7 @@ watch(
     () => props.filters,
     () => {
         singleDate.value = toCalendarDate(props.filters.date) as
-            | DateValue
-            | undefined;
+            DateValue | undefined;
         range.value = buildRange(
             props.filters.date_from,
             props.filters.date_to,

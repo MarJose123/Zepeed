@@ -373,8 +373,7 @@ const nextUrl = () => {
                                         </p>
                                         <pre
                                             class="max-h-48 overflow-x-auto rounded-md border border-border bg-background p-2 text-[11px] leading-relaxed"
-                                            >{{ row.original.raw_output }}</pre
-                                        >
+                                            >{{ row.original.raw_output }}</pre>
                                     </div>
                                 </TableCell>
                             </TableRow>
