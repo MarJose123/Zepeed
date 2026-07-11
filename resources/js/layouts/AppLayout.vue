@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { usePage, router } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
 import { onMounted, onUnmounted, ref } from "vue";
 import { Toaster } from "vue-sonner";
 import { useNotification } from "@/composables/useNotification";
+import { useNotificationChannel } from "@/composables/useNotificationChannel";
 import { useSpeedtestTestChannel } from "@/composables/useSpeedtestTestChannel";
 import AppSidebarLayout from "@/layouts/app/AppSidebarLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
@@ -16,13 +17,10 @@ withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
+const flashEventListener = ref();
 const page = usePage();
 const { notify } = useNotification();
-const flashEventListener = ref();
 
-// Subscribe to every enabled provider's test channel once, at the layout level.
-// This ensures test result toasts are visible regardless of which page the user
-// navigated to after clicking Test.
 const providers = page.props.speedtest as Provider[];
 
 providers.forEach((provider) => {
@@ -69,6 +67,8 @@ onUnmounted(() => {
         flashEventListener.value();
     }
 });
+
+useNotificationChannel(); // ← mounts the export broadcast listener
 </script>
 
 <template>
@@ -77,5 +77,3 @@ onUnmounted(() => {
     </AppSidebarLayout>
     <Toaster richColors position="bottom-right" />
 </template>
-
-<style scoped></style>

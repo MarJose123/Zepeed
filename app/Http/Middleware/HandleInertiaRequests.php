@@ -6,6 +6,7 @@ use App\Http\Resources\Account\User\UserResource;
 use App\Http\Resources\ProviderResource;
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Inertia\Middleware;
 use Override;
 
@@ -55,6 +56,20 @@ class HandleInertiaRequests extends Middleware
                     ->orderBy('id')
                     ->get()
             )->resolve() : [],
+            'notifications' => static fn () => $request->user()
+                ? $request->user()->notifications()
+                    ->latest()
+                    ->get()
+                    ->map(static fn (DatabaseNotification $n) => [
+                        'id'         => $n->id,
+                        'type'       => class_basename($n->type),
+                        'data'       => $n->data,
+                        'read_at'    => $n->read_at?->toIso8601String(),
+                        'created_at' => $n->created_at->toIso8601String(),
+                    ])
+                    ->values()
+                    ->toArray()
+                : [],
         ];
     }
 }

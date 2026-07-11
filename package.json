@@ -44,7 +44,7 @@
         "@floating-ui/vue": "2.0.0",
         "@inertiajs/vite": "3.5.0",
         "@inertiajs/vue3": "3.5.0",
-        "@lucide/vue": "1.21.0",
+        "@lucide/vue": "1.23.0",
         "@tanstack/vue-table": "8.21.3",
         "@tiptap/extension-mention": "3.27.1",
         "@tiptap/extension-placeholder": "3.27.1",
