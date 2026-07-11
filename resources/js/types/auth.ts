@@ -22,14 +22,6 @@ export type Auth = {
     user: User;
 };
 
-export interface DbNotification {
-    id: string;
-    type: string;
-    data: Record<string, unknown>;
-    read_at: string | null;
-    created_at: string;
-}
-
 export type TwoFactorConfigContent = {
     title: string;
     description: string;
