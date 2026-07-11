@@ -43,10 +43,10 @@ const exportOpen = ref(false);
             <div class="flex items-start justify-between">
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">
-                        Download Results
+                        Upload Results
                     </h1>
                     <p class="mt-1 text-sm text-muted-foreground">
-                        Historical download speed measurements across all
+                        Historical upload speed measurements across all
                         providers.
                     </p>
                 </div>
