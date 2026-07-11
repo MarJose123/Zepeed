@@ -100,7 +100,7 @@ jobs:
 
       - name: Commit and push updated config
         if: steps.validate.outputs.valid == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v7.1.0
+        uses: stefanzweifel/git-auto-commit-action@v7.2.0
         with:
           commit_message: "chore: update version and build_date to ${{ steps.version.outputs.version }}"
           file_pattern: config/app.php
