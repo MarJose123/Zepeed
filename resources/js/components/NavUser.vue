@@ -61,7 +61,7 @@ function openNotifications(): void {
                         <!-- Badge overlaid on the button corner, not inside UserInfo -->
                         <span
                             v-if="unreadCount > 0"
-                            class="pointer-events-none absolute top-1 left-6 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground ring-2 ring-sidebar"
+                            class="pointer-events-none absolute top-1 left-6 flex size-4 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground ring-2 ring-sidebar"
                         >
                             {{ unreadCount > 9 ? "9+" : unreadCount }}
                         </span>
@@ -114,7 +114,7 @@ function openNotifications(): void {
                             <span>Notifications</span>
                             <span
                                 v-if="unreadCount > 0"
-                                class="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground"
+                                class="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground"
                             >
                                 {{ unreadCount > 9 ? "9+" : unreadCount }}
                             </span>

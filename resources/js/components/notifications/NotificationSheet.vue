@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
+    SheetDescription,
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
@@ -20,15 +21,6 @@ const { open } = useNotificationSheet();
 // Auto-mark all as read when the sheet opens
 watch(open, (isOpen) => {
     if (isOpen) {
-        router.post(
-            route("notifications.read-all"),
-            {},
-            {
-                preserveScroll: true,
-                only: ["auth"],
-            },
-        );
-
         // Lazy-load notifications for the sheet
         router.reload({ only: ["notifications"] });
     }
@@ -52,20 +44,29 @@ function markAllRead(): void {
             side="right"
             class="flex w-full flex-col gap-0 p-0 sm:max-w-sm"
         >
-            <SheetHeader
-                class="flex flex-row items-center justify-between border-b px-4 py-3"
-            >
-                <SheetTitle class="text-sm font-bold">Notifications</SheetTitle>
-                <Button
-                    v-if="unreadCount > 0"
-                    variant="ghost"
-                    size="sm"
-                    class="h-7 gap-1.5 text-xs text-muted-foreground"
-                    @click="markAllRead"
-                >
-                    <CheckCheck class="size-3.5" />
-                    Mark all read
-                </Button>
+            <SheetHeader class="flex flex-row items-center border-b px-4 py-3">
+                <div class="flex w-full flex-col gap-2">
+                    <SheetTitle class="text-sm font-bold">
+                        Notifications
+                    </SheetTitle>
+                    <div class="flex flex-row justify-between items-center">
+                        <SheetDescription
+                            class="text-[11px] text-muted-foreground"
+                        >
+                            Notifications are kept until dismissed.
+                        </SheetDescription>
+                        <Button
+                            v-if="unreadCount > 0"
+                            variant="ghost"
+                            size="sm"
+                            class="h-7 gap-1.5 text-xs text-muted-foreground"
+                            @click="markAllRead"
+                        >
+                            <CheckCheck class="size-3.5" />
+                            Mark all read
+                        </Button>
+                    </div>
+                </div>
             </SheetHeader>
 
             <div class="flex-1 overflow-y-auto">
@@ -87,12 +88,6 @@ function markAllRead(): void {
                         :notification="n"
                     />
                 </div>
-            </div>
-
-            <div class="border-t px-4 py-2.5">
-                <p class="text-[11px] text-muted-foreground">
-                    Notifications are kept until dismissed.
-                </p>
             </div>
         </SheetContent>
     </Sheet>
