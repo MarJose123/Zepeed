@@ -101,7 +101,7 @@ jobs:
       # ── Docker meta — generates image tags + OCI labels automatically ─────
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6.1.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: marjose123/zepeed
           flavor: |
@@ -130,7 +130,7 @@ jobs:
 
       # ── Build and push ────────────────────────────────────────────────────
       - name: Build and push multi-platform image
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         with:
           context: .
           file: docker/production/Dockerfile
