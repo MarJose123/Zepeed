@@ -109,8 +109,6 @@ jobs:
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=${{ steps.version.outputs.tag }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}},value=${{ steps.version.outputs.version }}
 
       # ── QEMU + Buildx for multi-platform (amd64 + arm64) ─────────────────
       - name: Set up QEMU
