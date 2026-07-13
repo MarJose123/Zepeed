@@ -21,6 +21,8 @@
 /storage/pail
 /vendor
 .junie
+.mcp.json
+.ai
 boost.json
 AGENTS.md
 Homestead.json
