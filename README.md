@@ -9,6 +9,8 @@
 
 ![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image)
 ![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release)
+![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls)
+
 
 ![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=main&style=flat-square&label=API%20Test)
