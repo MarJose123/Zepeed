@@ -111,7 +111,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.validate.outputs.valid == 'true'
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ steps.version.outputs.version }}"
