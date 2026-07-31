@@ -29,6 +29,7 @@ class ProviderController extends Controller
         $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
         $providers = Provider::query()
+            ->with(['latestResult', 'latestSuccessfulResult'])
             ->filterByQueryString()
             ->sortByQueryString()
             ->paginate($perPage)

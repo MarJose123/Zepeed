@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Enums\SpeedtestServer;
 use App\Models\Provider;
+use App\Models\SpeedResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -161,5 +162,142 @@ class ProviderTest extends TestCase
         $response = $this->getJson('/api/v1/providers');
 
         $response->assertUnauthorized();
+    }
+
+    /**
+     * Test provider exposes the last result and the last known good result
+     * when the most recent scheduled run failed.
+     */
+    public function testProviderIncludesLastResultAndLastKnownGood(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        SpeedResult::factory()->success()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subDays(2),
+            'download_mbps' => 120,
+        ]);
+        SpeedResult::factory()->failed()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subHour(),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $providerData = collect($response['data'])->firstWhere('slug', 'ookla');
+
+        $this->assertSame('failed', $providerData['last_result']['status']);
+        $this->assertSame('success', $providerData['last_known_good']['status']);
+        $this->assertEquals(120.0, $providerData['last_known_good']['download']);
+    }
+
+    /**
+     * Test provider last_known_good is null when no successful result exists.
+     */
+    public function testProviderLastKnownGoodIsNullWithoutSuccessfulResult(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        SpeedResult::factory()->failed()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subHour(),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $providerData = collect($response['data'])->firstWhere('slug', 'ookla');
+
+        $this->assertSame('failed', $providerData['last_result']['status']);
+        $this->assertNull($providerData['last_known_good']);
+    }
+
+    /**
+     * Test provider last_known_good equals the last result when the latest
+     * scheduled run succeeded.
+     */
+    public function testProviderLastKnownGoodEqualsLastResultWhenLatestRunSucceeded(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        $latest = SpeedResult::factory()->success()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subMinutes(30),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $providerData = collect($response['data'])->firstWhere('slug', 'ookla');
+
+        $this->assertSame('success', $providerData['last_result']['status']);
+        $this->assertSame($latest->id, $providerData['last_known_good']['id']);
+    }
+
+    /**
+     * Test provider last_result and last_known_good are null when no results exist.
+     */
+    public function testProviderLastResultAndLastKnownGoodAreNullWithoutResults(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $providerData = collect($response['data'])->firstWhere('slug', 'ookla');
+
+        $this->assertNull($providerData['last_result']);
+        $this->assertNull($providerData['last_known_good']);
+    }
+
+    /**
+     * Test provider last_result and last_known_good resolve deterministically
+     * when multiple results share the same measured_at timestamp.
+     */
+    public function testProviderLastResultAndLastKnownGoodBreakTimestampTies(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        $sameTimestamp = now()->subHour();
+
+        SpeedResult::factory()->success()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => $sameTimestamp,
+            'download_mbps' => 100,
+        ]);
+        $newest = SpeedResult::factory()->success()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => $sameTimestamp,
+            'download_mbps' => 200,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/providers');
+
+        $response->assertOk();
+        $providerData = collect($response['data'])->firstWhere('slug', 'ookla');
+
+        $this->assertSame($newest->id, $providerData['last_result']['id']);
+        $this->assertSame($newest->id, $providerData['last_known_good']['id']);
     }
 }

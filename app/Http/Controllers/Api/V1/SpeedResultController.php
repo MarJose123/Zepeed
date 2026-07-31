@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\SpeedtestServer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\SpeedResultResource;
+use App\Models\Provider;
 use App\Models\SpeedResult;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Speedtest Results Endpoints
@@ -36,6 +40,52 @@ class SpeedResultController extends Controller
             ->searchByQueryString()
             ->paginate($perPage)
             ->withQueryString();
+
+        return SpeedResultResource::collection($results)->additional([
+            'success' => filled($results),
+            'code'    => 200,
+        ]);
+    }
+
+    /**
+     * Get the most recent speedtest result for each activated provider.
+     *
+     * Returns a collection with a single entry per enabled provider that has
+     * at least one measurement — the provider's latest result. When
+     * `provider_slug` is provided, only that provider's latest result is
+     * returned (if the provider is enabled and has results).
+     *
+     * @queryParam provider_slug string Filter by provider slug (ookla, librespeed, netflix, cloudflare). Optional.
+     *
+     * @throws ValidationException
+     */
+    public function latest(): AnonymousResourceCollection
+    {
+        $providerSlug = request()->query('provider_slug');
+        $server = null;
+
+        if ($providerSlug !== null) {
+            $server = SpeedtestServer::tryFrom((string) $providerSlug);
+
+            if ($server === null) {
+                throw ValidationException::withMessages([
+                    'provider_slug' => 'The selected provider_slug is invalid.',
+                ]);
+            }
+        }
+
+        $providers = Provider::query()
+            ->enabled()
+            ->when($server !== null, static fn ($query) => $query->forServer($server))
+            ->with('latestResult')
+            ->orderBy('name')
+            ->get();
+
+        /** @var Collection<int, SpeedResult> $results */
+        $results = $providers
+            ->map(static fn (Provider $provider) => $provider->latestResult)
+            ->filter()
+            ->values();
 
         return SpeedResultResource::collection($results)->additional([
             'success' => filled($results),

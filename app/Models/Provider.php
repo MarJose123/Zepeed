@@ -37,6 +37,7 @@ use Override;
  * @property-read bool                 $is_healthy
  * @property-read bool                 $is_runnable
  * @property-read SpeedResult|null $latestResult
+ * @property-read SpeedResult|null $latestSuccessfulResult
  *
  * @method static Builder<Provider> enabled()
  * @method static Builder<Provider> forServer(SpeedtestServer $server)
@@ -242,11 +243,30 @@ class Provider extends Model
     }
 
     /**
+     * The most recent speed test result for this provider (any status).
+     *
      * @return HasOne<SpeedResult, $this>
      */
     public function latestResult(): HasOne
     {
         return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
-            ->latestOfMany();
+            ->ofMany(['measured_at' => 'max', 'id' => 'max']);
+    }
+
+    /**
+     * The most recent successful speed test result for this provider.
+     *
+     * Used as the "last known good" reference when the provider's latest
+     * scheduled run failed or was skipped.
+     *
+     * @return HasOne<SpeedResult, $this>
+     */
+    public function latestSuccessfulResult(): HasOne
+    {
+        return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
+            ->ofMany(
+                ['measured_at' => 'max', 'id' => 'max'],
+                static fn (Builder $query) => $query->where('status', 'success'),
+            );
     }
 }

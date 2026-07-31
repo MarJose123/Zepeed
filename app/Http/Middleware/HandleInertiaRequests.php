@@ -68,7 +68,7 @@ class HandleInertiaRequests extends Middleware
                         'created_at' => $n->created_at->toIso8601String(),
                     ])
                     ->values()
-                    ->toArray()
+                    ->all()
                 : [],
         ];
     }
