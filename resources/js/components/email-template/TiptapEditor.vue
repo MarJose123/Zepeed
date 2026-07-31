@@ -107,7 +107,7 @@ watch(
                     'bg-accent': editor.isActive('heading', { level: 1 }),
                 }"
                 @mousedown.prevent="
-                    editor.chain().focus().toggleHeading({ level: 1 }).run()
+                    editor!.chain().focus().toggleHeading({ level: 1 }).run()
                 "
             >
                 <Heading1 class="h-3.5 w-3.5" />
@@ -123,7 +123,7 @@ watch(
                     'bg-accent': editor.isActive('heading', { level: 2 }),
                 }"
                 @mousedown.prevent="
-                    editor.chain().focus().toggleHeading({ level: 2 }).run()
+                    editor!.chain().focus().toggleHeading({ level: 2 }).run()
                 "
             >
                 <Heading2 class="h-3.5 w-3.5" />
@@ -139,7 +139,7 @@ watch(
                 class="h-7 w-7"
                 :class="{ 'bg-accent': editor.isActive('bulletList') }"
                 @mousedown.prevent="
-                    editor.chain().focus().toggleBulletList().run()
+                    editor!.chain().focus().toggleBulletList().run()
                 "
             >
                 <List class="h-3.5 w-3.5" />
@@ -153,7 +153,7 @@ watch(
                 class="h-7 w-7"
                 :class="{ 'bg-accent': editor.isActive('orderedList') }"
                 @mousedown.prevent="
-                    editor.chain().focus().toggleOrderedList().run()
+                    editor!.chain().focus().toggleOrderedList().run()
                 "
             >
                 <ListOrdered class="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ watch(
                 size="icon"
                 class="h-7 w-7"
                 @mousedown.prevent="
-                    editor.chain().focus().setHorizontalRule().run()
+                    editor!.chain().focus().setHorizontalRule().run()
                 "
             >
                 <Minus class="h-3.5 w-3.5" />

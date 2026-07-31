@@ -20,7 +20,7 @@ class ExportPingResultRequest extends FormRequest
             'target'    => [
                 'nullable',
                 'string',
-                Rule::in(['__all__', ...PingTarget::pluck('id')->toArray()]),
+                Rule::in(['__all__', ...PingTarget::query()->pluck('id')->toArray()]),
             ],
             'date_from' => ['required', 'date_format:Y-m-d'],
             'date_to'   => ['required', 'date_format:Y-m-d', 'after_or_equal:date_from'],

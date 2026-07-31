@@ -20,7 +20,7 @@ class ExportSpeedResultRequest extends FormRequest
             'provider'  => [
                 'nullable',
                 'string',
-                Rule::in(['__all__', ...Provider::pluck('slug')->toArray()]),
+                Rule::in(['__all__', ...Provider::query()->pluck('slug')->toArray()]),
             ],
             'date_from' => ['required', 'date_format:Y-m-d'],
             'date_to'   => ['required', 'date_format:Y-m-d', 'after_or_equal:date_from'],

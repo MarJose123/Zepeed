@@ -29,6 +29,12 @@ class ProviderResource extends JsonResource
             'last_run_at'      => $this->last_run_at?->toIso8601String(),
             'last_run_status'  => $this->last_run_status,
             'alert_on_failure' => $this->alert_on_failure,
+            'last_result'      => $this->whenLoaded('latestResult', fn (): ?SpeedResultResource => $this->latestResult !== null
+                ? new SpeedResultResource($this->latestResult)
+                : null),
+            'last_known_good'  => $this->whenLoaded('latestSuccessfulResult', fn (): ?SpeedResultResource => $this->latestSuccessfulResult !== null
+                ? new SpeedResultResource($this->latestSuccessfulResult)
+                : null),
         ];
     }
 }

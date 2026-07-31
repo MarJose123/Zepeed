@@ -37,6 +37,7 @@ use Override;
  * @property-read bool                 $is_healthy
  * @property-read bool                 $is_runnable
  * @property-read SpeedResult|null $latestResult
+ * @property-read SpeedResult|null $latestSuccessfulResult
  *
  * @method static Builder<Provider> enabled()
  * @method static Builder<Provider> forServer(SpeedtestServer $server)
@@ -242,11 +243,41 @@ class Provider extends Model
     }
 
     /**
+     * The most recent speed test result for this provider (any status).
+     *
+     * Implemented with a correlated subquery on `measured_at` instead of
+     * `ofMany()` because one-of-many relations always aggregate the primary
+     * key (`max(id)`), and Postgres has no `max()` aggregate for UUIDs.
+     *
      * @return HasOne<SpeedResult, $this>
      */
     public function latestResult(): HasOne
     {
         return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
-            ->latestOfMany();
+            ->whereRaw(
+                'speed_results.measured_at = (select max(latest_result.measured_at) from speed_results as latest_result where latest_result.provider_slug = speed_results.provider_slug)'
+            )
+            ->latest('measured_at')
+            ->latest('id');
+    }
+
+    /**
+     * The most recent successful speed test result for this provider.
+     *
+     * Used as the "last known good" reference when the provider's latest
+     * scheduled run failed or was skipped.
+     *
+     * @return HasOne<SpeedResult, $this>
+     */
+    public function latestSuccessfulResult(): HasOne
+    {
+        return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
+            ->where('status', 'success')
+            ->whereRaw(
+                'speed_results.measured_at = (select max(latest_result.measured_at) from speed_results as latest_result where latest_result.provider_slug = speed_results.provider_slug and latest_result.status = ?)',
+                ['success'],
+            )
+            ->latest('measured_at')
+            ->latest('id');
     }
 }

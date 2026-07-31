@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Enums\SpeedtestServer;
+use App\Models\Provider;
 use App\Models\SpeedResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -390,5 +391,233 @@ class SpeedResultTest extends TestCase
         $response = $this->getJson('/api/v1/speedtest/results');
 
         $response->assertUnauthorized();
+    }
+
+    /**
+     * Test that authenticated user gets the latest speedtest result per activated provider.
+     */
+    public function testAuthenticatedUserCanGetLatestSpeedResultPerProvider(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+        Provider::factory()->withSlug(SpeedtestServer::Librespeed)->enabled()->create();
+
+        SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subHours(3),
+            'download_mbps' => 100,
+        ]);
+        $ooklaLatest = SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subMinutes(30),
+            'download_mbps' => 250,
+        ]);
+        $librespeedLatest = SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Librespeed,
+            'measured_at'   => now()->subMinutes(10),
+            'download_mbps' => 500,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('code', 200)
+            ->assertJsonStructure([
+                'success',
+                'code',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'provider_slug',
+                        'provider_name',
+                        'status',
+                        'download',
+                        'upload',
+                        'ping',
+                        'jitter',
+                        'packet_loss',
+                        'server_name',
+                        'server_location',
+                        'isp',
+                        'share_url',
+                        'measured_at',
+                    ],
+                ],
+            ]);
+
+        $this->assertCount(2, $response['data']);
+
+        $ooklaEntry = collect($response['data'])->firstWhere('provider_slug', 'ookla');
+        $this->assertSame($ooklaLatest->id, $ooklaEntry['id']);
+        $this->assertEquals(250.0, $ooklaEntry['download']);
+
+        $librespeedEntry = collect($response['data'])->firstWhere('provider_slug', 'librespeed');
+        $this->assertSame($librespeedLatest->id, $librespeedEntry['id']);
+    }
+
+    /**
+     * Test disabled providers are excluded from the latest results.
+     */
+    public function testLatestSpeedResultExcludesDisabledProviders(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+        Provider::factory()->withSlug(SpeedtestServer::Librespeed)->disabled()->create();
+
+        SpeedResult::factory()->create(['provider_slug' => SpeedtestServer::Ookla]);
+        SpeedResult::factory()->create(['provider_slug' => SpeedtestServer::Librespeed]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('code', 200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.provider_slug', 'ookla');
+    }
+
+    /**
+     * Test latest speedtest result can be filtered by provider slug.
+     */
+    public function testLatestSpeedResultCanBeFilteredByProviderSlug(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+        Provider::factory()->withSlug(SpeedtestServer::Librespeed)->enabled()->create();
+
+        SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subHour(),
+        ]);
+        $ooklaLatest = SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => now()->subMinutes(30),
+            'download_mbps' => 300,
+        ]);
+        SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Librespeed,
+            'measured_at'   => now()->subMinutes(10),
+            'download_mbps' => 500,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest?provider_slug=ookla');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('code', 200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $ooklaLatest->id)
+            ->assertJsonPath('data.0.provider_slug', 'ookla')
+            ->assertJsonPath('data.0.download', 300);
+    }
+
+    /**
+     * Test latest speedtest result returns an empty collection when no results exist.
+     */
+    public function testLatestSpeedResultReturnsEmptyWhenNoResultsExist(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest');
+
+        $response->assertOk()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('code', 200)
+            ->assertJsonCount(0, 'data');
+    }
+
+    /**
+     * Test latest speedtest result returns an empty collection when the provider has no results.
+     */
+    public function testLatestSpeedResultReturnsEmptyWhenProviderHasNoResults(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+        Provider::factory()->withSlug(SpeedtestServer::Cloudflare)->enabled()->create();
+
+        SpeedResult::factory()->create(['provider_slug' => SpeedtestServer::Ookla]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest?provider_slug=cloudflare');
+
+        $response->assertOk()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('code', 200)
+            ->assertJsonCount(0, 'data');
+    }
+
+    /**
+     * Test latest speedtest result rejects an invalid provider slug.
+     */
+    public function testLatestSpeedResultRejectsInvalidProviderSlug(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest?provider_slug=invalid');
+
+        $response->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonValidationErrors('provider_slug');
+    }
+
+    /**
+     * Test that unauthenticated request to latest returns 401.
+     */
+    public function testLatestSpeedResultUnauthenticatedRequestReturns401(): void
+    {
+        $response = $this->getJson('/api/v1/speedtest/results/latest');
+
+        $response->assertUnauthorized();
+    }
+
+    /**
+     * Test latest speedtest result resolves deterministically when multiple
+     * results share the same measured_at timestamp.
+     */
+    public function testLatestSpeedResultBreaksTimestampTies(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        Provider::factory()->withSlug(SpeedtestServer::Ookla)->enabled()->create();
+
+        $sameTimestamp = now()->subHour();
+
+        SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => $sameTimestamp,
+            'download_mbps' => 100,
+        ]);
+        $newest = SpeedResult::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'measured_at'   => $sameTimestamp,
+            'download_mbps' => 200,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->getJson('/api/v1/speedtest/results/latest');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $newest->id)
+            ->assertJsonPath('data.0.download', 200);
     }
 }
