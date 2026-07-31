@@ -245,12 +245,20 @@ class Provider extends Model
     /**
      * The most recent speed test result for this provider (any status).
      *
+     * Implemented with a correlated subquery on `measured_at` instead of
+     * `ofMany()` because one-of-many relations always aggregate the primary
+     * key (`max(id)`), and Postgres has no `max()` aggregate for UUIDs.
+     *
      * @return HasOne<SpeedResult, $this>
      */
     public function latestResult(): HasOne
     {
         return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
-            ->ofMany(['measured_at' => 'max', 'id' => 'max']);
+            ->whereRaw(
+                'speed_results.measured_at = (select max(latest_result.measured_at) from speed_results as latest_result where latest_result.provider_slug = speed_results.provider_slug)'
+            )
+            ->latest('measured_at')
+            ->latest('id');
     }
 
     /**
@@ -264,9 +272,12 @@ class Provider extends Model
     public function latestSuccessfulResult(): HasOne
     {
         return $this->hasOne(SpeedResult::class, 'provider_slug', 'slug')
-            ->ofMany(
-                ['measured_at' => 'max', 'id' => 'max'],
-                static fn (Builder $query) => $query->where('status', 'success'),
-            );
+            ->where('status', 'success')
+            ->whereRaw(
+                'speed_results.measured_at = (select max(latest_result.measured_at) from speed_results as latest_result where latest_result.provider_slug = speed_results.provider_slug and latest_result.status = ?)',
+                ['success'],
+            )
+            ->latest('measured_at')
+            ->latest('id');
     }
 }
