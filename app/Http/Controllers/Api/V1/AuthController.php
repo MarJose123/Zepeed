@@ -5,10 +5,17 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserResource;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+#[Group(
+    name: 'Auth',
+    description: 'Manages session verification and token revocation. All endpoints require valid API token authentication via the auth:users-api guard.',
+    weight: 2,
+)]
 /**
  * Authentication Endpoints
  *
@@ -26,6 +33,7 @@ class AuthController extends Controller
      *
      * @param Request $request
      */
+    #[Endpoint(title: 'Get authenticated user', description: "Retrieve the current authenticated user's profile information including their ID, name, email, appearance preference, and account creation timestamp.")]
     public function user(Request $request): JsonResource
     {
         /** @var User $user */
@@ -46,6 +54,7 @@ class AuthController extends Controller
      *
      * @param Request $request
      */
+    #[Endpoint(title: 'Revoke token and logout', description: 'Deletes the current API token, effectively logging out the authenticated user. Other tokens for the same user remain active and unaffected.')]
     public function logout(Request $request): JsonResponse
     {
         $request->user()

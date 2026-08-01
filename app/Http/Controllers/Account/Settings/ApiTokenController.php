@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Account\Settings;
 
+use App\Enums\TokenAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\Settings\ApiToken\StoreApiTokenRequest;
 use App\Models\PersonalAccessToken;
@@ -55,6 +56,7 @@ class ApiTokenController extends Controller implements HasMiddleware
                 return [
                     'id'           => $token->id,
                     'name'         => $token->name,
+                    'abilities'    => $token->abilities,
                     'last_used_at' => $token->last_used_at?->diffForHumans(),
                     'last_used_ip' => $token->last_used_ip,
                     'browser'      => $agent->browser ?? null,
@@ -66,7 +68,8 @@ class ApiTokenController extends Controller implements HasMiddleware
             });
 
         return Inertia::render('account/settings/ApiTokens', [
-            'tokens' => $tokens,
+            'tokens'    => $tokens,
+            'abilities' => TokenAbility::options(),
         ]);
     }
 
@@ -81,7 +84,7 @@ class ApiTokenController extends Controller implements HasMiddleware
     {
         $newToken = $request->user()->createToken(
             $request->validated('name'),
-            ['*'],
+            $request->validated('abilities'),
             $request->filled('expires_at')
                 ? now()->parse($request->validated('expires_at'))
                 : null,

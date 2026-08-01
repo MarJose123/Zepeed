@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Observers\WebhooksObserver;
 use Carbon\CarbonImmutable;
+use Database\Factories\WebhookFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
@@ -27,9 +30,10 @@ use Override;
  * @property-read HasMany<WebhookDelivery, self> $deliveries
  */
 #[ObservedBy([WebhooksObserver::class])]
+#[UseFactory(WebhookFactory::class)]
 class Webhook extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'name',

@@ -3,10 +3,13 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Enums\SpeedtestServer;
+use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
+use App\Models\ProviderSchedule;
 use App\Models\SpeedResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class ProviderTest extends TestCase
@@ -299,5 +302,151 @@ class ProviderTest extends TestCase
 
         $this->assertSame($newest->id, $providerData['last_result']['id']);
         $this->assertSame($newest->id, $providerData['last_known_good']['id']);
+    }
+
+    /**
+     * Test that an authenticated user can update a provider configuration.
+     */
+    public function testAuthenticatedUserCanUpdateProvider(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create([
+            'is_enabled'       => true,
+            'alert_on_failure' => false,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson("/api/v1/providers/{$provider->slug->value}", [
+                'is_enabled'       => false,
+                'alert_on_failure' => true,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.enabled', false);
+
+        $this->assertDatabaseHas('providers', [
+            'slug'             => 'ookla',
+            'is_enabled'       => false,
+            'alert_on_failure' => true,
+        ]);
+    }
+
+    /**
+     * Test that provider update validation requires the boolean flags.
+     */
+    public function testProviderUpdateValidatesRequiredFields(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson("/api/v1/providers/{$provider->slug->value}", [
+                'is_enabled' => 'not-a-boolean',
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonStructure(['errors']);
+    }
+
+    /**
+     * Test that disabling a provider also disables its active schedules.
+     */
+    public function testDisablingProviderDisablesItsSchedules(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create([
+            'is_enabled' => true,
+        ]);
+        ProviderSchedule::factory()->create([
+            'provider_slug' => SpeedtestServer::Ookla,
+            'is_enabled'    => true,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson("/api/v1/providers/{$provider->slug->value}", [
+                'is_enabled'       => false,
+                'alert_on_failure' => false,
+            ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseHas('provider_schedules', [
+            'provider_slug' => 'ookla',
+            'is_enabled'    => false,
+        ]);
+    }
+
+    /**
+     * Test that a manual run can be triggered for an enabled provider.
+     */
+    public function testEnabledProviderCanRunNow(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create([
+            'is_enabled' => true,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now");
+
+        $response->assertStatus(202)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('code', 202)
+            ->assertJsonPath('data.provider_slug', 'ookla');
+
+        Queue::assertPushed(RunSpeedtestJob::class);
+    }
+
+    /**
+     * Test that a manual run is rejected for a disabled provider.
+     */
+    public function testDisabledProviderCannotRunNow(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create([
+            'is_enabled' => false,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now");
+
+        $response->assertUnprocessable()
+            ->assertJsonPath('success', false);
+
+        Queue::assertNotPushed(RunSpeedtestJob::class);
+    }
+
+    /**
+     * Test that an unknown provider returns 404.
+     */
+    public function testMissingProviderReturns404(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson('/api/v1/providers/unknown-slug', [
+                'is_enabled'       => true,
+                'alert_on_failure' => false,
+            ]);
+
+        $response->assertNotFound()
+            ->assertJsonPath('success', false);
     }
 }

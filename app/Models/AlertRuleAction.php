@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Database\Factories\AlertRuleActionFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
@@ -20,9 +23,10 @@ use Override;
  * @property EmailTemplate|null $emailTemplate
  * @property Webhook|null       $webhook
  */
+#[UseFactory(AlertRuleActionFactory::class)]
 class AlertRuleAction extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'alert_rule_id',

@@ -7,10 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\SpeedResultResource;
 use App\Models\Provider;
 use App\Models\SpeedResult;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
+#[Group(
+    name: 'Speedtest Results',
+    description: 'Provides access to historical speedtest measurements including download speed, upload speed, latency, jitter, and provider information.',
+    weight: 10,
+)]
 /**
  * Speedtest Results Endpoints
  *
@@ -30,6 +37,7 @@ class SpeedResultController extends Controller
      * @queryParam sort array Sort by field: ?sort[measured_at]=desc or ?sort[download_mbps]=asc.
      * @queryParam search string Full-text search across server_name, server_location, isp.
      */
+    #[Endpoint(title: 'List speedtest results', description: 'List speedtest results with pagination, filtering, sorting, and search.')]
     public function index(): AnonymousResourceCollection
     {
         $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
@@ -59,6 +67,7 @@ class SpeedResultController extends Controller
      *
      * @throws ValidationException
      */
+    #[Endpoint(title: 'Get latest speedtest results', description: 'Get the most recent speedtest result for each activated provider.')]
     public function latest(): AnonymousResourceCollection
     {
         $providerSlug = request()->query('provider_slug');

@@ -4,7 +4,10 @@ namespace App\Models;
 
 use App\Enums\AlertRuleMetric;
 use App\Enums\AlertRuleOperator;
+use Database\Factories\AlertRuleConditionFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
@@ -17,9 +20,10 @@ use Override;
  * @property string            $value
  * @property int               $sort_order
  */
+#[UseFactory(AlertRuleConditionFactory::class)]
 class AlertRuleCondition extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'alert_rule_id',
