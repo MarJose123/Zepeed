@@ -212,20 +212,22 @@ class MaintenanceWindow extends Model
 
     public static function toggleGlobalPause(bool $active): self
     {
+        // Find via `whereJsonContains` (the jsonb `@>` operator, portable across
+        // SQLite/MySQL/MariaDB/PostgreSQL). A `where providers = ...` equality
+        // cannot be used here because PostgreSQL's `json` type has no `=` operator.
         $window = self::query()
             ->ofType(MaintenanceWindowType::Indefinite)
             ->whereJsonContains('providers', 'all')
-            ->firstOrCreate(
-                [
-                    'type'      => MaintenanceWindowType::Indefinite->value,
-                    'providers' => json_encode(['all']),
-                ],
-                [
-                    'label'     => 'Global pause',
-                    'is_active' => $active,
-                    'providers' => ['all'],
-                ]
-            );
+            ->first();
+
+        if ($window === null) {
+            return self::query()->create([
+                'label'     => 'Global pause',
+                'type'      => MaintenanceWindowType::Indefinite->value,
+                'is_active' => $active,
+                'providers' => ['all'],
+            ]);
+        }
 
         $window->update(['is_active' => $active]);
 
