@@ -226,6 +226,27 @@ class TokenAbilityTest extends TestCase
     }
 
     /**
+     * Test that a legacy token explicitly stored with the '*' ability can
+     * trigger a manual speedtest run — proving backward compatibility on
+     * an all-of (abilities:) route beyond the default createToken path.
+     */
+    public function testWildcardTokenCanRunSpeedtest(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $token = $user->createToken('legacy-token', ['*']);
+
+        $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create(['is_enabled' => true]);
+
+        $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now")
+            ->assertStatus(202);
+
+        $this->assertSame(['*'], $user->tokens()->first()->abilities);
+    }
+
+    /**
      * Test that the manual speedtest run requires the dedicated run ability.
      */
     public function testRunSpeedtestWithoutRunAbilityIsForbidden(): void
