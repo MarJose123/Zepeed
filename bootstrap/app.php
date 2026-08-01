@@ -19,6 +19,8 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Inertia\Inertia;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpFoundation\Request as RequestAlias;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -40,6 +42,11 @@ return Application::configure(basePath: dirname(__DIR__))
             at: '*',
             headers: RequestAlias::HEADER_X_FORWARDED_FOR
         );
+
+        $middleware->alias([
+            'abilities' => CheckAbilities::class,
+            'ability'   => CheckForAnyAbility::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearanceMiddleware::class,

@@ -8,10 +8,11 @@ import ApiTokenTable from "@/components/api-token/ApiTokenTable.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import SettingsLayout from "@/layouts/SettingsLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
-import type { ApiToken } from "@/types/api-token";
+import type { ApiToken, TokenAbilityGroup } from "@/types/api-token";
 
 defineProps<{
     tokens: ApiToken[];
+    abilities: TokenAbilityGroup[];
 }>();
 
 const page = usePage();
@@ -50,7 +51,7 @@ const breadcrumbItems: TBreadcrumbItem[] = [
                         </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-2">
-                        <ApiTokenCreateDialog />
+                        <ApiTokenCreateDialog :abilities="abilities" />
                         <ApiTokenRevokeAllDialog
                             :disabled="tokens.length === 0"
                         />

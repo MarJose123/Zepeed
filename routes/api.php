@@ -9,4 +9,8 @@ Route::prefix('v1')->group(static function () {
     require __DIR__ . '/api/v1/provider.php';
     require __DIR__ . '/api/v1/speedtest.php';
     require __DIR__ . '/api/v1/maintenance.php';
+    require __DIR__ . '/api/v1/webhooks.php';
+    require __DIR__ . '/api/v1/alerts.php';
+    require __DIR__ . '/api/v1/ping-alerts.php';
+    require __DIR__ . '/api/v1/exports.php';
 });

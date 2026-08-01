@@ -16,10 +16,10 @@ class UpdateMaintenanceWindowRequest extends StoreMaintenanceWindowRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            /** @var MaintenanceWindow $window */
-            $window = $this->route('maintenance_window');
+            /** @var MaintenanceWindow|null $window */
+            $window = $this->route('maintenance_window') ?? $this->route('maintenanceWindow');
             $candidate = new MaintenanceWindow($this->validated());
-            $candidate->id = $window->id; // inject existing ID for self-exclusion
+            $candidate->id = $window?->id; // inject existing ID for self-exclusion
 
             if ($candidate->overlapsWithExisting()) {
                 $validator->errors()->add(

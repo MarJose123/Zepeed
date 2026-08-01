@@ -5,7 +5,10 @@ namespace App\Models;
 use App\Enums\ExportFormat;
 use App\Enums\ExportModule;
 use App\Enums\ExportStatus;
+use Database\Factories\ExportRequestFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -25,9 +28,10 @@ use Override;
  * @property Carbon|null         $created_at
  * @property Carbon|null         $updated_at
  */
+#[UseFactory(ExportRequestFactory::class)]
 class ExportRequest extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'user_id',

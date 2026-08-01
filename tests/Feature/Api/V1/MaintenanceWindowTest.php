@@ -235,4 +235,197 @@ class MaintenanceWindowTest extends TestCase
 
         $response->assertUnauthorized();
     }
+
+    /**
+     * Test that an authenticated user can create a recurring maintenance window.
+     */
+    public function testAuthenticatedUserCanCreateRecurringWindow(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson('/api/v1/maintenance/schedules', [
+                'label'            => 'Weekly maintenance',
+                'type'             => 'recurring',
+                'providers'        => ['all'],
+                'cron_expression'  => '0 2 * * *',
+                'duration_minutes' => 60,
+                'is_active'        => true,
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.label', 'Weekly maintenance')
+            ->assertJsonPath('data.type', 'recurring');
+
+        $this->assertDatabaseHas('maintenance_windows', ['label' => 'Weekly maintenance']);
+    }
+
+    /**
+     * Test that an authenticated user can create a one-time maintenance window.
+     */
+    public function testAuthenticatedUserCanCreateOneTimeWindow(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson('/api/v1/maintenance/schedules', [
+                'label'     => 'Server move',
+                'type'      => 'one_time',
+                'providers' => ['ookla'],
+                'starts_at' => now()->addDays(1)->toDateTimeString(),
+                'ends_at'   => now()->addDays(2)->toDateTimeString(),
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.type', 'one_time');
+
+        $this->assertDatabaseHas('maintenance_windows', ['label' => 'Server move']);
+    }
+
+    /**
+     * Test that overlapping one-time windows are rejected.
+     */
+    public function testOverlappingOneTimeWindowIsRejected(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        MaintenanceWindow::factory()->oneTime()->create([
+            'is_active' => true,
+            'providers' => ['ookla'],
+            'starts_at' => now()->addDays(1)->toDateTimeString(),
+            'ends_at'   => now()->addDays(2)->toDateTimeString(),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson('/api/v1/maintenance/schedules', [
+                'label'     => 'Overlapping window',
+                'type'      => 'one_time',
+                'providers' => ['ookla'],
+                'starts_at' => now()->addDays(1)->addHour()->toDateTimeString(),
+                'ends_at'   => now()->addDays(2)->addHour()->toDateTimeString(),
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonStructure(['errors' => ['starts_at']]);
+    }
+
+    /**
+     * Test that an authenticated user can update a maintenance window.
+     */
+    public function testAuthenticatedUserCanUpdateWindow(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $window = MaintenanceWindow::factory()->indefinite()->create(['label' => 'Old label']);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson("/api/v1/maintenance/schedules/{$window->id}", [
+                'label'     => 'New label',
+                'type'      => 'indefinite',
+                'providers' => ['all'],
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.label', 'New label');
+
+        $this->assertDatabaseHas('maintenance_windows', ['id' => $window->id, 'label' => 'New label']);
+    }
+
+    /**
+     * Test that an authenticated user can update a one-time window without
+     * tripping the self-overlap check.
+     */
+    public function testAuthenticatedUserCanUpdateOneTimeWindow(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $window = MaintenanceWindow::factory()->oneTime()->create([
+            'is_active' => true,
+            'providers' => ['all'],
+            'starts_at' => now()->addDays(1)->toDateTimeString(),
+            'ends_at'   => now()->addDays(2)->toDateTimeString(),
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->patchJson("/api/v1/maintenance/schedules/{$window->id}", [
+                'label'     => 'Rescheduled window',
+                'type'      => 'one_time',
+                'providers' => ['all'],
+                'starts_at' => now()->addDays(3)->toDateTimeString(),
+                'ends_at'   => now()->addDays(4)->toDateTimeString(),
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.label', 'Rescheduled window');
+    }
+
+    /**
+     * Test that an authenticated user can delete a maintenance window.
+     */
+    public function testAuthenticatedUserCanDeleteWindow(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $window = MaintenanceWindow::factory()->create();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->deleteJson("/api/v1/maintenance/schedules/{$window->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseMissing('maintenance_windows', ['id' => $window->id]);
+    }
+
+    /**
+     * Test that the global pause can be toggled on and off.
+     */
+    public function testGlobalPauseCanBeToggled(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson('/api/v1/maintenance/global-pause');
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseHas('maintenance_windows', [
+            'type'      => 'indefinite',
+            'is_active' => true,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->postJson('/api/v1/maintenance/global-pause');
+
+        $response->assertOk();
+        $this->assertDatabaseHas('maintenance_windows', [
+            'type'      => 'indefinite',
+            'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Test that a missing maintenance window returns 404.
+     */
+    public function testMissingWindowReturns404(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token');
+
+        $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
+            ->deleteJson('/api/v1/maintenance/schedules/nonexistent-uuid');
+
+        $response->assertNotFound()
+            ->assertJsonPath('success', false);
+    }
 }

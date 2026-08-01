@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Database\Factories\PingAlertRuleFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,9 +26,10 @@ use Override;
  * @property-read HasMany<PingAlertCondition, self> $conditions
  * @property-read HasMany<PingAlertAction, self>    $actions
  */
+#[UseFactory(PingAlertRuleFactory::class)]
 class PingAlertRule extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'name',

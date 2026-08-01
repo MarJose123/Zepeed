@@ -4,7 +4,10 @@ namespace App\Models;
 
 use App\Enums\PingAlertMetric;
 use App\Enums\PingAlertOperator;
+use Database\Factories\PingAlertConditionFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
@@ -18,9 +21,10 @@ use Override;
  * @property int               $lookback_minutes
  * @property int               $sort_order
  */
+#[UseFactory(PingAlertConditionFactory::class)]
 class PingAlertCondition extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'ping_alert_rule_id',

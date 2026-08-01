@@ -5,8 +5,15 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\PingResultResource;
 use App\Models\PingResult;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+#[Group(
+    name: 'Ping Results',
+    description: 'Provides access to network connectivity monitoring results. Tracks latency and reachability to configured network targets.',
+    weight: 6,
+)]
 /**
  * Ping Monitoring Endpoints
  *
@@ -26,6 +33,7 @@ class PingResultController extends Controller
      * @queryParam measured_at_to string Filter by end date (Y-m-d format).
      * @queryParam sort array Sort by field: ?sort[measured_at]=desc or ?sort[avg_ms]=asc.
      */
+    #[Endpoint(title: 'List ping results', description: 'List ping results with pagination, filtering, sorting, and search.')]
     public function index(): AnonymousResourceCollection
     {
         $perPage = min(max((int) request()->query('per_page', 25), 1), 100);

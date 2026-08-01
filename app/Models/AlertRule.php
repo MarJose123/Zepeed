@@ -4,7 +4,10 @@ namespace App\Models;
 
 use App\Enums\AlertRuleEvent;
 use Carbon\CarbonImmutable;
+use Database\Factories\AlertRuleFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
@@ -21,9 +24,10 @@ use Override;
  * @property-read HasMany<AlertRuleCondition, self> $conditions
  * @property-read HasMany<AlertRuleAction, self>    $actions
  */
+#[UseFactory(AlertRuleFactory::class)]
 class AlertRule extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'name',

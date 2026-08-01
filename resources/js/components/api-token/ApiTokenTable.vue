@@ -32,6 +32,7 @@ const revokeTarget = ref<ApiToken | null>(null);
             <TableHeader>
                 <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Abilities</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead>Last Used</TableHead>
                     <TableHead>Last IP</TableHead>
@@ -45,6 +46,25 @@ const revokeTarget = ref<ApiToken | null>(null);
                 <TableRow v-for="token in tokens" :key="token.id">
                     <TableCell class="text-sm font-medium">
                         {{ token.name }}
+                    </TableCell>
+                    <TableCell>
+                        <Badge
+                            v-if="token.abilities.includes('*')"
+                            variant="secondary"
+                            class="text-[10px]"
+                        >
+                            All
+                        </Badge>
+                        <div v-else class="flex max-w-48 flex-wrap gap-1">
+                            <Badge
+                                v-for="ability in token.abilities"
+                                :key="ability"
+                                variant="secondary"
+                                class="text-[10px]"
+                            >
+                                {{ ability }}
+                            </Badge>
+                        </div>
                     </TableCell>
                     <TableCell class="text-sm text-muted-foreground">
                         {{ token.created_at }}
