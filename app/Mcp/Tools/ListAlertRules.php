@@ -4,7 +4,7 @@ namespace App\Mcp\Tools;
 
 use App\Enums\TokenAbility;
 use App\Mcp\Tools\Concerns\AuthorizesRequests;
-use App\Models\Provider;
+use App\Models\AlertRule;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -13,8 +13,8 @@ use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 use Override;
 
-#[Description('List configured speedtest providers with pagination, filtering, and sorting.')]
-class ListProviders extends Tool
+#[Description('List speedtest alert rules with their conditions and actions, with pagination and an optional is_active filter. Requires the alerts:view token ability.')]
+class ListAlertRules extends Tool
 {
     use AuthorizesRequests;
 
@@ -23,28 +23,19 @@ class ListProviders extends Tool
      */
     public function handle(Request $request): Response|ResponseFactory
     {
-        $this->authorize($request, TokenAbility::ProvidersView, TokenAbility::ProvidersUpdate);
+        $this->authorize($request, TokenAbility::AlertsView, TokenAbility::AlertsCreate, TokenAbility::AlertsUpdate, TokenAbility::AlertsDelete);
 
         $perPage = min(max((int) $request->get('per_page', 25), 1), 100);
         $page = max((int) $request->get('page', 1), 1);
 
-        // Inject filter values into the HTTP request so filterByQueryString can read them
-        $queryParams = [];
+        $query = AlertRule::query()
+            ->with(['conditions', 'actions']);
 
-        if ($request->has('enabled')) {
-            $queryParams['enabled'] = $request->get('enabled');
+        if ($request->has('is_active')) {
+            $query->where('is_active', filter_var($request->get('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
 
-        if ($request->has('sort')) {
-            $queryParams['sort'] = $request->get('sort');
-        }
-
-        request()->merge($queryParams);
-
-        $results = Provider::query()
-            ->filterByQueryString()
-            ->sortByQueryString()
-            ->paginate($perPage, ['*'], 'page', $page);
+        $results = $query->latest()->paginate($perPage, ['*'], 'page', $page);
 
         return Response::structured([
             'data'       => $results->items(),
@@ -64,10 +55,9 @@ class ListProviders extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'per_page' => $schema->integer()->default(25)->min(1)->max(100),
-            'page'     => $schema->integer()->default(1)->min(1),
-            'enabled'  => $schema->boolean(),
-            'sort'     => $schema->object(),
+            'per_page'  => $schema->integer()->default(25)->min(1)->max(100),
+            'page'      => $schema->integer()->default(1)->min(1),
+            'is_active' => $schema->boolean(),
         ];
     }
 }

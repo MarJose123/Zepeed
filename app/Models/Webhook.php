@@ -7,6 +7,7 @@ use Carbon\CarbonImmutable;
 use Database\Factories\WebhookFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,36 @@ class Webhook extends Model
         'is_active',
         'last_fired_at',
     ];
+
+    /**
+     * The signing secret is encrypted and must never be serialized — the
+     * REST API and MCP expose only `has_secret`.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'secret',
+    ];
+
+    /**
+     * Computed attributes included in serialization.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'has_secret',
+    ];
+
+    /**
+     * Whether a signing secret is configured (the secret itself is never
+     * exposed — see $hidden).
+     */
+    protected function hasSecret(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => filled($this->secret),
+        );
+    }
 
     #[Override]
     protected function casts(): array

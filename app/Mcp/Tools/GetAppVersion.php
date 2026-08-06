@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Enums\TokenAbility;
+use App\Mcp\Tools\Concerns\AuthorizesRequests;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -13,11 +15,15 @@ use Override;
 #[Description('Get application version and environment information.')]
 class GetAppVersion extends Tool
 {
+    use AuthorizesRequests;
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response|ResponseFactory
     {
+        $this->authorize($request, TokenAbility::AppView);
+
         return Response::structured([
             'name'        => config('app.name'),
             'version'     => config('app.version'),

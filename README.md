@@ -88,7 +88,7 @@ composer run rector     # Rector fixes
 
 ## MCP Server
 
-Zepeed exposes an MCP (Model Context Protocol) server at `/mcp/zepeed` that AI tools like Claude, Cursor, and GitHub Copilot can connect to. All tools require a Sanctum API token for authentication.
+Zepeed exposes an MCP (Model Context Protocol) server at `/mcp/zepeed` that AI tools like Claude, Cursor, and GitHub Copilot can connect to. All tools require a Sanctum API token for authentication, and every tool enforces the same [token abilities](#token-abilities) as the REST API — an AI can query monitoring data and manage providers, maintenance windows, webhooks, alerts, and exports, but only within the permissions granted to its token.
 
 ### 1. Generate an API Token
 
@@ -180,7 +180,7 @@ Add to your `~/.continue/config.json`:
 
 ### 3. What You Can Ask
 
-Once connected, your AI can query Zepeed data using natural language:
+Once connected, your AI can query and manage Zepeed using natural language:
 
 | Prompt | Tool Called |
 |--------|-------------|
@@ -188,10 +188,72 @@ Once connected, your AI can query Zepeed data using natural language:
 | *"Show me the last 10 ping results"* | `ListPingResults` |
 | *"List all speedtest results from the last 24 hours"* | `ListSpeedtestResults` |
 | *"Which internet providers are configured?"* | `ListProviders` |
+| *"Run a speedtest on Ookla now"* | `RunSpeedtest` |
 | *"Show me the maintenance windows"* | `ListMaintenanceWindows` |
-| *"What tools are available?"* | lists all 6 tools |
+| *"Pause all speedtest runs"* | `ToggleGlobalPause` |
+| *"List my webhooks and alert rules"* | `ListWebhooks`, `ListAlertRules`, `ListPingAlertRules` |
+| *"Create an export of last month's ping results"* | `CreateExport` |
+| *"What tools are available?"* | lists all 30 tools |
 
 > **Note:** Replace `http://localhost:8000` with your production URL when deploying. All examples above use `GetAppVersion` — the simplest read-only tool — to verify connectivity.
+
+### 4. Permissions (Token Abilities)
+
+Every MCP tool maps to a REST API endpoint and requires the same Sanctum token ability as that endpoint. Read tools accept **any** ability of their module (`ability:` middleware semantics); write tools require their **specific** ability (`abilities:` middleware semantics). A token with the wildcard `*` ability (the default when creating a token) passes every gate.
+
+| Module | Ability | MCP Tools |
+|--------|---------|-----------|
+| App | `app:view` | `GetAppVersion` |
+| Ping Results | `ping-results:view` | `ListPingResults` |
+| Speedtest | `speedtest:view` / `speedtest:run` | `ListSpeedtestResults` / `RunSpeedtest` |
+| Providers | `providers:view`, `providers:update` | `ListProviders`, `UpdateProvider` |
+| Schedules | `schedules:view`, `schedules:create`, `schedules:update`, `schedules:delete` | `ListProviderSchedules` |
+| Maintenance | `maintenance:view`, `maintenance:create`, `maintenance:update`, `maintenance:delete` | `ListMaintenanceWindows`, `CreateMaintenanceWindow`, `UpdateMaintenanceWindow`, `DeleteMaintenanceWindow`, `ToggleGlobalPause` |
+| Webhooks | `webhooks:view`, `webhooks:create`, `webhooks:update`, `webhooks:delete`, `webhooks:test` | `ListWebhooks`, `CreateWebhook`, `UpdateWebhook`, `DeleteWebhook`, `TestWebhook` |
+| Alerts | `alerts:view`, `alerts:create`, `alerts:update`, `alerts:delete` | `ListAlertRules`, `CreateAlertRule`, `UpdateAlertRule`, `DeleteAlertRule`, `ToggleAlertRule` |
+| Ping Alerts | `ping-alerts:view`, `ping-alerts:create`, `ping-alerts:update`, `ping-alerts:delete` | `ListPingAlertRules`, `CreatePingAlertRule`, `UpdatePingAlertRule`, `DeletePingAlertRule`, `TogglePingAlertRule` |
+| Exports | `exports:view`, `exports:create` | `ListExports`, `CreateExport`, `GetExport` |
+
+When a token lacks the required ability (or no token is presented), the tool returns an error and performs no action.
+
+### 5. MCP & API Parity
+
+The MCP server mirrors the REST API 1:1. The table below maps every MCP tool to its REST endpoint and required ability, so an API token scoped for the REST API behaves identically over MCP.
+
+| MCP Tool | REST API Endpoint | Required Ability |
+|----------|-------------------|------------------|
+| `GetAppVersion` | `GET /api/v1/app/version` | `app:view` |
+| `ListPingResults` | `GET /api/v1/pings` | `ping-results:view` |
+| `ListSpeedtestResults` | `GET /api/v1/speedtest/results` | `speedtest:view` |
+| `ListProviders` | `GET /api/v1/providers` | `providers:view` or `providers:update` |
+| `UpdateProvider` | `PATCH /api/v1/providers/{provider}` | `providers:update` |
+| `RunSpeedtest` | `POST /api/v1/providers/{provider}/run-now` | `speedtest:run` |
+| `ListProviderSchedules` | `GET /api/v1/providers/schedules` | any `schedules:*` |
+| `ListMaintenanceWindows` | `GET /api/v1/maintenance/schedules` | any `maintenance:*` |
+| `CreateMaintenanceWindow` | `POST /api/v1/maintenance/schedules` | `maintenance:create` |
+| `UpdateMaintenanceWindow` | `PATCH /api/v1/maintenance/schedules/{id}` | `maintenance:update` |
+| `DeleteMaintenanceWindow` | `DELETE /api/v1/maintenance/schedules/{id}` | `maintenance:delete` |
+| `ToggleGlobalPause` | `POST /api/v1/maintenance/global-pause` | `maintenance:update` |
+| `ListWebhooks` | `GET /api/v1/webhooks` | any `webhooks:*` |
+| `CreateWebhook` | `POST /api/v1/webhooks` | `webhooks:create` |
+| `UpdateWebhook` | `PATCH /api/v1/webhooks/{id}` | `webhooks:update` |
+| `DeleteWebhook` | `DELETE /api/v1/webhooks/{id}` | `webhooks:delete` |
+| `TestWebhook` | `POST /api/v1/webhooks/{id}/test` | `webhooks:test` |
+| `ListAlertRules` | `GET /api/v1/alerts` | any `alerts:*` |
+| `CreateAlertRule` | `POST /api/v1/alerts` | `alerts:create` |
+| `UpdateAlertRule` | `PATCH /api/v1/alerts/{id}` | `alerts:update` |
+| `DeleteAlertRule` | `DELETE /api/v1/alerts/{id}` | `alerts:delete` |
+| `ToggleAlertRule` | `POST /api/v1/alerts/{id}/toggle` | `alerts:update` |
+| `ListPingAlertRules` | `GET /api/v1/ping-alerts` | any `ping-alerts:*` |
+| `CreatePingAlertRule` | `POST /api/v1/ping-alerts` | `ping-alerts:create` |
+| `UpdatePingAlertRule` | `PATCH /api/v1/ping-alerts/{id}` | `ping-alerts:update` |
+| `DeletePingAlertRule` | `DELETE /api/v1/ping-alerts/{id}` | `ping-alerts:delete` |
+| `TogglePingAlertRule` | `POST /api/v1/ping-alerts/{id}/toggle` | `ping-alerts:update` |
+| `ListExports` | `GET /api/v1/exports` | `exports:view` or `exports:create` |
+| `CreateExport` | `POST /api/v1/exports` | `exports:create` |
+| `GetExport` | `GET /api/v1/exports/{id}` | `exports:view` or `exports:create` |
+
+Not exposed over MCP (use the REST API or web UI instead): `GET /api/v1/webhooks/{id}/deliveries` (delivery history) and `GET /api/v1/exports/{id}/download` (binary download — `GetExport` returns the file contents for `csv`/`json` exports when `include_content` is set).
 
 ## Speedtest Providers
 - [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)
