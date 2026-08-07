@@ -2,6 +2,8 @@
 
 namespace App\Mcp\Tools;
 
+use App\Enums\TokenAbility;
+use App\Mcp\Tools\Concerns\AuthorizesRequests;
 use App\Models\PingResult;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
@@ -14,11 +16,15 @@ use Override;
 #[Description('List ping monitoring results with pagination, filtering, and sorting.')]
 class ListPingResults extends Tool
 {
+    use AuthorizesRequests;
+
     /**
      * Handle the tool request.
      */
     public function handle(Request $request): Response|ResponseFactory
     {
+        $this->authorize($request, TokenAbility::PingResultsView);
+
         $perPage = min(max((int) $request->get('per_page', 25), 1), 100);
         $page = max((int) $request->get('page', 1), 1);
 

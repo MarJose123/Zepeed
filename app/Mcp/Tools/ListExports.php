@@ -4,7 +4,8 @@ namespace App\Mcp\Tools;
 
 use App\Enums\TokenAbility;
 use App\Mcp\Tools\Concerns\AuthorizesRequests;
-use App\Models\Provider;
+use App\Models\ExportRequest;
+use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -13,8 +14,8 @@ use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 use Override;
 
-#[Description('List configured speedtest providers with pagination, filtering, and sorting.')]
-class ListProviders extends Tool
+#[Description('List the authenticated user\'s export requests, newest first, with an optional status filter. Requires the exports:view token ability.')]
+class ListExports extends Tool
 {
     use AuthorizesRequests;
 
@@ -23,28 +24,22 @@ class ListProviders extends Tool
      */
     public function handle(Request $request): Response|ResponseFactory
     {
-        $this->authorize($request, TokenAbility::ProvidersView, TokenAbility::ProvidersUpdate);
+        $this->authorize($request, TokenAbility::ExportsView, TokenAbility::ExportsCreate);
 
         $perPage = min(max((int) $request->get('per_page', 25), 1), 100);
         $page = max((int) $request->get('page', 1), 1);
 
-        // Inject filter values into the HTTP request so filterByQueryString can read them
-        $queryParams = [];
+        /** @var User $user */
+        $user = $request->user();
 
-        if ($request->has('enabled')) {
-            $queryParams['enabled'] = $request->get('enabled');
+        $query = ExportRequest::query()
+            ->where('user_id', $user->id);
+
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
         }
 
-        if ($request->has('sort')) {
-            $queryParams['sort'] = $request->get('sort');
-        }
-
-        request()->merge($queryParams);
-
-        $results = Provider::query()
-            ->filterByQueryString()
-            ->sortByQueryString()
-            ->paginate($perPage, ['*'], 'page', $page);
+        $results = $query->latest()->paginate($perPage, ['*'], 'page', $page);
 
         return Response::structured([
             'data'       => $results->items(),
@@ -66,8 +61,7 @@ class ListProviders extends Tool
         return [
             'per_page' => $schema->integer()->default(25)->min(1)->max(100),
             'page'     => $schema->integer()->default(1)->min(1),
-            'enabled'  => $schema->boolean(),
-            'sort'     => $schema->object(),
+            'status'   => $schema->string()->description('pending, processing, completed, or failed.'),
         ];
     }
 }
