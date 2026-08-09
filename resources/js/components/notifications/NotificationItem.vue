@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
-import { Download, X, CheckCircle2, XCircle } from "@lucide/vue";
+import { CheckCheck, Download, X, CheckCircle2, XCircle } from "@lucide/vue";
 import { computed } from "vue";
 import { Button } from "@/components/ui/button";
 import type {
@@ -23,6 +23,19 @@ const completedData = computed(() =>
 const failedData = computed(() =>
     !isCompleted.value ? (props.notification.data as ExportFailedData) : null,
 );
+
+function markAsRead(): void {
+    router.post(
+        route("notifications.read", {
+            notification: props.notification.id,
+        }),
+        {},
+        {
+            preserveScroll: true,
+            only: ["notifications", "auth"],
+        },
+    );
+}
 
 function dismiss(): void {
     router.delete(
@@ -112,13 +125,23 @@ function download(): void {
             </Button>
         </div>
 
-        <!-- Dismiss -->
-        <button
-            class="mt-0.5 shrink-0 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
-            aria-label="Dismiss"
-            @click="dismiss"
-        >
-            <X class="size-3.5" />
-        </button>
+        <!-- Actions -->
+        <div class="mt-0.5 flex shrink-0 items-center gap-1">
+            <button
+                v-if="isUnread"
+                class="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"
+                aria-label="Mark as read"
+                @click="markAsRead"
+            >
+                <CheckCheck class="size-3.5" />
+            </button>
+            <button
+                class="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                aria-label="Dismiss"
+                @click="dismiss"
+            >
+                <X class="size-3.5" />
+            </button>
+        </div>
     </div>
 </template>

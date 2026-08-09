@@ -28,8 +28,8 @@ Route::get('exports/{exportRequest}/download', [ExportController::class, 'downlo
     ->name('exports.download');
 
 Route::middleware(['auth', 'verified'])->prefix('notifications')->name('notifications.')->group(function () {
-    Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::post('/read-all', [NotificationController::class, 'markAllRead'])->name('read-all');
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
     Route::delete('/{notification}', [NotificationController::class, 'dismiss'])->name('dismiss');
 });
 

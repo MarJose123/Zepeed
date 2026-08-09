@@ -1,4 +1,3 @@
-import type { TUserNotification } from "@/types";
 import type { Appearance } from "@/types/ui";
 
 export type User = {
@@ -9,7 +8,6 @@ export type User = {
     email_verified_at: string | null;
     created_at: string;
     unread_count: number;
-    notifications: TUserNotification[];
     [key: string]: unknown;
 };
 
