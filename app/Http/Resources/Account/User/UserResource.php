@@ -32,12 +32,6 @@ class UserResource extends JsonResource
             'created_at'          => $this->created_at,
             'updated_at'          => $this->updated_at,
             'unread_count'        => $this->unreadNotifications()->count(),
-            'notifications'       => NotificationResource::collection(
-                $this->unreadNotifications()
-                    ->latest()
-                    ->take(20)
-                    ->get()
-            ),
         ];
     }
 }
