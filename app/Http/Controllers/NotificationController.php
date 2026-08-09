@@ -19,6 +19,18 @@ final class NotificationController extends Controller
         return back();
     }
 
+    public function markAsRead(Request $request, DatabaseNotification $notification): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        abort_if($notification->notifiable_id !== $user->id, 403);
+
+        $notification->markAsRead();
+
+        return back();
+    }
+
     public function dismiss(Request $request, DatabaseNotification $notification): RedirectResponse
     {
         /** @var User $user */
