@@ -32,7 +32,7 @@ function markAllRead(): void {
         {},
         {
             preserveScroll: true,
-            only: ["auth"],
+            only: ["auth", "notifications"],
         },
     );
 }
