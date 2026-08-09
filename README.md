@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".showcase/Zepeed_MD_Logo.png" alt="Zepeed" width="200">
+  <img src="/.showcase/Zepeed_MD_Logo.png" alt="Zepeed" width="200"/>
 </p>
 <h1 align="center">Zepeed</h1>
 
