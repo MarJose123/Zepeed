@@ -44,7 +44,7 @@ class PingResultFactory extends Factory
      */
     public function success(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'              => PingResultStatus::Success,
             'packets_received'    => 4,
             'packet_loss_percent' => 0.0,
@@ -57,7 +57,7 @@ class PingResultFactory extends Factory
      */
     public function failed(): static
     {
-        return $this->state(static fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status'              => PingResultStatus::Failed,
             'packets_received'    => 0,
             'packet_loss_percent' => 100.0,

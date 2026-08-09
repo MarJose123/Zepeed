@@ -17,6 +17,7 @@ class PingAlertService
 {
     public function __construct(
         private readonly WebhookService $webhookService,
+        private readonly AppriseService $appriseService,
     ) {}
 
     /**
@@ -32,6 +33,7 @@ class PingAlertService
                 'actions.mailProvider',
                 'actions.emailTemplate',
                 'actions.webhook',
+                'actions.apprise',
             ])
             ->get();
 
@@ -87,6 +89,7 @@ class PingAlertService
                 match ($action->type) {
                     'webhook' => $this->fireWebhook($action, $rule, $target, $result),
                     'email'   => $this->fireEmail($action, $rule, $target, $result),
+                    'apprise' => $this->fireApprise($action, $rule, $target, $result),
                     default   => null,
                 };
             } catch (Throwable $e) {
@@ -197,6 +200,56 @@ class PingAlertService
             'packet_loss'  => $result->packet_loss_percent,
             'triggered_at' => now()->toIso8601String(),
         ]);
+    }
+
+    private function fireApprise(
+        PingAlertAction $action,
+        PingAlertRule $rule,
+        PingTarget $target,
+        PingResult $result,
+    ): void {
+        if (! $action->apprise) {
+            return;
+        }
+
+        $status = $result->status->value;
+        $type = match ($status) {
+            'success' => 'success',
+            'failed'  => 'failure',
+            default   => 'warning',
+        };
+
+        $this->appriseService->dispatch(
+            $action->apprise,
+            "Zepeed: Ping alert — {$rule->name}",
+            self::buildAppriseBody($rule, $target, $result),
+            ['type' => $type],
+        );
+    }
+
+    /**
+     * Plain-text summary of a ping alert for Apprise notifications.
+     */
+    private static function buildAppriseBody(
+        PingAlertRule $rule,
+        PingTarget $target,
+        PingResult $result,
+    ): string {
+        $data = self::buildMergeData($rule, $target, $result);
+
+        return collect([
+            "Rule: {$data['rule_name']}",
+            "Target: {$data['target_label']} ({$data['target_host']})",
+            "Status: {$data['status']}",
+            "Avg latency: {$data['avg_ms']} ms",
+            "Max latency: {$data['max_ms']} ms",
+            "Packet loss: {$data['packet_loss_percent']}%",
+            $data['failure_reason'] !== '' ? "Failure reason: {$data['failure_reason']}" : null,
+            "Triggered at: {$data['triggered_at']}",
+            "Dashboard: {$data['dashboard_url']}",
+        ])
+            ->filter()
+            ->implode("\n");
     }
 
     /**

@@ -58,7 +58,7 @@ export interface PingAlertCondition {
 
 export interface PingAlertAction {
     id?: string;
-    type: "email" | "webhook";
+    type: "email" | "webhook" | "apprise";
     mail_provider_id: string | null;
     mail_provider_label?: string | null;
     email_template_id: string | null;
@@ -66,6 +66,8 @@ export interface PingAlertAction {
     recipient_email: string | null;
     webhook_id: string | null;
     webhook_label?: string | null;
+    apprise_id: string | null;
+    apprise_label?: string | null;
     sort_order: number;
 }
 

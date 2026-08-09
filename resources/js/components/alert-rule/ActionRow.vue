@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Mail, Link2, Trash2 } from "@lucide/vue";
+import { Bell, Link2, Mail, Trash2 } from "@lucide/vue";
+import { computed } from "vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import type { AlertRuleAction } from "@/types/alert-rule";
+import type { Apprise } from "@/types/apprise";
 import type { EmailTemplate } from "@/types/email-template";
 import type { MailProvider } from "@/types/mail";
 import type { Webhook } from "@/types/webhook";
@@ -20,6 +22,7 @@ const props = defineProps<{
     mailProviders: MailProvider[];
     emailTemplates: EmailTemplate[];
     webhooks: Webhook[];
+    apprises: Apprise[];
     index: number;
 }>();
 
@@ -31,43 +34,58 @@ const emit = defineEmits<{
 const update = (key: keyof AlertRuleAction, value: string | null) => {
     emit("update", { ...props.action, [key]: value });
 };
+
+const actionLabel = computed(() => {
+    switch (props.action.type) {
+        case "email":
+            return "Send email notification";
+        case "webhook":
+            return "Trigger webhook";
+        case "apprise":
+            return "Send Apprise notification";
+    }
+});
+
+const containerClass = computed(() => {
+    switch (props.action.type) {
+        case "email":
+            return "border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30";
+        case "webhook":
+            return "border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/30";
+        case "apprise":
+            return "border-purple-200 bg-purple-50/50 dark:border-purple-900 dark:bg-purple-950/30";
+    }
+});
 </script>
 
 <template>
-    <div
-        class="rounded-lg border p-3"
-        :class="
-            action.type === 'email'
-                ? 'border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/30'
-                : 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/30'
-        "
-    >
+    <div class="rounded-lg border p-3" :class="containerClass">
         <div class="mb-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div
                     class="flex h-6 w-6 items-center justify-center rounded-md"
-                    :class="
-                        action.type === 'email'
-                            ? 'bg-blue-100 dark:bg-blue-900'
-                            : 'bg-green-100 dark:bg-green-900'
-                    "
+                    :class="{
+                        'bg-blue-100 dark:bg-blue-900': action.type === 'email',
+                        'bg-green-100 dark:bg-green-900':
+                            action.type === 'webhook',
+                        'bg-purple-100 dark:bg-purple-900':
+                            action.type === 'apprise',
+                    }"
                 >
                     <Mail
                         v-if="action.type === 'email'"
                         class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
                     />
                     <Link2
-                        v-else
+                        v-else-if="action.type === 'webhook'"
                         class="h-3.5 w-3.5 text-green-600 dark:text-green-400"
                     />
+                    <Bell
+                        v-else
+                        class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400"
+                    />
                 </div>
-                <span class="text-xs font-medium">
-                    {{
-                        action.type === "email"
-                            ? "Send email notification"
-                            : "Trigger webhook"
-                    }}
-                </span>
+                <span class="text-xs font-medium">{{ actionLabel }}</span>
             </div>
             <Button
                 variant="ghost"
@@ -182,7 +200,7 @@ const update = (key: keyof AlertRuleAction, value: string | null) => {
         </div>
 
         <!-- Webhook action fields -->
-        <div v-else class="space-y-1">
+        <div v-else-if="action.type === 'webhook'" class="space-y-1">
             <Label class="text-[10px]">Webhook</Label>
             <Select
                 :model-value="action.webhook_id ?? 'none'"
@@ -201,19 +219,77 @@ const update = (key: keyof AlertRuleAction, value: string | null) => {
                     <SelectValue placeholder="Select webhook" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem
-                        v-for="wh in webhooks"
-                        :key="wh.id"
-                        :value="wh.id"
-                        class="text-xs"
-                    >
-                        {{ wh.name }}
-                        <span
-                            class="text-muted-foreground ml-1 font-mono text-[10px]"
+                    <template v-if="webhooks.length > 0">
+                        <SelectItem
+                            v-for="wh in webhooks"
+                            :key="wh.id"
+                            :value="wh.id"
+                            class="text-xs"
                         >
-                            {{ wh.method }}
-                        </span>
-                    </SelectItem>
+                            {{ wh.name }}
+                            <span
+                                class="text-muted-foreground ml-1 font-mono text-[10px]"
+                            >
+                                {{ wh.method }}
+                            </span>
+                        </SelectItem>
+                    </template>
+                    <div
+                        v-else
+                        class="text-muted-foreground px-2 py-3 text-center text-xs"
+                    >
+                        No webhooks found.
+                        <br />
+                        Add one in Integration → Webhooks.
+                    </div>
+                </SelectContent>
+            </Select>
+        </div>
+
+        <!-- Apprise action fields -->
+        <div v-else class="space-y-1">
+            <Label class="text-[10px]">Apprise instance</Label>
+            <Select
+                :model-value="action.apprise_id ?? 'none'"
+                @update:model-value="
+                    (v) => {
+                        if (typeof v === 'string' || typeof v === 'number') {
+                            update(
+                                'apprise_id',
+                                String(v) === 'none' ? null : String(v),
+                            );
+                        }
+                    }
+                "
+            >
+                <SelectTrigger class="h-7 text-xs">
+                    <SelectValue placeholder="Select Apprise" />
+                </SelectTrigger>
+                <SelectContent>
+                    <template v-if="apprises.length > 0">
+                        <SelectItem
+                            v-for="a in apprises"
+                            :key="a.id"
+                            :value="a.id"
+                            class="text-xs"
+                        >
+                            {{ a.name }}
+                            <span
+                                v-if="a.tags.length > 0"
+                                class="text-muted-foreground ml-1 text-[10px]"
+                            >
+                                {{ a.tags.join(", ") }}
+                            </span>
+                        </SelectItem>
+                    </template>
+                    <div
+                        v-else
+                        class="text-muted-foreground px-2 py-3 text-center text-xs"
+                    >
+                        No Apprise instances found.
+                        <br />
+                        Add one in Integration → Apprise.
+                    </div>
                 </SelectContent>
             </Select>
         </div>

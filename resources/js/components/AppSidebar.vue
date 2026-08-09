@@ -2,6 +2,7 @@
 import { Icon } from "@iconify/vue";
 import { Link } from "@inertiajs/vue3";
 import {
+    Bell,
     Cable,
     ChartGantt,
     LayoutDashboard,
@@ -101,8 +102,9 @@ const navigation: TSidebarNavigationItems = [
                 icon: Cable,
                 items: [
                     {
-                        title: "Webhooks",
-                        href: route("speedtest.integration.webhooks.index"),
+                        title: "Apprise",
+                        icon: Bell,
+                        href: route("speedtest.integration.apprise.index"),
                     },
                     {
                         title: "Mailer",
@@ -111,6 +113,10 @@ const navigation: TSidebarNavigationItems = [
                     {
                         title: "Prometheus",
                         href: route("speedtest.integration.prometheus.index"),
+                    },
+                    {
+                        title: "Webhooks",
+                        href: route("speedtest.integration.webhooks.index"),
                     },
                 ],
             },

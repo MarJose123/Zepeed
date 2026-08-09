@@ -17,6 +17,7 @@ class AlertRuleService
 {
     public function __construct(
         private readonly WebhookService $webhookService,
+        private readonly AppriseService $appriseService,
     ) {}
 
     /**
@@ -27,7 +28,7 @@ class AlertRuleService
     {
         $rules = AlertRule::query()
             ->where('is_active', true)
-            ->with(['conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook'])
+            ->with(['conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook', 'actions.apprise'])
             ->get();
 
         foreach ($rules as $rule) {
@@ -102,6 +103,7 @@ class AlertRuleService
                 match ($action->type) {
                     'email'   => $this->fireEmail($action, $mergeData),
                     'webhook' => $this->fireWebhook($action, $result),
+                    'apprise' => $this->fireApprise($action, $result),
                 };
             } catch (Throwable $e) {
                 Log::error("AlertRuleService: action [{$action->id}] failed", [
@@ -171,6 +173,50 @@ class AlertRuleService
                 'failure_reason'  => $result->failure_reason,
             ],
         );
+    }
+
+    private function fireApprise(AlertRuleAction $action, SpeedResult $result): void
+    {
+        if (! $action->apprise) {
+            return;
+        }
+
+        $status = $result->status;
+        $type = match ($status) {
+            'success' => 'success',
+            'failed'  => 'failure',
+            default   => 'warning',
+        };
+
+        $this->appriseService->dispatch(
+            $action->apprise,
+            "Zepeed: Speedtest {$status}",
+            self::buildAppriseBody($result),
+            ['type' => $type],
+        );
+    }
+
+    /**
+     * Plain-text summary of a speedtest result for Apprise notifications.
+     */
+    private static function buildAppriseBody(SpeedResult $result): string
+    {
+        $data = self::buildMergeData($result);
+
+        return collect([
+            "Provider: {$data['provider_name']}",
+            "Status: {$data['status']}",
+            "Download: {$data['download_mbps']} Mbps",
+            "Upload: {$data['upload_mbps']} Mbps",
+            "Ping: {$data['ping_ms']} ms",
+            "Jitter: {$data['jitter_ms']} ms",
+            "Packet loss: {$data['packet_loss']}%",
+            "Measured at: {$data['measured_at']}",
+            $data['failure_reason'] !== '' ? "Failure reason: {$data['failure_reason']}" : null,
+            "Dashboard: {$data['dashboard_url']}",
+        ])
+            ->filter()
+            ->implode("\n");
     }
 
     /**

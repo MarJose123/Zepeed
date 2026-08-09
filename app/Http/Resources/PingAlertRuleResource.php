@@ -59,6 +59,8 @@ class PingAlertRuleResource extends JsonResource
                 'recipient_email'      => $a->recipient_email,
                 'webhook_id'           => $a->webhook_id,
                 'webhook_label'        => $a->relationLoaded('webhook') ? $a->webhook?->name : null,
+                'apprise_id'           => $a->apprise_id,
+                'apprise_label'        => $a->relationLoaded('apprise') ? $a->apprise?->name : null,
                 'sort_order'           => $a->sort_order,
             ])->values(),
             'created_at'         => $rule->created_at->toIso8601String(),

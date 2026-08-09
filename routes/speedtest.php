@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AlertRuleController;
+use App\Http\Controllers\AppriseController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GeneralSettingsController;
@@ -152,6 +153,17 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                 Route::post('/{webhook}/test', [WebhookController::class, 'test'])->name('test');
                 Route::get('/{webhook}/deliveries', [WebhookController::class, 'deliveries'])->name('deliveries');
                 Route::get('/{webhook}/deliveries/json', [WebhookController::class, 'deliveriesJson'])->name('deliveries.json');
+            });
+
+        Route::prefix('apprise/')
+            ->name('apprise.')
+            ->group(static function () {
+                Route::get('/', [AppriseController::class, 'index'])->name('index');
+                Route::post('/', [AppriseController::class, 'store'])->name('store');
+                Route::post('/test-config', [AppriseController::class, 'testConfig'])->name('test-config');
+                Route::patch('/{apprise}', [AppriseController::class, 'update'])->name('update');
+                Route::delete('/{apprise}', [AppriseController::class, 'destroy'])->name('destroy');
+                Route::post('/{apprise}/test', [AppriseController::class, 'test'])->name('test');
             });
 
         Route::prefix('prometheus/')->name('prometheus.')->group(static function () {

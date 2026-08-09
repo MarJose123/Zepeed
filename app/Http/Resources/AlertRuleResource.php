@@ -44,6 +44,8 @@ class AlertRuleResource extends JsonResource
                 'recipient_email'      => $a->recipient_email,
                 'webhook_id'           => $a->webhook_id,
                 'webhook_label'        => $a->webhook?->name,
+                'apprise_id'           => $a->apprise_id,
+                'apprise_label'        => $a->apprise?->name,
                 'sort_order'           => $a->sort_order,
             ])->values(),
             'created_at' => $rule->created_at->toIso8601String(),
