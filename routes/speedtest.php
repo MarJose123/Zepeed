@@ -177,7 +177,7 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
             Route::get('/', [PingResultController::class, 'index'])->name('index');
             // export
             Route::post('export', [ExportController::class, 'storePingResult'])
-                ->name('ping-results.export');
+                ->name('export');
         });
 
         Route::prefix('ping-alerts/')->name('ping-alerts.')->group(static function () {
