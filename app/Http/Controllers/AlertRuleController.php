@@ -6,12 +6,14 @@ use App\Enums\SpeedtestServer;
 use App\Http\Requests\StoreAlertRuleRequest;
 use App\Http\Requests\UpdateAlertRuleRequest;
 use App\Http\Resources\AlertRuleResource;
+use App\Http\Resources\AppriseResource;
 use App\Http\Resources\EmailTemplateResource;
 use App\Http\Resources\MailProviderResource;
 use App\Http\Resources\WebhookResource;
 use App\Models\AlertRule;
 use App\Models\AlertRuleAction;
 use App\Models\AlertRuleCondition;
+use App\Models\Apprise;
 use App\Models\EmailTemplate;
 use App\Models\MailProvider;
 use App\Models\Webhook;
@@ -28,7 +30,7 @@ class AlertRuleController extends Controller
         return Inertia::render('settings/AlertRules', [
             'rules' => AlertRuleResource::collection(
                 AlertRule::query()
-                    ->with(['conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook'])
+                    ->with(['conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook', 'actions.apprise'])
                     ->latest()
                     ->get()
             )->resolve(),
@@ -53,6 +55,10 @@ class AlertRuleController extends Controller
 
             'webhooks' => WebhookResource::collection(
                 Webhook::query()->where('is_active', true)->latest()->get()
+            )->resolve(),
+
+            'apprises' => AppriseResource::collection(
+                Apprise::query()->where('is_active', true)->latest()->get()
             )->resolve(),
         ]);
     }
@@ -89,6 +95,7 @@ class AlertRuleController extends Controller
                     'email_template_id' => $action['email_template_id'] ?? null,
                     'recipient_email'   => $action['recipient_email'] ?? null,
                     'webhook_id'        => $action['webhook_id'] ?? null,
+                    'apprise_id'        => $action['apprise_id'] ?? null,
                     'sort_order'        => $action['sort_order'] ?? $i,
                 ]);
             }
@@ -157,6 +164,7 @@ class AlertRuleController extends Controller
                         'email_template_id' => $action['email_template_id'] ?? null,
                         'recipient_email'   => $action['recipient_email'] ?? null,
                         'webhook_id'        => $action['webhook_id'] ?? null,
+                        'apprise_id'        => $action['apprise_id'] ?? null,
                         'sort_order'        => $action['sort_order'] ?? $i,
                     ]);
                 }

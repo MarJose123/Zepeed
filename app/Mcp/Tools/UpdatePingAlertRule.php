@@ -44,11 +44,12 @@ class UpdatePingAlertRule extends Tool
             'conditions.*.lookback_minutes' => ['required', 'integer', 'min:1', 'max:120'],
             'conditions.*.sort_order'       => ['integer'],
             'actions'                       => ['sometimes', 'array', 'min:1', 'max:3'],
-            'actions.*.type'                => ['required', 'in:email,webhook'],
+            'actions.*.type'                => ['required', 'in:email,webhook,apprise'],
             'actions.*.mail_provider_id'    => ['nullable', 'uuid', 'exists:mail_providers,id'],
             'actions.*.email_template_id'   => ['nullable', 'uuid', 'exists:email_templates,id'],
             'actions.*.recipient_email'     => ['nullable', 'email'],
             'actions.*.webhook_id'          => ['nullable', 'uuid', 'exists:webhooks,id'],
+            'actions.*.apprise_id'          => ['nullable', 'uuid', 'exists:apprises,id'],
             'actions.*.sort_order'          => ['integer'],
         ]);
 
@@ -101,6 +102,7 @@ class UpdatePingAlertRule extends Tool
                         'email_template_id'  => $action['email_template_id'] ?? null,
                         'recipient_email'    => $action['recipient_email'] ?? null,
                         'webhook_id'         => $action['webhook_id'] ?? null,
+                        'apprise_id'         => $action['apprise_id'] ?? null,
                         'sort_order'         => $action['sort_order'] ?? $i,
                     ]);
                 }
@@ -136,11 +138,12 @@ class UpdatePingAlertRule extends Tool
                 'sort_order'       => $schema->integer(),
             ])),
             'actions'            => $schema->array()->description('1-3 actions.')->min(1)->max(3)->items($schema->object([
-                'type'              => $schema->string()->description('email or webhook.')->enum(['email', 'webhook'])->required(),
+                'type'              => $schema->string()->description('email, webhook or apprise.')->enum(['email', 'webhook', 'apprise'])->required(),
                 'mail_provider_id'  => $schema->string()->description('UUID of a mail provider (email actions).'),
                 'email_template_id' => $schema->string()->description('UUID of an email template (email actions).'),
                 'recipient_email'   => $schema->string()->description('Recipient address (email actions).'),
                 'webhook_id'        => $schema->string()->description('UUID of a webhook (webhook actions).'),
+                'apprise_id'        => $schema->string()->description('UUID of an Apprise instance (apprise actions).'),
                 'sort_order'        => $schema->integer(),
             ])),
         ];

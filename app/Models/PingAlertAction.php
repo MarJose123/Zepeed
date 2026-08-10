@@ -13,15 +13,17 @@ use Override;
 /**
  * @property string             $id
  * @property string             $ping_alert_rule_id
- * @property string             $type               email|webhook
+ * @property string             $type               email|webhook|apprise
  * @property string|null        $mail_provider_id
  * @property string|null        $email_template_id
  * @property string|null        $recipient_email
  * @property string|null        $webhook_id
+ * @property string|null        $apprise_id
  * @property int                $sort_order
  * @property MailProvider|null  $mailProvider
  * @property EmailTemplate|null $emailTemplate
  * @property Webhook|null       $webhook
+ * @property Apprise|null       $apprise
  */
 #[UseFactory(PingAlertActionFactory::class)]
 class PingAlertAction extends Model
@@ -35,6 +37,7 @@ class PingAlertAction extends Model
         'email_template_id',
         'recipient_email',
         'webhook_id',
+        'apprise_id',
         'sort_order',
     ];
 
@@ -66,5 +69,11 @@ class PingAlertAction extends Model
     public function webhook(): BelongsTo
     {
         return $this->belongsTo(Webhook::class);
+    }
+
+    /** @return BelongsTo<Apprise, $this> */
+    public function apprise(): BelongsTo
+    {
+        return $this->belongsTo(Apprise::class);
     }
 }

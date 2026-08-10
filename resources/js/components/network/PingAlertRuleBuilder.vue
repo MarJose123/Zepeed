@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
-import { Loader2, Plus } from "@lucide/vue";
+import { Bell, Link2, Loader2, Mail, Plus } from "@lucide/vue";
 import { computed, watch } from "vue";
 import PingAlertActionRow from "@/components/network/PingAlertActionRow.vue";
 import PingAlertConditionRow from "@/components/network/PingAlertConditionRow.vue";
 import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import type { Apprise } from "@/types/apprise";
 import type { EmailTemplate } from "@/types/email-template";
 import type { MailProvider } from "@/types/mail";
 import type {
@@ -32,6 +39,7 @@ const props = defineProps<{
     mailProviders: MailProvider[];
     emailTemplates: EmailTemplate[];
     webhooks: Webhook[];
+    apprises: Apprise[];
 }>();
 
 const emit = defineEmits<{ cancel: [] }>();
@@ -100,6 +108,7 @@ const addEmailAction = () => {
         email_template_id: null,
         recipient_email: null,
         webhook_id: null,
+        apprise_id: null,
         sort_order: form.actions.length,
     });
 };
@@ -111,6 +120,19 @@ const addWebhookAction = () => {
         email_template_id: null,
         recipient_email: null,
         webhook_id: null,
+        apprise_id: null,
+        sort_order: form.actions.length,
+    });
+};
+
+const addAppriseAction = () => {
+    form.actions.push({
+        type: "apprise",
+        mail_provider_id: null,
+        email_template_id: null,
+        recipient_email: null,
+        webhook_id: null,
+        apprise_id: props.apprises[0]?.id ?? null,
         sort_order: form.actions.length,
     });
 };
@@ -295,26 +317,48 @@ const submit = () => {
                         >
                     </div>
                     <div class="flex gap-1.5">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            class="h-7 border-green-300 text-xs text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300"
-                            :disabled="form.actions.length >= 3"
-                            @click="addEmailAction"
-                        >
-                            <Plus class="mr-1 h-3 w-3" />
-                            Email
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            class="h-7 border-green-300 text-xs text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300"
-                            :disabled="form.actions.length >= 3"
-                            @click="addWebhookAction"
-                        >
-                            <Plus class="mr-1 h-3 w-3" />
-                            Webhook
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    class="h-7 border-green-300 text-xs text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300"
+                                    :disabled="form.actions.length >= 3"
+                                >
+                                    <Plus class="mr-1 h-3 w-3" />
+                                    Add action
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" class="w-44">
+                                <DropdownMenuItem
+                                    class="text-xs"
+                                    @click="addEmailAction"
+                                >
+                                    <Mail
+                                        class="mr-2 h-3.5 w-3.5 text-blue-500"
+                                    />
+                                    Email
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    class="text-xs"
+                                    @click="addWebhookAction"
+                                >
+                                    <Link2
+                                        class="mr-2 h-3.5 w-3.5 text-green-500"
+                                    />
+                                    Webhook
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    class="text-xs"
+                                    @click="addAppriseAction"
+                                >
+                                    <Bell
+                                        class="mr-2 h-3.5 w-3.5 text-purple-500"
+                                    />
+                                    Apprise
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
                 <div class="space-y-2 p-3">
@@ -333,6 +377,7 @@ const submit = () => {
                         :mail-providers="mailProviders"
                         :email-templates="emailTemplates"
                         :webhooks="webhooks"
+                        :apprises="apprises"
                         @update="updateAction(i, $event)"
                         @remove="removeAction(i)"
                     />

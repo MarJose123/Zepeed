@@ -27,11 +27,12 @@ class UpdateAlertRuleRequest extends FormRequest
             'conditions.*.sort_order'  => ['integer'],
 
             'actions'                        => ['sometimes', 'array', 'min:1'],
-            'actions.*.type'                 => ['required_with:actions', Rule::in(['email', 'webhook'])],
+            'actions.*.type'                 => ['required_with:actions', Rule::in(['email', 'webhook', 'apprise'])],
             'actions.*.mail_provider_id'     => ['nullable', 'uuid', 'exists:mail_providers,id'],
             'actions.*.email_template_id'    => ['nullable', 'uuid', 'exists:email_templates,id'],
             'actions.*.recipient_email'      => ['nullable', 'email'],
             'actions.*.webhook_id'           => ['nullable', 'uuid', 'exists:webhooks,id'],
+            'actions.*.apprise_id'           => ['nullable', 'uuid', 'exists:apprises,id'],
             'actions.*.sort_order'           => ['integer'],
         ];
     }

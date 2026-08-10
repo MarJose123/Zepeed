@@ -111,6 +111,7 @@ class PingAlertRuleController extends Controller
                     'email_template_id'  => $action['email_template_id'] ?? null,
                     'recipient_email'    => $action['recipient_email'] ?? null,
                     'webhook_id'         => $action['webhook_id'] ?? null,
+                    'apprise_id'         => $action['apprise_id'] ?? null,
                     'sort_order'         => $action['sort_order'] ?? $i,
                 ]);
             }
@@ -183,6 +184,7 @@ class PingAlertRuleController extends Controller
                         'email_template_id'  => $action['email_template_id'] ?? null,
                         'recipient_email'    => $action['recipient_email'] ?? null,
                         'webhook_id'         => $action['webhook_id'] ?? null,
+                        'apprise_id'         => $action['apprise_id'] ?? null,
                         'sort_order'         => $action['sort_order'] ?? $i,
                     ]);
                 }

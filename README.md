@@ -38,6 +38,7 @@ Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Ine
 - **Real-time Notifications**: Get notified of run successes or failures via Inertia notifications.
 - **Modern Stack**: Built with Laravel 12, Vue 3, shadcn/vue, and Tailwind CSS v4.
 - **Webhooks**: Integrate with your favorite services for real-time notifications.
+- **Apprise**: Fan out notifications to 80+ messaging services (Slack, Discord, Telegram, Signal, and more) through a self-hosted Apprise gateway.
 - **Prometheus Integration**: Expose a `/metrics` scrape endpoint for monitoring with Prometheus and Grafana.
 - **Email Services**: Send speedtest results via SMTP, Mailgun, Postmark, AWS SES, and more.
 - **Ping Test**: Check the latency of your internet connection.
@@ -210,6 +211,7 @@ Every MCP tool maps to a REST API endpoint and requires the same Sanctum token a
 | Schedules | `schedules:view`, `schedules:create`, `schedules:update`, `schedules:delete` | `ListProviderSchedules` |
 | Maintenance | `maintenance:view`, `maintenance:create`, `maintenance:update`, `maintenance:delete` | `ListMaintenanceWindows`, `CreateMaintenanceWindow`, `UpdateMaintenanceWindow`, `DeleteMaintenanceWindow`, `ToggleGlobalPause` |
 | Webhooks | `webhooks:view`, `webhooks:create`, `webhooks:update`, `webhooks:delete`, `webhooks:test` | `ListWebhooks`, `CreateWebhook`, `UpdateWebhook`, `DeleteWebhook`, `TestWebhook` |
+| Apprise | `apprise:view`, `apprise:create`, `apprise:update`, `apprise:delete`, `apprise:test` | — (no MCP tools yet; use the REST API or web UI) |
 | Alerts | `alerts:view`, `alerts:create`, `alerts:update`, `alerts:delete` | `ListAlertRules`, `CreateAlertRule`, `UpdateAlertRule`, `DeleteAlertRule`, `ToggleAlertRule` |
 | Ping Alerts | `ping-alerts:view`, `ping-alerts:create`, `ping-alerts:update`, `ping-alerts:delete` | `ListPingAlertRules`, `CreatePingAlertRule`, `UpdatePingAlertRule`, `DeletePingAlertRule`, `TogglePingAlertRule` |
 | Exports | `exports:view`, `exports:create` | `ListExports`, `CreateExport`, `GetExport` |
@@ -253,7 +255,7 @@ The MCP server mirrors the REST API 1:1. The table below maps every MCP tool to 
 | `CreateExport` | `POST /api/v1/exports` | `exports:create` |
 | `GetExport` | `GET /api/v1/exports/{id}` | `exports:view` or `exports:create` |
 
-Not exposed over MCP (use the REST API or web UI instead): `GET /api/v1/webhooks/{id}/deliveries` (delivery history) and `GET /api/v1/exports/{id}/download` (binary download — `GetExport` returns the file contents for `csv`/`json` exports when `include_content` is set).
+Not exposed over MCP (use the REST API or web UI instead): the Apprise API (`/api/v1/apprise*` — notification gateway management), `GET /api/v1/webhooks/{id}/deliveries` (delivery history) and `GET /api/v1/exports/{id}/download` (binary download — `GetExport` returns the file contents for `csv`/`json` exports when `include_content` is set).
 
 ## Speedtest Providers
 - [mikkelam/fast-cli](https://github.com/mikkelam/fast-cli)

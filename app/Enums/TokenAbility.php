@@ -19,6 +19,12 @@ enum TokenAbility: string
 
     case AppView = 'app:view';
 
+    case AppriseView = 'apprise:view';
+    case AppriseCreate = 'apprise:create';
+    case AppriseUpdate = 'apprise:update';
+    case AppriseDelete = 'apprise:delete';
+    case AppriseTest = 'apprise:test';
+
     case ExportsView = 'exports:view';
     case ExportsCreate = 'exports:create';
 
@@ -59,6 +65,7 @@ enum TokenAbility: string
         return match ($this) {
             self::AlertsView, self::AlertsCreate, self::AlertsUpdate, self::AlertsDelete                             => 'Alerts',
             self::AppView                                                                                            => 'App',
+            self::AppriseView, self::AppriseCreate, self::AppriseUpdate, self::AppriseDelete, self::AppriseTest      => 'Apprise',
             self::ExportsView, self::ExportsCreate                                                                   => 'Exports',
             self::MaintenanceView, self::MaintenanceCreate, self::MaintenanceUpdate, self::MaintenanceDelete         => 'Maintenance',
             self::PingAlertsView, self::PingAlertsCreate, self::PingAlertsUpdate, self::PingAlertsDelete             => 'Ping Alerts',

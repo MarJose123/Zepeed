@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePingAlertRuleRequest;
 use App\Http\Requests\UpdatePingAlertRuleRequest;
+use App\Http\Resources\AppriseResource;
 use App\Http\Resources\EmailTemplateResource;
 use App\Http\Resources\MailProviderResource;
 use App\Http\Resources\PingAlertRuleResource;
 use App\Http\Resources\PingTargetResource;
 use App\Http\Resources\WebhookResource;
+use App\Models\Apprise;
 use App\Models\EmailTemplate;
 use App\Models\MailProvider;
 use App\Models\PingAlertAction;
@@ -29,7 +31,7 @@ class PingAlertRuleController extends Controller
         return Inertia::render('network/PingAlerts', [
             'rules' => PingAlertRuleResource::collection(
                 PingAlertRule::query()
-                    ->with(['target', 'conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook'])
+                    ->with(['target', 'conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook', 'actions.apprise'])
                     ->latest()
                     ->get()
             )->resolve(),
@@ -51,6 +53,10 @@ class PingAlertRuleController extends Controller
 
             'webhooks' => WebhookResource::collection(
                 Webhook::query()->where('is_active', true)->latest()->get()
+            )->resolve(),
+
+            'apprises' => AppriseResource::collection(
+                Apprise::query()->where('is_active', true)->latest()->get()
             )->resolve(),
         ]);
     }
@@ -87,6 +93,7 @@ class PingAlertRuleController extends Controller
                     'email_template_id'  => $action['email_template_id'] ?? null,
                     'recipient_email'    => $action['recipient_email'] ?? null,
                     'webhook_id'         => $action['webhook_id'] ?? null,
+                    'apprise_id'         => $action['apprise_id'] ?? null,
                     'sort_order'         => $action['sort_order'] ?? $i,
                 ]);
             }
@@ -150,6 +157,7 @@ class PingAlertRuleController extends Controller
                         'email_template_id'  => $action['email_template_id'] ?? null,
                         'recipient_email'    => $action['recipient_email'] ?? null,
                         'webhook_id'         => $action['webhook_id'] ?? null,
+                        'apprise_id'         => $action['apprise_id'] ?? null,
                         'sort_order'         => $action['sort_order'] ?? $i,
                     ]);
                 }

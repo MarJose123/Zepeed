@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
+import type { Apprise } from "@/types/apprise";
 import type { EmailTemplate } from "@/types/email-template";
 import type { MailProvider } from "@/types/mail";
 import type { PingAlertRule, PingTarget } from "@/types/ping";
@@ -34,6 +35,7 @@ const props = defineProps<{
     mail_providers: MailProvider[];
     email_templates: EmailTemplate[];
     webhooks: Webhook[];
+    apprises: Apprise[];
 }>();
 
 const breadcrumbs: TBreadcrumbItem[] = [
@@ -136,11 +138,14 @@ const lastTriggeredLabel = (rule: PingAlertRule): string => {
 const actionsSummary = (rule: PingAlertRule): string => {
     const emails = rule.actions.filter((a) => a.type === "email").length;
     const webhooks = rule.actions.filter((a) => a.type === "webhook").length;
+    const apprises = rule.actions.filter((a) => a.type === "apprise").length;
     const parts = [];
 
     if (emails) parts.push(`${emails} email${emails > 1 ? "s" : ""}`);
 
     if (webhooks) parts.push(`${webhooks} webhook${webhooks > 1 ? "s" : ""}`);
+
+    if (apprises) parts.push(`${apprises} apprise${apprises > 1 ? "s" : ""}`);
 
     return parts.join(" + ") || "No actions";
 };
@@ -328,6 +333,7 @@ const actionsSummary = (rule: PingAlertRule): string => {
                     :mail-providers="mail_providers"
                     :email-templates="email_templates"
                     :webhooks="webhooks"
+                    :apprises="apprises"
                     @cancel="closeBuilder"
                 />
             </div>
