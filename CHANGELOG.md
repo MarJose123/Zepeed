@@ -4,6 +4,24 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 1.4.0 - 2026-08-10
+
+### What's Changed
+
+* chore(deps): bump softprops/action-gh-release from 3 to 3.0.1 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/59
+* chore(deps): bump softprops/action-gh-release from 3.0.1 to 3.0.2 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/64
+* chore(deps): bump docker/login-action from 4.4.0 to 4.5.1 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/65
+* Add API endpoint for fetching latest speedtest results by provider by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/66
+* Feat(api): add missing REST API endpoints, Sanctum token abilities, and Scramble API docs by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/67
+* feat(mcp): implement missing MCP endpoints in parity with the REST API by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/68
+* chore(deps): bump docker/login-action from 4.5.1 to 4.6.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/69
+* feat(ci): add workflow to update Docker Hub description by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/70
+* fix: correct ping-results export route name by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/71
+* feat: allow marking individual notifications as read by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/72
+* feat(alerts): add Apprise integration for alert notifications by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/74
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v1.3.0...v1.4.0
+
 ## Release 1.3.0 - 2026-07-11
 
 ### What's Changed
