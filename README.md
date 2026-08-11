@@ -7,16 +7,16 @@
 
 <div align="center">
 
-![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image)
-![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release)
-![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls)
+![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image&cacheSeconds=86400)
+![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release&cacheSeconds=86400)
+![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls&cacheSeconds=86400)
 
 
-![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=main&style=flat-square&label=API%20Test)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=main&style=flat-square&label=PHPStan)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=main&style=flat-square&label=Code%20Style)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=main&style=flat-square&label=MCP%20Tests)
+![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License&cacheSeconds=432000)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=v1.x&style=flat-square&label=API%20Test&cacheSeconds=86400)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=v1.x&style=flat-square&label=PHPStan&cacheSeconds=86400)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=v1.x&style=flat-square&label=Code%20Style&cacheSeconds=86400)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=v1.x&style=flat-square&label=MCP%20Tests&cacheSeconds=86400)
 
 
 
@@ -24,7 +24,7 @@
 
 Zepeed is a powerful speedtest aggregator and monitor built with Laravel 13, Inertia.js, and Vue 3. It allows you to schedule and run speedtests using multiple providers like Speedtest Ookla, LibreSpeed, and Fast.com, providing a unified dashboard for monitoring your network performance.
 
-[**Explore the Documentation »**](https://zepeed.mintlify.app/)
+[**Explore the Documentation**](https://zepeed.mintlify.app/)
 
 ![banner.png](/.showcase/banner.png)
 

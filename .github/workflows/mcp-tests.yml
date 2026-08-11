@@ -2,9 +2,11 @@ name: "MCP Tests"
 
 on:
   push:
-    branches: [ "main", "master", "develop" ]
+    branches:
+      - v1.x
   pull_request:
-    branches: [ "main", "master", "develop" ]
+    branches:
+      - v1.x
 
 jobs:
   mcp-tests:

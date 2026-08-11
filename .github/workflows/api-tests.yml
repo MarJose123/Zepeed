@@ -2,9 +2,11 @@ name: "API Tests"
 
 on:
   push:
-    branches: [ "main", "master", "develop" ]
+    branches:
+      - v1.x
   pull_request:
-    branches: [ "main", "master", "develop" ]
+    branches:
+      - v1.x
 
 jobs:
   api-tests:

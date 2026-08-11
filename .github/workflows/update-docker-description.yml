@@ -3,7 +3,7 @@ name: "Update Docker Hub Description"
 on:
   push:
     branches:
-      - main
+      - v1.x
     paths:
       - README.md
       - .github/workflows/dockerhub-description.yml
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref: main
+          ref: v1.x
           fetch-depth: 0
 
       - name: Update Docker Hub description
