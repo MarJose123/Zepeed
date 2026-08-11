@@ -13,7 +13,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
 
     env:
-      BRANCH_NAME: main
+      BRANCH_NAME: v1.x
 
     steps:
       - name: Checkout code
