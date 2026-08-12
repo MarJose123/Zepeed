@@ -18,7 +18,7 @@ use Throwable;
 
 #[Group(
     name: 'Apprise',
-    description: 'Manage Apprise notification gateway configurations. Each instance points at an Apprise API server and carries its own tags and optional Basic Auth credentials. Apprise instances are triggered by alert rules when speedtest or ping conditions match.',
+    description: 'Manage Apprise notification gateway configurations. Each instance points at an Apprise API server and carries its own tags and optional Basic Auth credentials. Apprise instances are triggered by workflow rules (speedtest) or ping alert rules when their conditions match.',
     weight: 12,
 )]
 /**
@@ -26,8 +26,8 @@ use Throwable;
  *
  * Manage Apprise notification gateway configurations. Each instance points at
  * an Apprise API server and carries its own tags and optional Basic Auth
- * credentials. Apprise instances are triggered by alert rules when speedtest
- * or ping conditions match.
+ * credentials. Apprise instances are triggered by workflow rules (speedtest)
+ * or ping alert rules when their conditions match.
  */
 class AppriseController extends Controller
 {

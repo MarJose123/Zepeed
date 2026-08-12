@@ -2,16 +2,16 @@
 import { router, usePage } from "@inertiajs/vue3";
 import { Head } from "@inertiajs/vue3";
 import { ref } from "vue";
-import PublicAlertHistory from "@/components/public/PublicAlertHistory.vue";
 import PublicPingResultsTable from "@/components/public/PublicPingResultsTable.vue";
 import PublicResultsTable from "@/components/public/PublicResultsTable.vue";
 import PublicStatCard from "@/components/public/PublicStatCard.vue";
 import PublicTrendChart from "@/components/public/PublicTrendChart.vue";
+import PublicWorkflowRules from "@/components/public/PublicWorkflowRules.vue";
 import { usePublicDashboardRefresh } from "@/composables/usePublicDashboardRefresh";
 import { usePublicPingRefresh } from "@/composables/usePublicPingRefresh";
 import PublicLayout from "@/layouts/PublicLayout.vue";
 import type {
-    PublicAlertItem,
+    PublicWorkflowRuleItem,
     PublicDashboardRefreshPayload,
     PublicPingRefreshPayload,
     PublicPingResult,
@@ -25,7 +25,7 @@ const props = defineProps<{
     trend: TrendPoint[];
     recentResults: PublicSpeedResult[];
     recentPingResults: PublicPingResult[];
-    alertHistory: PublicAlertItem[];
+    workflowRules: PublicWorkflowRuleItem[];
 }>();
 
 const page = usePage<{
@@ -180,9 +180,9 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
                 <p
                     class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
                 >
-                    Alert history
+                    Workflow rules
                 </p>
-                <PublicAlertHistory :alerts="alertHistory" />
+                <PublicWorkflowRules :rules="workflowRules" />
             </section>
         </div>
     </PublicLayout>

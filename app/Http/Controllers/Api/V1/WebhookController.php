@@ -19,14 +19,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 #[Group(
     name: 'Webhooks',
-    description: 'Manage outbound webhook configurations and inspect their delivery history. Webhooks are triggered by alert rules when speedtest or ping conditions match.',
+    description: 'Manage outbound webhook configurations and inspect their delivery history. Webhooks are triggered by workflow rules (speedtest) or ping alert rules when their conditions match.',
     weight: 11,
 )]
 /**
  * Webhook Endpoints
  *
  * Manage outbound webhook configurations and inspect their delivery history.
- * Webhooks are triggered by alert rules when speedtest or ping conditions match.
+ * Webhooks are triggered by workflow rules (speedtest) or ping alert rules
+ * when their conditions match.
  */
 class WebhookController extends Controller
 {

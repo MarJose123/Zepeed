@@ -92,7 +92,7 @@ class EmailTemplate extends Model
 
     public function isUsedInRules(): bool
     {
-        return AlertRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('email_template_id', $this->id)
             ->exists()
             ||
@@ -104,7 +104,7 @@ class EmailTemplate extends Model
     /** @return array<string> */
     public function usedInRuleNames(): array
     {
-        $speedtestNames = AlertRuleAction::query()
+        $speedtestNames = WorkflowRuleAction::query()
             ->where('email_template_id', $this->id)
             ->with('rule')
             ->get()

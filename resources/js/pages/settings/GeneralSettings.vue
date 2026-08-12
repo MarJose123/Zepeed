@@ -225,7 +225,7 @@ const dangerActions: TDangerActionConfig[] = [
     {
         key: "clear_results",
         title: "Clear all speed results",
-        desc: "Truncates the speed_results table. All historical test rows are permanently deleted. Providers, alert rules, schedules, and mail providers are not affected.",
+        desc: "Truncates the speed_results table. All historical test rows are permanently deleted. Providers, workflow rules, schedules, and mail providers are not affected.",
         word: "CLEAR RESULTS",
         label: "Execute",
         detail: "All speedtest rows will be permanently deleted. This cannot be undone.",
@@ -241,7 +241,7 @@ const dangerActions: TDangerActionConfig[] = [
     {
         key: "reset_config",
         title: "Reset all configuration",
-        desc: "Deletes all providers, alert rules, mail providers, webhooks, email templates, schedules, and maintenance windows. Speed results and user accounts are fully preserved.",
+        desc: "Deletes all providers, workflow rules, mail providers, webhooks, email templates, schedules, and maintenance windows. Speed results and user accounts are fully preserved.",
         word: "RESET CONFIG",
         label: "Execute",
         detail: "All configuration will be wiped. Speed results and user accounts are fully preserved.",

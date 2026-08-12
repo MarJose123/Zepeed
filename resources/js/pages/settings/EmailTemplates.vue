@@ -342,7 +342,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             class="text-muted-foreground text-xs leading-relaxed"
                         >
                             Choose <strong>Speedtest result</strong> for speed
-                            alert rules and <strong>Ping result</strong> for
+                            workflow rules and <strong>Ping result</strong> for
                             ping alert rules. The merge field picker
                             automatically shows only the fields relevant to the
                             selected type.

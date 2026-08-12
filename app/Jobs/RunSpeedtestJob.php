@@ -16,8 +16,8 @@ use App\Models\MaintenanceWindow;
 use App\Models\Provider;
 use App\Models\SpeedResult;
 use App\Models\SpeedtestTestSession;
-use App\Services\AlertRuleService;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
+use App\Services\WorkflowRuleService;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -69,7 +69,7 @@ class RunSpeedtestJob implements ShouldQueue
         return "speedtest-provider-{$slug->value}";
     }
 
-    public function handle(AlertRuleService $alertRuleService): void
+    public function handle(WorkflowRuleService $workflowRuleService): void
     {
         $slug = $this->provider->slug;
 
@@ -122,7 +122,7 @@ class RunSpeedtestJob implements ShouldQueue
                 'provider' => $slug->value,
             ]);
 
-            $alertRuleService->evaluate($skipped);
+            $workflowRuleService->evaluate($skipped);
 
             return;
         }
@@ -158,7 +158,7 @@ class RunSpeedtestJob implements ShouldQueue
             if (! $this->testOnly) {
                 $speedResult = SpeedResult::query()->create($result->toStorageArray());
                 $this->provider->markSuccessful();
-                $alertRuleService->evaluate($speedResult);
+                $workflowRuleService->evaluate($speedResult);
             }
 
             if ($this->testOnly && $this->testSessionId) {
@@ -195,7 +195,7 @@ class RunSpeedtestJob implements ShouldQueue
             if (! $this->testOnly) {
                 $failed = SpeedResult::recordFailed(provider: $this->provider, e: $e);
                 $this->provider->markFailed();
-                $alertRuleService->evaluate($failed);
+                $workflowRuleService->evaluate($failed);
             }
 
             if ($this->testOnly && $this->testSessionId) {

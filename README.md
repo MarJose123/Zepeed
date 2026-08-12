@@ -89,7 +89,7 @@ composer run rector     # Rector fixes
 
 ## MCP Server
 
-Zepeed exposes an MCP (Model Context Protocol) server at `/mcp/zepeed` that AI tools like Claude, Cursor, and GitHub Copilot can connect to. All tools require a Sanctum API token for authentication, and every tool enforces the same [token abilities](#token-abilities) as the REST API — an AI can query monitoring data and manage providers, maintenance windows, webhooks, alerts, and exports, but only within the permissions granted to its token.
+Zepeed exposes an MCP (Model Context Protocol) server at `/mcp/zepeed` that AI tools like Claude, Cursor, and GitHub Copilot can connect to. All tools require a Sanctum API token for authentication, and every tool enforces the same [token abilities](#token-abilities) as the REST API — an AI can query monitoring data and manage providers, maintenance windows, webhooks, workflow rules, and exports, but only within the permissions granted to its token.
 
 ### 1. Generate an API Token
 
@@ -192,7 +192,7 @@ Once connected, your AI can query and manage Zepeed using natural language:
 | *"Run a speedtest on Ookla now"* | `RunSpeedtest` |
 | *"Show me the maintenance windows"* | `ListMaintenanceWindows` |
 | *"Pause all speedtest runs"* | `ToggleGlobalPause` |
-| *"List my webhooks and alert rules"* | `ListWebhooks`, `ListAlertRules`, `ListPingAlertRules` |
+| *"List my webhooks and workflow rules"* | `ListWebhooks`, `ListWorkflowRules`, `ListPingAlertRules` |
 | *"Create an export of last month's ping results"* | `CreateExport` |
 | *"What tools are available?"* | lists all 30 tools |
 
@@ -212,7 +212,7 @@ Every MCP tool maps to a REST API endpoint and requires the same Sanctum token a
 | Maintenance | `maintenance:view`, `maintenance:create`, `maintenance:update`, `maintenance:delete` | `ListMaintenanceWindows`, `CreateMaintenanceWindow`, `UpdateMaintenanceWindow`, `DeleteMaintenanceWindow`, `ToggleGlobalPause` |
 | Webhooks | `webhooks:view`, `webhooks:create`, `webhooks:update`, `webhooks:delete`, `webhooks:test` | `ListWebhooks`, `CreateWebhook`, `UpdateWebhook`, `DeleteWebhook`, `TestWebhook` |
 | Apprise | `apprise:view`, `apprise:create`, `apprise:update`, `apprise:delete`, `apprise:test` | — (no MCP tools yet; use the REST API or web UI) |
-| Alerts | `alerts:view`, `alerts:create`, `alerts:update`, `alerts:delete` | `ListAlertRules`, `CreateAlertRule`, `UpdateAlertRule`, `DeleteAlertRule`, `ToggleAlertRule` |
+| Workflow Rules | `workflow-rules:view`, `workflow-rules:create`, `workflow-rules:update`, `workflow-rules:delete` | `ListWorkflowRules`, `CreateWorkflowRule`, `UpdateWorkflowRule`, `DeleteWorkflowRule`, `ToggleWorkflowRule` |
 | Ping Alerts | `ping-alerts:view`, `ping-alerts:create`, `ping-alerts:update`, `ping-alerts:delete` | `ListPingAlertRules`, `CreatePingAlertRule`, `UpdatePingAlertRule`, `DeletePingAlertRule`, `TogglePingAlertRule` |
 | Exports | `exports:view`, `exports:create` | `ListExports`, `CreateExport`, `GetExport` |
 
@@ -241,11 +241,11 @@ The MCP server mirrors the REST API 1:1. The table below maps every MCP tool to 
 | `UpdateWebhook` | `PATCH /api/v1/webhooks/{id}` | `webhooks:update` |
 | `DeleteWebhook` | `DELETE /api/v1/webhooks/{id}` | `webhooks:delete` |
 | `TestWebhook` | `POST /api/v1/webhooks/{id}/test` | `webhooks:test` |
-| `ListAlertRules` | `GET /api/v1/alerts` | any `alerts:*` |
-| `CreateAlertRule` | `POST /api/v1/alerts` | `alerts:create` |
-| `UpdateAlertRule` | `PATCH /api/v1/alerts/{id}` | `alerts:update` |
-| `DeleteAlertRule` | `DELETE /api/v1/alerts/{id}` | `alerts:delete` |
-| `ToggleAlertRule` | `POST /api/v1/alerts/{id}/toggle` | `alerts:update` |
+| `ListWorkflowRules` | `GET /api/v1/workflow-rules` | any `workflow-rules:*` |
+| `CreateWorkflowRule` | `POST /api/v1/workflow-rules` | `workflow-rules:create` |
+| `UpdateWorkflowRule` | `PATCH /api/v1/workflow-rules/{id}` | `workflow-rules:update` |
+| `DeleteWorkflowRule` | `DELETE /api/v1/workflow-rules/{id}` | `workflow-rules:delete` |
+| `ToggleWorkflowRule` | `POST /api/v1/workflow-rules/{id}/toggle` | `workflow-rules:update` |
 | `ListPingAlertRules` | `GET /api/v1/ping-alerts` | any `ping-alerts:*` |
 | `CreatePingAlertRule` | `POST /api/v1/ping-alerts` | `ping-alerts:create` |
 | `UpdatePingAlertRule` | `PATCH /api/v1/ping-alerts/{id}` | `ping-alerts:update` |

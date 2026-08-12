@@ -97,7 +97,7 @@ function destroyWebhook() {
                 <div>
                     <h1 class="text-xl font-semibold">Webhooks</h1>
                     <p class="text-muted-foreground mt-1 text-sm">
-                        Configure reusable endpoints triggered by alert rules
+                        Configure reusable endpoints triggered by workflow rules
                     </p>
                 </div>
             </div>
@@ -141,7 +141,7 @@ function destroyWebhook() {
                         No webhooks configured.
                     </p>
                     <p class="text-muted-foreground mt-0.5 text-xs">
-                        Add a webhook to use it as an action in alert rules.
+                        Add a webhook to use it as an action in workflow rules.
                     </p>
                 </div>
                 <Button
@@ -208,8 +208,8 @@ function destroyWebhook() {
                         v-else-if="deleteTarget"
                         class="text-muted-foreground mb-2"
                     >
-                        {{ deleteTarget.name }} is not used in any alert rules
-                        and can be safely removed.
+                        {{ deleteTarget.name }} is not used in any workflow
+                        rules and can be safely removed.
                     </p>
 
                     <p class="text-muted-foreground">

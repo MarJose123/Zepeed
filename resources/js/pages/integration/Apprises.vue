@@ -89,7 +89,8 @@ function destroyApprise() {
                 <div>
                     <h1 class="text-xl font-semibold">Apprise</h1>
                     <p class="text-muted-foreground mt-1 text-sm">
-                        Apprise notification gateways triggered by alert rules
+                        Apprise notification gateways triggered by workflow
+                        rules
                     </p>
                 </div>
             </div>
@@ -134,7 +135,7 @@ function destroyApprise() {
                     </p>
                     <p class="text-muted-foreground mt-0.5 text-xs">
                         Add an Apprise API server to use it as an action in
-                        alert rules.
+                        workflow rules.
                     </p>
                 </div>
                 <Button
@@ -194,8 +195,8 @@ function destroyApprise() {
                         v-else-if="deleteTarget"
                         class="text-muted-foreground mb-2"
                     >
-                        {{ deleteTarget.name }} is not used in any alert rules
-                        and can be safely removed.
+                        {{ deleteTarget.name }} is not used in any workflow
+                        rules and can be safely removed.
                     </p>
 
                     <p class="text-muted-foreground">

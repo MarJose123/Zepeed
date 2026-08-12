@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AlertRule;
 use App\Models\PingResult;
 use App\Models\Provider;
 use App\Models\SpeedResult;
+use App\Models\WorkflowRule;
 use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -91,12 +91,12 @@ class PublicDashboardController extends Controller
             ->values()
             ->all();
 
-        $alertHistory = AlertRule::query()
+        $workflowRules = WorkflowRule::query()
             ->select(['id', 'name', 'is_active', 'updated_at'])
             ->latest('updated_at')
             ->limit(10)
             ->get()
-            ->map(static fn (AlertRule $rule): array => [
+            ->map(static fn (WorkflowRule $rule): array => [
                 'id'         => $rule->id,
                 'name'       => $rule->name,
                 'is_enabled' => $rule->is_active,
@@ -108,7 +108,7 @@ class PublicDashboardController extends Controller
             'trend'             => $trend,
             'recentResults'     => $recentResults,
             'recentPingResults' => $recentPingResults,
-            'alertHistory'      => $alertHistory,
+            'workflowRules'     => $workflowRules,
         ]);
     }
 }

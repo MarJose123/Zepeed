@@ -87,11 +87,11 @@ class Apprise extends Model
     }
 
     /**
-     * Check if this Apprise instance is referenced by any alert rules.
+     * Check if this Apprise instance is referenced by any rules.
      */
     public function isUsedInRules(): bool
     {
-        return AlertRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('apprise_id', $this->id)
             ->exists()
             || PingAlertAction::query()
@@ -100,13 +100,13 @@ class Apprise extends Model
     }
 
     /**
-     * Names of alert rules using this Apprise instance.
+     * Names of rules using this Apprise instance.
      *
      * @return array<string>
      */
     public function usedInRuleNames(): array
     {
-        return AlertRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('apprise_id', $this->id)
             ->with('rule')
             ->get()

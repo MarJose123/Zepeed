@@ -72,8 +72,12 @@ const navigation: TSidebarNavigationItems = [
                         ),
                     },
                     {
-                        title: "Alert Rules",
-                        href: route("speedtest.alert-rules.index", {}, false),
+                        title: "Workflow Rules",
+                        href: route(
+                            "speedtest.workflow-rules.index",
+                            {},
+                            false,
+                        ),
                     },
                     {
                         title: "Email Templates",
