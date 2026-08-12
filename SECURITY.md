@@ -5,9 +5,9 @@
 The following versions of this project are currently supported with security updates.
 
 | Version | Supported          |
-| ------- | ------------------ |
-| v1.x   | :white_check_mark: |
-| v2.x   | :white_check_mark: |
+| ----- | ------------------ |
+| 1.x  | :white_check_mark: |
+| 2.x  | :white_check_mark: |
 
 
 ## Reporting a Vulnerability

@@ -3,10 +3,10 @@ name: "API Tests"
 on:
   push:
     branches:
-      - v1.x
+      - 2.x
   pull_request:
     branches:
-      - v1.x
+      - 2.x
 
 jobs:
   api-tests:

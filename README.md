@@ -13,10 +13,10 @@
 
 
 ![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License&cacheSeconds=7200)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=v1.x&style=flat-square&label=API%20Test&cacheSeconds=3600)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=v1.x&style=flat-square&label=PHPStan&cacheSeconds=3600)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=v1.x&style=flat-square&label=Code%20Style&cacheSeconds=3600)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=v1.x&style=flat-square&label=MCP%20Tests&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=2.x&style=flat-square&label=API%20Test&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=2.x&style=flat-square&label=PHPStan&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=2.x&style=flat-square&label=Code%20Style&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=2.x&style=flat-square&label=MCP%20Tests&cacheSeconds=3600)
 
 
 

@@ -3,14 +3,14 @@ name: PHPStan
 on:
   push:
     branches:
-      - v1.x
+      - 2.x
     paths:
       - '**.php'
       - 'phpstan.neon.dist'
       - '.github/workflows/phpstan.yml'
   pull_request:
     branches:
-      - v1.x
+      - 2.x
 
 jobs:
   phpstan:

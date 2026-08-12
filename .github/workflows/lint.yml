@@ -3,10 +3,10 @@ name: "Code Style & Quality Fixes"
 on:
   push:
     branches:
-      - v1.x
+      - 2.x
   pull_request:
     branches:
-      - v1.x
+      - 2.x
 
 permissions:
   contents: write
@@ -50,4 +50,4 @@ jobs:
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
           commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          branch: v1.x
+          branch: 2.x
