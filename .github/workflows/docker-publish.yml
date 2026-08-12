@@ -37,10 +37,10 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout v1.x branch (post-release commit)
+      - name: Checkout 2.x branch (post-release commit)
         uses: actions/checkout@v7
         with:
-          ref: "v1.x"
+          ref: "2.x"
           fetch-depth: 0
 
       # ── Resolve the version from whichever trigger fired ──────────────────
