@@ -7,16 +7,16 @@
 
 <div align="center">
 
-![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image&cacheSeconds=86400)
-![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release&sort=semver&filter=v1.*&cacheSeconds=86400)
-![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls&cacheSeconds=86400)
+![Docker Image Version](https://img.shields.io/docker/v/marjose123/zepeed?style=flat-square&label=Docker%20Image&cacheSeconds=3600)
+![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release&sort=semver&filter=v1.*&cacheSeconds=3600)
+![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls&cacheSeconds=3600)
 
 
-![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License&cacheSeconds=432000)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=v1.x&style=flat-square&label=API%20Test&cacheSeconds=86400)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=v1.x&style=flat-square&label=PHPStan&cacheSeconds=86400)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=v1.x&style=flat-square&label=Code%20Style&cacheSeconds=86400)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=v1.x&style=flat-square&label=MCP%20Tests&cacheSeconds=86400)
+![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License&cacheSeconds=7200)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/api-tests.yml?branch=v1.x&style=flat-square&label=API%20Test&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/phpstan.yml?branch=v1.x&style=flat-square&label=PHPStan&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/lint.yml?branch=v1.x&style=flat-square&label=Code%20Style&cacheSeconds=3600)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/marjose123/Zepeed/mcp-tests.yml?branch=v1.x&style=flat-square&label=MCP%20Tests&cacheSeconds=3600)
 
 
 
