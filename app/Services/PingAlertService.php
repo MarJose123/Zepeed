@@ -10,7 +10,6 @@ use App\Models\PingTarget;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class PingAlertService
@@ -18,6 +17,7 @@ class PingAlertService
     public function __construct(
         private readonly WebhookService $webhookService,
         private readonly AppriseService $appriseService,
+        private readonly MailProviderService $mailProviderService,
     ) {}
 
     /**
@@ -158,9 +158,13 @@ class PingAlertService
         $subject = $template->renderSubject($mergeData);
         $body = $template->renderBody($mergeData);
 
-        $mailer = $action->mail_provider_id
-            ? Mail::mailer($action->mail_provider_id)
-            : Mail::mailer('zepeed_failover');
+        $mailer = $this->mailProviderService->mailerFor($action->mail_provider_id);
+
+        if ($mailer === null) {
+            Log::warning("PingAlertService: no mailer available for action [{$action->id}] on rule [{$rule->id}]; skipping email to [{$action->recipient_email}].");
+
+            return;
+        }
 
         $mailer->html(
             $body,

@@ -43,7 +43,7 @@ class WorkflowRuleController extends Controller
                 ]),
 
             'mail_providers' => MailProviderResource::collection(
-                MailProvider::query()->ordered()->get()
+                MailProvider::query()->active()->ordered()->get()
             )->resolve(),
 
             'email_templates' => EmailTemplateResource::collection(

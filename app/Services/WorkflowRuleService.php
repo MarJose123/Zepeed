@@ -10,7 +10,6 @@ use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class WorkflowRuleService
@@ -18,6 +17,7 @@ class WorkflowRuleService
     public function __construct(
         private readonly WebhookService $webhookService,
         private readonly AppriseService $appriseService,
+        private readonly MailProviderService $mailProviderService,
     ) {}
 
     /**
@@ -130,10 +130,15 @@ class WorkflowRuleService
         $subject = $template->renderSubject($mergeData);
         $body = $template->renderBody($mergeData);
 
-        // Use the specific mail provider if set, otherwise use the failover chain
-        $mailer = $action->mail_provider_id
-            ? Mail::mailer($action->mail_provider_id)
-            : Mail::mailer('zepeed_failover');
+        // Use the action's specific provider when registered, otherwise fall
+        // back to the failover chain (and skip when no mailer is available).
+        $mailer = $this->mailProviderService->mailerFor($action->mail_provider_id);
+
+        if ($mailer === null) {
+            Log::warning("WorkflowRuleService: no mailer available for action [{$action->id}] on rule [{$action->workflow_rule_id}]; skipping email to [{$action->recipient_email}].");
+
+            return;
+        }
 
         $mailer
             ->html($body, static function (Message $message) use ($subject, $action) {
