@@ -190,8 +190,8 @@ function flush() {
                         System metrics
                     </Label>
                     <p class="text-muted-foreground mt-0.5 text-[11px]">
-                        Alert rules, maintenance mode, webhook deliveries, app
-                        info.
+                        Workflow rules, maintenance mode, webhook deliveries,
+                        app info.
                     </p>
                 </div>
             </div>

@@ -4,10 +4,10 @@ namespace Tests\Feature\Api\V1;
 
 use App\Enums\SpeedtestServer;
 use App\Enums\TokenAbility;
-use App\Models\AlertRule;
 use App\Models\Provider;
 use App\Models\User;
 use App\Models\Webhook;
+use App\Models\WorkflowRule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -36,7 +36,7 @@ class TokenAbilityTest extends TestCase
     public function testTokenWithoutAbilityIsForbidden(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsView->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesView->value]);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->getJson('/api/v1/speedtest/results')
@@ -50,10 +50,10 @@ class TokenAbilityTest extends TestCase
     public function testWriteAbilityImpliesView(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsUpdate->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesUpdate->value]);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->getJson('/api/v1/alerts')
+            ->getJson('/api/v1/workflow-rules')
             ->assertOk();
     }
 
@@ -63,10 +63,10 @@ class TokenAbilityTest extends TestCase
     public function testViewAbilityCannotWrite(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsView->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesView->value]);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->postJson('/api/v1/alerts', [
+            ->postJson('/api/v1/workflow-rules', [
                 'name'               => 'Unauthorized rule',
                 'event'              => 'run_fails',
                 'condition_operator' => 'and',
@@ -100,12 +100,12 @@ class TokenAbilityTest extends TestCase
     public function testCreateAbilityCannotUpdate(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsCreate->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesCreate->value]);
 
-        $rule = AlertRule::factory()->create();
+        $rule = WorkflowRule::factory()->create();
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->patchJson("/api/v1/alerts/{$rule->id}", [
+            ->patchJson("/api/v1/workflow-rules/{$rule->id}", [
                 'name' => 'Attempted rename',
             ])
             ->assertForbidden();
@@ -117,12 +117,12 @@ class TokenAbilityTest extends TestCase
     public function testUpdateAbilityCanUpdate(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsUpdate->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesUpdate->value]);
 
-        $rule = AlertRule::factory()->create(['name' => 'Old name']);
+        $rule = WorkflowRule::factory()->create(['name' => 'Old name']);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->patchJson("/api/v1/alerts/{$rule->id}", [
+            ->patchJson("/api/v1/workflow-rules/{$rule->id}", [
                 'name' => 'New name',
             ])
             ->assertOk();
@@ -134,15 +134,15 @@ class TokenAbilityTest extends TestCase
     public function testDeleteAbilityCanDelete(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsDelete->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesDelete->value]);
 
-        $rule = AlertRule::factory()->create();
+        $rule = WorkflowRule::factory()->create();
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->deleteJson("/api/v1/alerts/{$rule->id}")
+            ->deleteJson("/api/v1/workflow-rules/{$rule->id}")
             ->assertOk();
 
-        $this->assertDatabaseMissing('alert_rules', ['id' => $rule->id]);
+        $this->assertDatabaseMissing('workflow_rules', ['id' => $rule->id]);
     }
 
     /**
@@ -151,15 +151,15 @@ class TokenAbilityTest extends TestCase
     public function testUpdateAbilityCannotDelete(): void
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token', [TokenAbility::AlertsUpdate->value]);
+        $token = $user->createToken('test-token', [TokenAbility::WorkflowRulesUpdate->value]);
 
-        $rule = AlertRule::factory()->create();
+        $rule = WorkflowRule::factory()->create();
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->deleteJson("/api/v1/alerts/{$rule->id}")
+            ->deleteJson("/api/v1/workflow-rules/{$rule->id}")
             ->assertForbidden();
 
-        $this->assertDatabaseHas('alert_rules', ['id' => $rule->id]);
+        $this->assertDatabaseHas('workflow_rules', ['id' => $rule->id]);
     }
 
     /**

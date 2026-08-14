@@ -12,10 +12,10 @@ namespace App\Enums;
  */
 enum TokenAbility: string
 {
-    case AlertsView = 'alerts:view';
-    case AlertsCreate = 'alerts:create';
-    case AlertsUpdate = 'alerts:update';
-    case AlertsDelete = 'alerts:delete';
+    case WorkflowRulesView = 'workflow-rules:view';
+    case WorkflowRulesCreate = 'workflow-rules:create';
+    case WorkflowRulesUpdate = 'workflow-rules:update';
+    case WorkflowRulesDelete = 'workflow-rules:delete';
 
     case AppView = 'app:view';
 
@@ -63,7 +63,7 @@ enum TokenAbility: string
     public function module(): string
     {
         return match ($this) {
-            self::AlertsView, self::AlertsCreate, self::AlertsUpdate, self::AlertsDelete                             => 'Alerts',
+            self::WorkflowRulesView, self::WorkflowRulesCreate, self::WorkflowRulesUpdate, self::WorkflowRulesDelete => 'Workflow Rules',
             self::AppView                                                                                            => 'App',
             self::AppriseView, self::AppriseCreate, self::AppriseUpdate, self::AppriseDelete, self::AppriseTest      => 'Apprise',
             self::ExportsView, self::ExportsCreate                                                                   => 'Exports',

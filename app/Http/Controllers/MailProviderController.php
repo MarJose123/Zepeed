@@ -42,6 +42,10 @@ class MailProviderController extends Controller
             'priority' => $priority,
         ]);
 
+        // Register the new provider as a runtime mailer right away so email
+        // actions can use it without waiting for the next process boot.
+        $this->service->buildFailoverMailer();
+
         InertiaNotification::make()
             ->success()
             ->title('Provider added')
@@ -59,6 +63,10 @@ class MailProviderController extends Controller
         MailProvider $mailProvider,
     ): RedirectResponse {
         $mailProvider->update($request->validated());
+
+        // Keep runtime mailer config in sync (e.g. when the provider is
+        // deactivated or its credentials change).
+        $this->service->buildFailoverMailer();
 
         InertiaNotification::make()
             ->success()
@@ -82,6 +90,9 @@ class MailProviderController extends Controller
                 $p->update(['priority' => $index + 1]);
             });
 
+        // Drop the deleted provider from the runtime mailer config.
+        $this->service->buildFailoverMailer();
+
         InertiaNotification::make()
             ->success()
             ->title('Provider removed')
@@ -94,6 +105,9 @@ class MailProviderController extends Controller
     public function reorder(ReorderMailProvidersRequest $request): RedirectResponse
     {
         $this->service->reorder($request->validated('ordered_ids'));
+
+        // Rebuild the failover chain with the new priority order.
+        $this->service->buildFailoverMailer();
 
         InertiaNotification::make()
             ->success()

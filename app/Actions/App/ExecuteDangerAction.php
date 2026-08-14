@@ -67,7 +67,7 @@ final class ExecuteDangerAction
         DB::transaction(static function (): void {
             Schema::disableForeignKeyConstraints();
 
-            foreach (['providers', 'alert_rules', 'mail_providers', 'webhooks', 'email_templates', 'schedules', 'maintenance_windows', 'settings'] as $table) {
+            foreach (['providers', 'workflow_rules', 'mail_providers', 'webhooks', 'email_templates', 'schedules', 'maintenance_windows', 'settings'] as $table) {
                 DB::table($table)->truncate();
             }
 

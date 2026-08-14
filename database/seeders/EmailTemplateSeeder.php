@@ -65,7 +65,7 @@ class EmailTemplateSeeder extends Seeder
                     '<p></p>',
                     '<hr>',
                     '<p></p>',
-                    '<p>You can adjust your alert thresholds in the alert rules settings.</p>',
+                    '<p>You can adjust your alert thresholds in the workflow rules settings.</p>',
                 ]),
             ],
 

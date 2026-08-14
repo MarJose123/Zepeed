@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ProviderSeeder::class,
             EmailTemplateSeeder::class,
             PingEmailTemplateSeeder::class,
+            WorkflowRulesMigratorSeeder::class,
         ]);
     }
 }

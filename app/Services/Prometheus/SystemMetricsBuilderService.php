@@ -2,40 +2,43 @@
 
 namespace App\Services\Prometheus;
 
-use App\Models\AlertRule;
 use App\Models\MaintenanceWindow;
 use App\Models\PingAlertRule;
 use App\Models\Webhook;
 use App\Models\WebhookDelivery;
+use App\Models\WorkflowRule;
 use Prometheus\CollectorRegistry;
 
 class SystemMetricsBuilderService
 {
     /**
-     * Register Groups 6, 7, 8, 9 — alert rules, maintenance,
+     * Register Groups 6, 7, 8, 9 — workflow rules, maintenance,
      * app info, and webhook delivery health.
      */
     public function register(CollectorRegistry $registry): void
     {
-        $this->registerAlertRules($registry);
+        $this->registerWorkflowRules($registry);
         $this->registerMaintenance($registry);
         $this->registerWebhooks($registry);
         $this->registerAppInfo($registry);
     }
 
     /**
-     * Group 6 — Speedtest and ping alert rule active state + last triggered.
+     * Group 6 — Speedtest workflow and ping alert rule active state + last triggered.
+     *
+     * The Prometheus gauge names below (`alert_rule_*`) are a stable external
+     * contract consumed by dashboards — they are intentionally not renamed.
      */
-    private function registerAlertRules(CollectorRegistry $registry): void
+    private function registerWorkflowRules(CollectorRegistry $registry): void
     {
-        $speedRules = AlertRule::query()
+        $speedRules = WorkflowRule::query()
             ->get(['name', 'provider_slug', 'event', 'is_active', 'last_triggered_at']);
 
         $pingRules = PingAlertRule::query()
             ->with('target:id,label')
             ->get(['id', 'name', 'ping_target_id', 'is_active', 'last_triggered_at']);
 
-        $srActive = $registry->registerGauge('zepeed', 'alert_rule_active', '1 if the speedtest alert rule is active', ['name', 'event', 'provider']);
+        $srActive = $registry->registerGauge('zepeed', 'alert_rule_active', '1 if the speedtest workflow rule is active', ['name', 'event', 'provider']);
         $srTs = $registry->registerGauge('zepeed', 'alert_rule_last_triggered_timestamp', 'Unix epoch of last trigger, 0 if never fired', ['name', 'provider']);
         $prActive = $registry->registerGauge('zepeed', 'ping_alert_rule_active', '1 if the ping alert rule is active', ['name', 'target']);
         $prTs = $registry->registerGauge('zepeed', 'ping_alert_rule_last_triggered_timestamp', 'Unix epoch of last trigger, 0 if never fired', ['name', 'target']);

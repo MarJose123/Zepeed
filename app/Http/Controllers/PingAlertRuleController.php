@@ -41,7 +41,7 @@ class PingAlertRuleController extends Controller
             )->resolve(),
 
             'mail_providers' => MailProviderResource::collection(
-                MailProvider::query()->ordered()->get()
+                MailProvider::query()->active()->ordered()->get()
             )->resolve(),
 
             'email_templates' => EmailTemplateResource::collection(

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\AppriseController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ExportController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\ProviderScheduleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpeedResultController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\WorkflowRuleController;
 
 Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.')->group(static function () {
 
@@ -100,14 +100,14 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
 
         });
 
-        Route::prefix('alert-rules/')
-            ->name('alert-rules.')
+        Route::prefix('workflow-rules/')
+            ->name('workflow-rules.')
             ->group(static function () {
-                Route::get('/', [AlertRuleController::class, 'index'])->name('index');
-                Route::post('/', [AlertRuleController::class, 'store'])->name('store');
-                Route::patch('/{alertRule}', [AlertRuleController::class, 'update'])->name('update');
-                Route::delete('/{alertRule}', [AlertRuleController::class, 'destroy'])->name('destroy');
-                Route::post('/{alertRule}/toggle', [AlertRuleController::class, 'toggle'])->name('toggle');
+                Route::get('/', [WorkflowRuleController::class, 'index'])->name('index');
+                Route::post('/', [WorkflowRuleController::class, 'store'])->name('store');
+                Route::patch('/{workflowRule}', [WorkflowRuleController::class, 'update'])->name('update');
+                Route::delete('/{workflowRule}', [WorkflowRuleController::class, 'destroy'])->name('destroy');
+                Route::post('/{workflowRule}/toggle', [WorkflowRuleController::class, 'toggle'])->name('toggle');
             });
 
         Route::prefix('general-settings/')

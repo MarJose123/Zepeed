@@ -100,23 +100,23 @@ class Webhook extends Model
     }
 
     /**
-     * Check if this webhook is referenced by any alert rules.
+     * Check if this webhook is referenced by any workflow rules.
      */
     public function isUsedInRules(): bool
     {
-        return AlertRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('webhook_id', $this->id)
             ->exists();
     }
 
     /**
-     * Names of alert rules using this webhook.
+     * Names of workflow rules using this webhook.
      *
      * @return array<string>
      */
     public function usedInRuleNames(): array
     {
-        return AlertRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('webhook_id', $this->id)
             ->with('rule')
             ->get()

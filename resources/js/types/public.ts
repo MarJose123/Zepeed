@@ -25,7 +25,7 @@ export interface PublicSpeedResult {
     measured_at: string;
 }
 
-export interface PublicAlertItem {
+export interface PublicWorkflowRuleItem {
     id: string;
     name: string;
     is_enabled: boolean;
