@@ -43,7 +43,7 @@ class WorkflowRuleController extends Controller
         $perPage = min(max((int) request()->query('per_page', 25), 1), 100);
 
         $rules = WorkflowRule::query()
-            ->with(['conditions', 'actions'])
+            ->with(['conditions', 'actions', 'target'])
             ->when(
                 request()->has('is_active'),
                 static fn ($query) => $query->where('is_active', filter_var(request()->query('is_active'), FILTER_VALIDATE_BOOLEAN))
@@ -66,7 +66,7 @@ class WorkflowRuleController extends Controller
     #[Endpoint(title: 'Show workflow rule', description: 'Show a single workflow rule with its conditions and actions.')]
     public function show(WorkflowRule $workflowRule): JsonResource
     {
-        $workflowRule->load(['conditions', 'actions']);
+        $workflowRule->load(['conditions', 'actions', 'target']);
 
         return WorkflowRuleResource::make($workflowRule)->additional([
             'success' => true,
@@ -88,6 +88,7 @@ class WorkflowRuleController extends Controller
             $rule = WorkflowRule::query()->create([
                 'name'               => $validated['name'],
                 'provider_slug'      => $validated['provider_slug'] ?? null,
+                'ping_target_id'     => $validated['ping_target_id'] ?? null,
                 'event'              => $validated['event'],
                 'condition_operator' => $validated['condition_operator'] ?? 'and',
                 'is_active'          => $validated['is_active'] ?? true,
@@ -100,6 +101,7 @@ class WorkflowRuleController extends Controller
                     'metric'           => $condition['metric'],
                     'operator'         => $condition['operator'],
                     'value'            => $condition['value'],
+                    'lookback_minutes' => $condition['lookback_minutes'] ?? null,
                     'sort_order'       => $condition['sort_order'] ?? $i,
                 ]);
             }
@@ -120,7 +122,7 @@ class WorkflowRuleController extends Controller
             return $rule;
         });
 
-        $rule->load(['conditions', 'actions']);
+        $rule->load(['conditions', 'actions', 'target']);
 
         return WorkflowRuleResource::make($rule)
             ->additional([
@@ -146,7 +148,7 @@ class WorkflowRuleController extends Controller
             $validated = $request->validated();
 
             $updateData = [];
-            foreach (['name', 'provider_slug', 'event', 'condition_operator', 'cooldown_minutes'] as $key) {
+            foreach (['name', 'provider_slug', 'ping_target_id', 'event', 'condition_operator', 'cooldown_minutes'] as $key) {
                 if (array_key_exists($key, $validated)) {
                     $updateData[$key] = $validated[$key];
                 }
@@ -168,6 +170,7 @@ class WorkflowRuleController extends Controller
                         'metric'           => $condition['metric'],
                         'operator'         => $condition['operator'],
                         'value'            => $condition['value'],
+                        'lookback_minutes' => $condition['lookback_minutes'] ?? null,
                         'sort_order'       => $condition['sort_order'] ?? $i,
                     ]);
                 }
@@ -191,7 +194,7 @@ class WorkflowRuleController extends Controller
             }
         });
 
-        $workflowRule->load(['conditions', 'actions']);
+        $workflowRule->load(['conditions', 'actions', 'target']);
 
         return WorkflowRuleResource::make($workflowRule->refresh())->additional([
             'success' => true,

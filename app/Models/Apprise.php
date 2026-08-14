@@ -93,10 +93,7 @@ class Apprise extends Model
     {
         return WorkflowRuleAction::query()
             ->where('apprise_id', $this->id)
-            ->exists()
-            || PingAlertAction::query()
-                ->where('apprise_id', $this->id)
-                ->exists();
+            ->exists();
     }
 
     /**
@@ -111,13 +108,6 @@ class Apprise extends Model
             ->with('rule')
             ->get()
             ->pluck('rule.name')
-            ->merge(
-                PingAlertAction::query()
-                    ->where('apprise_id', $this->id)
-                    ->with('rule')
-                    ->get()
-                    ->pluck('rule.name')
-            )
             ->filter()
             ->unique()
             ->values()

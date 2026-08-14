@@ -6,7 +6,6 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\GeneralSettingsController;
 use App\Http\Controllers\MailProviderController;
 use App\Http\Controllers\MaintenanceWindowController;
-use App\Http\Controllers\PingAlertRuleController;
 use App\Http\Controllers\PingResultController;
 use App\Http\Controllers\PingTargetController;
 use App\Http\Controllers\PrometheusController;
@@ -190,14 +189,6 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
             // export
             Route::post('export', [ExportController::class, 'storePingResult'])
                 ->name('export');
-        });
-
-        Route::prefix('ping-alerts/')->name('ping-alerts.')->group(static function () {
-            Route::get('/', [PingAlertRuleController::class, 'index'])->name('index');
-            Route::post('/', [PingAlertRuleController::class, 'store'])->name('store');
-            Route::patch('{pingAlertRule}', [PingAlertRuleController::class, 'update'])->name('update');
-            Route::delete('{pingAlertRule}', [PingAlertRuleController::class, 'destroy'])->name('destroy');
-            Route::post('{pingAlertRule}/toggle', [PingAlertRuleController::class, 'toggle'])->name('toggle');
         });
     });
 

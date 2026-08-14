@@ -4,18 +4,15 @@ namespace App\Mcp\Servers;
 
 use App\Mcp\Tools\CreateExport;
 use App\Mcp\Tools\CreateMaintenanceWindow;
-use App\Mcp\Tools\CreatePingAlertRule;
 use App\Mcp\Tools\CreateWebhook;
 use App\Mcp\Tools\CreateWorkflowRule;
 use App\Mcp\Tools\DeleteMaintenanceWindow;
-use App\Mcp\Tools\DeletePingAlertRule;
 use App\Mcp\Tools\DeleteWebhook;
 use App\Mcp\Tools\DeleteWorkflowRule;
 use App\Mcp\Tools\GetAppVersion;
 use App\Mcp\Tools\GetExport;
 use App\Mcp\Tools\ListExports;
 use App\Mcp\Tools\ListMaintenanceWindows;
-use App\Mcp\Tools\ListPingAlertRules;
 use App\Mcp\Tools\ListPingResults;
 use App\Mcp\Tools\ListProviders;
 use App\Mcp\Tools\ListProviderSchedules;
@@ -25,10 +22,8 @@ use App\Mcp\Tools\ListWorkflowRules;
 use App\Mcp\Tools\RunSpeedtest;
 use App\Mcp\Tools\TestWebhook;
 use App\Mcp\Tools\ToggleGlobalPause;
-use App\Mcp\Tools\TogglePingAlertRule;
 use App\Mcp\Tools\ToggleWorkflowRule;
 use App\Mcp\Tools\UpdateMaintenanceWindow;
-use App\Mcp\Tools\UpdatePingAlertRule;
 use App\Mcp\Tools\UpdateProvider;
 use App\Mcp\Tools\UpdateWebhook;
 use App\Mcp\Tools\UpdateWorkflowRule;
@@ -65,11 +60,6 @@ class ZepeedServer extends Server
         UpdateWorkflowRule::class,
         DeleteWorkflowRule::class,
         ToggleWorkflowRule::class,
-        ListPingAlertRules::class,
-        CreatePingAlertRule::class,
-        UpdatePingAlertRule::class,
-        DeletePingAlertRule::class,
-        TogglePingAlertRule::class,
         ListExports::class,
         CreateExport::class,
         GetExport::class,

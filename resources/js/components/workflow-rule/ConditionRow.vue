@@ -11,8 +11,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
+    isPingMetric,
     METRIC_OPTIONS,
+    metricUnit,
     OPERATOR_OPTIONS,
+    PING_LOOKBACK_OPTIONS,
     STATUS_VALUES,
 } from "@/types/workflow-rule";
 import type {
@@ -36,6 +39,8 @@ const selectedMetric = computed(() =>
 
 const isNumericMetric = computed(() => selectedMetric.value?.numeric ?? false);
 
+const isPing = computed(() => isPingMetric(props.condition.metric));
+
 // Filter operators based on metric type
 const availableOperators = computed(() =>
     isNumericMetric.value
@@ -43,10 +48,10 @@ const availableOperators = computed(() =>
         : OPERATOR_OPTIONS.filter((o) => !o.numericOnly),
 );
 
-const update = (key: keyof WorkflowRuleCondition, value: string) => {
+const update = (key: keyof WorkflowRuleCondition, value: string | number) => {
     const updated = { ...props.condition, [key]: value };
 
-    // Reset value when metric type changes
+    // Reset value (and lookback) when metric type changes
     if (key === "metric") {
         const newMetric = METRIC_OPTIONS.find((m) => m.value === value);
 
@@ -65,6 +70,10 @@ const update = (key: keyof WorkflowRuleCondition, value: string) => {
         }
 
         updated.value = newMetric?.numeric ? "" : "failed";
+
+        if (!isPingMetric(String(value))) {
+            updated.lookback_minutes = null;
+        }
     }
 
     emit("update", updated);
@@ -73,7 +82,7 @@ const update = (key: keyof WorkflowRuleCondition, value: string) => {
 
 <template>
     <div
-        class="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/10 px-3 py-2.5 flex-wrap"
+        class="flex flex-wrap items-center gap-2 rounded-lg bg-primary/5 border border-primary/10 px-3 py-2.5"
     >
         <!-- Condition number badge -->
         <div
@@ -152,15 +161,32 @@ const update = (key: keyof WorkflowRuleCondition, value: string) => {
                 @update:model-value="(v) => update('value', String(v))"
             />
             <span class="text-muted-foreground text-xs">
-                {{
-                    condition.metric === "ping_ms" ||
-                    condition.metric === "jitter_ms"
-                        ? "ms"
-                        : condition.metric === "packet_loss"
-                          ? "%"
-                          : "Mbps"
-                }}
+                {{ metricUnit(condition.metric) }}
             </span>
+        </div>
+
+        <!-- Lookback window (ping metrics only) -->
+        <div v-if="isPing" class="flex items-center gap-1.5">
+            <Select
+                :model-value="condition.lookback_minutes ?? 5"
+                @update:model-value="
+                    (v) => update('lookback_minutes', Number(v))
+                "
+            >
+                <SelectTrigger class="h-8 w-auto min-w-[110px] text-xs">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem
+                        v-for="opt in PING_LOOKBACK_OPTIONS"
+                        :key="opt.value"
+                        :value="String(opt.value)"
+                        class="text-xs"
+                    >
+                        {{ opt.label }} lookback
+                    </SelectItem>
+                </SelectContent>
+            </Select>
         </div>
 
         <!-- Remove button -->

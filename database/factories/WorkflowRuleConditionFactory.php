@@ -28,4 +28,14 @@ class WorkflowRuleConditionFactory extends Factory
             'sort_order'       => 0,
         ];
     }
+
+    public function ping(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'metric'           => WorkflowRuleMetric::LatencyAvg,
+            'operator'         => WorkflowRuleOperator::IsAbove,
+            'value'            => (string) fake()->numberBetween(50, 200),
+            'lookback_minutes' => 5,
+        ]);
+    }
 }

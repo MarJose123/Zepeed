@@ -13,7 +13,7 @@ use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 use Override;
 
-#[Description('List speedtest workflow rules with their conditions and actions, with pagination and an optional is_active filter. Requires the workflow-rules:view token ability.')]
+#[Description('List workflow rules (speedtest and ping) with their conditions and actions, with pagination and optional is_active / event filters. Requires any workflow-rules token ability.')]
 class ListWorkflowRules extends Tool
 {
     use AuthorizesRequests;
@@ -29,10 +29,14 @@ class ListWorkflowRules extends Tool
         $page = max((int) $request->get('page', 1), 1);
 
         $query = WorkflowRule::query()
-            ->with(['conditions', 'actions']);
+            ->with(['conditions', 'actions', 'target']);
 
         if ($request->has('is_active')) {
             $query->where('is_active', filter_var($request->get('is_active'), FILTER_VALIDATE_BOOLEAN));
+        }
+
+        if ($request->has('event')) {
+            $query->where('event', (string) $request->get('event'));
         }
 
         $results = $query->latest()->paginate($perPage, ['*'], 'page', $page);
@@ -58,6 +62,7 @@ class ListWorkflowRules extends Tool
             'per_page'  => $schema->integer()->default(25)->min(1)->max(100),
             'page'      => $schema->integer()->default(1)->min(1),
             'is_active' => $schema->boolean(),
+            'event'     => $schema->string()->description('Filter by event: run_completes, run_fails, run_skipped, any, or ping.')->enum(['run_completes', 'run_fails', 'run_skipped', 'any', 'ping']),
         ];
     }
 }

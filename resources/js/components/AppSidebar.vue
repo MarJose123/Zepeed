@@ -144,14 +144,6 @@ const navigation: TSidebarNavigationItems = [
                             false,
                         ),
                     },
-                    {
-                        title: "Ping Alert Rules",
-                        href: route(
-                            "speedtest.network.ping-alerts.index",
-                            {},
-                            false,
-                        ),
-                    },
                 ],
             },
         ],

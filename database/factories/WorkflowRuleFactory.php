@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\WorkflowRuleEvent;
+use App\Models\PingTarget;
 use App\Models\WorkflowRule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -31,5 +32,14 @@ class WorkflowRuleFactory extends Factory
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => ['is_active' => false]);
+    }
+
+    public function ping(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'provider_slug'  => null,
+            'ping_target_id' => PingTarget::factory(),
+            'event'          => WorkflowRuleEvent::Ping,
+        ]);
     }
 }
