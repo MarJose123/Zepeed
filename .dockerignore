@@ -30,6 +30,7 @@ storage/framework/views/*.php
 storage/app/public/*
 bootstrap/cache/*.php
 database/database.sqlite
+openapi.json
 
 # System files
 .DS_Store
