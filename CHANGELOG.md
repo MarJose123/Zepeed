@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.2 - 2026-08-15
+
+### What's Changed
+
+* ci: integrate GitHub App token for workflows to bypass branch protect… by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/84
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.1...v2.0.0-beta.2
+
 ## Release 1.4.0 - 2026-08-10
 
 ### What's Changed
