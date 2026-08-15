@@ -1,6 +1,9 @@
 export type MailDriver =
     "smtp" | "resend" | "mailgun" | "postmark" | "ses" | "sendmail";
 
+/** Sentinel returned by the API for stored secrets; kept on save when unchanged. */
+export const SECRET_MASK = "********";
+
 export interface MailProvider {
     id: string;
     driver: MailDriver;
@@ -15,6 +18,11 @@ export interface MailProvider {
     last_failed_at: string | null;
     failure_count: number;
     is_primary: boolean;
+    /**
+     * Editable driver config. Secret values are masked with {@link SECRET_MASK}
+     * and preserved server-side when saved unchanged.
+     */
+    config: Record<string, string>;
     config_summary: string;
     created_at: string;
 }

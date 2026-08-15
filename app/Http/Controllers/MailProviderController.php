@@ -62,7 +62,16 @@ class MailProviderController extends Controller
         UpdateMailProviderRequest $request,
         MailProvider $mailProvider,
     ): RedirectResponse {
-        $mailProvider->update($request->validated());
+        $validated = $request->validated();
+
+        // The edit UI submits the mask sentinel (or an empty value) for
+        // credentials it did not change — keep the stored value in that case
+        // so saving unrelated fields doesn't wipe the password/API key.
+        if (isset($validated['config']) && is_array($validated['config'])) {
+            $validated['config'] = $this->mergeUnchangedSecrets($mailProvider, $validated['config']);
+        }
+
+        $mailProvider->update($validated);
 
         // Keep runtime mailer config in sync (e.g. when the provider is
         // deactivated or its credentials change).
@@ -75,6 +84,32 @@ class MailProviderController extends Controller
             ->send();
 
         return back();
+    }
+
+    /**
+     * Replace unchanged credential placeholders with the currently stored
+     * values. The edit UI sends {@see MailProvider::SECRET_MASK} (or an empty
+     * value) for credentials it did not touch.
+     *
+     * @param array<string, mixed> $submitted
+     *
+     * @return array<string, mixed>
+     */
+    private function mergeUnchangedSecrets(MailProvider $provider, array $submitted): array
+    {
+        foreach (MailProvider::SECRET_CONFIG_KEYS as $key) {
+            if (! array_key_exists($key, $submitted)) {
+                continue;
+            }
+
+            $value = $submitted[$key];
+
+            if ($value === null || $value === '' || $value === MailProvider::SECRET_MASK) {
+                $submitted[$key] = $provider->config[$key] ?? null;
+            }
+        }
+
+        return $submitted;
     }
 
     public function destroy(MailProvider $mailProvider): RedirectResponse

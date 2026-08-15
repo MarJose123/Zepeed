@@ -29,10 +29,33 @@ class MailProviderResource extends JsonResource
             'last_failed_at'     => $provider->last_failed_at?->toIso8601String(),
             'failure_count'      => $provider->failure_count,
             'is_primary'         => $provider->priority === 1,
-            // Never expose raw config — only expose non-sensitive indicators
+            // Expose the config for the edit UI, but never raw credentials —
+            // secret values are replaced with a mask sentinel.
+            'config'          => self::buildEditableConfig($provider),
             'config_summary'  => self::buildConfigSummary($provider),
             'created_at'      => $provider->created_at->toIso8601String(),
         ];
+    }
+
+    /**
+     * Build the editable config for the UI: non-secret values as stored,
+     * secret values replaced with {@see MailProvider::SECRET_MASK} so
+     * credentials never leave the server in plaintext. The update endpoint
+     * treats the mask (or an empty value) as "keep the stored value".
+     *
+     * @return array<string, mixed>
+     */
+    private static function buildEditableConfig(MailProvider $provider): array
+    {
+        $config = $provider->config;
+
+        foreach (MailProvider::SECRET_CONFIG_KEYS as $key) {
+            if (isset($config[$key]) && $config[$key] !== '') {
+                $config[$key] = MailProvider::SECRET_MASK;
+            }
+        }
+
+        return $config;
     }
 
     /**
