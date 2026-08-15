@@ -33,11 +33,6 @@ enum TokenAbility: string
     case MaintenanceUpdate = 'maintenance:update';
     case MaintenanceDelete = 'maintenance:delete';
 
-    case PingAlertsView = 'ping-alerts:view';
-    case PingAlertsCreate = 'ping-alerts:create';
-    case PingAlertsUpdate = 'ping-alerts:update';
-    case PingAlertsDelete = 'ping-alerts:delete';
-
     case PingResultsView = 'ping-results:view';
 
     case ProvidersView = 'providers:view';
@@ -68,7 +63,6 @@ enum TokenAbility: string
             self::AppriseView, self::AppriseCreate, self::AppriseUpdate, self::AppriseDelete, self::AppriseTest      => 'Apprise',
             self::ExportsView, self::ExportsCreate                                                                   => 'Exports',
             self::MaintenanceView, self::MaintenanceCreate, self::MaintenanceUpdate, self::MaintenanceDelete         => 'Maintenance',
-            self::PingAlertsView, self::PingAlertsCreate, self::PingAlertsUpdate, self::PingAlertsDelete             => 'Ping Alerts',
             self::PingResultsView                                                                                    => 'Ping Results',
             self::ProvidersView, self::ProvidersUpdate                                                               => 'Providers',
             self::SchedulesView, self::SchedulesCreate, self::SchedulesUpdate, self::SchedulesDelete                 => 'Schedules',

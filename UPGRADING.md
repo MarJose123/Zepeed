@@ -6,8 +6,10 @@ tables, and the web UI). Your data and configuration are preserved
 automatically — the migration renames the tables **in place** and rewrites
 existing API token abilities, so **no manual data move is required**.
 
-> The separate **Ping Alert Rules** feature is **not** renamed and is
-> unaffected by this upgrade.
+> The separate **Ping Alert Rules** feature is **merged** into **Workflow
+> Rules** by this upgrade — see
+> [Ping Alert Rules merged into Workflow Rules](#ping-alert-rules-merged-into-workflow-rules)
+> below.
 
 ## TL;DR
 
@@ -72,10 +74,27 @@ rename migration detects the legacy tables are absent and becomes a no-op.
 Update any external consumers (scripts, dashboards, AI clients) that call the
 old endpoint, tool, or ability names.
 
+### Ping Alert Rules merged into Workflow Rules
+
+Zepeed 2.x also merges the separate **Ping Alert Rules** feature into
+**Workflow Rules**:
+
+| Area | Before | After |
+| --- | --- | --- |
+| REST API | `/api/v1/ping-alerts`, `/api/v1/ping-alerts/{id}`, `/api/v1/ping-alerts/{id}/toggle` | `/api/v1/workflow-rules` (ping rules are `event: "ping"` + `ping_target_id`; old path removed, **not** aliased) |
+| Token abilities | `ping-alerts:*` | `workflow-rules:*` (existing tokens migrated automatically) |
+| MCP tools | `ListPingAlertRules`, `CreatePingAlertRule`, `UpdatePingAlertRule`, `DeletePingAlertRule`, `TogglePingAlertRule` | the corresponding `*WorkflowRule` tools accept `event: "ping"`, `ping_target_id`, ping metrics and `lookback_minutes` |
+| Web UI | Network → **Ping Alert Rules** (`/speedtest/network/ping-alerts`) | Settings → **Workflow Rules** (`/speedtest/settings/workflow-rules`) — pick the **Ping result recorded** event |
+| Tables | `ping_alert_rules`, `ping_alert_conditions`, `ping_alert_actions` | rows copied into `workflow_rules` (`event = 'ping'`), `workflow_rule_conditions` (with `lookback_minutes`) and `workflow_rule_actions`; legacy tables dropped |
+
+The migration runs automatically on `php artisan migrate`; existing ping
+rules and `ping-alerts:*` token abilities are preserved. New ping condition
+metrics (`latency_avg`, `latency_max`, `consecutive_failures`) live on
+`WorkflowRuleMetric`, and new operators (`is_above_or_equal`,
+`is_below_or_equal`) on `WorkflowRuleOperator`.
+
 ### Not renamed (intentionally)
 
-- **Ping Alert Rules** — `ping-alerts:*` abilities, `/api/v1/ping-alerts`,
-  `PingAlertRule*` models/tools, `ping_alert_*` tables.
 - **Prometheus metric names** — `zepeed_alert_rule_active` and
   `zepeed_alert_rule_last_triggered_timestamp` are a stable external contract
   for dashboards and are kept unchanged.

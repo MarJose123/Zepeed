@@ -2,8 +2,8 @@
 
 namespace App\Services\Prometheus;
 
+use App\Enums\WorkflowRuleEvent;
 use App\Models\MaintenanceWindow;
-use App\Models\PingAlertRule;
 use App\Models\Webhook;
 use App\Models\WebhookDelivery;
 use App\Models\WorkflowRule;
@@ -24,17 +24,20 @@ class SystemMetricsBuilderService
     }
 
     /**
-     * Group 6 — Speedtest workflow and ping alert rule active state + last triggered.
+     * Group 6 — Speedtest workflow and ping workflow rule active state + last triggered.
      *
-     * The Prometheus gauge names below (`alert_rule_*`) are a stable external
-     * contract consumed by dashboards — they are intentionally not renamed.
+     * The Prometheus gauge names below (`alert_rule_*`, `ping_alert_rule_*`)
+     * are a stable external contract consumed by dashboards — they are
+     * intentionally not renamed.
      */
     private function registerWorkflowRules(CollectorRegistry $registry): void
     {
         $speedRules = WorkflowRule::query()
+            ->where('event', '!=', WorkflowRuleEvent::Ping->value)
             ->get(['name', 'provider_slug', 'event', 'is_active', 'last_triggered_at']);
 
-        $pingRules = PingAlertRule::query()
+        $pingRules = WorkflowRule::query()
+            ->where('event', WorkflowRuleEvent::Ping->value)
             ->with('target:id,label')
             ->get(['id', 'name', 'ping_target_id', 'is_active', 'last_triggered_at']);
 

@@ -94,30 +94,17 @@ class EmailTemplate extends Model
     {
         return WorkflowRuleAction::query()
             ->where('email_template_id', $this->id)
-            ->exists()
-            ||
-            PingAlertAction::query()
-                ->where('email_template_id', $this->id)
-                ->exists();
+            ->exists();
     }
 
     /** @return array<string> */
     public function usedInRuleNames(): array
     {
-        $speedtestNames = WorkflowRuleAction::query()
+        return WorkflowRuleAction::query()
             ->where('email_template_id', $this->id)
             ->with('rule')
             ->get()
-            ->pluck('rule.name');
-
-        $pingNames = PingAlertAction::query()
-            ->where('email_template_id', $this->id)
-            ->with('rule')
-            ->get()
-            ->pluck('rule.name');
-
-        return $speedtestNames
-            ->merge($pingNames)
+            ->pluck('rule.name')
             ->filter()
             ->unique()
             ->values()

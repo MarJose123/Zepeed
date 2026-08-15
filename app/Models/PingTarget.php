@@ -27,9 +27,9 @@ use Override;
  * @property CarbonImmutable|null $last_tested_at
  * @property CarbonImmutable      $created_at
  * @property CarbonImmutable      $updated_at
- * @property-read HasMany<PingResult, self>    $results
- * @property-read HasMany<PingAlertRule, self> $alertRules
- * @property-read PingResult|null              $latestResult
+ * @property-read HasMany<PingResult, self>     $results
+ * @property-read HasMany<WorkflowRule, self>   $workflowRules
+ * @property-read PingResult|null               $latestResult
  */
 #[UseFactory(PingTargetFactory::class)]
 class PingTarget extends Model
@@ -76,10 +76,10 @@ class PingTarget extends Model
         return $this->hasOne(PingResult::class, 'ping_target_id')->latestOfMany('measured_at');
     }
 
-    /** @return HasMany<PingAlertRule, $this> */
-    public function alertRules(): HasMany
+    /** @return HasMany<WorkflowRule, $this> */
+    public function workflowRules(): HasMany
     {
-        return $this->hasMany(PingAlertRule::class);
+        return $this->hasMany(WorkflowRule::class, 'ping_target_id');
     }
 
     /** Scope: only enabled targets. */

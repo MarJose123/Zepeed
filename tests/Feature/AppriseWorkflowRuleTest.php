@@ -4,15 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\WorkflowRuleEvent;
 use App\Models\Apprise;
-use App\Models\PingAlertAction;
-use App\Models\PingAlertRule;
 use App\Models\PingResult;
 use App\Models\PingTarget;
 use App\Models\SpeedResult;
 use App\Models\User;
 use App\Models\WorkflowRule;
 use App\Models\WorkflowRuleAction;
-use App\Services\PingAlertService;
 use App\Services\WorkflowRuleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -66,21 +63,21 @@ class AppriseWorkflowRuleTest extends TestCase
      * Test that a ping workflow rule with an Apprise action dispatches a
      * notification with a failure type and the instance's tags.
      */
-    public function testPingAlertRuleFiresAppriseAction(): void
+    public function testPingWorkflowRuleFiresAppriseAction(): void
     {
         $apprise = Apprise::factory()->withTags(['ping', 'network'])->create([
             'url' => 'https://apprise.test/notify/ping',
         ]);
         $target = PingTarget::factory()->create();
-        $rule = PingAlertRule::factory()->create([
+        $rule = WorkflowRule::factory()->ping()->create([
             'ping_target_id' => $target->id,
             'is_active'      => true,
         ]);
-        PingAlertAction::factory()->create([
-            'ping_alert_rule_id' => $rule->id,
-            'type'               => 'apprise',
-            'apprise_id'         => $apprise->id,
-            'sort_order'         => 0,
+        WorkflowRuleAction::factory()->create([
+            'workflow_rule_id' => $rule->id,
+            'type'             => 'apprise',
+            'apprise_id'       => $apprise->id,
+            'sort_order'       => 0,
         ]);
         $result = PingResult::factory()->failed()->create([
             'ping_target_id' => $target->id,
@@ -88,7 +85,7 @@ class AppriseWorkflowRuleTest extends TestCase
 
         Http::fake();
 
-        resolve(PingAlertService::class)->evaluate($target, $result);
+        resolve(WorkflowRuleService::class)->evaluatePing($target, $result);
 
         Http::assertSent(fn (Request $request) => $request->url() === $apprise->url
             && $request['title'] === "Zepeed: Ping alert — {$rule->name}"
@@ -176,7 +173,7 @@ class AppriseWorkflowRuleTest extends TestCase
     /**
      * Test that the ping workflow rule API accepts an apprise action type.
      */
-    public function testPingAlertRuleApiAcceptsAppriseAction(): void
+    public function testPingWorkflowRuleApiAcceptsAppriseAction(): void
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token');
@@ -184,8 +181,9 @@ class AppriseWorkflowRuleTest extends TestCase
         $apprise = Apprise::factory()->create();
 
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->postJson('/api/v1/ping-alerts', [
+            ->postJson('/api/v1/workflow-rules', [
                 'name'               => 'Ping apprise alert',
+                'event'              => 'ping',
                 'ping_target_id'     => PingTarget::factory()->create()->id,
                 'condition_operator' => 'and',
                 'cooldown_minutes'   => 30,
@@ -193,7 +191,7 @@ class AppriseWorkflowRuleTest extends TestCase
                     [
                         'metric'           => 'latency_avg',
                         'operator'         => 'is_above',
-                        'value'            => 100,
+                        'value'            => '100',
                         'lookback_minutes' => 30,
                         'sort_order'       => 0,
                     ],
@@ -211,7 +209,7 @@ class AppriseWorkflowRuleTest extends TestCase
             ->assertJsonPath('data.actions.0.type', 'apprise')
             ->assertJsonPath('data.actions.0.apprise_id', $apprise->id);
 
-        $this->assertDatabaseHas('ping_alert_actions', [
+        $this->assertDatabaseHas('workflow_rule_actions', [
             'type'       => 'apprise',
             'apprise_id' => $apprise->id,
         ]);

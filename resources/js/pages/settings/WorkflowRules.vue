@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RuleBuilder from "@/components/workflow-rule/RuleBuilder.vue";
+import type { PingTargetOption } from "@/components/workflow-rule/RuleBuilder.vue";
 import AppLayout from "@/layouts/AppLayout.vue";
 import type { TBreadcrumbItem } from "@/types";
 import type { Apprise } from "@/types/apprise";
@@ -32,6 +33,7 @@ import type { WorkflowRule } from "@/types/workflow-rule";
 const props = defineProps<{
     rules: WorkflowRule[];
     providers: Array<{ slug: string; label: string }>;
+    targets?: PingTargetOption[];
     mail_providers: MailProvider[];
     email_templates: EmailTemplate[];
     webhooks: Webhook[];
@@ -292,6 +294,13 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                 <!-- Summary badges -->
                                 <div class="mt-1.5 flex flex-wrap gap-1">
                                     <span
+                                        v-if="rule.ping_target_id"
+                                        class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                                    >
+                                        {{ rule.target_label ?? "Ping target" }}
+                                    </span>
+                                    <span
+                                        v-else
                                         class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300"
                                     >
                                         {{
@@ -373,9 +382,9 @@ const actionsSummary = (rule: WorkflowRule): string => {
 
                 <div class="border-border border-t px-4 py-2.5">
                     <p class="text-muted-foreground text-[10px]">
-                        Rules are evaluated after every speedtest result is
-                        recorded. Actions fire immediately when all conditions
-                        match.
+                        Rules are evaluated after every speedtest result or ping
+                        test is recorded. Actions fire immediately when all
+                        conditions match.
                     </p>
                 </div>
             </div>
@@ -390,6 +399,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                     :rule="isNew ? null : selectedRule()"
                     :is-new="isNew"
                     :providers="providers"
+                    :targets="targets ?? []"
                     :mail-providers="mail_providers"
                     :email-templates="email_templates"
                     :webhooks="webhooks"

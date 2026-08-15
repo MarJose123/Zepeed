@@ -192,9 +192,9 @@ Once connected, your AI can query and manage Zepeed using natural language:
 | *"Run a speedtest on Ookla now"* | `RunSpeedtest` |
 | *"Show me the maintenance windows"* | `ListMaintenanceWindows` |
 | *"Pause all speedtest runs"* | `ToggleGlobalPause` |
-| *"List my webhooks and workflow rules"* | `ListWebhooks`, `ListWorkflowRules`, `ListPingAlertRules` |
+| *"List my webhooks and workflow rules"* | `ListWebhooks`, `ListWorkflowRules` |
 | *"Create an export of last month's ping results"* | `CreateExport` |
-| *"What tools are available?"* | lists all 30 tools |
+| *"What tools are available?"* | lists all 25 tools |
 
 > **Note:** Replace `http://localhost:8000` with your production URL when deploying. All examples above use `GetAppVersion` — the simplest read-only tool — to verify connectivity.
 
@@ -213,7 +213,6 @@ Every MCP tool maps to a REST API endpoint and requires the same Sanctum token a
 | Webhooks | `webhooks:view`, `webhooks:create`, `webhooks:update`, `webhooks:delete`, `webhooks:test` | `ListWebhooks`, `CreateWebhook`, `UpdateWebhook`, `DeleteWebhook`, `TestWebhook` |
 | Apprise | `apprise:view`, `apprise:create`, `apprise:update`, `apprise:delete`, `apprise:test` | — (no MCP tools yet; use the REST API or web UI) |
 | Workflow Rules | `workflow-rules:view`, `workflow-rules:create`, `workflow-rules:update`, `workflow-rules:delete` | `ListWorkflowRules`, `CreateWorkflowRule`, `UpdateWorkflowRule`, `DeleteWorkflowRule`, `ToggleWorkflowRule` |
-| Ping Alerts | `ping-alerts:view`, `ping-alerts:create`, `ping-alerts:update`, `ping-alerts:delete` | `ListPingAlertRules`, `CreatePingAlertRule`, `UpdatePingAlertRule`, `DeletePingAlertRule`, `TogglePingAlertRule` |
 | Exports | `exports:view`, `exports:create` | `ListExports`, `CreateExport`, `GetExport` |
 
 When a token lacks the required ability (or no token is presented), the tool returns an error and performs no action.
@@ -246,11 +245,6 @@ The MCP server mirrors the REST API 1:1. The table below maps every MCP tool to 
 | `UpdateWorkflowRule` | `PATCH /api/v1/workflow-rules/{id}` | `workflow-rules:update` |
 | `DeleteWorkflowRule` | `DELETE /api/v1/workflow-rules/{id}` | `workflow-rules:delete` |
 | `ToggleWorkflowRule` | `POST /api/v1/workflow-rules/{id}/toggle` | `workflow-rules:update` |
-| `ListPingAlertRules` | `GET /api/v1/ping-alerts` | any `ping-alerts:*` |
-| `CreatePingAlertRule` | `POST /api/v1/ping-alerts` | `ping-alerts:create` |
-| `UpdatePingAlertRule` | `PATCH /api/v1/ping-alerts/{id}` | `ping-alerts:update` |
-| `DeletePingAlertRule` | `DELETE /api/v1/ping-alerts/{id}` | `ping-alerts:delete` |
-| `TogglePingAlertRule` | `POST /api/v1/ping-alerts/{id}/toggle` | `ping-alerts:update` |
 | `ListExports` | `GET /api/v1/exports` | `exports:view` or `exports:create` |
 | `CreateExport` | `POST /api/v1/exports` | `exports:create` |
 | `GetExport` | `GET /api/v1/exports/{id}` | `exports:view` or `exports:create` |

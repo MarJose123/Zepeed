@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\PingTarget;
-use App\Services\PingAlertService;
 use App\Services\PingService;
+use App\Services\WorkflowRuleService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -43,7 +43,7 @@ class RunPingTestJob implements ShouldBeUnique, ShouldQueue
         return "ping-target-{$this->target->id}";
     }
 
-    public function handle(PingService $pingService, PingAlertService $alertService): void
+    public function handle(PingService $pingService, WorkflowRuleService $workflowRuleService): void
     {
         if (! $this->target->is_enabled) {
             return;
@@ -51,7 +51,7 @@ class RunPingTestJob implements ShouldBeUnique, ShouldQueue
 
         try {
             $result = $pingService->run($this->target);
-            $alertService->evaluate($this->target, $result);
+            $workflowRuleService->evaluatePing($this->target, $result);
         } catch (Throwable $e) {
             Log::error('RunPingTestJob: ping execution failed.', [
                 'target_id' => $this->target->id,

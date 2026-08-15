@@ -32,10 +32,17 @@ import type {
 } from "@/types/workflow-rule";
 import { EVENT_OPTIONS } from "@/types/workflow-rule";
 
+export interface PingTargetOption {
+    id: string;
+    label: string;
+    host: string;
+}
+
 const props = defineProps<{
     rule?: WorkflowRule | null;
     isNew: boolean;
     providers: Array<{ slug: string; label: string }>;
+    targets?: PingTargetOption[];
     mailProviders: MailProvider[];
     emailTemplates: EmailTemplate[];
     webhooks: Webhook[];
@@ -50,6 +57,7 @@ const emit = defineEmits<{
 const form = useForm({
     name: props.rule?.name ?? "",
     provider_slug: props.rule?.provider_slug ?? "",
+    ping_target_id: props.rule?.ping_target_id ?? "",
     event: props.rule?.event ?? "run_completes",
     condition_operator: props.rule?.condition_operator ?? "and",
     is_active: props.rule?.is_active ?? true,
@@ -58,6 +66,8 @@ const form = useForm({
     actions: (props.rule?.actions ?? []) as WorkflowRuleAction[],
 });
 
+const isPingEvent = computed(() => form.event === "ping");
+
 watch(
     () => props.rule,
     (rule) => {
@@ -65,6 +75,7 @@ watch(
 
         form.name = rule.name;
         form.provider_slug = rule.provider_slug ?? "";
+        form.ping_target_id = rule.ping_target_id ?? "";
         form.event = rule.event;
         form.condition_operator = rule.condition_operator;
         form.is_active = rule.is_active;
@@ -76,12 +87,22 @@ watch(
 );
 
 const addCondition = () => {
-    form.conditions.push({
-        metric: "status",
-        operator: "is",
-        value: "failed",
-        sort_order: form.conditions.length,
-    });
+    form.conditions.push(
+        isPingEvent.value
+            ? {
+                  metric: "latency_avg",
+                  operator: "is_above",
+                  value: "50",
+                  lookback_minutes: 5,
+                  sort_order: form.conditions.length,
+              }
+            : {
+                  metric: "status",
+                  operator: "is",
+                  value: "failed",
+                  sort_order: form.conditions.length,
+              },
+    );
 };
 
 const updateCondition = (index: number, updated: WorkflowRuleCondition) => {
@@ -154,7 +175,10 @@ const save = () => {
     form[method](route(routeName, routeParams, false), {
         data: {
             name: form.name,
-            provider_slug: form.provider_slug || null,
+            provider_slug: isPingEvent.value
+                ? null
+                : form.provider_slug || null,
+            ping_target_id: isPingEvent.value ? form.ping_target_id : null,
             event: form.event,
             condition_operator: form.condition_operator,
             is_active: form.is_active,
@@ -252,6 +276,71 @@ const cooldownLabel = computed(() => {
                 </div>
                 <div class="flex flex-wrap items-end gap-3 p-3">
                     <div class="space-y-1">
+                        <Label class="text-[10px]">Event</Label>
+                        <Select
+                            :model-value="form.event"
+                            @update:model-value="
+                                (v) => v && (form.event = String(v) as any)
+                            "
+                        >
+                            <SelectTrigger
+                                class="h-8 w-auto min-w-[160px] text-xs"
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="opt in EVENT_OPTIONS"
+                                    :key="opt.value"
+                                    :value="opt.value"
+                                    class="text-xs"
+                                >
+                                    {{ opt.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <!-- Ping target selector (ping rules) -->
+                    <div v-if="isPingEvent" class="space-y-1">
+                        <Label class="text-[10px]">Ping target</Label>
+                        <Select
+                            :model-value="form.ping_target_id"
+                            @update:model-value="
+                                (v) => v && (form.ping_target_id = String(v))
+                            "
+                        >
+                            <SelectTrigger
+                                class="h-8 w-auto min-w-[160px] text-xs"
+                            >
+                                <SelectValue
+                                    placeholder="Select a ping target"
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="t in targets ?? []"
+                                    :key="t.id"
+                                    :value="t.id"
+                                    class="text-xs"
+                                >
+                                    {{ t.label }}
+                                    <span class="ml-1 text-muted-foreground">
+                                        {{ t.host }}
+                                    </span>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p
+                            v-if="form.errors.ping_target_id"
+                            class="text-destructive text-xs"
+                        >
+                            {{ form.errors.ping_target_id }}
+                        </p>
+                    </div>
+
+                    <!-- Provider selector (speedtest rules) -->
+                    <div v-else class="space-y-1">
                         <Label class="text-[10px]">Provider</Label>
                         <Select
                             :model-value="form.provider_slug || 'any'"
@@ -285,31 +374,6 @@ const cooldownLabel = computed(() => {
                                     class="text-xs"
                                 >
                                     {{ p.label }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div class="space-y-1">
-                        <Label class="text-[10px]">Event</Label>
-                        <Select
-                            :model-value="form.event"
-                            @update:model-value="
-                                (v) => v && (form.event = String(v) as any)
-                            "
-                        >
-                            <SelectTrigger
-                                class="h-8 w-auto min-w-[160px] text-xs"
-                            >
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="opt in EVENT_OPTIONS"
-                                    :key="opt.value"
-                                    :value="opt.value"
-                                    class="text-xs"
-                                >
-                                    {{ opt.label }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>

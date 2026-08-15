@@ -10,6 +10,7 @@ use App\Mcp\Tools\DeleteWorkflowRule;
 use App\Mcp\Tools\ListWorkflowRules;
 use App\Mcp\Tools\ToggleWorkflowRule;
 use App\Mcp\Tools\UpdateWorkflowRule;
+use App\Models\PingTarget;
 use App\Models\Webhook;
 use App\Models\WorkflowRule;
 use App\Models\WorkflowRuleAction;
@@ -138,5 +139,86 @@ class WorkflowRuleToolsTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertDatabaseMissing('workflow_rules', ['id' => $rule->id]);
+    }
+
+    public function testCreatePingWorkflowRuleWithConditionsAndActions(): void
+    {
+        $user = $this->mcpUser([TokenAbility::WorkflowRulesCreate->value]);
+        $target = PingTarget::factory()->create();
+
+        $response = ZepeedServer::actingAs($user)
+            ->tool(CreateWorkflowRule::class, [
+                'name'               => 'Latency spike',
+                'event'              => 'ping',
+                'ping_target_id'     => $target->id,
+                'condition_operator' => 'and',
+                'cooldown_minutes'   => 60,
+                'conditions'         => [
+                    [
+                        'metric'           => 'latency_avg',
+                        'operator'         => 'is_above',
+                        'value'            => '100',
+                        'lookback_minutes' => 5,
+                    ],
+                ],
+                'actions' => [
+                    ['type' => 'email', 'recipient_email' => 'ops@example.com'],
+                ],
+            ]);
+
+        $response
+            ->assertOk()
+            ->assertHasNoErrors()
+            ->assertStructuredContent(function ($json) {
+                $json->where('success', true)
+                    ->where('workflow_rule.name', 'Latency spike')
+                    ->etc();
+            });
+
+        $rule = WorkflowRule::query()->where('name', 'Latency spike')->first();
+
+        $this->assertNotNull($rule);
+        $this->assertSame('ping', $rule->event->value);
+        $this->assertSame($target->id, $rule->ping_target_id);
+        $this->assertCount(1, $rule->conditions);
+        $this->assertSame(5, $rule->conditions->first()->lookback_minutes);
+        $this->assertCount(1, $rule->actions);
+    }
+
+    public function testListWorkflowRulesFiltersByPingEvent(): void
+    {
+        $user = $this->mcpUser([TokenAbility::WorkflowRulesView->value]);
+        WorkflowRule::factory()->create();
+        WorkflowRule::factory()->ping()->create();
+
+        $response = ZepeedServer::actingAs($user)
+            ->tool(ListWorkflowRules::class, ['event' => 'ping', 'per_page' => 10, 'page' => 1]);
+
+        $response
+            ->assertOk()
+            ->assertHasNoErrors()
+            ->assertStructuredContent(function ($json) {
+                $json->has('data', 1)
+                    ->where('pagination.total', 1)
+                    ->etc();
+            });
+    }
+
+    public function testCreatePingWorkflowRuleRequiresPingTarget(): void
+    {
+        $user = $this->mcpUser([TokenAbility::WorkflowRulesCreate->value]);
+
+        $response = ZepeedServer::actingAs($user)
+            ->tool(CreateWorkflowRule::class, [
+                'name'               => 'Missing target',
+                'event'              => 'ping',
+                'condition_operator' => 'and',
+                'conditions'         => [
+                    ['metric' => 'latency_avg', 'operator' => 'is_above', 'value' => 100],
+                ],
+                'actions' => [],
+            ]);
+
+        $response->assertHasErrors();
     }
 }

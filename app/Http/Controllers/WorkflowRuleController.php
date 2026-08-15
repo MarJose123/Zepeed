@@ -8,11 +8,13 @@ use App\Http\Requests\UpdateWorkflowRuleRequest;
 use App\Http\Resources\AppriseResource;
 use App\Http\Resources\EmailTemplateResource;
 use App\Http\Resources\MailProviderResource;
+use App\Http\Resources\PingTargetResource;
 use App\Http\Resources\WebhookResource;
 use App\Http\Resources\WorkflowRuleResource;
 use App\Models\Apprise;
 use App\Models\EmailTemplate;
 use App\Models\MailProvider;
+use App\Models\PingTarget;
 use App\Models\Webhook;
 use App\Models\WorkflowRule;
 use App\Models\WorkflowRuleAction;
@@ -30,7 +32,7 @@ class WorkflowRuleController extends Controller
         return Inertia::render('settings/WorkflowRules', [
             'rules' => WorkflowRuleResource::collection(
                 WorkflowRule::query()
-                    ->with(['conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook', 'actions.apprise'])
+                    ->with(['target', 'conditions', 'actions.mailProvider', 'actions.emailTemplate', 'actions.webhook', 'actions.apprise'])
                     ->latest()
                     ->get()
             )->resolve(),
@@ -42,13 +44,16 @@ class WorkflowRuleController extends Controller
                     'label' => $case->label(),
                 ]),
 
+            'targets' => PingTargetResource::collection(
+                PingTarget::query()->orderBy('label')->get()
+            )->resolve(),
+
             'mail_providers' => MailProviderResource::collection(
                 MailProvider::query()->active()->ordered()->get()
             )->resolve(),
 
             'email_templates' => EmailTemplateResource::collection(
                 EmailTemplate::query()
-                    ->where('template_type', 'speedtest')
                     ->orderBy('name')
                     ->get()
             )->resolve(),
@@ -71,6 +76,7 @@ class WorkflowRuleController extends Controller
             $rule = WorkflowRule::query()->create([
                 'name'               => $validated['name'],
                 'provider_slug'      => $validated['provider_slug'] ?? null,
+                'ping_target_id'     => $validated['ping_target_id'] ?? null,
                 'event'              => $validated['event'],
                 'condition_operator' => $validated['condition_operator'] ?? 'and',
                 'is_active'          => $validated['is_active'] ?? true,
@@ -83,6 +89,7 @@ class WorkflowRuleController extends Controller
                     'metric'           => $condition['metric'],
                     'operator'         => $condition['operator'],
                     'value'            => $condition['value'],
+                    'lookback_minutes' => $condition['lookback_minutes'] ?? null,
                     'sort_order'       => $condition['sort_order'] ?? $i,
                 ]);
             }
@@ -123,7 +130,7 @@ class WorkflowRuleController extends Controller
 
             // Build update array explicitly — avoid array_filter stripping falsy values
             $updateData = [];
-            foreach (['name', 'provider_slug', 'event', 'condition_operator', 'cooldown_minutes'] as $key) {
+            foreach (['name', 'provider_slug', 'ping_target_id', 'event', 'condition_operator', 'cooldown_minutes'] as $key) {
                 if (array_key_exists($key, $validated)) {
                     $updateData[$key] = $validated[$key];
                 }
@@ -147,6 +154,7 @@ class WorkflowRuleController extends Controller
                         'metric'           => $condition['metric'],
                         'operator'         => $condition['operator'],
                         'value'            => $condition['value'],
+                        'lookback_minutes' => $condition['lookback_minutes'] ?? null,
                         'sort_order'       => $condition['sort_order'] ?? $i,
                     ]);
                 }
