@@ -30,6 +30,22 @@ use Override;
 class MailProvider extends Model
 {
     use HasUuids;
+
+    /**
+     * Config keys that hold credentials. Never returned in plaintext by
+     * MailProviderResource; preserved when an edit submits the mask sentinel.
+     *
+     * @var array<string>
+     */
+    public const SECRET_CONFIG_KEYS = ['password', 'api_key', 'token', 'secret'];
+
+    /**
+     * Placeholder sentinel shown in the edit UI in place of stored secrets.
+     * The update endpoint treats this value (or an empty value) as
+     * "keep the currently stored credential".
+     */
+    public const SECRET_MASK = '********';
+
     protected $fillable = [
         'driver',
         'label',

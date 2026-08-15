@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import type { MailDriver } from "@/types/mail";
+import { SECRET_MASK, type MailDriver } from "@/types/mail";
 
 const props = defineProps<{
     driver: MailDriver;
@@ -19,6 +19,10 @@ const props = defineProps<{
 const emit = defineEmits<{
     "update:config": [config: Record<string, string>];
 }>();
+
+/** True when the field holds the mask sentinel for a stored secret. */
+const isMasked = (value: string | undefined): boolean =>
+    value === SECRET_MASK;
 
 const update = (key: string, value: string | number) => {
     emit("update:config", { ...props.config, [key]: String(value) });
@@ -125,6 +129,12 @@ const e = (field: string): string | undefined =>
                 <p v-if="e('password')" class="text-destructive text-[10px]">
                     {{ e("password") }}
                 </p>
+                <p
+                    v-else-if="isMasked(config.password)"
+                    class="text-muted-foreground text-[10px]"
+                >
+                    Leave unchanged to keep the current password.
+                </p>
             </div>
         </div>
     </template>
@@ -142,6 +152,12 @@ const e = (field: string): string | undefined =>
             />
             <p v-if="e('api_key')" class="text-destructive text-[10px]">
                 {{ e("api_key") }}
+            </p>
+            <p
+                v-else-if="isMasked(config.api_key)"
+                class="text-muted-foreground text-[10px]"
+            >
+                Leave unchanged to keep the current API key.
             </p>
             <p v-else class="text-muted-foreground text-[10px]">
                 Get your API key from
@@ -169,6 +185,12 @@ const e = (field: string): string | undefined =>
             />
             <p v-if="e('api_key')" class="text-destructive text-[10px]">
                 {{ e("api_key") }}
+            </p>
+            <p
+                v-else-if="isMasked(config.api_key)"
+                class="text-muted-foreground text-[10px]"
+            >
+                Leave unchanged to keep the current API key.
             </p>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -218,6 +240,12 @@ const e = (field: string): string | undefined =>
             <p v-if="e('token')" class="text-destructive text-[10px]">
                 {{ e("token") }}
             </p>
+            <p
+                v-else-if="isMasked(config.token)"
+                class="text-muted-foreground text-[10px]"
+            >
+                Leave unchanged to keep the current token.
+            </p>
             <p v-else class="text-muted-foreground text-[10px]">
                 Find your token in
 
@@ -259,6 +287,12 @@ const e = (field: string): string | undefined =>
                 />
                 <p v-if="e('secret')" class="text-destructive text-[10px]">
                     {{ e("secret") }}
+                </p>
+                <p
+                    v-else-if="isMasked(config.secret)"
+                    class="text-muted-foreground text-[10px]"
+                >
+                    Leave unchanged to keep the current secret key.
                 </p>
             </div>
         </div>

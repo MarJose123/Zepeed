@@ -94,8 +94,19 @@ const editForm = useForm({
     label: props.provider.label,
     from_address: props.provider.from_address,
     from_name: props.provider.from_name,
-    config: {} as Record<string, string>,
+    config: { ...props.provider.config },
 });
+
+// Re-seed the form from the (possibly refreshed) provider prop every time the
+// dialog opens so the fields always show the current configured values.
+function openEdit() {
+    editForm.clearErrors();
+    editForm.label = props.provider.label;
+    editForm.from_address = props.provider.from_address;
+    editForm.from_name = props.provider.from_name;
+    editForm.config = { ...props.provider.config };
+    showEdit.value = true;
+}
 
 function saveEdit() {
     editForm.patch(
@@ -212,7 +223,7 @@ const driverIcons: Record<string, string> = {
                 variant="outline"
                 size="sm"
                 class="h-7 w-7 p-0"
-                @click="showEdit = true"
+                @click="openEdit"
             >
                 <Pencil class="h-3 w-3" />
             </Button>
