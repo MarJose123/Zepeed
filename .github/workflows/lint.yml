@@ -1,9 +1,6 @@
 name: "Code Style & Quality Fixes"
 
 on:
-  push:
-    branches:
-      - 2.x
   pull_request:
     branches:
       - 2.x
@@ -29,7 +26,9 @@ jobs:
 
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.head_ref }}
+          # head_ref is only set for pull_request events; on push events fall back
+          # to the pushed branch (2.x) instead of the repo default branch (v1.x).
+          ref: ${{ github.head_ref || github.ref_name }}
           persist-credentials: true
           # Push identity for git-auto-commit-action; must be a bypassed actor.
           token: ${{ steps.app-token.outputs.token }}
@@ -64,4 +63,7 @@ jobs:
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
           commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          branch: 2.x
+          # Commit to the branch that was checked out. Hardcoding 2.x made the
+          # action try to `git checkout 2.x` mid-run, which aborts when the linter
+          # left local changes in files that differ between branches.
+          branch: ${{ github.head_ref || github.ref_name }}
