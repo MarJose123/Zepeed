@@ -8,8 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SECRET_MASK  } from "@/types/mail";
-import type {MailDriver} from "@/types/mail";
+import { SECRET_MASK } from "@/types/mail";
+import type { MailDriver } from "@/types/mail";
 
 const props = defineProps<{
     driver: MailDriver;
