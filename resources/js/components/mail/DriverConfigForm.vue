@@ -8,7 +8,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SECRET_MASK, type MailDriver } from "@/types/mail";
+import { SECRET_MASK  } from "@/types/mail";
+import type {MailDriver} from "@/types/mail";
 
 const props = defineProps<{
     driver: MailDriver;
@@ -21,8 +22,7 @@ const emit = defineEmits<{
 }>();
 
 /** True when the field holds the mask sentinel for a stored secret. */
-const isMasked = (value: string | undefined): boolean =>
-    value === SECRET_MASK;
+const isMasked = (value: string | undefined): boolean => value === SECRET_MASK;
 
 const update = (key: string, value: string | number) => {
     emit("update:config", { ...props.config, [key]: String(value) });

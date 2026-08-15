@@ -43,7 +43,7 @@ class MailProviderEditTest extends TestCase
     {
         $provider = $this->makeProvider();
 
-        $payload = (new MailProviderResource($provider))->resolve();
+        $payload = new MailProviderResource($provider)->resolve();
 
         // Non-secret values are exposed as-is so the edit fields can populate.
         $this->assertSame('smtp.example.com', $payload['config']['host']);
