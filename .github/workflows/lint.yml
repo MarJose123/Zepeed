@@ -15,10 +15,24 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: MarJose123
+          repositories: Zepeed
+          # The App must be added to the 2.x ruleset bypass list (Always allow)
+          # for its pushes to pass the ruleset (GITHUB_TOKEN cannot bypass on user repos).
+          permission-contents: write
+
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
           persist-credentials: true
+          # Push identity for git-auto-commit-action; must be a bypassed actor.
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

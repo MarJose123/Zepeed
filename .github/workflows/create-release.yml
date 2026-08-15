@@ -26,12 +26,27 @@ jobs:
           echo "✓ Tag format is valid: $TAG"
           echo "valid=true" >> $GITHUB_OUTPUT
 
+      - name: Generate GitHub App token
+        if: steps.validate.outputs.valid == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: MarJose123
+          repositories: Zepeed
+          # The App must be added to the 2.x ruleset bypass list (Always allow)
+          # for its pushes to pass the ruleset (GITHUB_TOKEN cannot bypass on user repos).
+          permission-contents: write
+
       - name: Checkout repository
         if: steps.validate.outputs.valid == 'true'
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: "2.x"
+          # Push identity for git-auto-commit-action; must be a bypassed actor.
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Extract version from tag
         if: steps.validate.outputs.valid == 'true'
