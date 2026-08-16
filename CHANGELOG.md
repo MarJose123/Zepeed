@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.3 - 2026-08-16
+
+### What's Changed
+
+* fix: show current configured values when editing a mail provider by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/85
+* feat: redesign login page with two-column slogan layout by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/86
+* feat: add GitHub star prompt for web UI and Artisan commands by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/87
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.2...v2.0.0-beta.3
+
 ## Release 2.0.0-beta.2 - 2026-08-15
 
 ### What's Changed
