@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class RealtimeCredentialsCommand extends Command
 {
+    use PromptsForGitHubStar;
     protected $signature = 'app:realtime-credential
                             {--force : Overwrite existing credentials}';
 
@@ -43,6 +45,8 @@ class RealtimeCredentialsCommand extends Command
         $this->writeCredentials($env, $contents);
 
         $this->components->info('Realtime credentials written to ' . basename($env));
+
+        $this->promptForGitHubStar();
 
         return self::SUCCESS;
     }

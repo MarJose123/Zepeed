@@ -17,6 +17,9 @@
         <testsuite name="Mcp">
             <directory>tests/Feature/Mcp</directory>
         </testsuite>
+        <testsuite name="Web">
+            <directory>tests/Feature/Web</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

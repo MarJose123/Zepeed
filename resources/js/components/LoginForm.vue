@@ -17,6 +17,7 @@ import { InputPassword } from "@/components/ui/input-password";
 import { Spinner } from "@/components/ui/spinner";
 import type { Appearance } from "@/composables/useAppearance";
 import { useAppearance } from "@/composables/useAppearance";
+import { recordLoginTime } from "@/composables/useGitHubStarPrompt";
 import { cn } from "@/lib/utils";
 
 const props = defineProps<{
@@ -105,11 +106,13 @@ const { updateAppearance } = useAppearance();
                     :reset-on-success="['password']"
                     :reset-on-error="['password']"
                     :on-success="
-                        () =>
+                        () => {
+                            recordLoginTime();
                             updateAppearance(
                                 (usePage()?.props?.appearance
                                     ?.mode as Appearance) || 'light',
-                            )
+                            );
+                        }
                     "
                     v-slot="{ errors, processing }"
                 >

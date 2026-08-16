@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Web;
 
 use App\Enums\MailDriver;
 use App\Http\Resources\MailProviderResource;

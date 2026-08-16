@@ -121,13 +121,18 @@
             "@php artisan config:clear --ansi",
             "@php artisan test --testsuite=Mcp --stop-on-failure --ansi"
         ],
+        "test:web": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Web --stop-on-failure --ansi"
+        ],
         "pre-commit": [
             "@rector",
             "bun run typecheck",
             "@format",
             "@analyse",
             "@test:api",
-            "@test:mcp"
+            "@test:mcp",
+            "@test:web"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

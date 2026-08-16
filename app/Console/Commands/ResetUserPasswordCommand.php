@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +12,7 @@ use function Laravel\Prompts\text;
 
 class ResetUserPasswordCommand extends Command
 {
+    use PromptsForGitHubStar;
     protected $signature = 'app:reset-user-password';
 
     protected $description = 'Change the password for a user.';
@@ -38,5 +40,6 @@ class ResetUserPasswordCommand extends Command
 
         $this->info(sprintf('Password for user %s has been updated.', $email));
 
+        $this->promptForGitHubStar();
     }
 }

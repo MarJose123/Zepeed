@@ -22,6 +22,7 @@ declare module "@inertiajs/core" {
             auth: Auth;
             appearance: UserAppearance;
             speedtest: Provider[];
+            github_star_url: string | null;
             [key: string]: unknown;
         };
         flashDataType: {

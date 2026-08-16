@@ -2,6 +2,7 @@
 import { router, usePage } from "@inertiajs/vue3";
 import { onMounted, onUnmounted, ref } from "vue";
 import { Toaster } from "vue-sonner";
+import GitHubStarDialog from "@/components/GitHubStarDialog.vue";
 import { useNotification } from "@/composables/useNotification";
 import { useNotificationChannel } from "@/composables/useNotificationChannel";
 import { useSpeedtestTestChannel } from "@/composables/useSpeedtestTestChannel";
@@ -75,5 +76,6 @@ useNotificationChannel(); // ← mounts the export broadcast listener
     <AppSidebarLayout :breadcrumbs="breadcrumbs">
         <slot />
     </AppSidebarLayout>
+    <GitHubStarDialog />
     <Toaster richColors position="bottom-right" />
 </template>

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,7 @@ use function Laravel\Prompts\text;
 
 class CreateUserAccountCommand extends Command
 {
+    use PromptsForGitHubStar;
     protected $signature = 'app:create-user-account
                             {--default : Create the default admin account from config/zepeed.php (non-interactive)}';
 
@@ -106,6 +108,8 @@ class CreateUserAccountCommand extends Command
         $user->save();
 
         $this->info('User account created successfully.');
+
+        $this->promptForGitHubStar();
 
         return self::SUCCESS;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Http;
  */
 class OoklaListServersCommand extends Command
 {
+    use PromptsForGitHubStar;
     /**
      * The name and signature of the console command.
      *
@@ -50,5 +52,7 @@ class OoklaListServersCommand extends Command
             headers: $fields,
             rows: $response->collect()->select($fields),
         );
+
+        $this->promptForGitHubStar();
     }
 }

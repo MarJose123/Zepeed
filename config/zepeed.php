@@ -22,4 +22,21 @@ return [
         'password' => env('DEFAULT_ADMIN_PASSWORD', 'zepeed_admin'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | GitHub Repository
+    |--------------------------------------------------------------------------
+    |
+    | The URL of the project's GitHub repository. Used by the "star the
+    | project" prompts — the web star dialog shown to authenticated users
+    | and the post-success prompt of interactive Artisan commands.
+    |
+    | Set GITHUB_REPOSITORY_URL to enable the prompts. When left unset the
+    | feature stays disabled: the web dialog is never shown and the Artisan
+    | prompt is skipped, so no broken links can be presented.
+    |
+    */
+
+    'github_repository_url' => env('GITHUB_REPOSITORY_URL'),
+
 ];
