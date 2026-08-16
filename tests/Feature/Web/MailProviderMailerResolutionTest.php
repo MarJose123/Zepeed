@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Web;
 
 use App\Enums\EmailTemplateType;
 use App\Enums\MailDriver;

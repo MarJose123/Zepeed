@@ -56,6 +56,15 @@ class HandleInertiaRequests extends Middleware
                     ->orderBy('id')
                     ->get()
             )->resolve() : [],
+            'github_star_url' => static function () use ($request) {
+                if (! $request->user()) {
+                    return;
+                }
+
+                $url = config('zepeed.github_repository_url');
+
+                return is_string($url) && trim($url) !== '' ? $url : null;
+            },
             'notifications' => static fn () => $request->user()
                 ? $request->user()->notifications()
                     ->latest()

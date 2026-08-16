@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use App\Enums\QueueWorkerName;
 use App\Enums\SpeedtestServer;
 use App\Jobs\RunSpeedtestJob;
@@ -13,6 +14,7 @@ use Illuminate\Support\Collection;
 
 class SpeedtestRunCommand extends Command
 {
+    use PromptsForGitHubStar;
     /*
      * Manually trigger a speedtest run for one or all providers.
      *
@@ -49,10 +51,18 @@ class SpeedtestRunCommand extends Command
 
         $sync = $this->option('sync');
 
+        $succeeded = true;
+
         foreach ($providers as $provider) {
-            $sync
+            $result = $sync
                 ? $this->runSync($provider)
                 : $this->runQueued($provider);
+
+            $succeeded = $result && $succeeded;
+        }
+
+        if ($succeeded) {
+            $this->promptForGitHubStar();
         }
 
         return self::SUCCESS;
@@ -91,7 +101,12 @@ class SpeedtestRunCommand extends Command
         return Provider::query()->enabled()->get();
     }
 
-    private function runQueued(Provider $provider): void
+    /**
+     * Dispatch the provider's speedtest to the queue.
+     *
+     * @return bool Whether the provider was actually dispatched.
+     */
+    private function runQueued(Provider $provider): bool
     {
         if (! $provider->is_runnable) {
             $this->components->warn(
@@ -101,15 +116,22 @@ class SpeedtestRunCommand extends Command
                     : '(Provider disabled)')
             );
 
-            return;
+            return false;
         }
 
         dispatch(new RunSpeedtestJob(provider: $provider, runFromConsole: true)->onQueue(QueueWorkerName::Speedtest->value));
 
         $this->components->info("Dispatched {$provider->slug->label()} to the queue.");
+
+        return true;
     }
 
-    private function runSync(Provider $provider): void
+    /**
+     * Run the provider synchronously and output its metrics inline.
+     *
+     * @return bool Whether the run completed successfully.
+     */
+    private function runSync(Provider $provider): bool
     {
         if (! $provider->is_runnable) {
             $this->components->warn(
@@ -119,12 +141,14 @@ class SpeedtestRunCommand extends Command
                     : '(Provider disabled)')
             );
 
-            return;
+            return false;
         }
+
+        $succeeded = true;
 
         $this->components->task(
             "Running {$provider->slug->label()}",
-            function () use ($provider): bool {
+            function () use ($provider, &$succeeded): bool {
                 try {
                     $result = $provider->service()->run();
 
@@ -185,9 +209,13 @@ class SpeedtestRunCommand extends Command
                         "Failed: [{$e->reason->value}] {$e->getMessage()}"
                     );
 
+                    $succeeded = false;
+
                     return false;
                 }
             }
         );
+
+        return $succeeded;
     }
 }

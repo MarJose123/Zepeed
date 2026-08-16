@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Web;
 
 use App\Enums\WorkflowRuleEvent;
 use App\Models\Apprise;

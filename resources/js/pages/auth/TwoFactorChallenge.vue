@@ -15,6 +15,7 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Spinner } from "@/components/ui/spinner";
+import { recordLoginTime } from "@/composables/useGitHubStarPrompt";
 import GuestLayout from "@/layouts/GuestLayout.vue";
 import type { TwoFactorConfigContent } from "@/types";
 
@@ -61,6 +62,7 @@ const code = ref<string>("");
                         class="space-y-4"
                         reset-on-error
                         @error="code = ''"
+                        @success="recordLoginTime"
                         #default="{ errors, processing, clearErrors }"
                     >
                         <FieldGroup>
@@ -142,6 +144,7 @@ const code = ref<string>("");
                         class="space-y-4"
                         reset-on-error
                         @error="code = ''"
+                        @success="recordLoginTime"
                         #default="{ errors, processing, clearErrors }"
                     >
                         <FieldGroup>
