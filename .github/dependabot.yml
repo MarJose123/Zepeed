@@ -7,7 +7,6 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
-      - "github-actions"
     cooldown:
       default-days: 7
 
@@ -17,8 +16,6 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
-      - "github-actions"
-      - "php"
     cooldown:
       default-days: 7
     ignore:
@@ -32,7 +29,6 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
-      - "github-actions"
     cooldown:
       default-days: 7
     ignore:
