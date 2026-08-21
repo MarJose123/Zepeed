@@ -7,9 +7,8 @@
 
 <div align="center">
 
-![Docker Image Version](https://img.shields.io/github/v/tag/marjose123/zepeed?filter=2.*&style=flat-square&label=Docker%20Image&cacheSeconds=3600)
-![GitHub Release](https://img.shields.io/github/v/release/marjose123/zepeed?style=flat-square&label=Latest%20Release&sort=semver&filter=2.*&cacheSeconds=3600)
-![Docker Pulls](https://img.shields.io/docker/pulls/marjose123/zepeed?style=flat-square&label=Docker%20Pulls&cacheSeconds=3600)
+![Docker Image Version](https://img.shields.io/github/v/tag/marjose123/zepeed?sort=semver&filter=v2.*&style=flat-square&label=Docker%20Image&cacheSeconds=3600)
+![GitHub Release](https://img.shields.io/github/v/release/MarJose123/Zepeed?include_prereleases&sort=semver&filter=v2.*&style=flat-square&label=Latest%20Release&cacheSeconds=3600)
 
 
 ![GitHub License](https://img.shields.io/github/license/marjose123/zepeed?style=flat-square&label=License&cacheSeconds=7200)
