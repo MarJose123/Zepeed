@@ -29,7 +29,7 @@ RUN chmod +x /tmp/install-cli-tools.sh && /tmp/install-cli-tools.sh
 # =============================================================================
 #  Stage 2 — Final runtime image
 # =============================================================================
-FROM serversideup/php:8.4-fpm-nginx-alpine AS base
+FROM serversideup/php:8.4-fpm-nginx-alpine3.24 AS base
 
 LABEL maintainer="MarJose Darang"
 

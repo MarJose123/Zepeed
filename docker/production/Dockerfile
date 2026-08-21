@@ -27,7 +27,7 @@ RUN chmod +x /tmp/install-cli-tools.sh && /tmp/install-cli-tools.sh
 #  Compiles Composer deps + Bun frontend assets inside a disposable layer.
 #  Nothing from this stage reaches the runtime image except /var/www/html.
 # =============================================================================
-FROM serversideup/php:8.4-fpm-nginx-alpine AS builder
+FROM serversideup/php:8.4-fpm-nginx-alpine3.24 AS builder
 
 USER root
 
@@ -67,7 +67,7 @@ RUN bun run build
 # =============================================================================
 #  Stage 3 — Production runtime image
 # =============================================================================
-FROM serversideup/php:8.4-fpm-nginx-alpine AS production
+FROM serversideup/php:8.4-fpm-nginx-alpine3.24 AS production
 
 ARG TIMEZONE=UTC
 ARG VERSION=dev
