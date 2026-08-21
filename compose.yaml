@@ -9,10 +9,9 @@ services:
                 TIMEZONE: '${APP_TIMEZONE:-UTC}'
                 HEALTHCHECK_PATH: '/up'
                 OOKLA_VERSION: '${OOKLA_VERSION:-1.2.0}'
-                LIBRESPEED_VERSION: '${LIBRESPEED_VERSION:-1.0.12}'
+                LIBRESPEED_VERSION: '${LIBRESPEED_VERSION:-1.0.14}'
                 FAST_CLI_VERSION: '${FAST_CLI_VERSION:-0.3.5}'
-                CLOUDFLARE_SPEED_CLI_VERSION: '${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.5}'
-        image: zepeed-8.4/app:latest
+                CLOUDFLARE_SPEED_CLI_VERSION: '${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.8}'
         extra_hosts:
             - "host.docker.internal:host-gateway"
         environment:

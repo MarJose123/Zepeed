@@ -8,9 +8,9 @@ FROM alpine:3.22 AS cli-builder
 #  Update versions here; the script reads these as overrides.
 # -----------------------------------------------------------------------------
 ARG OOKLA_VERSION=1.2.0
-ARG LIBRESPEED_VERSION=1.0.12
+ARG LIBRESPEED_VERSION=1.0.14
 ARG FAST_CLI_VERSION=0.3.5
-ARG CLOUDFLARE_SPEED_CLI_VERSION=1.0.5
+ARG CLOUDFLARE_SPEED_CLI_VERSION=1.0.8
 
 ENV OOKLA_VERSION=${OOKLA_VERSION} \
     LIBRESPEED_VERSION=${LIBRESPEED_VERSION} \
@@ -29,7 +29,7 @@ RUN chmod +x /tmp/install-cli-tools.sh && /tmp/install-cli-tools.sh
 # =============================================================================
 #  Stage 2 — Final runtime image
 # =============================================================================
-FROM serversideup/php:8.4-fpm-nginx-alpine AS base
+FROM serversideup/php:8.4-fpm-nginx-alpine3.24 AS base
 
 LABEL maintainer="MarJose Darang"
 
