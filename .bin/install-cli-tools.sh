@@ -13,9 +13,9 @@ set -euo pipefail
 #  Pinned versions — update here to upgrade, nowhere else.
 # -----------------------------------------------------------------------------
 OOKLA_VERSION="${OOKLA_VERSION:-1.2.0}"
-LIBRESPEED_VERSION="${LIBRESPEED_VERSION:-1.0.12}"
+LIBRESPEED_VERSION="${LIBRESPEED_VERSION:-1.0.14}"
 FAST_CLI_VERSION="${FAST_CLI_VERSION:-0.3.5}"
-CLOUDFLARE_SPEED_CLI_VERSION="${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.5}"
+CLOUDFLARE_SPEED_CLI_VERSION="${CLOUDFLARE_SPEED_CLI_VERSION:-1.0.8}"
 
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
