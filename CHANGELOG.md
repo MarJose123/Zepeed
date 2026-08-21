@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.4 - 2026-08-21
+
+### What's Changed
+
+* Refactor README badge links for consistent filters and sorting by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/88
+* Update dependencies and Dockerfile base images for stability by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/89
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.3...v2.0.0-beta.4
+
 ## Release 2.0.0-beta.3 - 2026-08-16
 
 ### What's Changed
