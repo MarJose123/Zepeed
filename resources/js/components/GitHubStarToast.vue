@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
     <div
-        class="flex w-[340px] items-start gap-3"
+        class="bg-popover text-popover-foreground flex w-full max-w-[340px] items-start gap-3 rounded-lg border px-3 py-3 shadow-md"
         role="dialog"
         aria-label="Star the GitHub repository"
     >

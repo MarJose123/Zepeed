@@ -41,7 +41,7 @@ watch(
                 dismissible: false,
                 closeButton: false,
             });
-        } else {
+        } else if (toastId !== undefined) {
             toast.dismiss(toastId);
             toastId = undefined;
         }
