@@ -1,56 +1,55 @@
 <script setup lang="ts">
-import { Star } from "@lucide/vue";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { markRaw, watch } from "vue";
+import { toast } from "vue-sonner";
+import GitHubStarToast from "@/components/GitHubStarToast.vue";
 import { useGitHubStarPrompt } from "@/composables/useGitHubStarPrompt";
 
-const { isOpen, dismiss, star } = useGitHubStarPrompt();
+const { isOpen, star, dismiss } = useGitHubStarPrompt();
+
+let toastId: string | number | undefined;
 
 /**
- * Any user-initiated close (Esc, overlay click, close button, "Not now")
- * counts as a dismissal and keeps the dialog hidden for the rest of the
- * session. The "Star on GitHub" button closes without marking a dismissal,
- * so the prompt may return on a later day.
+ * Render the GitHub star prompt as a persistent toast instead of a modal.
+ *
+ * The toast never auto-closes (`duration: Infinity`) and is not dismissible
+ * by swiping (`dismissible: false`). Toaster-level `closeButton` stays off,
+ * so there is no independent close affordance — it only closes when the
+ * user explicitly picks "Star on GitHub" (opens the repo, no session
+ * dismissal) or "Not now" (marks it dismissed for the rest of the session).
  */
-function handleOpenChange(open: boolean): void {
-    if (!open) {
-        dismiss();
-
-        return;
-    }
-
-    isOpen.value = open;
-}
+watch(
+    isOpen,
+    (open) => {
+        if (open) {
+            toastId = toast.custom(markRaw(GitHubStarToast), {
+                componentProps: {
+                    onStar: () => {
+                        toast.dismiss(toastId);
+                        star();
+                    },
+                    onNotNow: () => {
+                        toast.dismiss(toastId);
+                        dismiss();
+                    },
+                },
+                // Place the prompt at the bottom-center of the viewport. The
+                // sonner container is a small fixed box around just this
+                // toast, so it does not shield the rest of the screen — the
+                // user can keep interacting with the page freely.
+                position: "bottom-center",
+                duration: Infinity,
+                dismissible: false,
+                closeButton: false,
+            });
+        } else if (toastId !== undefined) {
+            toast.dismiss(toastId);
+            toastId = undefined;
+        }
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
-    <Dialog :open="isOpen" @update:open="handleOpenChange">
-        <DialogContent class="sm:max-w-md">
-            <DialogHeader>
-                <DialogTitle>Enjoying this project?</DialogTitle>
-                <DialogDescription>
-                    If this project is useful to you, consider giving it a ⭐ on
-                    GitHub. It helps support the project and lets other
-                    developers discover it.
-                </DialogDescription>
-            </DialogHeader>
-            <DialogFooter class="gap-2">
-                <DialogClose as-child>
-                    <Button variant="secondary">Not now</Button>
-                </DialogClose>
-                <Button @click="star">
-                    <Star class="fill-current" />
-                    Star on GitHub
-                </Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+    <span class="hidden" />
 </template>
