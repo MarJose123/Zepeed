@@ -11,6 +11,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && github.repository == 'MarJose123/Zepeed' }}
     steps:
       - name: Generate GitHub App token
         id: app-token
