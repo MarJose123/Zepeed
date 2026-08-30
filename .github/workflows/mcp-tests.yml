@@ -10,6 +10,7 @@ on:
 
 jobs:
   mcp-tests:
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && github.repository == 'MarJose123/Zepeed' }}
     runs-on: ubuntu-latest
 
     steps:

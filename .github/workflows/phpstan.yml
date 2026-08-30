@@ -16,6 +16,7 @@ jobs:
   phpstan:
     name: phpstan
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && github.repository == 'MarJose123/Zepeed' }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
