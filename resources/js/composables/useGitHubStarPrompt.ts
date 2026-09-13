@@ -38,6 +38,14 @@ const MAX_DELAY_MS = 15 * 60 * 1000;
 const SHOW_DELAY_MS = 1500;
 
 /**
+ * Dev-only delay bounds so the prompt can be tested quickly. In development
+ * the toast appears 2–10 seconds after load instead of the 4–15 minute
+ * production countdown. These values are never used outside `import.meta.env.DEV`.
+ */
+const DEV_MIN_DELAY_MS = 2 * 1000;
+const DEV_MAX_DELAY_MS = 10 * 1000;
+
+/**
  * Referral tag appended to the repository URL as a `ref=` query parameter
  * (the same convention the sidebar's GitHub links use). Browsers cannot set
  * the HTTP Referer header to an arbitrary string, so this tag is what the
@@ -90,6 +98,13 @@ function randomDelayMs(): number {
     return (
         Math.floor(Math.random() * (MAX_DELAY_MS - MIN_DELAY_MS + 1)) +
         MIN_DELAY_MS
+    );
+}
+
+function randomDevDelayMs(): number {
+    return (
+        Math.floor(Math.random() * (DEV_MAX_DELAY_MS - DEV_MIN_DELAY_MS + 1)) +
+        DEV_MIN_DELAY_MS
     );
 }
 
@@ -166,6 +181,23 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
             debug(
                 "skipped: no repository URL configured (github_star_url prop is null — check GITHUB_REPOSITORY_URL and that config is not cached)",
             );
+
+            return;
+        }
+
+        // Dev-only fast path for testing: show the prompt 2–10 seconds after
+        // load, ignoring the per-session dismissal and once-per-day limits so
+        // it re-triggers on every dev reload. Never used in production.
+        if (import.meta.env.DEV) {
+            const devDelayMs = randomDevDelayMs();
+
+            debug(
+                `[dev] showing prompt in ${Math.round(devDelayMs / 1000)} sec for testing`,
+            );
+            timer = setTimeout(() => {
+                isOpen.value = true;
+                debug("[dev] dialog shown");
+            }, devDelayMs);
 
             return;
         }
