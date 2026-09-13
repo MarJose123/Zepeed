@@ -4,6 +4,27 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.5 - 2026-09-13
+
+### What's Changed
+
+* Ignore major Dependabot updates by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/95
+* Remove 'github-actions' label from Dependabot configuration by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/97
+* chore(deps): bump vue-input-otp from 0.3.2 to 0.4.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/96
+* Remove outdated sections from README by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/98
+* Update README and replace outdated banner image by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/99
+* Update README documentation by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/100
+* chore(deps): bump @rollup/rollup-linux-x64-gnu from 4.62.4 to 4.62.5 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/102
+* chore(deps): bump docker/setup-buildx-action from 4.2.0 to 4.3.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/101
+* Restrict workflows to exclude Dependabot pull requests by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/103
+* chore(deps): bump docker/setup-qemu-action from 4.2.0 to 4.3.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/107
+* Refactor GitHub star dialog to use persistent toast notification by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/104
+* chore(deps): bump @rollup/rollup-linux-x64-gnu from 4.62.5 to 4.63.1 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/109
+* chore(deps): bump vccs from 0.4.1 to 0.5.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/106
+* chore(deps): bump softprops/action-gh-release from 3.0.2 to 3.0.3 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/108
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.4...v2.0.0-beta.5
+
 ## Release 2.0.0-beta.4 - 2026-08-21
 
 ### What's Changed
