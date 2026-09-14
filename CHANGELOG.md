@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.6 - 2026-09-14
+
+### What's Changed
+
+* chore(deps): update dependencies in bun.lock (vccs to 0.5.0, rollup-l… by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/110
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.5...v2.0.0-beta.6
+
 ## Release 2.0.0-beta.5 - 2026-09-13
 
 ### What's Changed
