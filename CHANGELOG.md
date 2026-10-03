@@ -4,6 +4,21 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.7 - 2026-10-03
+
+### What's Changed
+
+* chore(deps): bump vccs from 0.5.0 to 0.6.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/111
+* chore(deps): bump docker/setup-qemu-action from 4.3.0 to 4.4.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/112
+* chore(deps): bump docker/build-push-action from 7.3.0 to 7.4.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/113
+* chore(deps): bump docker/setup-buildx-action from 4.3.0 to 4.4.1 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/114
+* chore(deps): update dependencies in composer and package by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/115
+* GitHub Star Prompt: Add Cooldown After Starring, Remove Once-Per-Day Limit What changed by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/116
+* Fix: Resolve DOM warnings for maintenance password form by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/117
+* Refactor/rector ci style by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/118
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.6...v2.0.0-beta.7
+
 ## Release 2.0.0-beta.6 - 2026-09-14
 
 ### What's Changed
