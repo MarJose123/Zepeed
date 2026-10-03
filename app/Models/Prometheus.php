@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -19,22 +21,19 @@ use Override;
  * @property CarbonImmutable   $created_at
  * @property CarbonImmutable   $updated_at
  */
+#[Fillable([
+    'is_enabled',
+    'allowed_ips',
+    'cache_ttl',
+    'include_speed',
+    'include_ping',
+    'include_system',
+    'providers',
+])]
+#[Table(name: 'prometheus')]
 class Prometheus extends Model
 {
     use HasUuids;
-
-    protected $table = 'prometheus';
-
-    /** @var list<string> */
-    protected $fillable = [
-        'is_enabled',
-        'allowed_ips',
-        'cache_ttl',
-        'include_speed',
-        'include_ping',
-        'include_system',
-        'providers',
-    ];
 
     #[Override]
     protected function casts(): array

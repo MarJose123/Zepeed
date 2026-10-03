@@ -4,26 +4,16 @@ namespace App\Console\Commands;
 
 use App\Models\Setting;
 use App\Models\SpeedResult;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+#[Description('Prune speed test result rows older than the configured retention window')]
+#[Signature('app:speedtest-prune
+                            {--dry-run : Preview how many rows would be deleted without actually deleting}')]
 final class PruneSpeedResultsCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:speedtest-prune
-                            {--dry-run : Preview how many rows would be deleted without actually deleting}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Prune speed test result rows older than the configured retention window';
-
     /**
      * Execute the console command.
      */

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\MailDriver;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,18 @@ use Override;
  * @method static Builder<MailProvider> active()
  * @method static Builder<MailProvider> ordered()
  */
+#[Fillable([
+    'driver',
+    'label',
+    'priority',
+    'is_active',
+    'config',
+    'from_address',
+    'from_name',
+    'last_used_at',
+    'last_failed_at',
+    'failure_count',
+])]
 class MailProvider extends Model
 {
     use HasUuids;
@@ -46,19 +59,6 @@ class MailProvider extends Model
      */
     public const SECRET_MASK = '********';
 
-    protected $fillable = [
-        'driver',
-        'label',
-        'priority',
-        'is_active',
-        'config',
-        'from_address',
-        'from_name',
-        'last_used_at',
-        'last_failed_at',
-        'failure_count',
-    ];
-
     #[Override]
     protected function casts(): array
     {
@@ -73,13 +73,13 @@ class MailProvider extends Model
         ];
     }
 
-    /** @param Builder<MailProvider> $query */
+    /** @param Builder<static> $query */
     protected function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
     }
 
-    /** @param Builder<MailProvider> $query */
+    /** @param Builder<static> $query */
     protected function scopeOrdered(Builder $query): void
     {
         $query->orderBy('priority');

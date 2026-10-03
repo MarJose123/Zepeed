@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Observers\WebhooksObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\WebhookFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -32,41 +35,27 @@ use Override;
  */
 #[ObservedBy([WebhooksObserver::class])]
 #[UseFactory(WebhookFactory::class)]
+#[Appends([
+    'has_secret',
+])]
+#[Fillable([
+    'name',
+    'url',
+    'method',
+    'secret',
+    'headers',
+    'timeout',
+    'retry_attempts',
+    'verify_ssl',
+    'is_active',
+    'last_fired_at',
+])]
+#[Hidden([
+    'secret',
+])]
 class Webhook extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'name',
-        'url',
-        'method',
-        'secret',
-        'headers',
-        'timeout',
-        'retry_attempts',
-        'verify_ssl',
-        'is_active',
-        'last_fired_at',
-    ];
-
-    /**
-     * The signing secret is encrypted and must never be serialized — the
-     * REST API and MCP expose only `has_secret`.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'secret',
-    ];
-
-    /**
-     * Computed attributes included in serialization.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'has_secret',
-    ];
 
     /**
      * Whether a signing secret is configured (the secret itself is never

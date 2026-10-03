@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -14,12 +15,10 @@ use Override;
  *
  * @method static Builder<static> query()
  */
+#[Fillable(['key', 'value'])]
 final class Setting extends Model
 {
     use HasUuids;
-
-    /** @var list<string> */
-    protected $fillable = ['key', 'value'];
 
     // ─── Static helpers ───────────────────────────────────────────────────
 

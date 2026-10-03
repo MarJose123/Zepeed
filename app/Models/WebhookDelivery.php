@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,21 +24,20 @@ use Override;
  * @property CarbonImmutable $updated_at
  * @property-read Webhook     $webhook
  */
+#[Fillable([
+    'webhook_id',
+    'event',
+    'status_code',
+    'status_text',
+    'duration_ms',
+    'attempt',
+    'max_attempts',
+    'success',
+    'response_body',
+])]
 class WebhookDelivery extends Model
 {
     use HasUuids;
-
-    protected $fillable = [
-        'webhook_id',
-        'event',
-        'status_code',
-        'status_text',
-        'duration_ms',
-        'attempt',
-        'max_attempts',
-        'success',
-        'response_body',
-    ];
 
     #[Override]
     protected function casts(): array

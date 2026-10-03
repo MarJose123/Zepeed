@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 use Override;
@@ -21,21 +22,17 @@ use Override;
  * @property CarbonImmutable      $created_at
  * @property CarbonImmutable      $updated_at
  */
+#[Fillable([
+    'name',
+    'token',
+    'abilities',
+    'last_used_ip',
+    'last_used_agent',
+    'last_used_at',
+    'expires_at',
+])]
 class PersonalAccessToken extends SanctumPersonalAccessToken
 {
-    /**
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'token',
-        'abilities',
-        'last_used_ip',
-        'last_used_agent',
-        'last_used_at',
-        'expires_at',
-    ];
-
     /**
      * Record IP and user agent on each API request that uses this token.
      *

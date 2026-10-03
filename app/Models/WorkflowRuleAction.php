@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\WorkflowRuleActionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,20 +27,19 @@ use Override;
  * @property Apprise|null       $apprise
  */
 #[UseFactory(WorkflowRuleActionFactory::class)]
+#[Fillable([
+    'workflow_rule_id',
+    'type',
+    'mail_provider_id',
+    'email_template_id',
+    'recipient_email',
+    'webhook_id',
+    'apprise_id',
+    'sort_order',
+])]
 class WorkflowRuleAction extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'workflow_rule_id',
-        'type',
-        'mail_provider_id',
-        'email_template_id',
-        'recipient_email',
-        'webhook_id',
-        'apprise_id',
-        'sort_order',
-    ];
 
     #[Override]
     protected function casts(): array

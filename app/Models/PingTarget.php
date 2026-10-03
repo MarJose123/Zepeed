@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\PingStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\PingTargetFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -32,21 +33,20 @@ use Override;
  * @property-read PingResult|null               $latestResult
  */
 #[UseFactory(PingTargetFactory::class)]
+#[Fillable([
+    'label',
+    'host',
+    'is_enabled',
+    'packets',
+    'timeout_seconds',
+    'status',
+    'last_avg_ms',
+    'last_loss_percent',
+    'last_tested_at',
+])]
 class PingTarget extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'label',
-        'host',
-        'is_enabled',
-        'packets',
-        'timeout_seconds',
-        'status',
-        'last_avg_ms',
-        'last_loss_percent',
-        'last_tested_at',
-    ];
 
     #[Override]
     protected function casts(): array
@@ -82,7 +82,8 @@ class PingTarget extends Model
         return $this->hasMany(WorkflowRule::class, 'ping_target_id');
     }
 
-    /** Scope: only enabled targets. */
+    /** Scope: only enabled targets.
+     * @param Builder<static> $query */
     protected function scopeEnabled(Builder $query): void
     {
         $query->where('is_enabled', true);

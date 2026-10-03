@@ -7,6 +7,7 @@ use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
 use Database\Factories\MaintenanceWindowFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -37,6 +38,17 @@ use Override;
  * @method static Builder<MaintenanceWindow> ofType(MaintenanceWindowType $type)
  */
 #[UseFactory(MaintenanceWindowFactory::class)]
+#[Fillable([
+    'label',
+    'type',
+    'is_active',
+    'providers',
+    'starts_at',
+    'ends_at',
+    'cron_expression',
+    'duration_minutes',
+    'notes',
+])]
 class MaintenanceWindow extends Model
 {
     use HasFactory, HasFilters, HasUuids, IsSortable;
@@ -47,18 +59,6 @@ class MaintenanceWindow extends Model
 
     protected $attributes = [
         'providers' => '["all"]',
-    ];
-
-    protected $fillable = [
-        'label',
-        'type',
-        'is_active',
-        'providers',
-        'starts_at',
-        'ends_at',
-        'cron_expression',
-        'duration_minutes',
-        'notes',
     ];
 
     /**
@@ -98,13 +98,13 @@ class MaintenanceWindow extends Model
         ];
     }
 
-    /** @param Builder<MaintenanceWindow> $query */
+    /** @param Builder<static> $query */
     protected function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
     }
 
-    /** @param Builder<MaintenanceWindow> $query */
+    /** @param Builder<static> $query */
     protected function scopeForProvider(Builder $query, SpeedtestServer $server): void
     {
         $query->where(static function (Builder $q) use ($server) {
@@ -113,7 +113,7 @@ class MaintenanceWindow extends Model
         });
     }
 
-    /** @param Builder<MaintenanceWindow> $query */
+    /** @param Builder<static> $query */
     protected function scopeOfType(Builder $query, MaintenanceWindowType $type): void
     {
         $query->where('type', $type->value);
