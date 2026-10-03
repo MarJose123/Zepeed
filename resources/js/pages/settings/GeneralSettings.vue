@@ -647,7 +647,7 @@ const envOptions = [
                                         during maintenance. Auto-generated if
                                         left blank.
                                     </p>
-                                    <div class="flex gap-2">
+                                    <form @submit.prevent class="flex gap-2">
                                         <div class="relative flex-1">
                                             <Input
                                                 v-model="form.bypass_secret"
@@ -656,6 +656,7 @@ const envOptions = [
                                                         ? 'text'
                                                         : 'password'
                                                 "
+                                                autocomplete="new-password"
                                                 placeholder="Leave blank to auto-generate on save"
                                                 class="pr-9"
                                             />
@@ -679,13 +680,14 @@ const envOptions = [
                                         <Button
                                             variant="outline"
                                             size="sm"
+                                            type="button"
                                             @click="generateSecret"
                                         >
                                             <RefreshCw
                                                 class="size-3.5 mr-1.5"
                                             />Generate
                                         </Button>
-                                    </div>
+                                    </form>
                                     <p
                                         class="text-[11px] text-muted-foreground"
                                     >
