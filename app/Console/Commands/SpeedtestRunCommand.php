@@ -9,35 +9,19 @@ use App\Jobs\RunSpeedtestJob;
 use App\Models\Provider;
 use App\Models\SpeedResult;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 
+#[Description('Trigger a speed test run in console for one or all enabled providers')]
+#[Signature('app:speedtest-run
+                            {provider? : Provider slug (speedtest, librespeed, netflix-speedtest). Omit to run all.}
+                            {--sync : Run synchronously and output results inline}
+                            {--queue : Dispatch to the queue (default behaviour)}')]
 class SpeedtestRunCommand extends Command
 {
     use PromptsForGitHubStar;
-    /*
-     * Manually trigger a speedtest run for one or all providers.
-     *
-     * Run all enabled providers (queued by default):
-     *   php artisan app:speedtest-run
-     *
-     * Run a specific provider:
-     *   php artisan app:speedtest-run librespeed
-     *
-     * Run synchronously with inline metrics output:
-     *   php artisan app:speedtest-run --sync
-     *   php artisan app:speedtest-run speedtest --sync
-     *
-     * Explicit queue dispatch:
-     *   php artisan app:speedtest-run --queue
-     */
-
-    protected $signature = 'app:speedtest-run
-                            {provider? : Provider slug (speedtest, librespeed, netflix-speedtest). Omit to run all.}
-                            {--sync : Run synchronously and output results inline}
-                            {--queue : Dispatch to the queue (default behaviour)}';
-
-    protected $description = 'Trigger a speed test run in console for one or all enabled providers';
 
     public function handle(): int
     {

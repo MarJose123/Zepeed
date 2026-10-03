@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\SpeedtestServer;
 use App\Services\Speedtest\Contracts\SpeedtestServiceInterface;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\RouteKey;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -42,6 +44,19 @@ use Override;
  * @method static Builder<Provider> enabled()
  * @method static Builder<Provider> forServer(SpeedtestServer $server)
  */
+#[Fillable([
+    'slug',
+    'name',
+    'is_enabled',
+    'alert_on_failure',
+    'server_url',
+    'server_id',
+    'extra_flags',
+    'meta',
+    'last_run_at',
+    'last_run_status',
+])]
+#[RouteKey('slug')]
 class Provider extends Model
 {
     use HasFactory, HasFilters, HasUuids, IsSortable;
@@ -51,25 +66,6 @@ class Provider extends Model
         'created_at',
         'is_enabled',
     ];
-
-    protected $fillable = [
-        'slug',
-        'name',
-        'is_enabled',
-        'alert_on_failure',
-        'server_url',
-        'server_id',
-        'extra_flags',
-        'meta',
-        'last_run_at',
-        'last_run_status',
-    ];
-
-    #[Override]
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
 
     /**
      * Define filters for Provider model.
@@ -102,14 +98,13 @@ class Provider extends Model
     }
 
     // Scopes
-
-    /** @param Builder<Provider> $query */
+    /** @param Builder<static> $query */
     protected function scopeEnabled(Builder $query): void
     {
         $query->where('is_enabled', true);
     }
 
-    /** @param Builder<Provider> $query */
+    /** @param Builder<static> $query */
     protected function scopeForServer(Builder $query, SpeedtestServer $server): void
     {
         $query->where('slug', $server->value);

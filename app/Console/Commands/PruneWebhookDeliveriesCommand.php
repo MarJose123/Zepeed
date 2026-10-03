@@ -4,23 +4,17 @@ namespace App\Console\Commands;
 
 use App\Models\Setting;
 use App\Models\WebhookDelivery;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
+#[Description('Prune webhooks delivery history rows older than the configured retention window')]
+#[Signature('app:webhooks-prune
+                            {--dry-run : Preview how many rows would be deleted without actually deleting}')]
 final class PruneWebhookDeliveriesCommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'app:webhooks-prune
-                            {--dry-run : Preview how many rows would be deleted without actually deleting}';
-
-    /**
-     * @var string
-     */
-    protected $description = 'Prune webhooks delivery history rows older than the configured retention window';
-
     public function handle(): int
     {
         $retentionDays = max(30, (int) Setting::get('webhook_retention_days', 30));

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\WorkflowRuleMetric;
 use App\Enums\WorkflowRuleOperator;
 use Database\Factories\WorkflowRuleConditionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,18 +23,17 @@ use Override;
  * @property int                  $sort_order
  */
 #[UseFactory(WorkflowRuleConditionFactory::class)]
+#[Fillable([
+    'workflow_rule_id',
+    'metric',
+    'operator',
+    'value',
+    'lookback_minutes',
+    'sort_order',
+])]
 class WorkflowRuleCondition extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'workflow_rule_id',
-        'metric',
-        'operator',
-        'value',
-        'lookback_minutes',
-        'sort_order',
-    ];
 
     #[Override]
     protected function casts(): array

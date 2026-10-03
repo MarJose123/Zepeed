@@ -6,6 +6,7 @@ use App\Enums\ExportFormat;
 use App\Enums\ExportModule;
 use App\Enums\ExportStatus;
 use Database\Factories\ExportRequestFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,21 +30,20 @@ use Override;
  * @property Carbon|null         $updated_at
  */
 #[UseFactory(ExportRequestFactory::class)]
+#[Fillable([
+    'user_id',
+    'module',
+    'format',
+    'status',
+    'filters',
+    'file_path',
+    'row_count',
+    'failure_message',
+    'expires_at',
+])]
 class ExportRequest extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'user_id',
-        'module',
-        'format',
-        'status',
-        'filters',
-        'file_path',
-        'row_count',
-        'failure_message',
-        'expires_at',
-    ];
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Carbon\CarbonImmutable;
 use Database\Factories\AppriseFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -27,40 +30,26 @@ use Override;
  * @property-read bool                 $has_credentials
  */
 #[UseFactory(AppriseFactory::class)]
+#[Appends([
+    'has_credentials',
+])]
+#[Fillable([
+    'name',
+    'url',
+    'tags',
+    'username',
+    'password',
+    'timeout',
+    'verify_ssl',
+    'is_active',
+    'last_fired_at',
+])]
+#[Hidden([
+    'password',
+])]
 class Apprise extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'name',
-        'url',
-        'tags',
-        'username',
-        'password',
-        'timeout',
-        'verify_ssl',
-        'is_active',
-        'last_fired_at',
-    ];
-
-    /**
-     * The Basic Auth password is encrypted and must never be serialized —
-     * the REST API, MCP and UI expose only `has_credentials`.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-    ];
-
-    /**
-     * Computed attributes included in serialization.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'has_credentials',
-    ];
 
     /**
      * Whether Basic Auth credentials are configured (the password itself is

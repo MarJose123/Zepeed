@@ -42,7 +42,7 @@ class ExportTest extends TestCase
                 'date_to'   => now()->format('Y-m-d'),
             ]);
 
-        $response->assertStatus(202)
+        $response->assertAccepted()
             ->assertJsonPath('success', true)
             ->assertJsonPath('code', 202)
             ->assertJsonPath('data.module', 'speed_download')
@@ -80,7 +80,7 @@ class ExportTest extends TestCase
                 'date_to'   => now()->format('Y-m-d'),
             ]);
 
-        $response->assertStatus(202)
+        $response->assertAccepted()
             ->assertJsonPath('data.module', 'ping_result');
 
         Queue::assertPushed(GeneratePingResultExportJob::class);

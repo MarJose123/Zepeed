@@ -6,6 +6,7 @@ use App\Enums\SpeedtestServer;
 use Carbon\CarbonImmutable;
 use Cron\CronExpression;
 use Database\Factories\ProviderScheduleFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -33,20 +34,19 @@ use Override;
  * @method static Builder<ProviderSchedule> forProvider(SpeedtestServer $server)
  */
 #[UseFactory(ProviderScheduleFactory::class)]
+#[Fillable([
+    'provider_slug',
+    'label',
+    'cron_expression',
+    'is_enabled',
+    'last_scheduled_at',
+])]
 class ProviderSchedule extends Model
 {
     use HasFactory, HasFilters, HasUuids, IsSortable;
 
     protected array $sortable = [
         'created_at' => 'desc',
-    ];
-
-    protected $fillable = [
-        'provider_slug',
-        'label',
-        'cron_expression',
-        'is_enabled',
-        'last_scheduled_at',
     ];
 
     /**
@@ -74,13 +74,13 @@ class ProviderSchedule extends Model
         ];
     }
 
-    /** @param Builder<ProviderSchedule> $query */
+    /** @param Builder<static> $query */
     protected function scopeEnabled(Builder $query): void
     {
         $query->where('is_enabled', true);
     }
 
-    /** @param Builder<ProviderSchedule> $query */
+    /** @param Builder<static> $query */
     protected function scopeForProvider(Builder $query, SpeedtestServer $server): void
     {
         $query->where('provider_slug', $server->value);

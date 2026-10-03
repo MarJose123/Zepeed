@@ -139,9 +139,7 @@ class DashboardController extends Controller
             $key = (string) $row->measured_at;
             $slug = (string) $row->provider_slug;
 
-            if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
-            }
+            $buckets[$key] ??= ['label' => Date::parse($row->measured_at)->format($fmt)];
 
             $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;
             $buckets[$key]["{$slug}_ul"] = $row->upload_mbps !== null ? round((float) $row->upload_mbps, 2) : null;

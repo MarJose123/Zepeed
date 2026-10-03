@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,18 +20,17 @@ use Override;
  * @property CarbonImmutable      $created_at
  * @property CarbonImmutable      $updated_at
  */
+#[Fillable([
+    'provider_id',
+    'user_id',
+    'status',
+    'error_message',
+    'started_at',
+    'completed_at',
+])]
 class SpeedtestTestSession extends Model
 {
     use HasUuids;
-
-    protected $fillable = [
-        'provider_id',
-        'user_id',
-        'status',
-        'error_message',
-        'started_at',
-        'completed_at',
-    ];
 
     #[Override]
     protected function casts(): array

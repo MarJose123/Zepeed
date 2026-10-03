@@ -3,29 +3,20 @@
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForGitHubStar;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
 /**
  * credits: https://github.com/alexjustesen/speedtest-tracker
  */
+#[Description('Get a list of local Ookla speedtest servers.')]
+#[Signature('app:ookla-list-servers
+                            {search? : Search for a server by name}')]
 class OoklaListServersCommand extends Command
 {
     use PromptsForGitHubStar;
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:ookla-list-servers
-                            {search? : Search for a server by name}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Get a list of local Ookla speedtest servers.';
 
     /**
      * Execute the console command.

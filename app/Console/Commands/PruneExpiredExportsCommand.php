@@ -3,13 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Models\ExportRequest;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Description('Delete export files and rows that have passed their 7-day expiry.')]
+#[Signature('app:exports-prune {--dry-run : Preview deletions without removing files}')]
 final class PruneExpiredExportsCommand extends Command
 {
-    protected $signature = 'app:exports-prune {--dry-run : Preview deletions without removing files}';
-    protected $description = 'Delete export files and rows that have passed their 7-day expiry.';
-
     public function handle(): int
     {
         $expired = ExportRequest::query()

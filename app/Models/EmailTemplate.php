@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EmailTemplateType;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -20,18 +21,17 @@ use Override;
  * @property CarbonImmutable   $created_at
  * @property CarbonImmutable   $updated_at
  */
+#[Fillable([
+    'name',
+    'slug',
+    'subject',
+    'body',
+    'is_system',
+    'template_type',
+])]
 class EmailTemplate extends Model
 {
     use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'slug',
-        'subject',
-        'body',
-        'is_system',
-        'template_type',
-    ];
 
     #[Override]
     protected function casts(): array

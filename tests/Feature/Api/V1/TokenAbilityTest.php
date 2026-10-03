@@ -240,8 +240,7 @@ class TokenAbilityTest extends TestCase
         $provider = Provider::factory()->withSlug(SpeedtestServer::Ookla)->create(['is_enabled' => true]);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now")
-            ->assertStatus(202);
+            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now")->assertAccepted();
 
         $this->assertSame(['*'], $user->tokens()->first()->abilities);
     }
@@ -274,8 +273,7 @@ class TokenAbilityTest extends TestCase
         $token = $user->createToken('run-token', [TokenAbility::SpeedtestRun->value]);
 
         $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
-            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now")
-            ->assertStatus(202);
+            ->postJson("/api/v1/providers/{$provider->slug->value}/run-now")->assertAccepted();
     }
 
     /**

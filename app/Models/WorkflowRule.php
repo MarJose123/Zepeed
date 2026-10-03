@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\WorkflowRuleEvent;
 use Carbon\CarbonImmutable;
 use Database\Factories\WorkflowRuleFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,20 +29,19 @@ use Override;
  * @property-read HasMany<WorkflowRuleAction, self>    $actions
  */
 #[UseFactory(WorkflowRuleFactory::class)]
+#[Fillable([
+    'name',
+    'provider_slug',
+    'ping_target_id',
+    'event',
+    'condition_operator',
+    'is_active',
+    'cooldown_minutes',
+    'last_triggered_at',
+])]
 class WorkflowRule extends Model
 {
     use HasFactory, HasUuids;
-
-    protected $fillable = [
-        'name',
-        'provider_slug',
-        'ping_target_id',
-        'event',
-        'condition_operator',
-        'is_active',
-        'cooldown_minutes',
-        'last_triggered_at',
-    ];
 
     #[Override]
     protected function casts(): array

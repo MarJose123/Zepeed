@@ -6,6 +6,7 @@ use App\Enums\SpeedtestServer;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use App\Services\Speedtest\Exceptions\SpeedtestFailureReason;
 use Database\Factories\SpeedResultFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -45,6 +46,26 @@ use Override;
  * @property Carbon|null                 $updated_at
  */
 #[UseFactory(SpeedResultFactory::class)]
+#[Fillable([
+    'provider_slug',
+    'status',
+    'download_mbps',
+    'upload_mbps',
+    'ping_ms',
+    'jitter_ms',
+    'packet_loss',
+    'download_bytes',
+    'upload_bytes',
+    'server_name',
+    'server_location',
+    'isp',
+    'share_url',
+    'client_ip',
+    'failure_reason',
+    'failure_message',
+    'raw_json',
+    'measured_at',
+])]
 class SpeedResult extends Model
 {
     use HasFactory, HasFilters, HasUuids, IsSearchable, IsSortable;
@@ -60,27 +81,6 @@ class SpeedResult extends Model
         'server_name',
         'server_location',
         'isp',
-    ];
-
-    protected $fillable = [
-        'provider_slug',
-        'status',
-        'download_mbps',
-        'upload_mbps',
-        'ping_ms',
-        'jitter_ms',
-        'packet_loss',
-        'download_bytes',
-        'upload_bytes',
-        'server_name',
-        'server_location',
-        'isp',
-        'share_url',
-        'client_ip',
-        'failure_reason',
-        'failure_message',
-        'raw_json',
-        'measured_at',
     ];
 
     /**
@@ -111,26 +111,41 @@ class SpeedResult extends Model
         ];
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeSuccessful(Builder $query): void
     {
         $query->where('status', 'success');
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeFailed(Builder $query): void
     {
         $query->where('status', 'failed');
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeSkipped(Builder $query): void
     {
         $query->where('status', 'skipped');
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeForProvider(Builder $query, SpeedtestServer $server): void
     {
         $query->where('provider_slug', $server->value);
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeRecent(Builder $query, int $hours = 24): void
     {
         $query->where('measured_at', '>=', now()->subHours($hours));

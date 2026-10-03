@@ -142,9 +142,7 @@ class PublicMetricsDashboardController extends Controller
             $key = (string) $row->measured_at;
             $slug = (string) $row->provider_slug;
 
-            if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
-            }
+            $buckets[$key] ??= ['label' => Date::parse($row->measured_at)->format($fmt)];
 
             $buckets[$key]["{$slug}_dl"] = $row->download_mbps !== null ? round((float) $row->download_mbps, 2) : null;
             $buckets[$key]["{$slug}_ul"] = $row->upload_mbps !== null ? round((float) $row->upload_mbps, 2) : null;
@@ -187,9 +185,7 @@ class PublicMetricsDashboardController extends Controller
         foreach ($rows as $row) {
             $key = (string) $row->measured_at;
 
-            if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
-            }
+            $buckets[$key] ??= ['label' => Date::parse($row->measured_at)->format($fmt)];
 
             $value = $valueResolver($row);
             $buckets[$key][(string) $row->provider_slug] = $value !== null ? round($value, 2) : null;
@@ -258,9 +254,7 @@ class PublicMetricsDashboardController extends Controller
         foreach ($rows as $row) {
             $key = (string) $row->measured_at;
 
-            if (! isset($buckets[$key])) {
-                $buckets[$key] = ['label' => Date::parse($row->measured_at)->format($fmt)];
-            }
+            $buckets[$key] ??= ['label' => Date::parse($row->measured_at)->format($fmt)];
 
             $buckets[$key][(string) $row->ping_target_id] = $row->avg_ms !== null
                 ? round((float) $row->avg_ms, 2)

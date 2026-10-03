@@ -4,19 +4,20 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use App\Models\User;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
+#[Description('Create a new user account.')]
+#[Signature('app:create-user-account
+                            {--default : Create the default admin account from config/zepeed.php (non-interactive)}')]
 class CreateUserAccountCommand extends Command
 {
     use PromptsForGitHubStar;
-    protected $signature = 'app:create-user-account
-                            {--default : Create the default admin account from config/zepeed.php (non-interactive)}';
-
-    protected $description = 'Create a new user account.';
 
     /**
      * Handle the command — dispatches to interactive or default path.

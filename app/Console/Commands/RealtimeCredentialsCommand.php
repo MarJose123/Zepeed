@@ -3,17 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForGitHubStar;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
+#[Description('Generate secure Soketi/Pusher credentials and write them to .env')]
+#[Signature('app:realtime-credential
+                            {--force : Overwrite existing credentials}')]
 class RealtimeCredentialsCommand extends Command
 {
     use PromptsForGitHubStar;
-    protected $signature = 'app:realtime-credential
-                            {--force : Overwrite existing credentials}';
-
-    protected $description = 'Generate secure Soketi/Pusher credentials and write them to .env';
 
     public function handle(): int
     {

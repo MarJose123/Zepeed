@@ -401,7 +401,7 @@ class ProviderTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer {$token->plainTextToken}")
             ->postJson("/api/v1/providers/{$provider->slug->value}/run-now");
 
-        $response->assertStatus(202)
+        $response->assertAccepted()
             ->assertJsonPath('success', true)
             ->assertJsonPath('code', 202)
             ->assertJsonPath('data.provider_slug', 'ookla');

@@ -4,18 +4,19 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\PromptsForGitHubStar;
 use App\Models\User;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
+#[Description('Change the password for a user.')]
+#[Signature('app:reset-user-password')]
 class ResetUserPasswordCommand extends Command
 {
     use PromptsForGitHubStar;
-    protected $signature = 'app:reset-user-password';
-
-    protected $description = 'Change the password for a user.';
 
     public function handle(): void
     {

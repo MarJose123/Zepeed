@@ -7,7 +7,9 @@ use App\Enums\PingStatus;
 use App\Models\Filters\PingTargetIdFilter;
 use Carbon\CarbonImmutable;
 use Database\Factories\PingResultFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,33 +41,31 @@ use Override;
  * @property-read PingTarget   $target
  */
 #[UseFactory(PingResultFactory::class)]
+#[Fillable([
+    'ping_target_id',
+    'status',
+    'packets_sent',
+    'packets_received',
+    'packet_loss_percent',
+    'min_ms',
+    'avg_ms',
+    'max_ms',
+    'stddev_ms',
+    'raw_output',
+    'failure_reason',
+    'measured_at',
+    'created_at',
+])]
+#[WithoutTimestamps]
 class PingResult extends Model
 {
     use HasFactory, HasFilters, HasUuids, IsSearchable, IsSortable;
-
-    public $timestamps = false;
 
     protected array $sortable = [
         'measured_at' => 'desc',
         'latency_ms',
         'packet_loss',
         'avg_ms',
-    ];
-
-    protected $fillable = [
-        'ping_target_id',
-        'status',
-        'packets_sent',
-        'packets_received',
-        'packet_loss_percent',
-        'min_ms',
-        'avg_ms',
-        'max_ms',
-        'stddev_ms',
-        'raw_output',
-        'failure_reason',
-        'measured_at',
-        'created_at',
     ];
 
     /**
@@ -121,11 +121,17 @@ class PingResult extends Model
         return $this->belongsTo(PingTarget::class, 'ping_target_id');
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeForTarget(Builder $query, string $targetId): void
     {
         $query->where('ping_target_id', $targetId);
     }
 
+    /**
+     * @param Builder<static> $query
+     */
     protected function scopeInDateRange(Builder $query, string $range): void
     {
         $hours = match ($range) {
