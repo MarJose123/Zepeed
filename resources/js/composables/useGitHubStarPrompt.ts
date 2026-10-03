@@ -13,15 +13,16 @@ export type UseGitHubStarPromptReturn = {
 /**
  * Browser storage keys for the GitHub star prompt.
  *
- * - localStorage `zepeed.github_star_prompt`: records the last date the
- *   dialog was shown, so it appears at most once per calendar day.
  * - localStorage `zepeed.github_star_prompt.scheduled_at`: when the dialog
  *   becomes eligible — a randomized 4–15 minutes after the user logged in.
+ * - localStorage `zepeed.github_star_prompt.starred_at`: records the last
+ *   time the user clicked the star CTA, so the dialog is hidden for 1–2
+ *   days after the user stars the repository.
  * - sessionStorage `zepeed.github_star_prompt.dismissed`: records that the
  *   user dismissed it, keeping it hidden for the rest of the browser session.
  */
-const DAILY_STATE_KEY = "zepeed.github_star_prompt";
 const SCHEDULED_AT_KEY = "zepeed.github_star_prompt.scheduled_at";
+const STARRED_AT_KEY = "zepeed.github_star_prompt.starred_at";
 const SESSION_DISMISS_KEY = "zepeed.github_star_prompt.dismissed";
 
 /**
@@ -36,6 +37,13 @@ const MAX_DELAY_MS = 15 * 60 * 1000;
  * and the user can interact before it appears.
  */
 const SHOW_DELAY_MS = 1500;
+
+/**
+ * After the user clicks the star CTA, the prompt is hidden for a randomized
+ * 1–2 day interval before it can appear again.
+ */
+const MIN_STAR_COOLDOWN_MS = 1 * 24 * 60 * 60 * 1000;
+const MAX_STAR_COOLDOWN_MS = 2 * 24 * 60 * 60 * 1000;
 
 /**
  * Dev-only delay bounds so the prompt can be tested quickly. In development
@@ -53,35 +61,6 @@ const DEV_MAX_DELAY_MS = 10 * 1000;
  */
 const REFERRAL_TAG = "zepeed-app";
 
-type DailyState = {
-    lastShownDate: string | null;
-};
-
-function todayKey(): string {
-    return new Date().toISOString().slice(0, 10);
-}
-
-function readDailyState(): DailyState {
-    try {
-        const raw = localStorage.getItem(DAILY_STATE_KEY);
-
-        return raw ? (JSON.parse(raw) as DailyState) : { lastShownDate: null };
-    } catch {
-        return { lastShownDate: null };
-    }
-}
-
-function hasShownToday(): boolean {
-    return readDailyState().lastShownDate === todayKey();
-}
-
-function markShownToday(): void {
-    localStorage.setItem(
-        DAILY_STATE_KEY,
-        JSON.stringify({ lastShownDate: todayKey() }),
-    );
-}
-
 function isDismissedForSession(): boolean {
     try {
         return sessionStorage.getItem(SESSION_DISMISS_KEY) === "1";
@@ -92,6 +71,40 @@ function isDismissedForSession(): boolean {
 
 function markDismissedForSession(): void {
     sessionStorage.setItem(SESSION_DISMISS_KEY, "1");
+}
+
+function randomStarCooldownMs(): number {
+    return (
+        Math.floor(
+            Math.random() * (MAX_STAR_COOLDOWN_MS - MIN_STAR_COOLDOWN_MS + 1),
+        ) + MIN_STAR_COOLDOWN_MS
+    );
+}
+
+function readStarExpiryAt(): number | null {
+    try {
+        const value = Number(localStorage.getItem(STARRED_AT_KEY));
+
+        return Number.isFinite(value) && value > 0 ? value : null;
+    } catch {
+        return null;
+    }
+}
+
+function isWithinStarCooldown(): boolean {
+    const expiryAt = readStarExpiryAt();
+
+    if (expiryAt === null) {
+        return false;
+    }
+
+    return Date.now() < expiryAt;
+}
+
+function markStarred(): void {
+    const expiryAt = Date.now() + randomStarCooldownMs();
+
+    localStorage.setItem(STARRED_AT_KEY, String(expiryAt));
 }
 
 function randomDelayMs(): number {
@@ -153,8 +166,8 @@ export function recordLoginTime(): void {
  * The dialog is only ever considered for authenticated users with a
  * configured repository URL. It becomes eligible a randomized delay
  * after login (`recordLoginTime`, see `MIN_DELAY_MS`/`MAX_DELAY_MS`),
- * appears at most once per day, and stays hidden for the rest of the
- * session once dismissed.
+ * stays hidden for the rest of the session once dismissed, and is
+ * hidden for 1–2 days after the user clicks the star CTA.
  *
  * Users who were already logged in when the countdown was first introduced
  * have it anchored to their first authenticated page load instead.
@@ -186,7 +199,7 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
         }
 
         // Dev-only fast path for testing: show the prompt 2–10 seconds after
-        // load, ignoring the per-session dismissal and once-per-day limits so
+        // load, ignoring the per-session dismissal and star cooldown limits so
         // it re-triggers on every dev reload. Never used in production.
         if (import.meta.env.DEV) {
             const devDelayMs = randomDevDelayMs();
@@ -208,8 +221,12 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
             return;
         }
 
-        if (hasShownToday()) {
-            debug("skipped: already shown today (once-per-day limit)");
+        if (isWithinStarCooldown()) {
+            const expiryAt = readStarExpiryAt();
+
+            debug(
+                `skipped: within star cooldown (expires at ${new Date(expiryAt!).toLocaleString()})`,
+            );
 
             return;
         }
@@ -236,7 +253,6 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
 
         timer = setTimeout(
             () => {
-                markShownToday();
                 isOpen.value = true;
                 debug("dialog shown");
             },
@@ -267,6 +283,7 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
             window.open(url.toString(), "_blank", "noopener");
         }
 
+        markStarred();
         isOpen.value = false;
     }
 
