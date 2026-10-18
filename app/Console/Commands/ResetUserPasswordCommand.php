@@ -9,6 +9,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
@@ -33,6 +34,15 @@ class ResetUserPasswordCommand extends Command
             label: 'What is the new password?',
             required: true,
         );
+
+        if (! confirm(
+            label: "Reset password for '{$email}'? This cannot be undone.",
+            default: false,
+        )) {
+            $this->info('Aborted.');
+
+            return;
+        }
 
         User::query()->where('email', '=', $email)
             ->update([

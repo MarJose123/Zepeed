@@ -91,15 +91,18 @@ class ConsoleGitHubStarPromptTest extends TestCase
     public function testCreateUserAccountDefaultPathNeverPrompts(): void
     {
         Process::fake();
+        $testEmail = 'test-admin@example.com';
+
         config()->set('zepeed.default_admin', [
             'name'     => 'Test Admin',
-            'email'    => 'admin-' . uniqid() . '@example.com',
+            'email'    => $testEmail,
             'password' => 'password123',
         ]);
 
         $this->artisan('app:create-user-account', ['--default' => true])
-            ->assertExitCode(0)
-            ->doesntExpectOutputToContain('GitHub repository:');
+            ->expectsConfirmation("About to create admin account '{$testEmail}' with the configured password. Continue?", 'yes')
+            ->doesntExpectOutputToContain('GitHub repository:')
+            ->assertExitCode(0);
 
         Process::assertNotRan($this->browserProcessMatcher());
     }

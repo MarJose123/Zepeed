@@ -12,7 +12,6 @@ use App\Support\MergeFields;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Blade;
 use Inertia\Inertia;
 use Inertia\Response;
 use Str;
@@ -129,12 +128,41 @@ class EmailTemplateController extends Controller
             $subject = $stripPills($request->input('subject'));
             $body = $stripPills($request->input('body'));
 
+            // Safe string replacement only — no Blade compilation to prevent SSTI.
+            $subject = $this->replaceMergeFields($subject, $rawData);
+            $body = $this->replaceMergeFields($body, EmailTemplate::buildRenderData($rawData));
+
             return response()->json([
-                'subject' => Blade::render($subject, $rawData),
-                'body'    => Blade::render($body, EmailTemplate::buildRenderData($rawData)),
+                'subject' => $subject,
+                'body'    => $body,
             ]);
         } catch (Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    /**
+     * Replace {{ field }} placeholders with values using safe string
+     * replacement. Does not compile or execute Blade directives, preventing
+     * Server-Side Template Injection (SSTI).
+     *
+     * @param array<string, mixed> $data
+     */
+    private function replaceMergeFields(string $template, array $data): string
+    {
+        return (string) preg_replace_callback(
+            '/\{\{\s*([\w.]+)\s*\}\}/',
+            static function (array $matches) use ($data): string {
+                $key = $matches[1];
+
+                // Support dot notation for nested arrays
+                $value = data_get($data, $key);
+
+                return $value !== null
+                    ? (is_string($value) ? $value : e($value))
+                    : $matches[0];
+            },
+            $template,
+        );
     }
 }

@@ -38,10 +38,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->replaceInGroup('web', PreventRequestsDuringMaintenance::class, PreventRequestsDuringMaintenanceMiddleware::class);
 
-        $middleware->trustProxies(
-            at: '*',
-            headers: RequestAlias::HEADER_X_FORWARDED_FOR
-        );
+        // Only trust explicit proxy IPs from the environment. Defaults to the
+        // Docker internal network range when deployed via compose. Setting this
+        // to an empty value disables forwarded-header trust entirely (bare-metal
+        // or direct-access deployments).
+        $trustedProxies = (string) env('TRUSTED_PROXIES', '172.16.0.0/12');
+
+        if ($trustedProxies !== '') {
+            $middleware->trustProxies(
+                at: array_map('trim', explode(',', $trustedProxies)),
+                headers: RequestAlias::HEADER_X_FORWARDED_FOR
+            );
+        }
 
         $middleware->alias([
             'abilities' => CheckAbilities::class,

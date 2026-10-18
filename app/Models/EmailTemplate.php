@@ -7,7 +7,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Blade;
 use Override;
 
 /**
@@ -65,17 +64,21 @@ class EmailTemplate extends Model
     }
 
     /**
-     * Render the subject string with Blade merge data.
+     * Render the subject string by replacing merge field placeholders
+     * with safe string substitution. Does not compile Blade directives,
+     * preventing Server-Side Template Injection (SSTI).
      *
      * @param array<string, mixed> $data
      */
     public function renderSubject(array $data): string
     {
-        return Blade::render($this->subject, $data);
+        return $this->replaceMergeFields($this->subject, $data);
     }
 
     /**
-     * Render the body string with Blade merge data.
+     * Render the body string by replacing merge field placeholders
+     * with safe string substitution. Does not compile Blade directives,
+     * preventing Server-Side Template Injection (SSTI).
      *
      * @param array<string, mixed> $data
      */
@@ -87,7 +90,31 @@ class EmailTemplate extends Model
             $this->body,
         ) ?? $this->body;
 
-        return Blade::render($body, static::buildRenderData($data));
+        return $this->replaceMergeFields($body, static::buildRenderData($data));
+    }
+
+    /**
+     * Replace {{ field }} placeholders with values using safe string
+     * replacement. Does not compile or execute Blade directives.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function replaceMergeFields(string $template, array $data): string
+    {
+        return (string) preg_replace_callback(
+            '/\{\{\s*([\w.]+)\s*\}\}/',
+            static function (array $matches) use ($data): string {
+                $key = $matches[1];
+
+                // Support dot notation for nested arrays
+                $value = data_get($data, $key);
+
+                return $value !== null
+                    ? (is_string($value) ? $value : e($value))
+                    : $matches[0];
+            },
+            $template,
+        );
     }
 
     public function isUsedInRules(): bool

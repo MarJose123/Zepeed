@@ -123,7 +123,8 @@ Route::middleware(['auth', 'verified'])->prefix('speedtest/')->name('speedtest.'
                     ->name('danger');
 
                 Route::post('general/cache', [GeneralSettingsController::class, 'clearCache'])
-                    ->name('cache.clear');
+                    ->name('cache.clear')
+                    ->middleware('throttle:cache-clear');
 
             });
 
