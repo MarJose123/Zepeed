@@ -15,11 +15,12 @@ return [
     |
     */
 
-    'redirect_domains' => [
-        '*',
-        // 'https://example.com',
-        // 'http://localhost',
-    ],
+    // Restrict OAuth redirect domains to trusted values. Defaults to localhost
+    // for development. Set MCP_REDIRECT_DOMAINS to a comma-separated list for
+    // production (e.g., "https://app.example.com,http://localhost").
+    'redirect_domains' => array_filter(
+        array_map(trim(...), explode(',', (string) env('MCP_REDIRECT_DOMAINS', 'http://localhost'))),
+    ),
 
     /*
     |--------------------------------------------------------------------------
