@@ -41,4 +41,19 @@ return [
 
     'github_repository_url' => env('GITHUB_REPOSITORY_URL'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | GitHub Star Prompt
+    |--------------------------------------------------------------------------
+    |
+    | Control whether the "star on GitHub" prompt is shown in the web UI.
+    | When set to false, the prompt will never appear, even if a repository
+    | URL is configured.
+    |
+    | Set GITHUB_STAR_PROMPT_ENABLED to false to disable the prompt.
+    |
+    */
+
+    'github_star_prompt_enabled' => env('GITHUB_STAR_PROMPT_ENABLED', true),
+
 ];

@@ -61,9 +61,20 @@ class HandleInertiaRequests extends Middleware
                     return;
                 }
 
+                if (! config('zepeed.github_star_prompt_enabled', true)) {
+                    return;
+                }
+
                 $url = config('zepeed.github_repository_url');
 
                 return is_string($url) && trim($url) !== '' ? $url : null;
+            },
+            'github_star_prompt_enabled' => static function () use ($request) {
+                if (! $request->user()) {
+                    return false;
+                }
+
+                return config('zepeed.github_star_prompt_enabled', true);
             },
             'notifications' => static fn () => $request->user()
                 ? $request->user()->notifications()
