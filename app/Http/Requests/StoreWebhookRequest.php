@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\NotInternalIp;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +12,7 @@ class StoreWebhookRequest extends FormRequest
     {
         return [
             'name'            => ['required', 'string', 'max:100'],
-            'url'             => ['required', 'url', 'max:500'],
+            'url'             => ['required', 'url', 'max:500', new NotInternalIp],
             'method'          => ['required', Rule::in(['POST', 'GET', 'PUT', 'PATCH'])],
             'secret'          => ['nullable', 'string', 'max:500'],
             'headers'         => ['nullable', 'array'],

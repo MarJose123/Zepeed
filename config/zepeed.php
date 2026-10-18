@@ -19,7 +19,9 @@ return [
     'default_admin' => [
         'name'     => env('DEFAULT_ADMIN_NAME', 'Zepeed Admin'),
         'email'    => env('DEFAULT_ADMIN_EMAIL', 'admin@zepeed.local'),
-        'password' => env('DEFAULT_ADMIN_PASSWORD', 'zepeed_admin'),
+        // No default password fallback — require DEFAULT_ADMIN_PASSWORD to be set.
+        // The create-user-account --default command validates the password is present.
+        'password' => (string) env('DEFAULT_ADMIN_PASSWORD', ''),
     ],
 
     /*

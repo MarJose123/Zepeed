@@ -65,5 +65,7 @@ class ApiServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('cache-clear', static fn (): Limit => Limit::perMinute(5));
+
     }
 }

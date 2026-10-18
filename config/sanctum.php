@@ -50,7 +50,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Token expiration in minutes. Defaults to 1 year (525600 minutes).
+    // Set to null to disable expiration (not recommended for production).
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 525600),
 
     /*
     |--------------------------------------------------------------------------

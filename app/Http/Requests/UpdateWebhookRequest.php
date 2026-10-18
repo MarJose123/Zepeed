@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\NotInternalIp;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +12,7 @@ class UpdateWebhookRequest extends FormRequest
     {
         return [
             'name'            => ['sometimes', 'string', 'max:100'],
-            'url'             => ['sometimes', 'url', 'max:500'],
+            'url'             => ['sometimes', 'url', 'max:500', new NotInternalIp],
             'method'          => ['sometimes', Rule::in(['POST', 'GET', 'PUT', 'PATCH'])],
             'secret'          => ['nullable', 'string', 'max:500'],
             'headers'         => ['nullable', 'array'],

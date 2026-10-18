@@ -60,6 +60,14 @@ class CreateUserAccountCommand extends Command
             return self::SUCCESS;
         }
 
+        if (! $this->confirm(
+            "About to create admin account '{$cfg['email']}' with the configured password. Continue?"
+        )) {
+            $this->info('Aborted.');
+
+            return self::SUCCESS;
+        }
+
         /** @var User $user */
         $user = User::query()->create($cfg);
         $user->email_verified_at = now();
