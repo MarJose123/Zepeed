@@ -178,6 +178,8 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
     const githubStarUrl = ref<string | null>(
         (page.props.github_star_url as string | null | undefined) ?? null,
     );
+    const promptEnabled =
+        (page.props.github_star_prompt_enabled as boolean | undefined) ?? true;
 
     let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -186,6 +188,14 @@ export function useGitHubStarPrompt(): UseGitHubStarPromptReturn {
 
         if (!auth?.user) {
             debug("skipped: not authenticated");
+
+            return;
+        }
+
+        if (!promptEnabled) {
+            debug(
+                "skipped: github_star_prompt_enabled is disabled by backend config",
+            );
 
             return;
         }

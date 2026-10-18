@@ -68,4 +68,38 @@ class GitHubStarDialogTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('github_star_url', null));
     }
+
+    public function testGitHubStarUrlIsNullWhenPromptIsDisabled(): void
+    {
+        config()->set('zepeed.github_repository_url', 'https://github.com/example/repo');
+        config()->set('zepeed.github_star_prompt_enabled', false);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('github_star_url', null)
+                ->where('github_star_prompt_enabled', false));
+    }
+
+    public function testGitHubStarPromptEnabledPropIsTrueByDefault(): void
+    {
+        config()->set('zepeed.github_repository_url', 'https://github.com/example/repo');
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('github_star_prompt_enabled', true));
+    }
+
+    public function testGitHubStarPromptEnabledPropIsFalseForGuests(): void
+    {
+        $this->get(route('public.dashboard'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('github_star_prompt_enabled', false));
+    }
 }
