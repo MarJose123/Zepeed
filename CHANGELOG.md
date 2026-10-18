@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.8 - 2026-10-18
+
+### What's Changed
+
+* fix: address 12 security vulnerabilities from comprehensive audit by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/119
+* feat: add config option to disable GitHub star prompt by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/120
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.7...v2.0.0-beta.8
+
 ## Release 2.0.0-beta.7 - 2026-10-03
 
 ### What's Changed
