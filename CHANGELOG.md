@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.9 - 2026-10-23
+
+### What's Changed
+
+* chore: update Docker base image for security php updates by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/121
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.8...v2.0.0-beta.9
+
 ## Release 2.0.0-beta.8 - 2026-10-18
 
 ### What's Changed
