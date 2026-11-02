@@ -6,6 +6,7 @@ use App\Models\ExportRequest;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 #[Description('Delete export files and rows that have passed their 7-day expiry.')]
 #[Signature('app:exports-prune {--dry-run : Preview deletions without removing files}')]
@@ -36,7 +37,7 @@ final class PruneExpiredExportsCommand extends Command
             if ($export->file_path) {
                 $fullPath = storage_path("app/private/{$export->file_path}");
                 if (file_exists($fullPath)) {
-                    unlink($fullPath);
+                    File::delete($fullPath);
                 }
             }
 

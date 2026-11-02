@@ -75,11 +75,6 @@ class CloudflareSpeedService extends AbstractSpeedtestService
         // Prefer explicit external_ipv4; fall back to generic ip field
         $clientIp = $parsed['external_ipv4'] ?? $parsed['ip'] ?? null;
 
-        // Persist extended diagnostics into the provider's meta column so
-        // future dashboard features can surface loaded latency, UDP quality,
-        // connection scoring, and Cloudflare network metadata without a migration.
-        $this->storeExtendedDiagnostics($parsed);
-
         return [
             'download_mbps'   => round((float) $download['mbps'], 2),
             'upload_mbps'     => round((float) $upload['mbps'], 2),
@@ -87,34 +82,38 @@ class CloudflareSpeedService extends AbstractSpeedtestService
             'jitter_ms'       => isset($idleLatency['jitter_ms'])
                 ? round((float) $idleLatency['jitter_ms'], 2)
                 : null,
-            'packet_loss'     => $packetLoss,
-            'download_bytes'  => isset($download['bytes']) ? (int) $download['bytes'] : null,
-            'upload_bytes'    => isset($upload['bytes']) ? (int) $upload['bytes'] : null,
-            'server_name'     => $parsed['server'] ?? null,
-            'server_location' => $parsed['colo'] ?? null,
-            'isp'             => $parsed['as_org'] ?? null,
-            'share_url'       => null, // Cloudflare speed test has no shareable result URL
-            'client_ip'       => is_string($clientIp) ? $clientIp : null,
+            'packet_loss'          => $packetLoss,
+            'download_bytes'       => isset($download['bytes']) ? (int) $download['bytes'] : null,
+            'upload_bytes'         => isset($upload['bytes']) ? (int) $upload['bytes'] : null,
+            'server_name'          => $parsed['server'] ?? null,
+            'server_location'      => $parsed['colo'] ?? null,
+            'isp'                  => $parsed['as_org'] ?? null,
+            'share_url'            => null, // Cloudflare speed test has no shareable result URL
+            'client_ip'            => is_string($clientIp) ? $clientIp : null,
+            'extended_diagnostics' => self::extractExtendedDiagnostics($parsed),
         ];
     }
 
     /**
-     * Persist extended Cloudflare diagnostics into the Provider meta column.
+     * Extract extended Cloudflare diagnostics from the raw parsed output.
      *
-     * Stored keys:
+     * Returns an associative array of diagnostic keys and their values,
+     * or an empty array if no extended data is present. The caller decides
+     * whether to persist these diagnostics.
+     *
+     * Keys:
      *   cloudflare_loaded_latency_download — LatencySummary during download phase
      *   cloudflare_loaded_latency_upload   — LatencySummary during upload phase
      *   cloudflare_udp                     — ExperimentalUdpSummary (packet loss, jitter, MOS)
      *   cloudflare_connection_quality      — quality scoring object
      *   cloudflare_network                 — ASN, colo, wireless flag, network name
      *   cloudflare_last_result_at          — ISO timestamp from the CLI output
+     *
+     * @return array<string, mixed>
      */
-    private function storeExtendedDiagnostics(array $parsed): void
+    public static function extractExtendedDiagnostics(array $parsed): array
     {
-        /** @var array<string, mixed> $existing */
-        $existing = is_array($this->provider->meta) ? $this->provider->meta : [];
-
-        $diagnostics = array_filter([
+        return array_filter([
             'cloudflare_loaded_latency_download' => $parsed['loaded_latency_download'] ?? null,
             'cloudflare_loaded_latency_upload'   => $parsed['loaded_latency_upload'] ?? null,
             'cloudflare_udp'                     => $parsed['experimental_udp'] ?? null,
@@ -127,9 +126,5 @@ class CloudflareSpeedService extends AbstractSpeedtestService
             ]),
             'cloudflare_last_result_at'          => $parsed['timestamp_utc'] ?? null,
         ], static fn (mixed $v): bool => $v !== null);
-
-        $this->provider->update([
-            'meta' => array_merge($existing, $diagnostics),
-        ]);
     }
 }

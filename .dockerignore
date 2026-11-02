@@ -32,6 +32,9 @@ bootstrap/cache/*.php
 database/database.sqlite
 openapi.json
 
+# Development Docker files (not needed in production image)
+docker/development/
+
 # System files
 .DS_Store
 Thumbs.db

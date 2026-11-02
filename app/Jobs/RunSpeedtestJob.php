@@ -16,6 +16,8 @@ use App\Models\MaintenanceWindow;
 use App\Models\Provider;
 use App\Models\SpeedResult;
 use App\Models\SpeedtestTestSession;
+use App\Services\Speedtest\CloudflareSpeedService;
+use App\Services\Speedtest\Data\SpeedtestResult;
 use App\Services\Speedtest\Exceptions\SpeedtestException;
 use App\Services\WorkflowRuleService;
 use Carbon\CarbonImmutable;
@@ -158,6 +160,7 @@ class RunSpeedtestJob implements ShouldQueue
             if (! $this->testOnly) {
                 $speedResult = SpeedResult::query()->create($result->toStorageArray());
                 $this->provider->markSuccessful();
+                $this->persistExtendedDiagnostics($result);
                 $workflowRuleService->evaluate($speedResult);
             }
 
@@ -279,6 +282,32 @@ class RunSpeedtestJob implements ShouldQueue
         $windowEnd = $lastRun->addMinutes($window->duration_minutes ?? 60);
 
         return $now->lessThanOrEqualTo($windowEnd);
+    }
+
+    /**
+     * Persist extended diagnostics (e.g., Cloudflare loaded latency, UDP stats)
+     * to the provider's meta column after a successful speedtest.
+     */
+    private function persistExtendedDiagnostics(SpeedtestResult $result): void
+    {
+        if ($result->server !== SpeedtestServer::Cloudflare) {
+            return;
+        }
+
+        $diagnostics = CloudflareSpeedService::extractExtendedDiagnostics(
+            json_decode($result->rawJson, associative: true) ?? []
+        );
+
+        if (empty($diagnostics)) {
+            return;
+        }
+
+        /** @var array<string, mixed> $existing */
+        $existing = is_array($this->provider->meta) ? $this->provider->meta : [];
+
+        $this->provider->update([
+            'meta' => array_merge($existing, $diagnostics),
+        ]);
     }
 
     public function failed(Throwable $exception): void
