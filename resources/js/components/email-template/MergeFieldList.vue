@@ -84,7 +84,7 @@ defineExpose({ onKeyDown });
             class="bg-muted border-border flex items-center gap-2 border-b px-3 py-2"
         >
             <svg
-                class="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                class="text-muted-foreground size-3.5 shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -145,13 +145,13 @@ defineExpose({ onKeyDown });
                                 {{ field.name }}
                             </div>
                             <div
-                                class="text-muted-foreground mt-0.5 truncate text-[10px]"
+                                class="text-muted-foreground mt-0.5 truncate text-xs"
                             >
                                 {{ field.desc }}
                             </div>
                         </div>
                         <code
-                            class="ml-2 shrink-0 rounded px-1.5 py-0.5 text-[10px]"
+                            class="ml-2 shrink-0 rounded px-1.5 py-0.5 text-xs"
                             :class="
                                 items.indexOf(field) === selectedIndex
                                     ? 'bg-primary/10 text-primary'
@@ -176,7 +176,7 @@ defineExpose({ onKeyDown });
                     ['Esc', 'close'],
                 ]"
                 :key="hint[0]"
-                class="flex items-center gap-1 text-[10px] text-muted-foreground"
+                class="flex items-center gap-1 text-xs text-muted-foreground"
             >
                 <kbd
                     class="border-border bg-background rounded border px-1 font-mono text-[9px]"

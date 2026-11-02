@@ -82,11 +82,11 @@ const update = (key: keyof WorkflowRuleCondition, value: string | number) => {
 
 <template>
     <div
-        class="flex flex-wrap items-center gap-2 rounded-lg bg-primary/5 border border-primary/10 px-3 py-2.5"
+        class="flex flex-wrap items-center gap-2 rounded-md bg-primary/5 border border-primary/10 px-3 py-2.5"
     >
         <!-- Condition number badge -->
         <div
-            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-medium text-primary"
+            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary"
         >
             {{ index + 1 }}
         </div>
@@ -196,7 +196,7 @@ const update = (key: keyof WorkflowRuleCondition, value: string | number) => {
             class="text-muted-foreground hover:text-destructive ml-auto h-7 w-7 shrink-0"
             @click="emit('remove')"
         >
-            <Trash2 class="h-3.5 w-3.5" />
+            <Trash2 class="size-3.5" />
         </Button>
     </div>
 </template>

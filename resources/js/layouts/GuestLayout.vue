@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from "@inertiajs/vue3";
 import { onMounted, onUnmounted, ref } from "vue";
-import { Toaster } from "vue-sonner";
+import { Sonner } from "@/components/ui/sonner";
 import { useNotification } from "@/composables/useNotification";
 
 const flashEventListener = ref();
@@ -24,7 +24,7 @@ onUnmounted(() => {
 <template>
     <div>
         <slot />
-        <Toaster richColors position="bottom-right" />
+        <Sonner richColors position="bottom-right" />
     </div>
 </template>
 

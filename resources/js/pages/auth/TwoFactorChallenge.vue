@@ -69,7 +69,7 @@ const code = ref<string>("");
                             <div
                                 class="flex flex-col items-center gap-2 text-center"
                             >
-                                <h1 class="text-xl font-bold">
+                                <h1 class="text-2xl font-semibold">
                                     {{ authConfigContent.title }}
                                 </h1>
                                 <FieldDescription>
@@ -151,7 +151,7 @@ const code = ref<string>("");
                             <div
                                 class="flex flex-col items-center gap-2 text-center"
                             >
-                                <h1 class="text-xl font-bold">
+                                <h1 class="text-2xl font-semibold">
                                     {{ authConfigContent.title }}
                                 </h1>
                                 <FieldDescription>

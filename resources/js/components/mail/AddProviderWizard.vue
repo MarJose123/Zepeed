@@ -204,10 +204,11 @@ function sendTest() {
             <div class="flex items-center px-1">
                 <template v-for="n in [1, 2, 3]" :key="n">
                     <div
-                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium transition-colors"
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-colors"
                         :class="{
                             'bg-primary text-primary-foreground': step === n,
-                            'bg-green-600 text-white': step > n,
+                            'bg-green-600 text-white dark:text-green-100':
+                                step > n,
                             'bg-muted text-muted-foreground border border-border':
                                 step < n,
                         }"
@@ -247,7 +248,7 @@ function sendTest() {
                     />
                     <p
                         v-if="form.errors.label"
-                        class="text-destructive text-[10px]"
+                        class="text-destructive text-xs"
                     >
                         {{ form.errors.label }}
                     </p>
@@ -265,10 +266,7 @@ function sendTest() {
                 />
 
                 <!-- Config-level error summary (catches generic 'config' key) -->
-                <p
-                    v-if="form.errors.config"
-                    class="text-destructive text-[10px]"
-                >
+                <p v-if="form.errors.config" class="text-destructive text-xs">
                     {{ form.errors.config }}
                 </p>
 
@@ -289,13 +287,13 @@ function sendTest() {
                         />
                         <p
                             v-if="fromAddressHint && !form.errors.from_address"
-                            class="text-muted-foreground text-[10px]"
+                            class="text-muted-foreground text-xs"
                         >
                             {{ fromAddressHint }}
                         </p>
                         <p
                             v-if="form.errors.from_address"
-                            class="text-destructive text-[10px]"
+                            class="text-destructive text-xs"
                         >
                             {{ form.errors.from_address }}
                         </p>
@@ -312,7 +310,7 @@ function sendTest() {
                         />
                         <p
                             v-if="form.errors.from_name"
-                            class="text-destructive text-[10px]"
+                            class="text-destructive text-xs"
                         >
                             {{ form.errors.from_name }}
                         </p>
@@ -324,7 +322,7 @@ function sendTest() {
                     v-if="hasConfigErrors"
                     class="rounded border border-destructive/30 bg-destructive/5 px-3 py-2"
                 >
-                    <p class="text-destructive text-[10px]">
+                    <p class="text-destructive text-xs">
                         Some configuration fields need attention — check the
                         fields above.
                     </p>
@@ -355,12 +353,12 @@ function sendTest() {
                         >
                             <Loader2
                                 v-if="testProcessing"
-                                class="mr-1.5 h-3 w-3 animate-spin"
+                                class="mr-1.5 size-3 animate-spin"
                             />
                             {{ testProcessing ? "Sending…" : "Send test" }}
                         </Button>
                     </div>
-                    <p class="text-muted-foreground text-[10px]">
+                    <p class="text-muted-foreground text-xs">
                         A real email will be sent via {{ driverLabel }} to
                         verify your configuration.
                     </p>
@@ -377,9 +375,7 @@ function sendTest() {
                         >
                             Connection successful
                         </p>
-                        <p
-                            class="text-[10px] text-green-600 dark:text-green-500"
-                        >
+                        <p class="text-xs text-green-600 dark:text-green-500">
                             Test email delivered via {{ driverLabel }} —
                             configuration is valid.
                         </p>
@@ -395,7 +391,7 @@ function sendTest() {
                         <p class="text-destructive text-xs font-medium">
                             Connection failed
                         </p>
-                        <p class="text-destructive/70 text-[10px]">
+                        <p class="text-destructive/70 text-xs">
                             {{
                                 testErrorMsg ??
                                 "Check your configuration and try again."
@@ -406,7 +402,7 @@ function sendTest() {
 
                 <p
                     v-if="testResult === null && !testProcessing"
-                    class="text-muted-foreground text-[10px]"
+                    class="text-muted-foreground text-xs"
                 >
                     Provider has been saved. You can close and test later from
                     the provider list, or send a test now to verify before
@@ -451,7 +447,7 @@ function sendTest() {
                     >
                         <Loader2
                             v-if="form.processing"
-                            class="mr-1.5 h-3 w-3 animate-spin"
+                            class="mr-1.5 size-3 animate-spin"
                         />
                         Save & test →
                     </Button>

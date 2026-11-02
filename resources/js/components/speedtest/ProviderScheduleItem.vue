@@ -70,7 +70,7 @@ const handleDelete = () => {
                 </p>
                 <Badge
                     variant="outline"
-                    class="rounded-full text-[10px]"
+                    class="rounded-full text-xs"
                     :class="
                         schedule.is_enabled
                             ? 'border-green-600/30 bg-green-50 text-green-700 dark:border-green-400/20 dark:bg-green-950 dark:text-green-400'
@@ -107,7 +107,7 @@ const handleDelete = () => {
                 class="h-8 w-8 p-0"
                 @click="showEditModal = true"
             >
-                <Edit2 class="h-4 w-4" />
+                <Edit2 class="size-4" />
                 <span class="sr-only">Edit schedule</span>
             </Button>
             <Button
@@ -116,7 +116,7 @@ const handleDelete = () => {
                 class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 @click="showDeleteConfirm = true"
             >
-                <Trash2 class="h-4 w-4" />
+                <Trash2 class="size-4" />
                 <span class="sr-only">Delete schedule</span>
             </Button>
         </div>

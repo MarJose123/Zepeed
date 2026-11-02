@@ -76,9 +76,7 @@ const latestPoints = computed(() =>
     <Card class="overflow-hidden p-0">
         <CardHeader class="border-border border-b px-4 py-3">
             <CardTitle class="text-sm font-medium">{{ title }}</CardTitle>
-            <CardDescription class="text-[11px]">{{
-                description
-            }}</CardDescription>
+            <CardDescription class="text-xs">{{ description }}</CardDescription>
         </CardHeader>
         <CardContent class="px-2 pb-3 pt-4">
             <ResponsiveContainer width="100%" :height="260">
@@ -108,7 +106,7 @@ const latestPoints = computed(() =>
                         <template #content="{ active, payload, label }">
                             <div
                                 v-if="active && payload && payload.length"
-                                class="bg-popover border-border text-popover-foreground rounded-lg border px-3 py-2 shadow-md"
+                                class="bg-popover border-border text-popover-foreground rounded-md border px-3 py-2 shadow-md"
                             >
                                 <p class="text-xs font-medium mb-1.5">
                                     {{ label }}
@@ -189,9 +187,7 @@ const latestPoints = computed(() =>
                                             backgroundColor: entry.color,
                                         }"
                                     />
-                                    <span
-                                        class="text-[10px] text-muted-foreground"
-                                    >
+                                    <span class="text-xs text-muted-foreground">
                                         {{ entry.value }}
                                     </span>
                                 </button>

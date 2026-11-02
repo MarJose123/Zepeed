@@ -236,7 +236,7 @@ const cooldownLabel = computed(() => {
                 <Button size="sm" :disabled="form.processing" @click="save">
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Save rule
                 </Button>
@@ -260,13 +260,13 @@ const cooldownLabel = computed(() => {
 
             <!-- WHEN block -->
             <div
-                class="overflow-hidden rounded-lg border border-blue-200 dark:border-blue-900"
+                class="overflow-hidden rounded-md border border-blue-200 dark:border-blue-900"
             >
                 <div
                     class="flex items-center gap-2 border-b border-blue-200 bg-blue-50 px-3 py-2 dark:border-blue-900 dark:bg-blue-950/50"
                 >
                     <span
-                        class="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                        class="rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                     >
                         When
                     </span>
@@ -276,7 +276,7 @@ const cooldownLabel = computed(() => {
                 </div>
                 <div class="flex flex-wrap items-end gap-3 p-3">
                     <div class="space-y-1">
-                        <Label class="text-[10px]">Event</Label>
+                        <Label class="text-xs">Event</Label>
                         <Select
                             :model-value="form.event"
                             @update:model-value="
@@ -303,7 +303,7 @@ const cooldownLabel = computed(() => {
 
                     <!-- Ping target selector (ping rules) -->
                     <div v-if="isPingEvent" class="space-y-1">
-                        <Label class="text-[10px]">Ping target</Label>
+                        <Label class="text-xs">Ping target</Label>
                         <Select
                             :model-value="form.ping_target_id"
                             @update:model-value="
@@ -341,7 +341,7 @@ const cooldownLabel = computed(() => {
 
                     <!-- Provider selector (speedtest rules) -->
                     <div v-else class="space-y-1">
-                        <Label class="text-[10px]">Provider</Label>
+                        <Label class="text-xs">Provider</Label>
                         <Select
                             :model-value="form.provider_slug || 'any'"
                             @update:model-value="
@@ -383,7 +383,7 @@ const cooldownLabel = computed(() => {
 
             <!-- IF block -->
             <div
-                class="overflow-hidden rounded-lg border border-purple-200 dark:border-purple-900"
+                class="overflow-hidden rounded-md border border-purple-200 dark:border-purple-900"
             >
                 <!-- Header row -->
                 <div
@@ -393,7 +393,7 @@ const cooldownLabel = computed(() => {
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span
-                                class="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                                class="rounded bg-purple-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                             >
                                 If
                             </span>
@@ -408,7 +408,7 @@ const cooldownLabel = computed(() => {
                             class="h-7 border-purple-300 text-xs text-purple-700 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-300"
                             @click="addCondition"
                         >
-                            <Plus class="mr-1 h-3 w-3" />
+                            <Plus class="mr-1 size-3" />
                             Add condition
                         </Button>
                     </div>
@@ -425,10 +425,10 @@ const cooldownLabel = computed(() => {
                                 v-for="op in ['and', 'or']"
                                 :key="op"
                                 type="button"
-                                class="rounded px-2.5 py-0.5 text-[10px] font-medium transition-colors"
+                                class="rounded px-2.5 py-0.5 text-xs font-medium transition-colors"
                                 :class="
                                     form.condition_operator === op
-                                        ? 'bg-purple-600 text-white'
+                                        ? 'bg-purple-600 text-white dark:text-purple-100'
                                         : 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900'
                                 "
                                 @click="
@@ -439,7 +439,7 @@ const cooldownLabel = computed(() => {
                             </button>
                         </div>
                         <span
-                            class="text-[10px] text-purple-500 dark:text-purple-400"
+                            class="text-xs text-purple-500 dark:text-purple-400"
                         >
                             {{
                                 form.condition_operator === "and"
@@ -454,7 +454,7 @@ const cooldownLabel = computed(() => {
                 <div class="space-y-2 p-3">
                     <div
                         v-if="form.conditions.length === 0"
-                        class="text-muted-foreground rounded-lg border border-dashed py-4 text-center text-xs"
+                        class="text-muted-foreground rounded-md border border-dashed py-4 text-center text-xs"
                     >
                         No conditions — rule fires on every matching event.
                         <button
@@ -483,14 +483,14 @@ const cooldownLabel = computed(() => {
 
             <!-- THEN block -->
             <div
-                class="overflow-hidden rounded-lg border border-green-200 dark:border-green-900"
+                class="overflow-hidden rounded-md border border-green-200 dark:border-green-900"
             >
                 <div
                     class="flex items-center justify-between border-b border-green-200 bg-green-50 px-3 py-2 dark:border-green-900 dark:bg-green-950/50"
                 >
                     <div class="flex items-center gap-2">
                         <span
-                            class="rounded bg-green-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-green-700 dark:bg-green-900 dark:text-green-300"
+                            class="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-green-700 dark:bg-green-900 dark:text-green-300"
                         >
                             Then
                         </span>
@@ -506,7 +506,7 @@ const cooldownLabel = computed(() => {
                                     size="sm"
                                     class="h-7 border-green-300 text-xs text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300"
                                 >
-                                    <Plus class="mr-1 h-3 w-3" />
+                                    <Plus class="mr-1 size-3" />
                                     Add action
                                 </Button>
                             </DropdownMenuTrigger>
@@ -515,9 +515,7 @@ const cooldownLabel = computed(() => {
                                     class="text-xs"
                                     @click="addEmailAction"
                                 >
-                                    <Mail
-                                        class="mr-2 h-3.5 w-3.5 text-blue-500"
-                                    />
+                                    <Mail class="mr-2 size-3.5 text-blue-500" />
                                     Email
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -525,7 +523,7 @@ const cooldownLabel = computed(() => {
                                     @click="addWebhookAction"
                                 >
                                     <Link2
-                                        class="mr-2 h-3.5 w-3.5 text-green-500"
+                                        class="mr-2 size-3.5 text-green-500"
                                     />
                                     Webhook
                                 </DropdownMenuItem>
@@ -534,7 +532,7 @@ const cooldownLabel = computed(() => {
                                     @click="addAppriseAction"
                                 >
                                     <Bell
-                                        class="mr-2 h-3.5 w-3.5 text-purple-500"
+                                        class="mr-2 size-3.5 text-purple-500"
                                     />
                                     Apprise
                                 </DropdownMenuItem>
@@ -545,7 +543,7 @@ const cooldownLabel = computed(() => {
                 <div class="space-y-2 p-3">
                     <div
                         v-if="form.actions.length === 0"
-                        class="text-muted-foreground rounded-lg border border-dashed py-4 text-center text-xs"
+                        class="text-muted-foreground rounded-md border border-dashed py-4 text-center text-xs"
                     >
                         No actions yet. Add an email notification or webhook
                         trigger.
@@ -572,12 +570,12 @@ const cooldownLabel = computed(() => {
             </div>
 
             <!-- Cooldown block -->
-            <div class="overflow-hidden rounded-lg border border-border">
+            <div class="overflow-hidden rounded-md border border-border">
                 <div
                     class="flex items-center gap-2 border-b bg-muted/50 px-3 py-2"
                 >
                     <span
-                        class="rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                        class="rounded bg-muted px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                         Cooldown
                     </span>

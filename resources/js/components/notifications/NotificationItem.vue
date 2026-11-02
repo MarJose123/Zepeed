@@ -56,7 +56,7 @@ function download(): void {
 
 <template>
     <div
-        class="flex items-start gap-3 rounded-lg p-3 transition-colors"
+        class="flex items-start gap-3 rounded-md p-3 transition-colors"
         :class="isUnread ? 'bg-primary/5' : 'hover:bg-muted/50'"
     >
         <!-- Icon -->
@@ -88,10 +88,7 @@ function download(): void {
                 />
             </div>
 
-            <p
-                v-if="isCompleted"
-                class="mt-0.5 text-[11px] text-muted-foreground"
-            >
+            <p v-if="isCompleted" class="mt-0.5 text-xs text-muted-foreground">
                 {{ completedData!.row_count ?? 0 }} rows ·
                 {{ completedData!.format.toUpperCase() }}
                 <span v-if="completedData!.expires_at">
@@ -102,14 +99,14 @@ function download(): void {
                 >
             </p>
 
-            <p v-else class="mt-0.5 text-[11px] text-muted-foreground">
+            <p v-else class="mt-0.5 text-xs text-muted-foreground">
                 {{
                     failedData!.failure_message ??
                     "Export could not be completed."
                 }}
             </p>
 
-            <p class="mt-1 text-[11px] text-muted-foreground">
+            <p class="mt-1 text-xs text-muted-foreground">
                 {{ new Date(notification.created_at).toLocaleString() }}
             </p>
 

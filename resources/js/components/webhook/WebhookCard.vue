@@ -52,7 +52,7 @@ function testWebhook() {
 
 <template>
     <div
-        class="border-border flex cursor-pointer flex-col overflow-hidden rounded-lg border transition-colors"
+        class="border-border flex cursor-pointer flex-col overflow-hidden rounded-md border transition-colors"
         :class="{
             'border-primary/60 bg-primary/2': selected,
             'hover:border-border-secondary': !selected,
@@ -66,13 +66,13 @@ function testWebhook() {
                     <div
                         class="bg-muted border-border flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"
                     >
-                        <Link2 class="text-muted-foreground h-4 w-4" />
+                        <Link2 class="text-muted-foreground size-4" />
                     </div>
                     <div>
                         <div class="text-sm font-medium">
                             {{ webhook.name }}
                         </div>
-                        <code class="text-muted-foreground text-[10px]">{{
+                        <code class="text-muted-foreground text-xs">{{
                             webhook.method
                         }}</code>
                     </div>
@@ -84,29 +84,27 @@ function testWebhook() {
                             : 'border-border bg-muted text-muted-foreground border'
                     "
                     variant="outline"
-                    class="text-[10px]"
+                    class="text-xs"
                 >
                     {{ webhook.is_active ? "active" : "inactive" }}
                 </Badge>
             </div>
 
             <!-- URL preview -->
-            <p
-                class="text-muted-foreground mb-3 truncate font-mono text-[11px]"
-            >
+            <p class="text-muted-foreground mb-3 truncate font-mono text-xs">
                 {{ webhook.url_preview }}
             </p>
 
             <!-- Stats -->
             <div class="grid grid-cols-2 gap-2">
                 <div class="bg-muted rounded-md p-2">
-                    <p class="text-muted-foreground text-[10px]">Last fired</p>
+                    <p class="text-muted-foreground text-xs">Last fired</p>
                     <p class="mt-0.5 text-xs font-medium">
                         {{ lastFiredLabel(webhook) }}
                     </p>
                 </div>
                 <div class="bg-muted rounded-md p-2">
-                    <p class="text-muted-foreground text-[10px]">Retries</p>
+                    <p class="text-muted-foreground text-xs">Retries</p>
                     <p class="mt-0.5 text-xs font-medium">
                         {{
                             webhook.retry_attempts > 0
@@ -137,7 +135,7 @@ function testWebhook() {
                 class="h-7 flex-1 text-xs"
                 @click="emit('edit')"
             >
-                <Pencil class="mr-1 h-3 w-3" />
+                <Pencil class="mr-1 size-3" />
                 Edit
             </Button>
             <Button
@@ -146,7 +144,7 @@ function testWebhook() {
                 class="text-muted-foreground hover:text-destructive h-7 w-7"
                 @click="emit('delete')"
             >
-                <Trash2 class="h-3.5 w-3.5" />
+                <Trash2 class="size-3.5" />
             </Button>
         </div>
     </div>

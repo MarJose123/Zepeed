@@ -52,7 +52,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('host') }"
                     @update:model-value="update('host', $event)"
                 />
-                <p v-if="e('host')" class="text-destructive text-[10px]">
+                <p v-if="e('host')" class="text-destructive text-xs">
                     {{ e("host") }}
                 </p>
             </div>
@@ -66,7 +66,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('port') }"
                     @update:model-value="update('port', $event)"
                 />
-                <p v-if="e('port')" class="text-destructive text-[10px]">
+                <p v-if="e('port')" class="text-destructive text-xs">
                     {{ e("port") }}
                 </p>
             </div>
@@ -90,7 +90,7 @@ const e = (field: string): string | undefined =>
                         <SelectItem value="none">None</SelectItem>
                     </SelectContent>
                 </Select>
-                <p v-if="e('encryption')" class="text-destructive text-[10px]">
+                <p v-if="e('encryption')" class="text-destructive text-xs">
                     {{ e("encryption") }}
                 </p>
             </div>
@@ -109,7 +109,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('username') }"
                     @update:model-value="update('username', $event)"
                 />
-                <p v-if="e('username')" class="text-destructive text-[10px]">
+                <p v-if="e('username')" class="text-destructive text-xs">
                     {{ e("username") }}
                 </p>
             </div>
@@ -126,12 +126,12 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('password') }"
                     @update:model-value="update('password', $event)"
                 />
-                <p v-if="e('password')" class="text-destructive text-[10px]">
+                <p v-if="e('password')" class="text-destructive text-xs">
                     {{ e("password") }}
                 </p>
                 <p
                     v-else-if="isMasked(config.password)"
-                    class="text-muted-foreground text-[10px]"
+                    class="text-muted-foreground text-xs"
                 >
                     Leave unchanged to keep the current password.
                 </p>
@@ -150,16 +150,16 @@ const e = (field: string): string | undefined =>
                 :class="{ 'border-destructive': e('api_key') }"
                 @update:model-value="update('api_key', $event)"
             />
-            <p v-if="e('api_key')" class="text-destructive text-[10px]">
+            <p v-if="e('api_key')" class="text-destructive text-xs">
                 {{ e("api_key") }}
             </p>
             <p
                 v-else-if="isMasked(config.api_key)"
-                class="text-muted-foreground text-[10px]"
+                class="text-muted-foreground text-xs"
             >
                 Leave unchanged to keep the current API key.
             </p>
-            <p v-else class="text-muted-foreground text-[10px]">
+            <p v-else class="text-muted-foreground text-xs">
                 Get your API key from
 
                 <a
@@ -183,12 +183,12 @@ const e = (field: string): string | undefined =>
                 :class="{ 'border-destructive': e('api_key') }"
                 @update:model-value="update('api_key', $event)"
             />
-            <p v-if="e('api_key')" class="text-destructive text-[10px]">
+            <p v-if="e('api_key')" class="text-destructive text-xs">
                 {{ e("api_key") }}
             </p>
             <p
                 v-else-if="isMasked(config.api_key)"
-                class="text-muted-foreground text-[10px]"
+                class="text-muted-foreground text-xs"
             >
                 Leave unchanged to keep the current API key.
             </p>
@@ -203,7 +203,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('domain') }"
                     @update:model-value="update('domain', $event)"
                 />
-                <p v-if="e('domain')" class="text-destructive text-[10px]">
+                <p v-if="e('domain')" class="text-destructive text-xs">
                     {{ e("domain") }}
                 </p>
             </div>
@@ -219,7 +219,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('endpoint') }"
                     @update:model-value="update('endpoint', $event)"
                 />
-                <p v-if="e('endpoint')" class="text-destructive text-[10px]">
+                <p v-if="e('endpoint')" class="text-destructive text-xs">
                     {{ e("endpoint") }}
                 </p>
             </div>
@@ -237,16 +237,16 @@ const e = (field: string): string | undefined =>
                 :class="{ 'border-destructive': e('token') }"
                 @update:model-value="update('token', $event)"
             />
-            <p v-if="e('token')" class="text-destructive text-[10px]">
+            <p v-if="e('token')" class="text-destructive text-xs">
                 {{ e("token") }}
             </p>
             <p
                 v-else-if="isMasked(config.token)"
-                class="text-muted-foreground text-[10px]"
+                class="text-muted-foreground text-xs"
             >
                 Leave unchanged to keep the current token.
             </p>
-            <p v-else class="text-muted-foreground text-[10px]">
+            <p v-else class="text-muted-foreground text-xs">
                 Find your token in
 
                 <a
@@ -271,7 +271,7 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('key') }"
                     @update:model-value="update('key', $event)"
                 />
-                <p v-if="e('key')" class="text-destructive text-[10px]">
+                <p v-if="e('key')" class="text-destructive text-xs">
                     {{ e("key") }}
                 </p>
             </div>
@@ -285,12 +285,12 @@ const e = (field: string): string | undefined =>
                     :class="{ 'border-destructive': e('secret') }"
                     @update:model-value="update('secret', $event)"
                 />
-                <p v-if="e('secret')" class="text-destructive text-[10px]">
+                <p v-if="e('secret')" class="text-destructive text-xs">
                     {{ e("secret") }}
                 </p>
                 <p
                     v-else-if="isMasked(config.secret)"
-                    class="text-muted-foreground text-[10px]"
+                    class="text-muted-foreground text-xs"
                 >
                     Leave unchanged to keep the current secret key.
                 </p>
@@ -333,7 +333,7 @@ const e = (field: string): string | undefined =>
                     >
                 </SelectContent>
             </Select>
-            <p v-if="e('region')" class="text-destructive text-[10px]">
+            <p v-if="e('region')" class="text-destructive text-xs">
                 {{ e("region") }}
             </p>
         </div>
@@ -353,10 +353,10 @@ const e = (field: string): string | undefined =>
                 :class="{ 'border-destructive': e('path') }"
                 @update:model-value="update('path', $event)"
             />
-            <p v-if="e('path')" class="text-destructive text-[10px]">
+            <p v-if="e('path')" class="text-destructive text-xs">
                 {{ e("path") }}
             </p>
-            <p v-else class="text-muted-foreground text-[10px]">
+            <p v-else class="text-muted-foreground text-xs">
                 Leave blank to use the default system sendmail path.
             </p>
         </div>

@@ -229,7 +229,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                         </p>
                     </div>
                     <Button size="sm" @click="openNew">
-                        <Plus class="mr-1.5 h-4 w-4" />
+                        <Plus class="mr-1.5 size-4" />
                         New rule
                     </Button>
                 </div>
@@ -250,7 +250,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                             No workflow rules yet.
                         </p>
                         <Button size="sm" variant="outline" @click="openNew">
-                            <Plus class="mr-1.5 h-4 w-4" />
+                            <Plus class="mr-1.5 size-4" />
                             Create your first rule
                         </Button>
                     </div>
@@ -278,7 +278,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                     >
                                     <Badge
                                         variant="outline"
-                                        class="shrink-0 text-[10px]"
+                                        class="shrink-0 text-xs"
                                         :class="
                                             rule.is_active
                                                 ? 'border-green-300 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300'
@@ -295,33 +295,31 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                 <div class="mt-1.5 flex flex-wrap gap-1">
                                     <span
                                         v-if="rule.ping_target_id"
-                                        class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                                        class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-950 dark:text-blue-300"
                                     >
                                         {{ rule.target_label ?? "Ping target" }}
                                     </span>
                                     <span
                                         v-else
-                                        class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                                        class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-950 dark:text-blue-300"
                                     >
                                         {{
                                             rule.provider_slug ?? "Any provider"
                                         }}
                                     </span>
                                     <span
-                                        class="inline-flex items-center rounded bg-purple-50 px-1.5 py-0.5 text-[10px] text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                                        class="inline-flex items-center rounded bg-purple-50 px-1.5 py-0.5 text-xs text-purple-700 dark:bg-purple-950 dark:text-purple-300"
                                     >
                                         {{ rule.event_label }}
                                     </span>
                                     <span
-                                        class="inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-[10px] text-green-700 dark:bg-green-950 dark:text-green-300"
+                                        class="inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-xs text-green-700 dark:bg-green-950 dark:text-green-300"
                                     >
                                         {{ actionsSummary(rule) }}
                                     </span>
                                 </div>
 
-                                <p
-                                    class="text-muted-foreground mt-1 text-[10px]"
-                                >
+                                <p class="text-muted-foreground mt-1 text-xs">
                                     {{ lastTriggeredLabel(rule) }}
                                     <template v-if="rule.cooldown_minutes > 0">
                                         · {{ rule.cooldown_minutes }}min
@@ -348,11 +346,11 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                 >
                                     <PauseCircle
                                         v-if="rule.is_active"
-                                        class="h-3.5 w-3.5 text-amber-500"
+                                        class="size-3.5 text-amber-500"
                                     />
                                     <CheckCircle2
                                         v-else
-                                        class="h-3.5 w-3.5 text-green-500"
+                                        class="size-3.5 text-green-500"
                                     />
                                 </Button>
 
@@ -363,7 +361,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                     title="Edit rule"
                                     @click="openEdit(rule)"
                                 >
-                                    <Pencil class="h-3.5 w-3.5" />
+                                    <Pencil class="size-3.5" />
                                 </Button>
 
                                 <Button
@@ -373,7 +371,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                                     title="Delete rule"
                                     @click.stop="confirmDelete(rule)"
                                 >
-                                    <Trash2 class="h-3.5 w-3.5" />
+                                    <Trash2 class="size-3.5" />
                                 </Button>
                             </div>
                         </div>
@@ -381,7 +379,7 @@ const actionsSummary = (rule: WorkflowRule): string => {
                 </div>
 
                 <div class="border-border border-t px-4 py-2.5">
-                    <p class="text-muted-foreground text-[10px]">
+                    <p class="text-muted-foreground text-xs">
                         Rules are evaluated after every speedtest result or ping
                         test is recorded. Actions fire immediately when all
                         conditions match.

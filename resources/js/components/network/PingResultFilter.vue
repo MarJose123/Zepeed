@@ -73,11 +73,11 @@ watch([range, target, status, perPage], apply);
                 class="h-8 gap-2"
                 :class="hasActiveFilters ? 'border-primary text-primary' : ''"
             >
-                <ListFilter class="h-3.5 w-3.5" />
+                <ListFilter class="size-3.5" />
                 Filters
                 <span
                     v-if="hasActiveFilters"
-                    class="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground"
+                    class="flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground"
                 >
                     {{ activeCount }}
                 </span>

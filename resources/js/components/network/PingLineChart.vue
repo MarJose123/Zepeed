@@ -44,7 +44,7 @@ function toggleSeries(key: string): void {
     <Card class="overflow-hidden p-0">
         <CardHeader class="border-border border-b px-4 py-3">
             <CardTitle class="text-sm font-medium">{{ title }}</CardTitle>
-            <CardDescription class="mt-0.5 text-[11px]">{{
+            <CardDescription class="mt-0.5 text-xs">{{
                 description
             }}</CardDescription>
         </CardHeader>
@@ -79,7 +79,7 @@ function toggleSeries(key: string): void {
                         >
                             <div
                                 v-if="active && payload?.length"
-                                class="bg-popover border-border text-popover-foreground rounded-lg border px-3 py-2 shadow-md"
+                                class="bg-popover border-border text-popover-foreground rounded-md border px-3 py-2 shadow-md"
                             >
                                 <p class="mb-1.5 text-xs font-medium">
                                     {{ bucketLabel }}
@@ -133,7 +133,7 @@ function toggleSeries(key: string): void {
                                         :style="{ backgroundColor: e.color }"
                                     />
                                     <span
-                                        class="text-[10px] text-muted-foreground"
+                                        class="text-xs text-muted-foreground"
                                         >{{ e.value }}</span
                                     >
                                 </button>

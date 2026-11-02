@@ -69,18 +69,18 @@ const emptyClass: Record<string, string> = {
 </script>
 
 <template>
-    <Card class="rounded-lg">
+    <Card class="rounded-md">
         <CardContent class="p-3">
             <div class="mb-2.5 flex items-center justify-between">
-                <p class="flex items-center gap-1.5 text-sm font-bold">
+                <p class="flex items-center gap-1.5 text-sm font-semibold">
                     <component
                         :is="IconComponent"
-                        class="h-3.5 w-3.5"
+                        class="size-3.5"
                         aria-hidden="true"
                     />
                     {{ label }}
                 </p>
-                <p class="text-sm font-bold">
+                <p class="text-sm font-semibold">
                     {{ currentValue
                     }}<span
                         class="text-muted-foreground ml-1 text-xs font-normal"
@@ -99,7 +99,7 @@ const emptyClass: Record<string, string> = {
                     class="flex-1 rounded-sm"
                 />
             </div>
-            <p class="text-muted-foreground mt-1.5 text-[10px]">
+            <p class="text-muted-foreground mt-1.5 text-xs">
                 Average across all providers · last 24 h
             </p>
         </CardContent>

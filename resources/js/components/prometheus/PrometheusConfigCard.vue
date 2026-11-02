@@ -49,7 +49,7 @@ function onIpsInput(e: Event) {
     <Card>
         <CardHeader class="border-border border-b px-4 py-3">
             <CardTitle class="text-sm font-medium">Access control</CardTitle>
-            <CardDescription class="text-[11px]">
+            <CardDescription class="text-xs">
                 Enable the scrape endpoint and restrict access by IP or CIDR
                 range.
             </CardDescription>
@@ -60,7 +60,7 @@ function onIpsInput(e: Event) {
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <p class="text-sm font-medium">Enable Prometheus</p>
-                    <p class="text-muted-foreground mt-0.5 text-[11px]">
+                    <p class="text-muted-foreground mt-0.5 text-xs">
                         Exposes the /metrics endpoint for scraping.
                     </p>
                 </div>
@@ -80,11 +80,8 @@ function onIpsInput(e: Event) {
                         class="text-muted-foreground text-xs"
                     />
                     <Button variant="outline" size="sm" @click="copyUrl">
-                        <Check
-                            v-if="copied"
-                            class="h-3.5 w-3.5 text-green-500"
-                        />
-                        <Copy v-else class="h-3.5 w-3.5" />
+                        <Check v-if="copied" class="size-3.5 text-green-500" />
+                        <Copy v-else class="size-3.5" />
                     </Button>
                 </div>
             </div>
@@ -99,7 +96,7 @@ function onIpsInput(e: Event) {
                     class="resize-none text-xs"
                     @input="onIpsInput"
                 />
-                <p class="text-muted-foreground text-[11px]">
+                <p class="text-muted-foreground text-xs">
                     One IP or CIDR per line. Empty means all IPs are allowed.
                     Supports ranges e.g. 10.0.0.0/8.
                 </p>

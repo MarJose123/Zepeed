@@ -94,7 +94,7 @@ function toggleGroup(group: TokenAbilityGroup, checked: boolean): void {
 <template>
     <Dialog :open="open" @update:open="(v) => (v ? (open = true) : close())">
         <Button size="sm" @click="open = true">
-            <Plus class="mr-1.5 h-3.5 w-3.5" />
+            <Plus class="mr-1.5 size-3.5" />
             Create Token
         </Button>
 
@@ -198,7 +198,7 @@ function toggleGroup(group: TokenAbilityGroup, checked: boolean): void {
                 <Button size="sm" :disabled="form.processing" @click="save">
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Create Token
                 </Button>

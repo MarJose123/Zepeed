@@ -46,13 +46,11 @@ function markAllRead(): void {
         >
             <SheetHeader class="flex flex-row items-center border-b px-4 py-3">
                 <div class="flex w-full flex-col gap-2">
-                    <SheetTitle class="text-sm font-bold">
+                    <SheetTitle class="text-sm font-semibold">
                         Notifications
                     </SheetTitle>
                     <div class="flex flex-row justify-between items-center">
-                        <SheetDescription
-                            class="text-[11px] text-muted-foreground"
-                        >
+                        <SheetDescription class="text-xs text-muted-foreground">
                             Notifications are kept until dismissed.
                         </SheetDescription>
                         <Button
@@ -76,7 +74,7 @@ function markAllRead(): void {
                 >
                     <Bell class="size-8 text-muted-foreground/40" />
                     <p class="text-sm font-medium">No notifications</p>
-                    <p class="text-[11px] text-muted-foreground">
+                    <p class="text-xs text-muted-foreground">
                         Exports and alerts will appear here.
                     </p>
                 </div>

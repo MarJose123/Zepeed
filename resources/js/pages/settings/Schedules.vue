@@ -36,9 +36,9 @@ const activeTab = ref<"schedules" | "maintenance">("schedules");
 <template>
     <Head title="Schedules" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex flex-col gap-1 py-5">
-                <h1 class="text-xl font-bold tracking-tight">Schedules</h1>
+                <h1 class="text-2xl font-semibold tracking-tight">Schedules</h1>
                 <p class="text-muted-foreground text-sm">
                     Control when each provider runs and manage maintenance
                     windows

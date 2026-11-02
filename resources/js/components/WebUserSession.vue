@@ -36,11 +36,11 @@ const revokeSession = (session: WebSession) => {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead class="font-bold">Device</TableHead>
-                    <TableHead class="font-bold">IP Address</TableHead>
-                    <TableHead class="font-bold">Location</TableHead>
-                    <TableHead class="font-bold">Activity</TableHead>
-                    <TableHead class="font-bold">Action</TableHead>
+                    <TableHead class="font-semibold">Device</TableHead>
+                    <TableHead class="font-semibold">IP Address</TableHead>
+                    <TableHead class="font-semibold">Location</TableHead>
+                    <TableHead class="font-semibold">Activity</TableHead>
+                    <TableHead class="font-semibold">Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

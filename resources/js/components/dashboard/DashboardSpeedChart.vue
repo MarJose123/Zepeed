@@ -86,19 +86,19 @@ const latestPoints = computed(() =>
 
 <template>
     <Card class="overflow-hidden p-0">
-        <CardHeader class="border-border border-b px-4 py-3">
+        <CardHeader class="border-border/40 border-b px-5 py-4">
             <CardTitle class="text-sm font-medium">{{ title }}</CardTitle>
-            <CardDescription class="mt-0.5 text-[11px]">{{
+            <CardDescription class="mt-1 text-xs">{{
                 description
             }}</CardDescription>
         </CardHeader>
 
-        <CardContent class="px-2 pb-3 pt-4">
+        <CardContent class="px-3 pb-4 pt-5">
             <div
                 v-if="!points.length || !series.length"
                 class="flex h-[260px] items-center justify-center"
             >
-                <p class="text-xs text-muted-foreground">
+                <p class="text-sm text-muted-foreground">
                     No data available for the selected range.
                 </p>
             </div>
@@ -111,7 +111,7 @@ const latestPoints = computed(() =>
                     <CartesianGrid
                         stroke-dasharray="3 3"
                         stroke="var(--border)"
-                        :stroke-opacity="0.5"
+                        :stroke-opacity="0.3"
                         :vertical="false"
                     />
                     <XAxis

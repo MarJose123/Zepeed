@@ -59,7 +59,7 @@ const fmtDate = (iso: string) =>
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-lg border border-border">
+    <div class="overflow-hidden rounded-md border border-border">
         <Table>
             <TableHeader>
                 <TableRow class="bg-muted/50 hover:bg-muted/50">
@@ -80,7 +80,7 @@ const fmtDate = (iso: string) =>
                         <p class="text-sm font-medium">
                             {{ row.target_label }}
                         </p>
-                        <p class="text-[11px] text-muted-foreground">
+                        <p class="text-xs text-muted-foreground">
                             {{ row.target_host }}
                         </p>
                     </TableCell>
@@ -127,7 +127,7 @@ const fmtDate = (iso: string) =>
         <div class="border-t border-border px-3 py-2 text-center">
             <Link
                 :href="route('speedtest.network.ping-results.index', {}, false)"
-                class="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:underline"
+                class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline"
             >
                 View all ping results →
             </Link>

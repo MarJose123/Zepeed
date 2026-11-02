@@ -140,7 +140,7 @@ const relativeTime = (iso: string) => {
                     'When',
                 ]"
                 :key="col"
-                class="text-muted-foreground text-[10px] font-medium uppercase tracking-wide"
+                class="text-muted-foreground text-xs font-medium uppercase tracking-wide"
             >
                 {{ col }}
             </span>
@@ -156,7 +156,7 @@ const relativeTime = (iso: string) => {
             >
                 <div class="bg-muted h-3 w-8 animate-pulse rounded" />
                 <div class="bg-muted h-3 w-12 animate-pulse rounded" />
-                <div class="bg-muted h-3 w-32 animate-pulse rounded" />
+                <div class="bg-muted size-32 animate-pulse rounded" />
                 <div class="bg-muted h-3 w-16 animate-pulse rounded" />
                 <div class="bg-muted h-3 w-14 animate-pulse rounded" />
             </div>
@@ -205,9 +205,7 @@ const relativeTime = (iso: string) => {
                 </span>
 
                 <!-- Event -->
-                <span
-                    class="text-muted-foreground truncate font-mono text-[11px]"
-                >
+                <span class="text-muted-foreground truncate font-mono text-xs">
                     {{ delivery.event }}
                 </span>
 

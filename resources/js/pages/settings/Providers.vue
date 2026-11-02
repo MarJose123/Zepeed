@@ -288,9 +288,9 @@ const submitForm = () => {
 <template>
     <Head title="Speedtest Providers" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex flex-col gap-1 py-5">
-                <h1 class="text-xl font-bold tracking-tight">
+                <h1 class="text-2xl font-semibold tracking-tight">
                     Speedtest Providers
                 </h1>
                 <p class="text-sm text-muted-foreground mt-1">
@@ -300,7 +300,7 @@ const submitForm = () => {
 
             <div
                 v-if="!providers.length"
-                class="rounded-lg border border-dashed border-border py-16 text-center"
+                class="rounded-md border border-dashed border-border py-16 text-center"
             >
                 <p class="text-sm text-muted-foreground">
                     No providers found. Run
@@ -330,10 +330,10 @@ const submitForm = () => {
                     <!-- Chromium warning -->
                     <div
                         v-if="provider.requires_chromium"
-                        class="mb-4 flex items-start gap-2 rounded-lg border border-border bg-muted p-3"
+                        class="mb-4 flex items-start gap-2 rounded-md border border-border bg-muted p-3"
                     >
                         <Info
-                            class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            class="mt-0.5 size-4 shrink-0 text-muted-foreground"
                         />
                         <p class="text-sm text-muted-foreground">
                             This provider requires Chromium to run. Chromium is
@@ -406,7 +406,7 @@ const submitForm = () => {
                                         size="sm"
                                         @click="testRun(provider)"
                                     >
-                                        <Zap class="h-3.5 w-3.5" />
+                                        <Zap class="size-3.5" />
                                         Test
                                     </Button>
 
@@ -426,7 +426,7 @@ const submitForm = () => {
                                         rel="noopener noreferrer"
                                         class="text-muted-foreground hover:text-foreground"
                                     >
-                                        <ExternalLink class="h-4 w-4" />
+                                        <ExternalLink class="size-4" />
                                     </a>
                                 </div>
                             </div>
@@ -445,7 +445,7 @@ const submitForm = () => {
                                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Radio
-                                                class="h-4 w-4 text-muted-foreground"
+                                                class="size-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -484,7 +484,7 @@ const submitForm = () => {
                                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Server
-                                                class="h-4 w-4 text-muted-foreground"
+                                                class="size-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -532,7 +532,7 @@ const submitForm = () => {
                                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Server
-                                                class="h-4 w-4 text-muted-foreground"
+                                                class="size-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -569,9 +569,7 @@ const submitForm = () => {
                                             size="sm"
                                             @click="serverSearchOpen = true"
                                         >
-                                            <Search
-                                                class="h-3.5 w-3.5 mr-1.5"
-                                            />
+                                            <Search class="size-3.5 mr-1.5" />
                                             Search
                                         </Button>
                                     </div>
@@ -588,7 +586,7 @@ const submitForm = () => {
                                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted"
                                         >
                                             <Bell
-                                                class="h-4 w-4 text-muted-foreground"
+                                                class="size-4 text-muted-foreground"
                                             />
                                         </div>
                                         <div>
@@ -622,7 +620,7 @@ const submitForm = () => {
                                 >
                                     <Loader2
                                         v-if="form.processing"
-                                        class="mr-2 h-4 w-4 animate-spin"
+                                        class="mr-2 size-4 animate-spin"
                                     />
                                     Save changes
                                 </Button>

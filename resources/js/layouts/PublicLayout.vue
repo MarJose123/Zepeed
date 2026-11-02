@@ -33,15 +33,15 @@ function toggleDark(): void {
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2.5">
                         <div
-                            class="bg-sidebar-primary text-sidebar-primary-foreground flex size-7 items-center justify-center rounded-lg"
+                            class="bg-sidebar-primary text-sidebar-primary-foreground flex size-7 items-center justify-center rounded-md"
                         >
                             <AppLogoIcon class="size-4" />
                         </div>
-                        <span class="text-sm font-bold tracking-tight">
+                        <span class="text-sm font-semibold tracking-tight">
                             Zepeed
                         </span>
                         <span
-                            class="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px]"
+                            class="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs"
                         >
                             Read-only · Public view
                         </span>

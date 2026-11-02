@@ -58,68 +58,69 @@ const lastRunLabel = computed(() => {
     <Card class="overflow-hidden p-0">
         <div class="p-4">
             <!-- Header -->
-            <div class="mb-3 flex items-center justify-between">
-                <div class="flex items-center gap-2">
+            <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
                     <div
-                        class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted"
                     >
                         <img
                             v-if="!faviconError"
                             :src="`https://www.google.com/s2/favicons?domain=${provider.website_link}&sz=32`"
                             :alt="provider.name"
-                            class="size-7 object-cover"
+                            class="size-5 object-cover"
                             @error="faviconError = true"
                         />
-                        <Clock
-                            v-else
-                            class="text-muted-foreground h-3.5 w-3.5"
-                        />
+                        <Clock v-else class="text-muted-foreground size-3.5" />
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-sm font-medium">{{
+                        <span class="text-sm font-medium leading-none">{{
                             provider.name
                         }}</span>
-                        <span class="text-muted-foreground text-[10px]">{{
+                        <span class="mt-1 text-xs text-muted-foreground">{{
                             lastRunLabel
                         }}</span>
                     </div>
                 </div>
-                <Badge :variant="statusVariant" class="text-[10px]">
+                <Badge :variant="statusVariant" class="text-xs px-1.5 py-0">
                     {{ statusLabel }}
                 </Badge>
             </div>
 
             <!-- Metrics -->
-            <div class="mb-3 grid grid-cols-3 gap-1.5">
-                <div class="bg-muted rounded-md p-2">
-                    <div class="text-sm font-medium">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-muted/50 rounded-md p-2.5">
+                    <div class="text-sm font-semibold">
                         {{
                             provider.latest
                                 ? provider.latest.download_mbps.toFixed(1)
                                 : "—"
                         }}
                     </div>
-                    <div class="text-muted-foreground text-[10px]">↓ Mbps</div>
+                    <div class="mt-0.5 text-xs text-muted-foreground">
+                        ↓ Mbps
+                    </div>
                 </div>
-                <div class="bg-muted rounded-md p-2">
-                    <div class="text-sm font-medium">
+                <div class="bg-muted/50 rounded-md p-2.5">
+                    <div class="text-sm font-semibold">
                         {{
                             provider.latest
                                 ? provider.latest.upload_mbps.toFixed(1)
                                 : "—"
                         }}
                     </div>
-                    <div class="text-muted-foreground text-[10px]">↑ Mbps</div>
+                    <div class="mt-0.5 text-xs text-muted-foreground">
+                        ↑ Mbps
+                    </div>
                 </div>
-                <div class="bg-muted rounded-md p-2">
-                    <div class="text-sm font-medium">
+                <div class="bg-muted/50 rounded-md p-2.5">
+                    <div class="text-sm font-semibold">
                         {{
                             provider.latest
                                 ? `${provider.latest.ping_ms.toFixed(0)}ms`
                                 : "—"
                         }}
                     </div>
-                    <div class="text-muted-foreground text-[10px]">ping</div>
+                    <div class="mt-0.5 text-xs text-muted-foreground">ping</div>
                 </div>
             </div>
         </div>

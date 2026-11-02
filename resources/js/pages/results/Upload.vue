@@ -39,10 +39,10 @@ const exportOpen = ref(false);
             { title: 'Upload Results', href: route(ROUTE_NAME) },
         ]"
     >
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">
+                    <h1 class="text-2xl font-semibold tracking-tight">
                         Upload Results
                     </h1>
                     <p class="mt-1 text-sm text-muted-foreground">

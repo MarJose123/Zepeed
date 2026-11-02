@@ -65,7 +65,7 @@ watch(
 </script>
 
 <template>
-    <div class="border-border flex flex-col overflow-hidden rounded-lg border">
+    <div class="border-border flex flex-col overflow-hidden rounded-md border">
         <!-- Toolbar -->
         <div
             v-if="editor"
@@ -80,7 +80,7 @@ watch(
                 :class="{ 'bg-accent': editor.isActive('bold') }"
                 @mousedown.prevent="editor.chain().focus().toggleBold().run()"
             >
-                <Bold class="h-3.5 w-3.5" />
+                <Bold class="size-3.5" />
             </Button>
 
             <!-- Italic -->
@@ -92,7 +92,7 @@ watch(
                 :class="{ 'bg-accent': editor.isActive('italic') }"
                 @mousedown.prevent="editor.chain().focus().toggleItalic().run()"
             >
-                <Italic class="h-3.5 w-3.5" />
+                <Italic class="size-3.5" />
             </Button>
 
             <div class="bg-border mx-1 h-4 w-px" />
@@ -110,7 +110,7 @@ watch(
                     editor!.chain().focus().toggleHeading({ level: 1 }).run()
                 "
             >
-                <Heading1 class="h-3.5 w-3.5" />
+                <Heading1 class="size-3.5" />
             </Button>
 
             <!-- H2 -->
@@ -126,7 +126,7 @@ watch(
                     editor!.chain().focus().toggleHeading({ level: 2 }).run()
                 "
             >
-                <Heading2 class="h-3.5 w-3.5" />
+                <Heading2 class="size-3.5" />
             </Button>
 
             <div class="bg-border mx-1 h-4 w-px" />
@@ -142,7 +142,7 @@ watch(
                     editor!.chain().focus().toggleBulletList().run()
                 "
             >
-                <List class="h-3.5 w-3.5" />
+                <List class="size-3.5" />
             </Button>
 
             <!-- Ordered list -->
@@ -156,7 +156,7 @@ watch(
                     editor!.chain().focus().toggleOrderedList().run()
                 "
             >
-                <ListOrdered class="h-3.5 w-3.5" />
+                <ListOrdered class="size-3.5" />
             </Button>
 
             <!-- Horizontal rule -->
@@ -169,7 +169,7 @@ watch(
                     editor!.chain().focus().setHorizontalRule().run()
                 "
             >
-                <Minus class="h-3.5 w-3.5" />
+                <Minus class="size-3.5" />
             </Button>
 
             <div class="bg-border mx-1 h-4 w-px" />
@@ -183,7 +183,7 @@ watch(
                 :disabled="!editor.can().undo()"
                 @mousedown.prevent="editor.chain().focus().undo().run()"
             >
-                <Undo class="h-3.5 w-3.5" />
+                <Undo class="size-3.5" />
             </Button>
 
             <!-- Redo -->
@@ -195,17 +195,17 @@ watch(
                 :disabled="!editor.can().redo()"
                 @mousedown.prevent="editor.chain().focus().redo().run()"
             >
-                <Redo class="h-3.5 w-3.5" />
+                <Redo class="size-3.5" />
             </Button>
 
             <!-- # hint -->
             <div class="ml-auto flex items-center gap-1">
                 <Kbd
-                    class="border-border bg-background text-muted-foreground rounded border px-1.5 py-0.5 font-mono text-[10px]"
+                    class="border-border bg-background text-muted-foreground rounded border px-1.5 py-0.5 font-mono text-xs"
                 >
                     #
                 </Kbd>
-                <span class="text-muted-foreground text-[10px]"
+                <span class="text-muted-foreground text-xs"
                     >to insert merge field</span
                 >
             </div>

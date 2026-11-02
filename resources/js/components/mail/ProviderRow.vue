@@ -148,7 +148,7 @@ const driverIcons: Record<string, string> = {
 
 <template>
     <div
-        class="flex items-center gap-3 rounded-lg border p-3.5 transition-all"
+        class="flex items-center gap-3 rounded-md border p-3.5 transition-all"
         :class="{
             'border-primary/50 bg-primary/5': provider.is_primary,
             'border-border': !provider.is_primary && !isDragOver,
@@ -163,11 +163,11 @@ const driverIcons: Record<string, string> = {
         @dragend="emit('dragend')"
     >
         <div class="text-muted-foreground cursor-grab active:cursor-grabbing">
-            <GripVertical class="h-4 w-4" />
+            <GripVertical class="size-4" />
         </div>
 
         <div
-            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium"
+            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
             :class="
                 provider.is_primary
                     ? 'bg-primary/10 text-primary'
@@ -187,7 +187,7 @@ const driverIcons: Record<string, string> = {
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-sm font-medium">{{ provider.label }}</span>
                 <Badge
-                    class="text-[10px]"
+                    class="text-xs"
                     :class="
                         provider.is_primary
                             ? 'border-primary/30 bg-primary/10 text-primary'
@@ -197,12 +197,12 @@ const driverIcons: Record<string, string> = {
                 >
                     {{ provider.is_primary ? "primary" : "fallback" }}
                 </Badge>
-                <Badge :variant="statusVariant(provider)" class="text-[10px]">
+                <Badge :variant="statusVariant(provider)" class="text-xs">
                     {{ statusLabel(provider) }}
                 </Badge>
             </div>
             <div
-                class="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px]"
+                class="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs"
             >
                 <span>Last sent: {{ lastUsedLabel(provider) }}</span>
                 <span>Failures: {{ provider.failure_count }}</span>
@@ -225,7 +225,7 @@ const driverIcons: Record<string, string> = {
                 class="h-7 w-7 p-0"
                 @click="openEdit"
             >
-                <Pencil class="h-3 w-3" />
+                <Pencil class="size-3" />
             </Button>
             <Button
                 variant="ghost"
@@ -233,7 +233,7 @@ const driverIcons: Record<string, string> = {
                 class="text-muted-foreground hover:text-destructive h-7 w-7 p-0"
                 @click="destroy"
             >
-                <Trash2 class="h-3 w-3" />
+                <Trash2 class="size-3" />
             </Button>
         </div>
     </div>
@@ -254,7 +254,7 @@ const driverIcons: Record<string, string> = {
                     placeholder="admin@mail.com"
                     class="text-xs"
                 />
-                <p class="text-muted-foreground text-[10px]">
+                <p class="text-muted-foreground text-xs">
                     A test email will be sent using this provider's
                     configuration.
                 </p>
@@ -270,7 +270,7 @@ const driverIcons: Record<string, string> = {
                 >
                     <Loader2
                         v-if="testProcessing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Send test
                 </Button>
@@ -296,7 +296,7 @@ const driverIcons: Record<string, string> = {
                     />
                     <p
                         v-if="editForm.errors.label"
-                        class="text-destructive text-[10px]"
+                        class="text-destructive text-xs"
                     >
                         {{ editForm.errors.label }}
                     </p>
@@ -327,7 +327,7 @@ const driverIcons: Record<string, string> = {
                         />
                         <p
                             v-if="editForm.errors.from_address"
-                            class="text-destructive text-[10px]"
+                            class="text-destructive text-xs"
                         >
                             {{ editForm.errors.from_address }}
                         </p>
@@ -343,7 +343,7 @@ const driverIcons: Record<string, string> = {
                         />
                         <p
                             v-if="editForm.errors.from_name"
-                            class="text-destructive text-[10px]"
+                            class="text-destructive text-xs"
                         >
                             {{ editForm.errors.from_name }}
                         </p>
@@ -361,7 +361,7 @@ const driverIcons: Record<string, string> = {
                 >
                     <Loader2
                         v-if="editForm.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Save changes
                 </Button>

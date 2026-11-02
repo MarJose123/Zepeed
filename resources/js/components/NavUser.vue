@@ -61,7 +61,7 @@ function openNotifications(): void {
                         <!-- Badge overlaid on the button corner, not inside UserInfo -->
                         <span
                             v-if="unreadCount > 0"
-                            class="pointer-events-none absolute top-1 left-6 flex size-4 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground ring-2 ring-sidebar"
+                            class="pointer-events-none absolute top-1 left-6 flex size-4 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground ring-2 ring-sidebar"
                         >
                             {{ unreadCount > 9 ? "9+" : unreadCount }}
                         </span>
@@ -69,7 +69,7 @@ function openNotifications(): void {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
-                    class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                    class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-md"
                     :side="
                         isMobile
                             ? 'bottom'
@@ -97,7 +97,7 @@ function openNotifications(): void {
                         >
                             <div class="flex items-center gap-2">
                                 <Moon class="size-4" />
-                                <span>Appearance</span>
+                                <span class="text-sm">Appearance</span>
                             </div>
                             <DisplayModeToggle />
                         </DropdownMenuItem>
@@ -111,10 +111,10 @@ function openNotifications(): void {
                             @select="openNotifications"
                         >
                             <Bell class="size-4" />
-                            <span>Notifications</span>
+                            <span class="text-sm">Notifications</span>
                             <span
                                 v-if="unreadCount > 0"
-                                class="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground"
+                                class="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground"
                             >
                                 {{ unreadCount > 9 ? "9+" : unreadCount }}
                             </span>
@@ -126,8 +126,8 @@ function openNotifications(): void {
                                 as="button"
                                 method="get"
                             >
-                                <Settings />
-                                Settings
+                                <Settings class="size-4" />
+                                <span class="text-sm">Settings</span>
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -142,8 +142,8 @@ function openNotifications(): void {
                             method="post"
                             @click="handleLogout"
                         >
-                            <LogOut />
-                            Log out
+                            <LogOut class="size-4" />
+                            <span class="text-sm">Log out</span>
                         </Link>
                     </DropdownMenuItem>
                 </DropdownMenuContent>

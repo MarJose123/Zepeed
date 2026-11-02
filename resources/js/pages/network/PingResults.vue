@@ -50,10 +50,10 @@ usePingResultsChannel({
 <template>
     <Head title="Ping Results" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">
+                    <h1 class="text-2xl font-semibold tracking-tight">
                         Ping Results
                     </h1>
                     <p class="mt-1 text-sm text-muted-foreground">
@@ -67,7 +67,7 @@ usePingResultsChannel({
                     class="gap-1.5"
                     @click="exportOpen = true"
                 >
-                    <FileDown class="size-3.5" />
+                    <FileDown class="size-4" />
                     Export
                 </Button>
             </div>

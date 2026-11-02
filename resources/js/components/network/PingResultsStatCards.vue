@@ -32,15 +32,15 @@ const fmtTime = (iso: string | null): string => {
                         Tests Run
                     </p>
                     <span
-                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"
+                        class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10"
                     >
-                        <Activity class="h-4 w-4 text-primary" />
+                        <Activity class="size-4 text-primary" />
                     </span>
                 </div>
-                <p class="mt-2 text-2xl font-bold tracking-tight">
+                <p class="mt-2 text-2xl font-semibold tracking-tight">
                     {{ stats.total_tests }}
                 </p>
-                <p class="mt-1 text-[11px] text-muted-foreground">
+                <p class="mt-1 text-xs text-muted-foreground">
                     in selected window
                 </p>
             </CardContent>
@@ -65,7 +65,7 @@ const fmtTime = (iso: string | null): string => {
                         Avg Latency
                     </p>
                     <span
-                        class="flex h-8 w-8 items-center justify-center rounded-lg"
+                        class="flex h-8 w-8 items-center justify-center rounded-md"
                         :class="
                             stats.avg_latency_ms === null
                                 ? 'bg-muted'
@@ -77,7 +77,7 @@ const fmtTime = (iso: string | null): string => {
                         "
                     >
                         <Radio
-                            class="h-4 w-4"
+                            class="size-4"
                             :class="
                                 stats.avg_latency_ms === null
                                     ? 'text-muted-foreground'
@@ -91,7 +91,7 @@ const fmtTime = (iso: string | null): string => {
                     </span>
                 </div>
                 <p
-                    class="mt-2 text-2xl font-bold tracking-tight"
+                    class="mt-2 text-2xl font-semibold tracking-tight"
                     :class="
                         stats.avg_latency_ms === null
                             ? 'text-foreground'
@@ -108,7 +108,7 @@ const fmtTime = (iso: string | null): string => {
                         >ms</span
                     >
                 </p>
-                <p class="mt-1 text-[11px] text-muted-foreground">
+                <p class="mt-1 text-xs text-muted-foreground">
                     average round-trip time
                 </p>
             </CardContent>
@@ -133,7 +133,7 @@ const fmtTime = (iso: string | null): string => {
                         Avg Packet Loss
                     </p>
                     <span
-                        class="flex h-8 w-8 items-center justify-center rounded-lg"
+                        class="flex h-8 w-8 items-center justify-center rounded-md"
                         :class="
                             stats.avg_packet_loss === null
                                 ? 'bg-muted'
@@ -145,7 +145,7 @@ const fmtTime = (iso: string | null): string => {
                         "
                     >
                         <TrendingDown
-                            class="h-4 w-4"
+                            class="size-4"
                             :class="
                                 stats.avg_packet_loss === null
                                     ? 'text-muted-foreground'
@@ -159,7 +159,7 @@ const fmtTime = (iso: string | null): string => {
                     </span>
                 </div>
                 <p
-                    class="mt-2 text-2xl font-bold tracking-tight"
+                    class="mt-2 text-2xl font-semibold tracking-tight"
                     :class="
                         stats.avg_packet_loss === null
                             ? 'text-foreground'
@@ -176,7 +176,7 @@ const fmtTime = (iso: string | null): string => {
                         >%</span
                     >
                 </p>
-                <p class="mt-1 text-[11px] text-muted-foreground">
+                <p class="mt-1 text-xs text-muted-foreground">
                     across all targets
                 </p>
             </CardContent>
@@ -186,7 +186,7 @@ const fmtTime = (iso: string | null): string => {
     <!-- Last updated indicator -->
     <p
         v-if="lastUpdated"
-        class="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+        class="flex items-center gap-1.5 text-xs text-muted-foreground"
     >
         <span class="relative flex h-2 w-2">
             <span

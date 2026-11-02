@@ -18,7 +18,7 @@ const fmtDate = (iso: string | null): string => {
 </script>
 
 <template>
-    <div class="border-border overflow-hidden rounded-lg border">
+    <div class="border-border overflow-hidden rounded-md border">
         <div
             v-for="rule in rules"
             :key="rule.id"
@@ -32,11 +32,11 @@ const fmtDate = (iso: string | null): string => {
                             ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
                             : 'bg-muted text-muted-foreground'
                     "
-                    class="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                    class="rounded-full px-2.5 py-0.5 text-xs font-medium"
                 >
                     {{ rule.is_enabled ? "Active" : "Disabled" }}
                 </span>
-                <span class="text-muted-foreground text-[11px]">{{
+                <span class="text-muted-foreground text-xs">{{
                     fmtDate(rule.updated_at)
                 }}</span>
             </div>

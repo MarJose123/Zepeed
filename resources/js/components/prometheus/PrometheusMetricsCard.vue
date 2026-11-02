@@ -56,7 +56,7 @@ function flush() {
             <CardTitle class="text-sm font-medium">
                 Metric scope &amp; cache
             </CardTitle>
-            <CardDescription class="text-[11px]">
+            <CardDescription class="text-xs">
                 Choose which metric groups to expose and how long the output is
                 cached.
             </CardDescription>
@@ -83,11 +83,11 @@ function flush() {
                         "
                     />
                     <Button variant="outline" size="sm" @click="flush">
-                        <RefreshCw class="mr-1.5 h-3.5 w-3.5" />
+                        <RefreshCw class="mr-1.5 size-3.5" />
                         Flush now
                     </Button>
                 </div>
-                <p class="text-muted-foreground text-[11px]">
+                <p class="text-muted-foreground text-xs">
                     Rendered output is served from cache between scrapes. Min
                     10s, max 3600s.
                 </p>
@@ -110,7 +110,7 @@ function flush() {
                         >
                             Speed test metrics
                         </Label>
-                        <p class="text-muted-foreground mt-0.5 text-[11px]">
+                        <p class="text-muted-foreground mt-0.5 text-xs">
                             Speed gauges, 24h health, provider state, failure
                             details.
                         </p>
@@ -166,7 +166,7 @@ function flush() {
                     >
                         Ping / network metrics
                     </Label>
-                    <p class="text-muted-foreground mt-0.5 text-[11px]">
+                    <p class="text-muted-foreground mt-0.5 text-xs">
                         Ping target gauges and 24h probe health for all enabled
                         targets.
                     </p>
@@ -189,7 +189,7 @@ function flush() {
                     >
                         System metrics
                     </Label>
-                    <p class="text-muted-foreground mt-0.5 text-[11px]">
+                    <p class="text-muted-foreground mt-0.5 text-xs">
                         Workflow rules, maintenance mode, webhook deliveries,
                         app info.
                     </p>

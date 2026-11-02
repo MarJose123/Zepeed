@@ -59,7 +59,7 @@ const chipStyle = computed(() =>
             <div class="flex items-start justify-between">
                 <span class="text-sm font-medium">{{ label }}</span>
                 <span
-                    class="rounded-lg p-1.5"
+                    class="rounded-md p-1.5"
                     :class="
                         !isAccent
                             ? TONE_STYLES[tone as Exclude<Tone, 'accent'>].chip
@@ -82,7 +82,7 @@ const chipStyle = computed(() =>
 
             <p class="mt-2">
                 <span
-                    class="text-2xl font-bold tracking-tight"
+                    class="text-2xl font-semibold tracking-tight"
                     :class="
                         !isAccent
                             ? TONE_STYLES[tone as Exclude<Tone, 'accent'>].text
@@ -97,7 +97,7 @@ const chipStyle = computed(() =>
                 }}</span>
             </p>
 
-            <p class="text-[11px] text-muted-foreground mt-1">{{ subLabel }}</p>
+            <p class="text-xs text-muted-foreground mt-1">{{ subLabel }}</p>
         </CardContent>
     </Card>
 </template>

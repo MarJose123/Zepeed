@@ -47,7 +47,7 @@ const perPage = computed<string>({
 <template>
     <div class="grid grid-cols-3 items-center gap-3 border-t px-4 py-3">
         <div class="flex items-center gap-2">
-            <p class="text-[11px] text-muted-foreground">Rows per page</p>
+            <p class="text-xs text-muted-foreground">Rows per page</p>
             <Select v-model="perPage">
                 <SelectTrigger size="sm" class="h-7 w-17.5 text-xs">
                     <SelectValue />
@@ -61,7 +61,7 @@ const perPage = computed<string>({
             </Select>
         </div>
 
-        <p class="justify-self-center text-[11px] text-muted-foreground">
+        <p class="justify-self-center text-xs text-muted-foreground">
             Showing
             <span class="font-medium text-foreground">{{
                 meta.from ?? 0
