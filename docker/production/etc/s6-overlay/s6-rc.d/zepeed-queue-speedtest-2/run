@@ -5,4 +5,5 @@ exec php /var/www/html/artisan queue:work \
     --tries=3 \
     --timeout=350 \
     --sleep=1 \
-    --max-jobs=500
+    --max-jobs=500 \
+    --rest=10

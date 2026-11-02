@@ -33,10 +33,6 @@ class WebhookService
 
         // Sign the payload if secret is set
         if (filled($webhook->secret)) {
-            $call->signUsing(DefaultSigner::class)
-                ->doNotSign()  // reset default
-                ->withHeaders(['X-Webhook-Secret' => $webhook->secret]);
-
             $call->signUsing(DefaultSigner::class);
         } else {
             $call->doNotSign();

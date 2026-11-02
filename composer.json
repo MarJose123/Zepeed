@@ -1,13 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "marjose123/laravel-shadcnvue-starter-kit",
+    "name": "marjose123/zepeed",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Zepeed is a self-hosted internet speedtest tracker for monitoring ISP performance.",
     "keywords": [
-        "laravel starter kit",
-        "laravel shadcnvue starter kit",
-        "laravel shadcnvue",
-        "laravel shadcnvue starter"
+        "Zepeed",
+        "Speedtest",
+        "Speedtest API",
+        "Speedtest Laravel",
+        "Self-hosted",
+        "Self-hosted Speedtest",
+        "speed tracker",
+        "speedtest tracker"
     ],
     "license": "MIT",
     "authors": [
