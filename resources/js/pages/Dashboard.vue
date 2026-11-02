@@ -5,6 +5,7 @@ import DashboardRangePicker from "@/components/dashboard/DashboardRangePicker.vu
 import DashboardSpeedChart from "@/components/dashboard/DashboardSpeedChart.vue";
 import ProviderCard from "@/components/dashboard/ProviderCard.vue";
 import RecentPingResultsTable from "@/components/dashboard/RecentPingResultsTable.vue";
+import { useAppearance } from "@/composables/useAppearance";
 import { useDashboardRefresh } from "@/composables/useDashboardRefresh";
 import { usePingResultsChannel } from "@/composables/usePingResultsChannel";
 import AppLayout from "@/layouts/AppLayout.vue";
@@ -24,6 +25,21 @@ const PROVIDER_COLORS: Record<string, string> = {
     netflix: "#ef4444",
     cloudflare: "#f97316",
 };
+
+const { seasonalTheme } = useAppearance();
+
+const seasonalGreeting = computed(() => {
+    switch (seasonalTheme.value) {
+        case "halloween":
+            return "🎃 Spooky season — may your speeds be frightfully fast!";
+        case "christmas":
+            return "🎄 Happy Holidays — wishing you merry speeds!";
+        case "newyear":
+            return "🎉 <span class='sparkle-text'>Happy New Year — here's to faster speeds ahead!</span>";
+        default:
+            return null;
+    }
+});
 
 const props = defineProps<{
     providerCards: IProviderCard[];
@@ -121,6 +137,11 @@ usePingResultsChannel({
                     Real-time overview of your internet speed across all
                     providers
                 </p>
+                <p
+                    v-if="seasonalGreeting"
+                    class="mt-2 text-sm font-medium"
+                    v-html="seasonalGreeting"
+                />
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

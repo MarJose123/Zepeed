@@ -9,11 +9,9 @@ import AppLogoIcon from "@/components/AppLogoIcon.vue";
         <AppLogoIcon />
     </div>
     <div class="grid flex-1 text-left leading-tight">
-        <span class="truncate text-sm font-semibold">Zepeed</span>
+        <span class="truncate text-sm font-semibold"> Zepeed </span>
         <span class="truncate text-xs text-muted-foreground"
             >Speed Tracker</span
         >
     </div>
 </template>
-
-<style scoped></style>

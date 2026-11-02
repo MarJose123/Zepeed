@@ -56,7 +56,7 @@ return [
                 'host'      => env('PUSHER_HOST') ?: 'soketi',
                 'port'      => env('PUSHER_PORT', 6001),
                 'scheme'    => env('PUSHER_SCHEME', 'http'),
-                'encrypted' => true,
+                'encrypted' => env('PUSHER_SCHEME', 'http') === 'https',
                 'useTLS'    => env('PUSHER_SCHEME', 'https') === 'https',
             ],
             'client_options' => [

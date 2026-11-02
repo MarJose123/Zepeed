@@ -94,6 +94,9 @@ class HandleInertiaRequests extends Middleware
                     ->values()
                     ->all()
                 : [],
+            'appearance' => static fn () => [
+                'seasonalTheme' => config('seasonal-theme.active'),
+            ],
         ];
     }
 }
