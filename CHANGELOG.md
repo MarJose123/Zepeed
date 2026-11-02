@@ -4,6 +4,15 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.11 - 2026-11-02
+
+### What's Changed
+
+* feat: modularize and optimize Zepeed architecture with Redis, enhanced logging, and dynamic configurations by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/126
+* feat: introduce seasonal themes with dynamic visual effects and Pusher transport fixes by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/127
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.10...v2.0.0-beta.11
+
 ## Release 2.0.0-beta.10 - 2026-11-02
 
 ### What's Changed
