@@ -60,48 +60,6 @@ const navigation: TSidebarNavigationItems = [
                 ],
             },
             {
-                title: "Settings",
-                icon: Settings2,
-                items: [
-                    {
-                        title: "General",
-                        href: route(
-                            "speedtest.general-settings.edit",
-                            {},
-                            false,
-                        ),
-                    },
-                    {
-                        title: "Workflow Rules",
-                        href: route(
-                            "speedtest.workflow-rules.index",
-                            {},
-                            false,
-                        ),
-                    },
-                    {
-                        title: "Email Templates",
-                        href: route(
-                            "speedtest.email-templates.index",
-                            {},
-                            false,
-                        ),
-                    },
-                    {
-                        title: "Schedules",
-                        href: route("speedtest.schedules.index", {}, false),
-                    },
-                    {
-                        title: "Speedtest Providers",
-                        href: route(
-                            "speedtest.server.providers.index",
-                            {},
-                            false,
-                        ),
-                    },
-                ],
-            },
-            {
                 title: "Integrations",
                 icon: Cable,
                 items: [
@@ -140,6 +98,48 @@ const navigation: TSidebarNavigationItems = [
                         title: "Ping Targets",
                         href: route(
                             "speedtest.network.ping-targets.index",
+                            {},
+                            false,
+                        ),
+                    },
+                ],
+            },
+            {
+                title: "Settings",
+                icon: Settings2,
+                items: [
+                    {
+                        title: "General",
+                        href: route(
+                            "speedtest.general-settings.edit",
+                            {},
+                            false,
+                        ),
+                    },
+                    {
+                        title: "Workflow Rules",
+                        href: route(
+                            "speedtest.workflow-rules.index",
+                            {},
+                            false,
+                        ),
+                    },
+                    {
+                        title: "Email Templates",
+                        href: route(
+                            "speedtest.email-templates.index",
+                            {},
+                            false,
+                        ),
+                    },
+                    {
+                        title: "Schedules",
+                        href: route("speedtest.schedules.index", {}, false),
+                    },
+                    {
+                        title: "Speedtest Providers",
+                        href: route(
+                            "speedtest.server.providers.index",
                             {},
                             false,
                         ),
