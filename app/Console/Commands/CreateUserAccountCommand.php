@@ -60,7 +60,9 @@ class CreateUserAccountCommand extends Command
             return self::SUCCESS;
         }
 
-        if (! $this->confirm(
+        // Auto-confirm in non-interactive mode (e.g., Docker containers) since
+        // the --default flag is already idempotent (checks for existing email above).
+        if ($this->input->isInteractive() && ! $this->confirm(
             "About to create admin account '{$cfg['email']}' with the configured password. Continue?"
         )) {
             $this->info('Aborted.');

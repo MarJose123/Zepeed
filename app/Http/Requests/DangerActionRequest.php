@@ -9,11 +9,6 @@ use Illuminate\Validation\Rule;
 
 final class DangerActionRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, mixed>
      */

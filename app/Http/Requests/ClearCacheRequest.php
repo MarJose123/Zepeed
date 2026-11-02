@@ -7,11 +7,6 @@ use Illuminate\Validation\Rule;
 
 class ClearCacheRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, mixed>
      */

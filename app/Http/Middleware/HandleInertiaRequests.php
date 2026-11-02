@@ -7,6 +7,7 @@ use App\Http\Resources\ProviderResource;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
+use Inertia\Inertia;
 use Inertia\Middleware;
 use Override;
 
@@ -50,12 +51,14 @@ class HandleInertiaRequests extends Middleware
                     ? new UserResource($request->user())
                     : null,
             ],
-            'speedtest' => static fn () => $request->user() ? ProviderResource::collection(
-                Provider::query()
-                    ->with('latestResult')
-                    ->orderBy('id')
-                    ->get()
-            )->resolve() : [],
+            'speedtest' => static fn () => $request->user()
+                ? Inertia::defer(fn () => ProviderResource::collection(
+                    Provider::query()
+                        ->with('latestResult')
+                        ->orderBy('id')
+                        ->get()
+                )->resolve())
+                : [],
             'github_star_url' => static function () use ($request) {
                 if (! $request->user()) {
                     return;
@@ -79,6 +82,7 @@ class HandleInertiaRequests extends Middleware
             'notifications' => static fn () => $request->user()
                 ? $request->user()->notifications()
                     ->latest()
+                    ->limit(50)
                     ->get()
                     ->map(static fn (DatabaseNotification $n) => [
                         'id'         => $n->id,

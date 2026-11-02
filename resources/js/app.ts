@@ -19,6 +19,7 @@ configureEcho({
     wsHost: import.meta.env.VITE_PUSHER_HOST ?? "localhost",
     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 6001,
     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 6001,
+    wsPath: import.meta.env.VITE_PUSHER_PATH ?? "/app",
     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? "https") === "https",
     disableStats: true,
     enabledTransports: ["ws", "wss"],

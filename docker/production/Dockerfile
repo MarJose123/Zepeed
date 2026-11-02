@@ -70,7 +70,7 @@ RUN bun run build
 FROM serversideup/php:8.4-fpm-nginx-alpine-v5.0.2 AS production
 
 ARG TIMEZONE=UTC
-ARG VERSION=dev
+ARG VERSION=prod
 ARG BUILD_DATE
 
 LABEL org.opencontainers.image.title="Zepeed" \
