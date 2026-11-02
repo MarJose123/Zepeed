@@ -102,7 +102,7 @@ const handleSubmit = () => {
         @click.self="$emit('close')"
     >
         <div
-            class="w-full max-w-md rounded-lg border border-border bg-background shadow-lg"
+            class="w-full max-w-md rounded-md border border-border bg-background shadow-lg"
         >
             <!-- Header -->
             <div
@@ -195,7 +195,7 @@ const handleSubmit = () => {
                                     class="text-center font-mono text-sm font-medium"
                                     @input="onSegmentInput"
                                 />
-                                <span class="text-muted-foreground text-[10px]">
+                                <span class="text-muted-foreground text-xs">
                                     {{ segment }}
                                 </span>
                             </div>
@@ -247,7 +247,7 @@ const handleSubmit = () => {
                         <p class="text-sm font-medium text-foreground">
                             Enable this schedule
                         </p>
-                        <p class="text-muted-foreground text-[11px]">
+                        <p class="text-muted-foreground text-xs">
                             Schedule will run immediately when enabled
                         </p>
                     </div>

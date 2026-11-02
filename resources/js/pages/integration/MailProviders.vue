@@ -119,9 +119,9 @@ function discardOrder() {
 <template>
     <Head title="Mailer Integration" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex flex-col gap-1 py-5">
-                <h1 class="text-xl font-semibold">Mailer integration</h1>
+                <h1 class="text-2xl font-semibold">Mailer integration</h1>
                 <p class="text-muted-foreground text-sm">
                     Configure mail providers for alert notifications.
                 </p>
@@ -146,7 +146,7 @@ function discardOrder() {
                             variant="outline"
                             @click="showWizard = true"
                         >
-                            <Plus class="mr-1.5 h-4 w-4" />
+                            <Plus class="mr-1.5 size-4" />
                             Add provider
                         </Button>
                     </div>
@@ -167,7 +167,7 @@ function discardOrder() {
                             class="mt-2"
                             @click="showWizard = true"
                         >
-                            <Plus class="mr-1.5 h-4 w-4" />
+                            <Plus class="mr-1.5 size-4" />
                             Add provider
                         </Button>
                     </Empty>
@@ -201,7 +201,7 @@ function discardOrder() {
             >
                 <div
                     v-if="orderChanged"
-                    class="border-primary/30 bg-primary/5 flex items-center justify-between rounded-lg border px-4 py-3"
+                    class="border-primary/30 bg-primary/5 flex items-center justify-between rounded-md border px-4 py-3"
                 >
                     <p class="text-primary text-xs">
                         Order changed — save to apply the new fallback chain.

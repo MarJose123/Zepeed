@@ -112,7 +112,7 @@ onMounted(async () => {
                 <div v-else class="mt-3 space-y-3">
                     <div
                         ref="recoveryCodeSectionRef"
-                        class="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
+                        class="grid gap-1 rounded-md bg-muted p-4 font-mono text-sm"
                     >
                         <div v-if="!recoveryCodesList.length" class="space-y-2">
                             <div
@@ -133,7 +133,8 @@ onMounted(async () => {
                         Each recovery code can be used once to access your
                         account and will be removed after use. If you need more,
                         click
-                        <span class="font-bold">Regenerate Codes</span> above.
+                        <span class="font-semibold">Regenerate Codes</span>
+                        above.
                     </p>
                 </div>
             </div>

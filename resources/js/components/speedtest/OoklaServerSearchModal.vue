@@ -106,12 +106,10 @@ const onClose = () => {
     <Dialog :open="open" @update:open="(v) => !v && onClose()">
         <DialogContent class="max-w-xl p-0 gap-0 overflow-hidden">
             <DialogHeader class="px-5 pt-5 pb-4 border-b border-border">
-                <DialogTitle class="text-base font-bold">
+                <DialogTitle class="text-base font-semibold">
                     Search Ookla Servers
                 </DialogTitle>
-                <DialogDescription
-                    class="text-[11px] text-muted-foreground mt-0.5"
-                >
+                <DialogDescription class="text-xs text-muted-foreground mt-0.5">
                     Results are cached for 24 hours. Click a row to select that
                     server.
                 </DialogDescription>
@@ -121,7 +119,7 @@ const onClose = () => {
             <div class="px-5 py-3 border-b border-border">
                 <div class="relative">
                     <Search
-                        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
                     />
                     <Input
                         v-model="query"
@@ -208,7 +206,7 @@ const onClose = () => {
                             <TableCell>
                                 <div class="flex items-center gap-1.5">
                                     <Building2
-                                        class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                                        class="size-3.5 shrink-0 text-muted-foreground"
                                     />
                                     <span class="text-sm">{{
                                         server.sponsor
@@ -218,7 +216,7 @@ const onClose = () => {
                             <TableCell>
                                 <div class="flex items-center gap-1.5">
                                     <MapPin
-                                        class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                                        class="size-3.5 shrink-0 text-muted-foreground"
                                     />
                                     <span class="text-sm"
                                         >{{ server.name }},
@@ -240,7 +238,7 @@ const onClose = () => {
             <div
                 class="flex items-center justify-between px-5 py-3 border-t border-border bg-muted/30"
             >
-                <p class="text-[11px] text-muted-foreground">
+                <p class="text-xs text-muted-foreground">
                     Showing up to 20 nearest results
                 </p>
                 <Button variant="outline" size="sm" @click="onClose">

@@ -139,7 +139,7 @@ function submit(): void {
                             <span class="text-sm font-medium">{{
                                 f.label
                             }}</span>
-                            <span class="text-[11px]">{{ f.hint }}</span>
+                            <span class="text-xs">{{ f.hint }}</span>
                         </button>
                     </div>
                 </div>
@@ -185,7 +185,7 @@ function submit(): void {
                     </Popover>
                     <p
                         v-if="form.errors.date_from || form.errors.date_to"
-                        class="text-[11px] text-destructive"
+                        class="text-xs text-destructive"
                     >
                         {{ form.errors.date_from ?? form.errors.date_to }}
                     </p>
@@ -213,7 +213,7 @@ function submit(): void {
 
                 <!-- Info -->
                 <div
-                    class="flex gap-2 rounded-md bg-muted px-3 py-2.5 text-[11px] text-muted-foreground"
+                    class="flex gap-2 rounded-md bg-muted px-3 py-2.5 text-xs text-muted-foreground"
                 >
                     <Download class="mt-0.5 size-3.5 shrink-0 text-primary" />
                     <span

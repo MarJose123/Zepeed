@@ -276,11 +276,11 @@ const envOptions = [
     <Head title="General Settings" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <!-- ── Page header ──────────────────────────────────────── -->
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">
+                    <h1 class="text-2xl font-semibold tracking-tight">
                         General Settings
                     </h1>
                     <p class="text-sm text-muted-foreground mt-1">
@@ -313,7 +313,7 @@ const envOptions = [
                         <Badge
                             v-if="form.maintenance_enabled"
                             variant="outline"
-                            class="ml-1.5 text-amber-600 border-amber-400 bg-amber-50 text-[10px] px-1.5 py-0"
+                            class="ml-1.5 text-amber-600 border-amber-400 bg-amber-50 text-xs px-1.5 py-0"
                         >
                             ON
                         </Badge>
@@ -363,7 +363,7 @@ const envOptions = [
                                             >App URL</FieldLabel
                                         >
                                         <FieldDescription
-                                            class="text-[11px] text-muted-foreground"
+                                            class="text-xs text-muted-foreground"
                                         >
                                             Used in notification links, email
                                             headers, and share URLs
@@ -390,7 +390,7 @@ const envOptions = [
                                             >Timezone</FieldLabel
                                         >
                                         <FieldDescription
-                                            class="text-[11px] text-muted-foreground"
+                                            class="text-xs text-muted-foreground"
                                         >
                                             All timestamps, schedules, and
                                             displayed dates
@@ -422,7 +422,7 @@ const envOptions = [
                                             >Environment</FieldLabel
                                         >
                                         <FieldDescription
-                                            class="text-[11px] text-muted-foreground"
+                                            class="text-xs text-muted-foreground"
                                         >
                                             Controls debug output, error detail,
                                             and caching behaviour
@@ -442,10 +442,10 @@ const envOptions = [
                                             </SelectContent>
                                         </Select>
                                         <p
-                                            class="text-[11px] text-muted-foreground mt-1"
+                                            class="text-xs text-muted-foreground mt-1"
                                         >
                                             Set to
-                                            <code class="text-[10px]"
+                                            <code class="text-xs"
                                                 >production</code
                                             >
                                             to disable stack traces in live
@@ -626,7 +626,7 @@ const envOptions = [
                                     >
                                     <CardDescription>
                                         Options passed to
-                                        <code class="text-[11px]"
+                                        <code class="text-xs"
                                             >artisan down</code
                                         >
                                     </CardDescription>
@@ -637,11 +637,9 @@ const envOptions = [
                             <div class="grid grid-cols-2 gap-5">
                                 <div class="space-y-1.5">
                                     <Label>Bypass secret</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         Access the app via
-                                        <code class="text-[10px]"
+                                        <code class="text-xs"
                                             >/?secret=&lt;value&gt;</code
                                         >
                                         during maintenance. Auto-generated if
@@ -688,9 +686,7 @@ const envOptions = [
                                             />Generate
                                         </Button>
                                     </form>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         <template
                                             v-if="
                                                 form.maintenance_enabled &&
@@ -698,9 +694,7 @@ const envOptions = [
                                             "
                                         >
                                             Bypass URL:
-                                            <code
-                                                class="text-[10px] select-all"
-                                            >
+                                            <code class="text-xs select-all">
                                                 {{ settings.app_url }}?secret={{
                                                     settings.bypass_secret
                                                 }}
@@ -716,13 +710,9 @@ const envOptions = [
 
                                 <div class="space-y-1.5">
                                     <Label>Retry-After</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         Sent in the
-                                        <code class="text-[10px]"
-                                            >Retry-After</code
-                                        >
+                                        <code class="text-xs">Retry-After</code>
                                         header of the 503 response
                                     </p>
                                     <div class="flex gap-2">
@@ -753,9 +743,7 @@ const envOptions = [
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         <template
                                             v-if="
                                                 form.retry_after_unit ===
@@ -776,9 +764,7 @@ const envOptions = [
                                     <Label for="maintenance_redirect"
                                         >Redirect to URL</Label
                                     >
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         Optional — redirect visitors to an
                                         external status page instead of serving
                                         503
@@ -894,16 +880,16 @@ const envOptions = [
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead class="text-[11px] pl-6"
+                                        <TableHead class="text-xs pl-6"
                                             >Event</TableHead
                                         >
-                                        <TableHead class="text-[11px]"
+                                        <TableHead class="text-xs"
                                             >Triggered by</TableHead
                                         >
-                                        <TableHead class="text-[11px]"
+                                        <TableHead class="text-xs"
                                             >Duration</TableHead
                                         >
-                                        <TableHead class="text-[11px]"
+                                        <TableHead class="text-xs"
                                             >Timestamp</TableHead
                                         >
                                     </TableRow>
@@ -1065,7 +1051,7 @@ const envOptions = [
 
                             <div class="space-y-1.5">
                                 <Label>Retention window</Label>
-                                <p class="text-[11px] text-muted-foreground">
+                                <p class="text-xs text-muted-foreground">
                                     Results older than this are eligible for
                                     deletion. Minimum 30 days.
                                 </p>
@@ -1086,7 +1072,7 @@ const envOptions = [
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <p class="text-[11px] text-muted-foreground">
+                                <p class="text-xs text-muted-foreground">
                                     <span class="text-emerald-600">→</span>
                                     Pruning runs automatically on the last day
                                     of every month at 00:00.
@@ -1121,9 +1107,7 @@ const envOptions = [
                             <div class="grid grid-cols-2 gap-5">
                                 <div class="space-y-1.5">
                                     <Label>Retain delivery logs for</Label>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         Minimum 30 days enforced. Applies to all
                                         delivery records.
                                     </p>
@@ -1145,9 +1129,7 @@ const envOptions = [
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         <span class="text-emerald-600">→</span>
                                         Pruning runs automatically on the last
                                         day of every month at 00:00.
@@ -1157,9 +1139,7 @@ const envOptions = [
                                     <Label
                                         >Extended retention for failures</Label
                                     >
-                                    <p
-                                        class="text-[11px] text-muted-foreground"
-                                    >
+                                    <p class="text-xs text-muted-foreground">
                                         Failed delivery records are kept for 90
                                         days regardless of the setting above
                                     </p>
@@ -1222,7 +1202,7 @@ const envOptions = [
                         <CardContent class="space-y-3 pt-0">
                             <!-- optimize -->
                             <div
-                                class="flex items-start justify-between gap-4 rounded-lg border border-border p-4"
+                                class="flex items-start justify-between gap-4 rounded-md border border-border p-4"
                             >
                                 <div class="space-y-0.5">
                                     <p class="text-sm font-medium leading-none">
@@ -1274,7 +1254,7 @@ const envOptions = [
 
                             <!-- optimize:clear -->
                             <div
-                                class="flex items-start justify-between gap-4 rounded-lg border p-4 transition-colors"
+                                class="flex items-start justify-between gap-4 rounded-md border p-4 transition-colors"
                                 :class="
                                     isProduction
                                         ? 'border-border bg-muted/40'
@@ -1294,7 +1274,7 @@ const envOptions = [
                                     </p>
                                     <p
                                         v-if="isProduction"
-                                        class="text-[11px] text-amber-600 mt-2 flex items-center gap-1"
+                                        class="text-xs text-amber-600 mt-2 flex items-center gap-1"
                                     >
                                         <AlertTriangle
                                             class="size-3 shrink-0"
@@ -1374,7 +1354,7 @@ const envOptions = [
                             <div
                                 v-for="action in dangerActions"
                                 :key="action.key"
-                                class="rounded-lg border border-destructive/20 overflow-hidden"
+                                class="rounded-md border border-destructive/20 overflow-hidden"
                             >
                                 <!-- Row header -->
                                 <div
@@ -1431,7 +1411,7 @@ const envOptions = [
                                         <p class="text-xs text-destructive">
                                             Type
                                             <code
-                                                class="bg-destructive/10 px-1.5 py-0.5 rounded text-[11px]"
+                                                class="bg-destructive/10 px-1.5 py-0.5 rounded text-xs"
                                             >
                                                 {{ action.word }}
                                             </code>

@@ -47,7 +47,7 @@ const toggleProvider = () => {
                     class="size-7 object-cover"
                     @error="onFaviconError"
                 />
-                <Clock v-else class="text-muted-foreground h-4 w-4" />
+                <Clock v-else class="text-muted-foreground size-4" />
             </div>
 
             <!-- Provider info -->
@@ -57,7 +57,7 @@ const toggleProvider = () => {
                         {{ provider.label }}
                     </span>
                     <Badge
-                        class="text-[10px]"
+                        class="text-xs"
                         :class="
                             provider.is_enabled
                                 ? 'border-green-600/20 bg-green-50 text-green-700 dark:border-green-400/20 dark:bg-green-950 dark:text-green-400'
@@ -81,7 +81,7 @@ const toggleProvider = () => {
 
             <!-- Chevron -->
             <ChevronDown
-                class="text-muted-foreground h-4 w-4 shrink-0 transition-transform duration-200"
+                class="text-muted-foreground size-4 shrink-0 transition-transform duration-200"
                 :class="{ 'rotate-180': isOpen }"
             />
         </div>

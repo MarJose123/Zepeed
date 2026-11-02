@@ -36,10 +36,10 @@ const emit = defineEmits<{
                         class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950"
                     >
                         <AlertTriangle
-                            class="h-4 w-4 text-amber-600 dark:text-amber-400"
+                            class="size-4 text-amber-600 dark:text-amber-400"
                         />
                     </div>
-                    <DialogTitle class="text-base font-bold">
+                    <DialogTitle class="text-base font-semibold">
                         Disable {{ providerName }}?
                     </DialogTitle>
                 </div>
@@ -51,7 +51,7 @@ const emit = defineEmits<{
 
             <div
                 v-if="schedules.length"
-                class="rounded-lg border border-border bg-muted/40 divide-y divide-border"
+                class="rounded-md border border-border bg-muted/40 divide-y divide-border"
             >
                 <div
                     v-for="schedule in schedules"
@@ -59,13 +59,13 @@ const emit = defineEmits<{
                     class="flex items-center gap-3 px-3 py-2.5"
                 >
                     <CalendarClock
-                        class="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                        class="size-3.5 shrink-0 text-muted-foreground"
                     />
                     <div class="flex flex-col gap-0.5 min-w-0">
                         <span class="text-sm truncate">{{
                             schedule.label
                         }}</span>
-                        <span class="text-[11px] text-muted-foreground">
+                        <span class="text-xs text-muted-foreground">
                             {{ schedule.cron_expression ?? "—" }}
                         </span>
                     </div>

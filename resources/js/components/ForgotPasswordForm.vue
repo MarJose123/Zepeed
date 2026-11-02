@@ -34,7 +34,9 @@ const props = defineProps<{
                         <div
                             class="flex flex-col items-center gap-2 text-center"
                         >
-                            <h1 class="text-2xl font-bold">Forgot Password</h1>
+                            <h1 class="text-2xl font-semibold">
+                                Forgot Password
+                            </h1>
                             <p
                                 class="text-muted-foreground text-sm text-balance"
                             >

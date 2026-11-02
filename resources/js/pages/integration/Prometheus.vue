@@ -39,10 +39,12 @@ function save() {
 <template>
     <Head title="Prometheus" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex items-start justify-between gap-3 py-5">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">Prometheus</h1>
+                    <h1 class="text-2xl font-semibold tracking-tight">
+                        Prometheus
+                    </h1>
                     <p class="text-muted-foreground mt-1 text-sm">
                         Expose a /metrics scrape endpoint for Prometheus and
                         Grafana.

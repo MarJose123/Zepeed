@@ -21,20 +21,20 @@ const IconComponent = props.icon ? iconMap[props.icon] : null;
 </script>
 
 <template>
-    <Card class="rounded-lg">
+    <Card class="rounded-md">
         <CardContent class="p-3">
             <p
-                class="text-muted-foreground mb-1 flex items-center gap-1.5 text-sm font-bold"
+                class="text-muted-foreground mb-1 flex items-center gap-1.5 text-sm font-semibold"
             >
                 <component
                     :is="IconComponent"
                     v-if="IconComponent"
-                    class="h-3 w-3"
+                    class="size-3"
                     aria-hidden="true"
                 />
                 {{ label }}
             </p>
-            <p class="text-2xl font-bold tracking-tight pl-2">
+            <p class="text-2xl font-semibold tracking-tight pl-2">
                 {{ value }}
                 <span
                     v-if="unit"

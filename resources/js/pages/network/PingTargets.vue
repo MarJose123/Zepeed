@@ -96,10 +96,10 @@ usePingResultsChannel({
 <template>
     <Head title="Ping Targets" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <div class="flex items-start justify-between">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">
+                    <h1 class="text-2xl font-semibold tracking-tight">
                         Ping Targets
                     </h1>
                     <p class="mt-1 text-sm text-muted-foreground">
@@ -108,14 +108,14 @@ usePingResultsChannel({
                     </p>
                 </div>
                 <Button size="sm" @click="openCreate">
-                    <Plus class="mr-1.5 h-4 w-4" />
+                    <Plus class="mr-1.5 size-4" />
                     Add Target
                 </Button>
             </div>
 
             <div
                 v-if="targets.length === 0"
-                class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16"
+                class="flex flex-col items-center justify-center gap-3 rounded-md border border-dashed py-16"
             >
                 <div
                     class="flex h-12 w-12 items-center justify-center rounded-full bg-muted"
@@ -126,7 +126,7 @@ usePingResultsChannel({
                     No ping targets configured yet.
                 </p>
                 <Button size="sm" variant="outline" @click="openCreate">
-                    <Plus class="mr-1.5 h-4 w-4" />
+                    <Plus class="mr-1.5 size-4" />
                     Add your first target
                 </Button>
             </div>

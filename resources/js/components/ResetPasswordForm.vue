@@ -41,7 +41,7 @@ const props = defineProps<{
                         <div
                             class="flex flex-col items-center gap-2 text-center"
                         >
-                            <h1 class="text-2xl font-bold">
+                            <h1 class="text-2xl font-semibold">
                                 Reset password of your account
                             </h1>
                             <p

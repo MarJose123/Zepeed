@@ -51,7 +51,7 @@ const revokeTarget = ref<ApiToken | null>(null);
                         <Badge
                             v-if="token.abilities.includes('*')"
                             variant="secondary"
-                            class="text-[10px]"
+                            class="text-xs"
                         >
                             All
                         </Badge>
@@ -60,7 +60,7 @@ const revokeTarget = ref<ApiToken | null>(null);
                                 v-for="ability in token.abilities"
                                 :key="ability"
                                 variant="secondary"
-                                class="text-[10px]"
+                                class="text-xs"
                             >
                                 {{ ability }}
                             </Badge>
@@ -106,7 +106,7 @@ const revokeTarget = ref<ApiToken | null>(null);
                                 >
                                     <component
                                         :is="platformIcon(token.platform)"
-                                        class="h-4 w-4"
+                                        class="size-4"
                                     />
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -155,7 +155,7 @@ const revokeTarget = ref<ApiToken | null>(null);
             class="flex flex-col items-center justify-center gap-2 py-12"
         >
             <p class="text-sm font-medium">No API tokens yet</p>
-            <p class="text-[11px] text-muted-foreground">
+            <p class="text-xs text-muted-foreground">
                 Create your first token to enable programmatic access.
             </p>
         </div>

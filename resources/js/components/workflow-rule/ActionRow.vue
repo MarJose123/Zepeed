@@ -59,7 +59,7 @@ const containerClass = computed(() => {
 </script>
 
 <template>
-    <div class="rounded-lg border p-3" :class="containerClass">
+    <div class="rounded-md border p-3" :class="containerClass">
         <div class="mb-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div
@@ -74,15 +74,15 @@ const containerClass = computed(() => {
                 >
                     <Mail
                         v-if="action.type === 'email'"
-                        class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
+                        class="size-3.5 text-blue-600 dark:text-blue-400"
                     />
                     <Link2
                         v-else-if="action.type === 'webhook'"
-                        class="h-3.5 w-3.5 text-green-600 dark:text-green-400"
+                        class="size-3.5 text-green-600 dark:text-green-400"
                     />
                     <Bell
                         v-else
-                        class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400"
+                        class="size-3.5 text-purple-600 dark:text-purple-400"
                     />
                 </div>
                 <span class="text-xs font-medium">{{ actionLabel }}</span>
@@ -93,14 +93,14 @@ const containerClass = computed(() => {
                 class="text-muted-foreground hover:text-destructive h-6 w-6"
                 @click="emit('remove')"
             >
-                <Trash2 class="h-3 w-3" />
+                <Trash2 class="size-3" />
             </Button>
         </div>
 
         <!-- Email action fields -->
         <div v-if="action.type === 'email'" class="grid grid-cols-3 gap-2">
             <div class="space-y-1">
-                <Label class="text-[10px]">Mail provider</Label>
+                <Label class="text-xs">Mail provider</Label>
                 <Select
                     :model-value="action.mail_provider_id ?? 'auto'"
                     @update:model-value="
@@ -131,9 +131,7 @@ const containerClass = computed(() => {
                             class="text-xs"
                         >
                             {{ mp.label }}
-                            <span
-                                class="text-muted-foreground ml-1 text-[10px]"
-                            >
+                            <span class="text-muted-foreground ml-1 text-xs">
                                 {{ mp.is_primary ? "· primary" : "" }}
                             </span>
                         </SelectItem>
@@ -142,7 +140,7 @@ const containerClass = computed(() => {
             </div>
 
             <div class="space-y-1">
-                <Label class="text-[10px]">Email template</Label>
+                <Label class="text-xs">Email template</Label>
                 <Select
                     :model-value="action.email_template_id ?? 'none'"
                     @update:model-value="
@@ -186,7 +184,7 @@ const containerClass = computed(() => {
             </div>
 
             <div class="space-y-1">
-                <Label class="text-[10px]">Recipient email</Label>
+                <Label class="text-xs">Recipient email</Label>
                 <Input
                     :model-value="action.recipient_email ?? ''"
                     type="email"
@@ -201,7 +199,7 @@ const containerClass = computed(() => {
 
         <!-- Webhook action fields -->
         <div v-else-if="action.type === 'webhook'" class="space-y-1">
-            <Label class="text-[10px]">Webhook</Label>
+            <Label class="text-xs">Webhook</Label>
             <Select
                 :model-value="action.webhook_id ?? 'none'"
                 @update:model-value="
@@ -228,7 +226,7 @@ const containerClass = computed(() => {
                         >
                             {{ wh.name }}
                             <span
-                                class="text-muted-foreground ml-1 font-mono text-[10px]"
+                                class="text-muted-foreground ml-1 font-mono text-xs"
                             >
                                 {{ wh.method }}
                             </span>
@@ -248,7 +246,7 @@ const containerClass = computed(() => {
 
         <!-- Apprise action fields -->
         <div v-else class="space-y-1">
-            <Label class="text-[10px]">Apprise instance</Label>
+            <Label class="text-xs">Apprise instance</Label>
             <Select
                 :model-value="action.apprise_id ?? 'none'"
                 @update:model-value="
@@ -276,7 +274,7 @@ const containerClass = computed(() => {
                             {{ a.name }}
                             <span
                                 v-if="a.tags.length > 0"
-                                class="text-muted-foreground ml-1 text-[10px]"
+                                class="text-muted-foreground ml-1 text-xs"
                             >
                                 {{ a.tags.join(", ") }}
                             </span>

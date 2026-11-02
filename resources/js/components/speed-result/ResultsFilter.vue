@@ -45,7 +45,7 @@ watch(
 <template>
     <Select v-model="provider">
         <SelectTrigger size="sm" class="h-8 w-auto gap-1.5 text-sm">
-            <Server class="h-3.5 w-3.5 text-muted-foreground" />
+            <Server class="size-3.5 text-muted-foreground" />
             <SelectValue placeholder="All providers" />
         </SelectTrigger>
         <SelectContent>

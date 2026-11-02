@@ -145,13 +145,13 @@ function openLinks(e: MouseEvent) {
             <!-- Error -->
             <div
                 v-else-if="error"
-                class="bg-destructive/5 border-destructive/20 m-5 rounded-lg border p-4"
+                class="bg-destructive/5 border-destructive/20 m-5 rounded-md border p-4"
             >
                 <p class="text-destructive text-xs font-medium">
                     Blade render error
                 </p>
                 <pre
-                    class="text-destructive/80 mt-1 whitespace-pre-wrap font-mono text-[11px] leading-relaxed"
+                    class="text-destructive/80 mt-1 whitespace-pre-wrap font-mono text-xs leading-relaxed"
                     >{{ error }}</pre>
             </div>
 
@@ -163,7 +163,7 @@ function openLinks(e: MouseEvent) {
                 <!-- Subject bar -->
                 <div class="border-border bg-muted/50 border-b px-5 py-3">
                     <span
-                        class="text-muted-foreground text-[11px] font-medium uppercase tracking-wide"
+                        class="text-muted-foreground text-xs font-medium uppercase tracking-wide"
                         >Subject</span
                     >
                     <p class="mt-0.5 text-sm font-medium">
@@ -190,7 +190,7 @@ function openLinks(e: MouseEvent) {
                         <div
                             class="border-t border-zinc-100 px-8 py-4 dark:border-zinc-700"
                         >
-                            <p class="text-[11px] text-zinc-400">
+                            <p class="text-xs text-zinc-400">
                                 Sent by Zepeed · sample data preview
                             </p>
                         </div>
@@ -202,14 +202,14 @@ function openLinks(e: MouseEvent) {
             <div
                 class="border-border bg-muted/30 flex items-center justify-between border-t px-5 py-2.5 gap-6"
             >
-                <p class="text-muted-foreground text-[10px] text-balance">
+                <p class="text-muted-foreground text-xs text-balance">
                     Preview uses placeholder values for all merge fields. Actual
                     values are injected by at send time.
                 </p>
 
                 <!-- Viewport toggle in footer -->
                 <div
-                    class="border-border flex items-center gap-0.5 rounded-lg border p-0.5"
+                    class="border-border flex items-center gap-0.5 rounded-md border p-0.5"
                 >
                     <Button
                         variant="ghost"
@@ -222,7 +222,7 @@ function openLinks(e: MouseEvent) {
                         "
                         @click="viewport = 'desktop'"
                     >
-                        <Monitor class="h-3.5 w-3.5" />
+                        <Monitor class="size-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
@@ -235,7 +235,7 @@ function openLinks(e: MouseEvent) {
                         "
                         @click="viewport = 'mobile'"
                     >
-                        <Smartphone class="h-3.5 w-3.5" />
+                        <Smartphone class="size-3.5" />
                     </Button>
                 </div>
             </div>

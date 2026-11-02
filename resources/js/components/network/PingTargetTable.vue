@@ -194,7 +194,7 @@ const columns: ColumnDef<PingTarget>[] = [
                             emit("runNow", row.original);
                         },
                     },
-                    () => h(Play, { class: "h-3.5 w-3.5" }),
+                    () => h(Play, { class: "size-3.5" }),
                 ),
                 h(
                     DropdownMenu,
@@ -213,7 +213,7 @@ const columns: ColumnDef<PingTarget>[] = [
                                     },
                                     () =>
                                         h(MoreHorizontal, {
-                                            class: "h-3.5 w-3.5",
+                                            class: "size-3.5",
                                         }),
                                 ),
                             ),
@@ -226,7 +226,7 @@ const columns: ColumnDef<PingTarget>[] = [
                                     },
                                     () => [
                                         h(Pencil, {
-                                            class: "mr-2 h-3.5 w-3.5",
+                                            class: "mr-2 size-3.5",
                                         }),
                                         "Edit",
                                     ],
@@ -241,7 +241,7 @@ const columns: ColumnDef<PingTarget>[] = [
                                     },
                                     () => [
                                         h(Trash2, {
-                                            class: "mr-2 h-3.5 w-3.5",
+                                            class: "mr-2 size-3.5",
                                         }),
                                         "Delete",
                                     ],

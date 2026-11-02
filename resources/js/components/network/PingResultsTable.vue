@@ -83,7 +83,7 @@ const AvgHeader = () =>
                     [
                         "Avg",
                         h(HelpCircle, {
-                            class: "h-3 w-3 text-muted-foreground",
+                            class: "size-3 text-muted-foreground",
                         }),
                     ],
                 ),
@@ -135,8 +135,8 @@ const columns: ColumnDef<PingResult>[] = [
                 },
                 () =>
                     expandedRows.value.has(row.original.id)
-                        ? h(ChevronDown, { class: "h-3.5 w-3.5" })
-                        : h(ChevronRight, { class: "h-3.5 w-3.5" }),
+                        ? h(ChevronDown, { class: "size-3.5" })
+                        : h(ChevronRight, { class: "size-3.5" }),
             ),
         meta: { headerClass: "w-8" },
     },
@@ -372,7 +372,7 @@ const nextUrl = () => {
                                             Raw Output
                                         </p>
                                         <pre
-                                            class="max-h-48 overflow-x-auto rounded-md border border-border bg-background p-2 text-[11px] leading-relaxed"
+                                            class="max-h-48 overflow-x-auto rounded-md border border-border bg-background p-2 text-xs leading-relaxed"
                                             >{{ row.original.raw_output }}</pre>
                                     </div>
                                 </TableCell>

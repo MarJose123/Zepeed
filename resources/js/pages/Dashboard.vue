@@ -114,16 +114,16 @@ usePingResultsChannel({
 <template>
     <Head title="Dashboard" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div class="py-5">
-                <h1 class="text-xl font-bold tracking-tight">Dashboard</h1>
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
+            <div>
+                <h1 class="text-2xl font-semibold tracking-tight">Dashboard</h1>
                 <p class="mt-1 text-sm text-muted-foreground">
                     Real-time overview of your internet speed across all
                     providers
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <ProviderCard
                     v-for="provider in providerCards"
                     :key="provider.slug"
@@ -158,7 +158,7 @@ usePingResultsChannel({
 
             <div>
                 <p
-                    class="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                    class="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
                 >
                     Recent ping results
                 </p>

@@ -45,7 +45,7 @@ const passwordRef = ref<InstanceType<typeof InputPasswordStrength> | null>(
                         <div
                             class="flex flex-col items-center gap-2 text-center"
                         >
-                            <h1 class="text-2xl font-bold">
+                            <h1 class="text-2xl font-semibold">
                                 Create your account
                             </h1>
                             <p

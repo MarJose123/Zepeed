@@ -102,7 +102,7 @@ const relativeTime = (iso: string) => {
 <template>
     <Head :title="`Delivery log — ${webhook.name}`" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <!-- Page header -->
             <div class="flex items-center gap-3 py-5">
                 <Button variant="ghost" size="icon" class="h-8 w-8" as-child>
@@ -115,11 +115,11 @@ const relativeTime = (iso: string) => {
                             )
                         "
                     >
-                        <ArrowLeft class="h-4 w-4" />
+                        <ArrowLeft class="size-4" />
                     </Link>
                 </Button>
                 <div>
-                    <h1 class="text-xl font-semibold">Delivery log</h1>
+                    <h1 class="text-2xl font-semibold">Delivery log</h1>
                     <p class="text-muted-foreground mt-0.5 text-sm">
                         {{ webhook.name }} ·
                         <code class="font-mono text-xs">{{
@@ -135,7 +135,7 @@ const relativeTime = (iso: string) => {
 
             <!-- Stats row -->
             <div class="grid grid-cols-3 gap-4">
-                <div class="bg-muted rounded-lg p-4">
+                <div class="bg-muted rounded-md p-4">
                     <p class="text-muted-foreground text-xs">
                         Total deliveries
                     </p>
@@ -143,7 +143,7 @@ const relativeTime = (iso: string) => {
                         {{ deliveries.meta.total ?? 0 }}
                     </p>
                 </div>
-                <div class="bg-muted rounded-lg p-4">
+                <div class="bg-muted rounded-md p-4">
                     <p class="text-muted-foreground text-xs">Successful</p>
                     <p
                         class="mt-1 text-2xl font-medium text-green-700 dark:text-green-400"
@@ -154,7 +154,7 @@ const relativeTime = (iso: string) => {
                         >
                     </p>
                 </div>
-                <div class="bg-muted rounded-lg p-4">
+                <div class="bg-muted rounded-md p-4">
                     <p class="text-muted-foreground text-xs">Last fired</p>
                     <p class="mt-1 text-sm font-medium">
                         {{
@@ -194,7 +194,7 @@ const relativeTime = (iso: string) => {
                             'When',
                         ]"
                         :key="col"
-                        class="text-muted-foreground text-[10px] font-medium uppercase tracking-wide"
+                        class="text-muted-foreground text-xs font-medium uppercase tracking-wide"
                     >
                         {{ col }}
                     </span>
@@ -238,7 +238,7 @@ const relativeTime = (iso: string) => {
                         {{ delivery.status_text ?? "—" }}
                     </span>
                     <span
-                        class="text-muted-foreground truncate font-mono text-[11px]"
+                        class="text-muted-foreground truncate font-mono text-xs"
                     >
                         {{ delivery.event }}
                     </span>

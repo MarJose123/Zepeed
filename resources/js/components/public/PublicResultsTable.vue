@@ -30,16 +30,16 @@ const rows = computed(() => props.results);
 </script>
 
 <template>
-    <div class="border-border overflow-hidden rounded-lg border">
+    <div class="border-border overflow-hidden rounded-md border">
         <Table>
             <TableHeader>
                 <TableRow class="bg-muted/50 hover:bg-muted/50">
-                    <TableHead class="text-[11px]">Provider</TableHead>
-                    <TableHead class="text-[11px]">Download</TableHead>
-                    <TableHead class="text-[11px]">Upload</TableHead>
-                    <TableHead class="text-[11px]">Ping</TableHead>
-                    <TableHead class="text-[11px]">Jitter</TableHead>
-                    <TableHead class="text-[11px]">Measured at</TableHead>
+                    <TableHead class="text-xs">Provider</TableHead>
+                    <TableHead class="text-xs">Download</TableHead>
+                    <TableHead class="text-xs">Upload</TableHead>
+                    <TableHead class="text-xs">Ping</TableHead>
+                    <TableHead class="text-xs">Jitter</TableHead>
+                    <TableHead class="text-xs">Measured at</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -76,10 +76,10 @@ const rows = computed(() => props.results);
         <div class="border-border border-t px-3 py-2 text-center">
             <Link
                 :href="route('login')"
-                class="text-muted-foreground inline-flex items-center gap-1.5 text-[11px] hover:underline"
+                class="text-muted-foreground inline-flex items-center gap-1.5 text-xs hover:underline"
             >
                 <svg
-                    class="h-3 w-3"
+                    class="size-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

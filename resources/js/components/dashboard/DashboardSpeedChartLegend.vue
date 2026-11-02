@@ -29,7 +29,7 @@ const emit = defineEmits<{ toggle: [key: string] }>();
                 class="size-2 shrink-0 rounded-full"
                 :style="{ backgroundColor: e.color }"
             />
-            <span class="text-[10px] text-muted-foreground">{{ e.value }}</span>
+            <span class="text-xs text-muted-foreground">{{ e.value }}</span>
         </button>
     </div>
 </template>

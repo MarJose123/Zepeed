@@ -39,10 +39,10 @@ const breadcrumbItems: TBreadcrumbItem[] = [
         <h1 class="sr-only">API Tokens</h1>
 
         <SettingsLayout>
-            <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-xl font-bold tracking-tight">
+                        <p class="text-2xl font-semibold tracking-tight">
                             API Tokens
                         </p>
                         <p class="text-sm text-muted-foreground mt-1">

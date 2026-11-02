@@ -83,16 +83,13 @@ function destroyApprise() {
 <template>
     <Head title="Apprise" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div class="flex flex-1 flex-col gap-6 p-6 pt-4">
             <!-- Page header -->
-            <div class="flex items-start justify-between gap-3 py-5">
-                <div>
-                    <h1 class="text-xl font-semibold">Apprise</h1>
-                    <p class="text-muted-foreground mt-1 text-sm">
-                        Apprise notification gateways triggered by workflow
-                        rules
-                    </p>
-                </div>
+            <div>
+                <h1 class="text-2xl font-semibold tracking-tight">Apprise</h1>
+                <p class="mt-1 text-sm text-muted-foreground">
+                    Apprise notification gateways triggered by workflow rules
+                </p>
             </div>
 
             <!-- Card grid -->
@@ -112,13 +109,13 @@ function destroyApprise() {
 
                 <!-- Add new card -->
                 <div
-                    class="border-border hover:border-border-secondary flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-10 transition-colors"
+                    class="border-border hover:border-border-secondary flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed py-10 transition-colors"
                     @click="openAdd"
                 >
                     <div
                         class="bg-muted flex h-9 w-9 items-center justify-center rounded-md"
                     >
-                        <Plus class="text-muted-foreground h-4 w-4" />
+                        <Plus class="text-muted-foreground size-4" />
                     </div>
                     <span class="text-muted-foreground text-xs"
                         >Add Apprise</span
@@ -144,7 +141,7 @@ function destroyApprise() {
                     class="mt-1"
                     @click="openAdd"
                 >
-                    <Plus class="mr-1.5 h-4 w-4" />
+                    <Plus class="mr-1.5 size-4" />
                     Add Apprise
                 </Button>
             </Empty>
@@ -208,7 +205,7 @@ function destroyApprise() {
             <AlertDialogFooter>
                 <AlertDialogCancel>Keep Apprise</AlertDialogCancel>
                 <AlertDialogAction
-                    class="bg-destructive text-white hover:bg-destructive/80"
+                    class="bg-destructive text-white dark:text-destructive-foreground hover:bg-destructive/80"
                     @click="destroyApprise"
                 >
                     {{

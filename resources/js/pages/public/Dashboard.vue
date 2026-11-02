@@ -94,7 +94,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
         <div class="flex flex-col gap-4">
             <section>
                 <p
-                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                    class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider"
                 >
                     Overview · last 24 h
                 </p>
@@ -132,7 +132,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                    class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider"
                 >
                     24-hour trend · all providers
                 </p>
@@ -160,7 +160,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                    class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider"
                 >
                     Recent speedtest results
                 </p>
@@ -169,7 +169,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                    class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider"
                 >
                     Recent ping results
                 </p>
@@ -178,7 +178,7 @@ usePublicPingRefresh((payload: PublicPingRefreshPayload) => {
 
             <section>
                 <p
-                    class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wider"
+                    class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider"
                 >
                     Workflow rules
                 </p>

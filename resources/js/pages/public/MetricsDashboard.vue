@@ -114,7 +114,7 @@ useMetricsDashboardRefresh(() => {
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <Gauge class="text-muted-foreground size-5" />
-                    <h1 class="text-xl font-bold tracking-tight">
+                    <h1 class="text-2xl font-semibold tracking-tight">
                         Metrics Dashboard
                     </h1>
                 </div>
@@ -131,7 +131,7 @@ useMetricsDashboardRefresh(() => {
                 <div class="flex items-center gap-1.5">
                     <Zap class="text-muted-foreground size-3.5" />
                     <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         Speed
                     </p>
@@ -149,7 +149,7 @@ useMetricsDashboardRefresh(() => {
                 <div class="flex items-center gap-1.5">
                     <Activity class="text-muted-foreground size-3.5" />
                     <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         Ping
                     </p>
@@ -167,7 +167,7 @@ useMetricsDashboardRefresh(() => {
                 <div class="flex items-center gap-1.5">
                     <Timer class="text-muted-foreground size-3.5" />
                     <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         Latency (IQM)
                     </p>
@@ -185,7 +185,7 @@ useMetricsDashboardRefresh(() => {
                 <div class="flex items-center gap-1.5">
                     <Activity class="text-muted-foreground size-3.5" />
                     <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         Jitter
                     </p>
@@ -203,7 +203,7 @@ useMetricsDashboardRefresh(() => {
                 <div class="flex items-center gap-1.5">
                     <Network class="text-muted-foreground size-3.5" />
                     <p
-                        class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
                         Network Ping
                     </p>

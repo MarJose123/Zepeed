@@ -185,7 +185,7 @@ watch(
                             class="relative mx-auto flex max-w-md items-center overflow-hidden"
                         >
                             <div
-                                class="relative mx-auto aspect-square w-64 overflow-hidden rounded-lg border border-border"
+                                class="relative mx-auto aspect-square w-64 overflow-hidden rounded-md border border-border"
                             >
                                 <div
                                     v-if="!qrCodeSvg"

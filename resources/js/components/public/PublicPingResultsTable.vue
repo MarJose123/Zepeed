@@ -59,15 +59,15 @@ const fmtDate = (iso: string): string =>
 </script>
 
 <template>
-    <div class="border-border overflow-hidden rounded-lg border">
+    <div class="border-border overflow-hidden rounded-md border">
         <Table>
             <TableHeader>
                 <TableRow class="bg-muted/50 hover:bg-muted/50">
-                    <TableHead class="text-[11px]">Target</TableHead>
-                    <TableHead class="text-[11px]">Status</TableHead>
-                    <TableHead class="text-[11px]">Avg Latency</TableHead>
-                    <TableHead class="text-[11px]">Pkt Loss</TableHead>
-                    <TableHead class="text-[11px]">Measured At</TableHead>
+                    <TableHead class="text-xs">Target</TableHead>
+                    <TableHead class="text-xs">Status</TableHead>
+                    <TableHead class="text-xs">Avg Latency</TableHead>
+                    <TableHead class="text-xs">Pkt Loss</TableHead>
+                    <TableHead class="text-xs">Measured At</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,7 +80,7 @@ const fmtDate = (iso: string): string =>
                         <p class="text-sm font-medium">
                             {{ row.target_label }}
                         </p>
-                        <p class="text-[11px] text-muted-foreground">
+                        <p class="text-xs text-muted-foreground">
                             {{ row.target_host }}
                         </p>
                     </TableCell>
@@ -126,10 +126,10 @@ const fmtDate = (iso: string): string =>
         <div class="border-border border-t px-3 py-2 text-center">
             <Link
                 :href="route('login')"
-                class="text-muted-foreground inline-flex items-center gap-1.5 text-[11px] hover:underline"
+                class="text-muted-foreground inline-flex items-center gap-1.5 text-xs hover:underline"
             >
                 <svg
-                    class="h-3 w-3"
+                    class="size-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

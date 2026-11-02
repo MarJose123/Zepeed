@@ -109,7 +109,7 @@ const submit = () => {
                         v-model="form.host"
                         placeholder="8.8.8.8 or hostname"
                     />
-                    <p class="text-[11px] text-muted-foreground">
+                    <p class="text-xs text-muted-foreground">
                         IPv4, IPv6, or resolvable hostname
                     </p>
                     <p v-if="form.errors.host" class="text-xs text-destructive">
@@ -164,11 +164,11 @@ const submit = () => {
                 </div>
 
                 <div
-                    class="flex items-center justify-between rounded-lg border p-3"
+                    class="flex items-center justify-between rounded-md border p-3"
                 >
                     <div>
                         <p class="text-sm font-medium">Enabled</p>
-                        <p class="text-[11px] text-muted-foreground">
+                        <p class="text-xs text-muted-foreground">
                             Include in scheduled ping tests
                         </p>
                     </div>
@@ -181,7 +181,7 @@ const submit = () => {
                 <Button :disabled="form.processing" @click="submit">
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-4 w-4 animate-spin"
+                        class="mr-1.5 size-4 animate-spin"
                     />
                     {{ target ? "Save Changes" : "Add Target" }}
                 </Button>

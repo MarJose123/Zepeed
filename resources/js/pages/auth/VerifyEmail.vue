@@ -14,9 +14,9 @@ defineProps<{
 <template>
     <Head title="Email verification" />
     <GuestLayout
-        class="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10"
+        class="bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10"
     >
-        <div class="w-full max-w-sm">
+        <div class="w-full max-w-md">
             <div class="'flex flex-col gap-6'">
                 <Card>
                     <CardContent>
@@ -30,7 +30,7 @@ defineProps<{
                                 <div
                                     class="flex flex-col items-center gap-2 text-center"
                                 >
-                                    <h1 class="text-2xl font-bold">
+                                    <h1 class="text-2xl font-semibold">
                                         Verify email
                                     </h1>
                                     <p

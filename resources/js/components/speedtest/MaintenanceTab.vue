@@ -276,7 +276,7 @@ watch(
                         :class="globalPause ? 'bg-destructive/10' : 'bg-muted'"
                     >
                         <AlertTriangle
-                            class="h-4 w-4"
+                            class="size-4"
                             :class="
                                 globalPause
                                     ? 'text-destructive'
@@ -309,7 +309,7 @@ watch(
             <Dialog v-model:open="showAddWindow">
                 <DialogTrigger as-child>
                     <Button size="sm" variant="outline">
-                        <Plus class="mr-1.5 h-4 w-4" />
+                        <Plus class="mr-1.5 size-4" />
                         Add window
                     </Button>
                 </DialogTrigger>
@@ -488,7 +488,7 @@ watch(
                         >
                             <Loader2
                                 v-if="windowForm.processing"
-                                class="mr-2 h-4 w-4 animate-spin"
+                                class="mr-2 size-4 animate-spin"
                             />
                             Create window
                         </Button>
@@ -534,7 +534,7 @@ watch(
                         >
                             <component
                                 :is="typeIcon(window.type)"
-                                class="text-muted-foreground h-4 w-4"
+                                class="text-muted-foreground size-4"
                             />
                         </div>
 
@@ -547,13 +547,13 @@ watch(
                                 <Badge
                                     v-if="window.is_currently_active"
                                     variant="destructive"
-                                    class="text-[10px]"
+                                    class="text-xs"
                                 >
                                     Active
                                 </Badge>
                                 <Badge
                                     :variant="typeBadgeVariant(window.type)"
-                                    class="text-[10px]"
+                                    class="text-xs"
                                 >
                                     {{ window.type_label }}
                                 </Badge>
@@ -597,7 +597,7 @@ watch(
                         class="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
                         @click="deleteWindow(window)"
                     >
-                        <Trash2 class="h-4 w-4" />
+                        <Trash2 class="size-4" />
                     </Button>
                 </div>
             </CardContent>
@@ -606,7 +606,7 @@ watch(
         <!-- Footer note -->
         <p class="text-muted-foreground pt-1 text-center text-xs">
             Runs skipped during any active window are logged with a
-            <code class="font-bold">skipped</code> status in Results.
+            <code class="font-semibold">skipped</code> status in Results.
         </p>
     </div>
 </template>

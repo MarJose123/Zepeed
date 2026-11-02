@@ -252,10 +252,10 @@ function save() {
                         >
                     </div>
                     <div
-                        class="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 font-mono text-[10px] text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                        class="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 font-mono text-xs text-purple-700 dark:bg-purple-950 dark:text-purple-300"
                     >
                         <svg
-                            class="h-3 w-3 shrink-0"
+                            class="size-3 shrink-0"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -342,7 +342,7 @@ function save() {
                             class="text-muted-foreground hover:text-destructive h-9 w-9 shrink-0"
                             @click="removeHeader(index)"
                         >
-                            <Trash2 class="h-3.5 w-3.5" />
+                            <Trash2 class="size-3.5" />
                         </Button>
                     </div>
                     <Button
@@ -351,7 +351,7 @@ function save() {
                         class="text-xs"
                         @click="addHeader"
                     >
-                        <Plus class="mr-1.5 h-3.5 w-3.5" />
+                        <Plus class="mr-1.5 size-3.5" />
                         Add header
                     </Button>
                 </div>
@@ -373,11 +373,11 @@ function save() {
                     >
                         <CheckCircle2
                             v-if="testResult === 'success'"
-                            class="mt-px h-4 w-4 shrink-0 text-green-600"
+                            class="mt-px size-4 shrink-0 text-green-600"
                         />
                         <XCircle
                             v-else
-                            class="text-destructive mt-px h-4 w-4 shrink-0"
+                            class="text-destructive mt-px size-4 shrink-0"
                         />
                         <p
                             :class="
@@ -409,14 +409,14 @@ function save() {
                     >
                         <Loader2
                             v-if="testProcessing"
-                            class="mr-1.5 h-3 w-3 animate-spin"
+                            class="mr-1.5 size-3 animate-spin"
                         />
                         {{ testProcessing ? "Testing…" : "Test connection" }}
                     </Button>
                     <Button size="sm" :disabled="form.processing" @click="save">
                         <Loader2
                             v-if="form.processing"
-                            class="mr-1.5 h-3 w-3 animate-spin"
+                            class="mr-1.5 size-3 animate-spin"
                         />
                         {{ isEdit ? "Save changes" : "Save webhook" }}
                     </Button>

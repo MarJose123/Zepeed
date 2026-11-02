@@ -50,7 +50,7 @@ const driverIcons: Record<MailDriver, string> = {
                 >
                     {{ driver.label }}
                 </div>
-                <div class="text-muted-foreground mt-0.5 text-[10px]">
+                <div class="text-muted-foreground mt-0.5 text-xs">
                     {{ driver.description }}
                 </div>
             </div>

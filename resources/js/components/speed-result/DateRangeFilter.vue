@@ -128,11 +128,11 @@ function clear(): void {
                 class="h-8 gap-1.5 text-sm"
                 :class="isActive ? 'border-primary text-primary' : ''"
             >
-                <CalendarRange class="h-3.5 w-3.5" />
+                <CalendarRange class="size-3.5" />
                 {{ triggerLabel }}
                 <X
                     v-if="isActive"
-                    class="h-3.5 w-3.5 opacity-70"
+                    class="size-3.5 opacity-70"
                     @click.stop="clear"
                 />
             </Button>

@@ -16,7 +16,7 @@ defineProps<{
 <template>
     <div
         v-if="active && payload?.length"
-        class="bg-popover border-border text-popover-foreground rounded-lg border px-3 py-2 shadow-md"
+        class="bg-popover border-border text-popover-foreground rounded-md border px-3 py-2 shadow-md"
     >
         <p class="mb-1.5 text-xs font-medium">{{ label }}</p>
         <div class="flex flex-col gap-1">

@@ -48,7 +48,7 @@ async function copy(): Promise<void> {
             </DialogHeader>
 
             <div class="space-y-4">
-                <p class="text-[11px] text-muted-foreground">
+                <p class="text-xs text-muted-foreground">
                     Copy and store this token securely. It will not be shown
                     again after you close this dialog.
                 </p>
@@ -65,11 +65,8 @@ async function copy(): Promise<void> {
                         class="h-7 w-7 shrink-0"
                         @click="copy"
                     >
-                        <Check
-                            v-if="copied"
-                            class="h-3.5 w-3.5 text-green-500"
-                        />
-                        <Copy v-else class="h-3.5 w-3.5" />
+                        <Check v-if="copied" class="size-3.5 text-green-500" />
+                        <Copy v-else class="size-3.5" />
                     </Button>
                 </div>
 
@@ -79,7 +76,7 @@ async function copy(): Promise<void> {
                     <p class="text-xs text-amber-700 dark:text-amber-300">
                         Use this token in API requests as:
                         <span
-                            class="block mt-1 text-[11px] text-amber-600 dark:text-amber-400"
+                            class="block mt-1 text-xs text-amber-600 dark:text-amber-400"
                         >
                             Authorization: Bearer &lt;token&gt;
                         </span>

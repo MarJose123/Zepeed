@@ -143,7 +143,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                             class="text-muted-foreground h-7 w-7"
                             @click="showHelp = true"
                         >
-                            <HelpCircle class="h-4 w-4" />
+                            <HelpCircle class="size-4" />
                         </Button>
                         <Button size="sm" class="h-7 text-xs" @click="startNew">
                             <PlusIcon />
@@ -167,7 +167,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     >
                         {{ tab.label }}
                         <span
-                            class="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px]"
+                            class="flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs"
                             :class="
                                 activeFilter === tab.value
                                     ? 'bg-primary/15 text-primary'
@@ -241,7 +241,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                                 {{ typeLabel(template) }}
                             </Badge>
 
-                            <span class="text-muted-foreground text-[10px]">
+                            <span class="text-muted-foreground text-xs">
                                 {{ lastUpdatedLabel(template) }}
                             </span>
                         </div>
@@ -317,7 +317,7 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                         >
                             Type
                             <Kbd
-                                class="border-border bg-muted rounded border px-1.5 py-0.5 text-[10px]"
+                                class="border-border bg-muted rounded border px-1.5 py-0.5 text-xs"
                                 >#</Kbd
                             >
                             anywhere in the subject or body to open the merge
@@ -328,11 +328,11 @@ const bladeSnippet2 = `@foreach($results as $r)\n- {{ $r }}\n@endforeach`;
                     <div class="space-y-1.5">
                         <p class="text-xs font-medium">Blade directives</p>
                         <pre
-                            class="bg-muted rounded-lg p-3 text-[11px] leading-relaxed"
+                            class="bg-muted rounded-md p-3 text-xs leading-relaxed"
                             v-text="bladeSnippet"
                         />
                         <pre
-                            class="bg-muted rounded-lg p-3 text-[11px] leading-relaxed"
+                            class="bg-muted rounded-md p-3 text-xs leading-relaxed"
                             v-text="bladeSnippet2"
                         />
                     </div>

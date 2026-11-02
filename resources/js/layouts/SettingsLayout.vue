@@ -47,7 +47,7 @@ const { isCurrentUrl } = useCurrentUrl();
 <template>
     <div class="space-y-4 p-4 sm:p-6">
         <div class="space-y-2">
-            <h2 class="text-xl font-semibold tracking-tight sm:text-2xl">
+            <h2 class="text-2xl font-semibold tracking-tight sm:text-2xl">
                 Settings
             </h2>
             <p class="text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ const { isCurrentUrl } = useCurrentUrl();
                             <component
                                 v-if="item.icon"
                                 :is="item.icon"
-                                class="h-4 w-4"
+                                class="size-4"
                             />
                             {{ item.title }}
                         </Link>

@@ -17,12 +17,12 @@ withDefaults(
 </script>
 
 <template>
-    <header class="flex h-16 shrink-0 items-center gap-2">
+    <header class="flex h-14 shrink-0 items-center border-border/40 border-b">
         <div class="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger class="-ml-1" />
             <Separator
                 orientation="vertical"
-                class="mr-2 data-[orientation=vertical]:h-4"
+                class="mr-2 data-[orientation=vertical]:h-3.5"
             />
             <template v-if="breadcrumbs && breadcrumbs.length > 0">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />

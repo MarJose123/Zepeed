@@ -257,7 +257,7 @@ function save() {
                         placeholder="https://apprise.example.com/notify"
                         class="font-mono text-xs"
                     />
-                    <p class="text-muted-foreground text-[10px]">
+                    <p class="text-muted-foreground text-xs">
                         Apprise API endpoint — include <code>/notify</code> (or
                         <code>/notify/{key}</code>) for stateful servers.
                     </p>
@@ -285,7 +285,7 @@ function save() {
                         placeholder="production, critical"
                         class="font-mono text-xs"
                     />
-                    <p class="text-muted-foreground text-[10px]">
+                    <p class="text-muted-foreground text-xs">
                         Notifications are sent with these tags so the Apprise
                         server routes them to matching services. Leave empty to
                         notify all configured services.
@@ -322,7 +322,7 @@ function save() {
                             class="text-xs"
                         />
                     </div>
-                    <p class="text-muted-foreground text-[10px]">
+                    <p class="text-muted-foreground text-xs">
                         Required when your Apprise server is protected by HTTP
                         Basic Auth. Passwords are stored encrypted.
                     </p>
@@ -373,7 +373,7 @@ function save() {
                 >
                     <Loader2
                         v-if="testProcessing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     {{
                         testProcessing
@@ -400,7 +400,7 @@ function save() {
                 >
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     {{ isEdit ? "Save changes" : "Add Apprise" }}
                 </Button>

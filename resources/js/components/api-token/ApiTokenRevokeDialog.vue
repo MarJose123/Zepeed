@@ -100,7 +100,7 @@ function confirm(): void {
                 >
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Revoke
                 </Button>

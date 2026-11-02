@@ -219,13 +219,13 @@ const lastUpdatedLabel = computed(() => {
                     :disabled="!form.body && !form.subject"
                     @click="showPreview = true"
                 >
-                    <Eye class="mr-1.5 h-3.5 w-3.5" />
+                    <Eye class="mr-1.5 size-3.5" />
                     Preview
                 </Button>
                 <Button size="sm" :disabled="form.processing" @click="save">
                     <Loader2
                         v-if="form.processing"
-                        class="mr-1.5 h-3 w-3 animate-spin"
+                        class="mr-1.5 size-3 animate-spin"
                     />
                     Save template
                 </Button>
@@ -286,13 +286,13 @@ const lastUpdatedLabel = computed(() => {
                     </p>
                     <p
                         v-if="form.template_type === 'ping'"
-                        class="text-[11px] text-purple-600 dark:text-purple-400"
+                        class="text-xs text-purple-600 dark:text-purple-400"
                     >
                         Merge fields are scoped to ping result data.
                     </p>
                     <p
                         v-else
-                        class="text-[11px] text-amber-600 dark:text-amber-400"
+                        class="text-xs text-amber-600 dark:text-amber-400"
                     >
                         Merge fields are scoped to speedtest result data.
                     </p>
@@ -306,7 +306,7 @@ const lastUpdatedLabel = computed(() => {
                     <span class="text-muted-foreground font-normal">
                         — type
                         <kbd
-                            class="border-border bg-muted rounded border px-1 font-mono text-[10px]"
+                            class="border-border bg-muted rounded border px-1 font-mono text-xs"
                             >#</kbd
                         >
                         to insert field
@@ -320,7 +320,7 @@ const lastUpdatedLabel = computed(() => {
                             ? '🔔 Ping alert — {{ $target_label }}'
                             : '⚡ Speedtest alert — {{ $provider_name }}'
                     "
-                    class="border-border bg-background focus:border-ring placeholder:text-muted-foreground h-9 w-full rounded-lg border px-3 font-mono text-xs outline-none transition-colors"
+                    class="border-border bg-background focus:border-ring placeholder:text-muted-foreground h-9 w-full rounded-md border px-3 font-mono text-xs outline-none transition-colors"
                     @input="onSubjectInput"
                 />
                 <p v-if="form.errors.subject" class="text-destructive text-xs">
@@ -370,7 +370,7 @@ const lastUpdatedLabel = computed(() => {
                     <div class="px-5 py-4">
                         <div
                             v-if="template?.is_used_in_rules"
-                            class="mb-3 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950"
+                            class="mb-3 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950"
                         >
                             <span class="mt-0.5 text-amber-600">⚠</span>
                             <div>
