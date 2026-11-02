@@ -1,13 +1,15 @@
+import { usePage } from "@inertiajs/vue3";
 import type { ComputedRef, Ref } from "vue";
 import { computed, onMounted, ref } from "vue";
-import type { Appearance, ResolvedAppearance } from "@/types";
+import type { Appearance, ResolvedAppearance, SeasonalTheme } from "@/types";
 
-export type { Appearance, ResolvedAppearance };
+export type { Appearance, ResolvedAppearance, SeasonalTheme };
 
 export type UseAppearanceReturn = {
     appearance: Ref<Appearance>;
     resolvedAppearance: ComputedRef<ResolvedAppearance>;
     updateAppearance: (value: Appearance) => void;
+    seasonalTheme: Ref<SeasonalTheme>;
 };
 
 export function updateTheme(value: Appearance): void {
@@ -84,8 +86,29 @@ export function initializeTheme(): void {
 }
 
 const appearance = ref<Appearance>("system");
+const seasonalTheme = ref<SeasonalTheme>("none");
+
+export function updateSeasonalThemeClass(value: SeasonalTheme): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    // Remove any existing seasonal theme classes
+    document.documentElement.classList.remove(
+        "theme-halloween",
+        "theme-christmas",
+        "theme-newyear",
+    );
+
+    // Add the new seasonal theme class if not "none"
+    if (value !== "none") {
+        document.documentElement.classList.add(`theme-${value}`);
+    }
+}
 
 export function useAppearance(): UseAppearanceReturn {
+    const page = usePage();
+
     onMounted(() => {
         const savedAppearance = localStorage.getItem(
             "appearance",
@@ -93,6 +116,13 @@ export function useAppearance(): UseAppearanceReturn {
 
         if (savedAppearance) {
             appearance.value = savedAppearance;
+        }
+
+        // Read seasonal theme from Inertia shared data (without applying class)
+        const serverSeasonalTheme = page.props.appearance?.seasonalTheme;
+
+        if (serverSeasonalTheme) {
+            seasonalTheme.value = serverSeasonalTheme as SeasonalTheme;
         }
     });
 
@@ -120,5 +150,6 @@ export function useAppearance(): UseAppearanceReturn {
         appearance,
         resolvedAppearance,
         updateAppearance,
+        seasonalTheme,
     };
 }

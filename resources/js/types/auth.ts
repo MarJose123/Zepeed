@@ -1,4 +1,4 @@
-import type { Appearance } from "@/types/ui";
+import type { Appearance, SeasonalTheme } from "@/types/ui";
 
 export type User = {
     id: number;
@@ -13,6 +13,7 @@ export type User = {
 
 export type UserAppearance = {
     mode: Appearance;
+    seasonalTheme: SeasonalTheme;
     [key: string]: unknown;
 };
 

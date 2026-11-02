@@ -1,0 +1,491 @@
+/* Seasonal Theme Animations */
+
+/* Halloween - Floating bats and pumpkins */
+@keyframes float-bat {
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-8px) rotate(-5deg);
+    }
+    75% {
+        transform: translateY(4px) rotate(5deg);
+    }
+}
+
+@keyframes pulse-glow {
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes sparkle {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes flicker {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    10% {
+        opacity: 0.8;
+    }
+    20% {
+        opacity: 1;
+    }
+    30% {
+        opacity: 0.6;
+    }
+    40% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+    60% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.7;
+    }
+    80% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0.8;
+    }
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Halloween Theme - Light Mode */
+.theme-halloween {
+    --primary: oklch(0.65 0.22 50);
+    --primary-foreground: oklch(0.98 0 0);
+    --accent: oklch(0.75 0.18 300);
+    --accent-foreground: oklch(0.2 0.05 300);
+    --ring: oklch(0.65 0.22 50);
+    --sidebar-primary: oklch(0.65 0.22 50);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.85 0.08 300);
+    --sidebar-accent-foreground: oklch(0.2 0.05 300);
+    --chart-1: oklch(0.65 0.22 50);
+    --chart-4: oklch(0.68 0.18 300);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.65 0.22 50) 0%,
+        oklch(0.75 0.18 300) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.65 0.22 50 / 0.3);
+    --web-color: oklch(0.5 0.05 300 / 0.6);
+    --spider-color: oklch(0.2 0.02 300);
+    --spider-eye-color: oklch(0.6 0.25 25);
+}
+
+/* Halloween Theme - Dark Mode */
+.dark.theme-halloween {
+    --primary: oklch(0.7 0.22 50);
+    --primary-foreground: oklch(0.98 0 0);
+    --accent: oklch(0.65 0.18 300);
+    --accent-foreground: oklch(0.9 0.05 300);
+    --ring: oklch(0.7 0.22 50);
+    --sidebar-primary: oklch(0.7 0.22 50);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.25 0.08 300);
+    --sidebar-accent-foreground: oklch(0.9 0.05 300);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.7 0.22 50) 0%,
+        oklch(0.65 0.18 300) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.7 0.22 50 / 0.4);
+    --web-color: oklch(0.7 0.05 300 / 0.5);
+    --spider-color: oklch(0.15 0.02 300);
+    --spider-eye-color: oklch(0.65 0.28 25);
+}
+
+/* Christmas Theme - Light Mode */
+.theme-christmas {
+    --primary: oklch(0.55 0.24 27);
+    --primary-foreground: oklch(0.98 0 0);
+    --accent: oklch(0.62 0.18 155);
+    --accent-foreground: oklch(0.15 0.05 155);
+    --ring: oklch(0.55 0.24 27);
+    --sidebar-primary: oklch(0.55 0.24 27);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.88 0.06 155);
+    --sidebar-accent-foreground: oklch(0.15 0.05 155);
+    --chart-1: oklch(0.55 0.24 27);
+    --chart-2: oklch(0.62 0.18 155);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.55 0.24 27) 0%,
+        oklch(0.62 0.18 155) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.55 0.24 27 / 0.3);
+}
+
+/* Christmas Theme - Dark Mode */
+.dark.theme-christmas {
+    --primary: oklch(0.62 0.22 27);
+    --primary-foreground: oklch(0.98 0 0);
+    --accent: oklch(0.25 0.08 155);
+    --accent-foreground: oklch(0.9 0.05 155);
+    --ring: oklch(0.62 0.22 27);
+    --sidebar-primary: oklch(0.62 0.22 27);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.22 0.06 155);
+    --sidebar-accent-foreground: oklch(0.9 0.05 155);
+    --chart-1: oklch(0.62 0.22 27);
+    --chart-2: oklch(0.65 0.18 155);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.62 0.22 27) 0%,
+        oklch(0.65 0.18 155) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.62 0.22 27 / 0.4);
+}
+
+/* New Year Theme - Light Mode */
+.theme-newyear {
+    --primary: oklch(0.65 0.2 80);
+    --primary-foreground: oklch(0.15 0 0);
+    --accent: oklch(0.65 0.2 260);
+    --accent-foreground: oklch(0.15 0.05 260);
+    --ring: oklch(0.65 0.2 80);
+    --sidebar-primary: oklch(0.65 0.2 80);
+    --sidebar-primary-foreground: oklch(0.15 0 0);
+    --sidebar-accent: oklch(0.88 0.04 260);
+    --sidebar-accent-foreground: oklch(0.15 0.05 260);
+    --chart-1: oklch(0.65 0.2 80);
+    --chart-5: oklch(0.65 0.2 260);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.65 0.2 80) 0%,
+        oklch(0.65 0.2 260) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.65 0.2 80 / 0.3);
+}
+
+/* New Year Theme - Dark Mode */
+.dark.theme-newyear {
+    --primary: oklch(0.72 0.18 80);
+    --primary-foreground: oklch(0.98 0 0);
+    --accent: oklch(0.25 0.08 260);
+    --accent-foreground: oklch(0.9 0.05 260);
+    --ring: oklch(0.72 0.18 80);
+    --sidebar-primary: oklch(0.72 0.18 80);
+    --sidebar-primary-foreground: oklch(0.98 0 0);
+    --sidebar-accent: oklch(0.22 0.06 260);
+    --sidebar-accent-foreground: oklch(0.9 0.05 260);
+    --chart-1: oklch(0.72 0.18 80);
+    --chart-5: oklch(0.65 0.2 260);
+    --seasonal-gradient: linear-gradient(
+        135deg,
+        oklch(0.72 0.18 80) 0%,
+        oklch(0.65 0.2 260) 100%
+    );
+    --seasonal-glow: 0 0 20px oklch(0.72 0.18 80 / 0.4);
+}
+
+/* Seasonal Banner Styles */
+.seasonal-banner {
+    height: 3px;
+    width: 100%;
+    background: var(--seasonal-gradient);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Seasonal Logo Glow */
+.theme-halloween .seasonal-logo,
+.theme-christmas .seasonal-logo,
+.theme-newyear .seasonal-logo {
+    filter: drop-shadow(var(--seasonal-glow));
+    animation: float-bat 3s ease-in-out infinite;
+}
+
+/* Seasonal Background Pattern - applied to main content area */
+.theme-halloween > :where(body, html, #app) {
+    background-image:
+        radial-gradient(
+            circle at 20% 80%,
+            oklch(0.65 0.22 50 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            oklch(0.75 0.18 300 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            oklch(0.65 0.22 50 / 0.02) 0%,
+            transparent 70%
+        ) !important;
+}
+
+/* Seasonal Background Pattern - Christmas */
+.theme-christmas > :where(body, html, #app) {
+    background-image:
+        radial-gradient(
+            circle at 20% 80%,
+            oklch(0.55 0.24 27 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            oklch(0.62 0.18 155 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            oklch(0.55 0.24 27 / 0.02) 0%,
+            transparent 70%
+        ) !important;
+}
+
+/* Seasonal Background Pattern - New Year */
+.theme-newyear > :where(body, html, #app) {
+    background-image:
+        radial-gradient(
+            circle at 20% 80%,
+            oklch(0.65 0.2 80 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            oklch(0.65 0.2 260 / 0.06) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            oklch(0.72 0.18 80 / 0.03) 0%,
+            transparent 70%
+        ) !important;
+}
+
+/* Halloween - Fog overlay effect */
+.theme-halloween::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 50px,
+        oklch(0.65 0.22 50 / 0.01) 50px,
+        oklch(0.65 0.22 50 / 0.01) 51px
+    );
+    animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* Christmas - Subtle ice crystal pattern */
+.theme-christmas::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(
+            circle at 25% 25%,
+            oklch(0.9 0.02 200 / 0.03) 1px,
+            transparent 1px
+        ),
+        radial-gradient(
+            circle at 75% 75%,
+            oklch(0.9 0.02 200 / 0.03) 1px,
+            transparent 1px
+        );
+    background-size:
+        60px 60px,
+        80px 80px;
+    animation: pulse-glow 5s ease-in-out infinite;
+}
+
+/* New Year - Golden sparkle dots */
+.theme-newyear::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+        circle,
+        oklch(0.8 0.15 80 / 0.08) 1px,
+        transparent 1px
+    );
+    background-size: 40px 40px;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+/* Seasonal Sidebar Styling */
+.theme-halloween :where([data-slot="sidebar"]),
+.theme-christmas :where([data-slot="sidebar"]),
+.theme-newyear :where([data-slot="sidebar"]) {
+    border-right-color: var(--sidebar-primary) !important;
+}
+
+/* Seasonal Sidebar Menu Items Hover */
+.theme-halloween :where([data-slot="sidebar-menu-button"]:hover),
+.theme-christmas :where([data-slot="sidebar-menu-button"]:hover),
+.theme-newyear :where([data-slot="sidebar-menu-button"]:hover) {
+    background-color: var(--sidebar-accent) !important;
+    color: var(--sidebar-accent-foreground) !important;
+}
+
+/* Seasonal Button Styling - primary buttons get seasonal gradient */
+.theme-halloween :where(.btn, [data-slot="button"][data-variant="default"]),
+.theme-christmas :where(.btn, [data-slot="button"][data-variant="default"]),
+.theme-newyear :where(.btn, [data-slot="button"][data-variant="default"]) {
+    background: var(--seasonal-gradient) !important;
+    border-color: transparent !important;
+    color: var(--primary-foreground) !important;
+}
+
+.theme-halloween
+    :where(.btn, [data-slot="button"][data-variant="default"]):hover,
+.theme-christmas
+    :where(.btn, [data-slot="button"][data-variant="default"]):hover,
+.theme-newyear
+    :where(.btn, [data-slot="button"][data-variant="default"]):hover {
+    box-shadow: var(--seasonal-glow) !important;
+    opacity: 0.9;
+    color: var(--primary-foreground) !important;
+}
+
+/* Seasonal Badge Styling */
+.theme-halloween :where([data-slot="badge"][data-variant="default"]),
+.theme-christmas :where([data-slot="badge"][data-variant="default"]),
+.theme-newyear :where([data-slot="badge"][data-variant="default"]) {
+    background: var(--seasonal-gradient) !important;
+    color: var(--primary-foreground) !important;
+}
+
+/* Seasonal Input Focus Ring */
+.theme-halloween :where(input, textarea, select):focus,
+.theme-christmas :where(input, textarea, select):focus,
+.theme-newyear :where(input, textarea, select):focus {
+    outline-color: var(--ring) !important;
+}
+
+/* Seasonal Table Header */
+.theme-halloween :where([data-slot="table-header"]),
+.theme-christmas :where([data-slot="table-header"]),
+.theme-newyear :where([data-slot="table-header"]) {
+    border-bottom-color: var(--primary) !important;
+}
+
+/* Seasonal Scrollbar */
+.theme-halloween ::-webkit-scrollbar-thumb,
+.theme-christmas ::-webkit-scrollbar-thumb,
+.theme-newyear ::-webkit-scrollbar-thumb {
+    background: var(--primary) !important;
+    border-radius: 4px;
+}
+
+/* Seasonal Button Hover Effects */
+.theme-halloween .btn-seasonal:hover,
+.theme-christmas .btn-seasonal:hover,
+.theme-newyear .btn-seasonal:hover {
+    box-shadow: var(--seasonal-glow);
+}
+
+/* Seasonal Card Border Accent */
+.theme-halloween .card-seasonal,
+.theme-christmas .card-seasonal,
+.theme-newyear .card-seasonal {
+    border-top: 2px solid transparent;
+    border-image: var(--seasonal-gradient) 1;
+}
+
+/* Seasonal Sparkle Effect for New Year */
+.theme-newyear .sparkle-text {
+    background: linear-gradient(
+        90deg,
+        var(--primary) 0%,
+        oklch(0.9 0.1 80) 25%,
+        var(--primary) 50%,
+        oklch(0.9 0.1 80) 75%,
+        var(--primary) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+}
+
+/* Seasonal Dashboard Title */
+.theme-halloween h1,
+.theme-christmas h1,
+.theme-newyear h1 {
+    background: var(--seasonal-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
