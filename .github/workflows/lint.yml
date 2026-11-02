@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.3.0
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
@@ -58,7 +58,7 @@ jobs:
 
       # uncomment this if you want to commit the changes to the repository
       - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7.2.0
+        uses: stefanzweifel/git-auto-commit-action@v7.2.1
         with:
           commit_message: Automated linter fixes
           commit_user_name: github-actions[bot]
