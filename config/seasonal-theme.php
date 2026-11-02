@@ -29,16 +29,16 @@ return [
 
     'schedules' => [
         'halloween' => [
-            'start' => '10-20',
+            'start' => '10-31',
             'end'   => '11-02',
         ],
         'christmas' => [
-            'start' => '12-15',
-            'end'   => '12-31',
+            'start' => '12-20',
+            'end'   => '12-26',
         ],
         'newyear'   => [
             'start' => '01-01',
-            'end'   => '01-07',
+            'end'   => '01-02',
         ],
     ],
 
