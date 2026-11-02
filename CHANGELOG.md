@@ -4,6 +4,17 @@
 All notable changes to this project will be documented in this file.
 
 <!--- END HEADER -->
+## Release 2.0.0-beta.10 - 2026-11-02
+
+### What's Changed
+
+* chore(deps): bump actions/create-github-app-token from 3.2.0 to 3.3.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/122
+* chore(deps): bump docker/login-action from 4.6.0 to 4.7.0 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/123
+* chore(deps): bump stefanzweifel/git-auto-commit-action from 7.2.0 to 7.2.1 by @dependabot[bot] in https://github.com/MarJose123/Zepeed/pull/124
+* feat: comprehensive UI theme overhaul with clean minimal design by @MarJose123 in https://github.com/MarJose123/Zepeed/pull/125
+
+**Full Changelog**: https://github.com/MarJose123/Zepeed/compare/v2.0.0-beta.9...v2.0.0-beta.10
+
 ## Release 2.0.0-beta.9 - 2026-10-23
 
 ### What's Changed
